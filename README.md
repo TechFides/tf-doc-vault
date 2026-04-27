@@ -9,9 +9,9 @@ Cíl: nasadit nové analýzové repo do 5 minut. Vyřešit jednou — sdílet na
 - **`config`** — factory `makeConfig()` postaví celou VitePress konfiguraci (locales, nav, sidebar, lokalizace, mermaid, volitelně analytics + editLink).
 - **`theme`** — `createTheme()` vrací VitePress theme se sdílenými komponentami: DocMeta, ImageLightbox, PrintLayout, VersionSwitcher, volitelně WidthToggle.
 - **`sidebar`** — generátor `nav` a `sidebar` z adresářové struktury `docs/<verze>/<sekce>/<skupina>/`.
-- **`scripts`** — `build-print-page`, `export-pdf`, `validate-docs`, `normalize-docs`, `ensure-lf`, `fix`. Spouštěné přes CLI `ana-docs`.
-- **`bin/ana-docs`** — CLI dispatcher pro projektové skripty.
-- **`bin/create-ana`** — CLI pro založení nového `*_ana` repa z templatu.
+- **`scripts`** — `build-print-page`, `export-pdf`, `validate-docs`, `normalize-docs`, `ensure-lf`, `fix`, `sync-template`. Spouštěné přes CLI `ana-docs`.
+- **`bin/ana-docs`** — CLI dispatcher: `create | print | export-pdf | pdf | validate | normalize | ensure-lf | fix | sync`.
+- **`bin/create-ana`** — alias pro `ana-docs create` (přímá invokace scaffolderu).
 - **`configs`** — `eslint.config.js`, `prettier.json`, `tsconfig.base.json` k extends.
 - **`infra/terraform`** — reusable modul pro Cloud Run + Artifact Registry + IAM.
 - **`docker`** — multi-stage Dockerfile s `ARG SERVER_TYPE=serve|nginx|nginx-auth` + nginx confs.
@@ -55,54 +55,82 @@ export default createTheme({ widthToggle: true });
     "docs:validate": "ana-docs validate",
     "docs:normalize": "ana-docs normalize",
     "docs:lf": "ana-docs ensure-lf",
+    "sync": "ana-docs sync",
+    "sync:apply": "ana-docs sync --apply",
     "fix": "ana-docs fix"
   },
   "dependencies": {
-    "@techfides/ana-docs": "^0.1.0"
+    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@techfides/ana-docs"]
   }
 }
 ```
 
+`pnpm.onlyBuiltDependencies` je nutný — pnpm 10 jinak odmítne spustit `prepare` hook git balíčku a `dist/` se nepostaví.
+
 ## Založení nového repa
 
+Předpoklad: SSH klíč na GitLabu (`gitlab.com:techfides/tf-analysis/...`).
+
 ```bash
-npx @techfides/ana-docs create my-new-ana \
-  --gcp-project=tfsa-my-new-ana \
-  --server=nginx-auth
+pnpm dlx --allow-build=@techfides/ana-docs \
+  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.0" \
+  create moje_analyza \
+  --source=git --ref=v0.1.0 \
+  --gcp-project=tfsa-moje-analyza \
+  --server=nginx
 ```
 
-CLI:
+Co se stane:
 
-1. Zkopíruje `template/` do `./my-new-ana/`.
-2. Nahradí placeholdery (`__PROJECT__`, `__GCP_PROJECT__`, `__SERVER_TYPE__`).
-3. Inicializuje git, vytvoří první commit.
-4. Po `pnpm install && pnpm docs:dev` běží na `http://localhost:5173`.
+1. `pnpm dlx` stáhne tooling z GitLabu, postaví `dist/` (díky `--allow-build`), spustí `ana-docs create`.
+2. Scaffolder zkopíruje `template/` do `./moje_analyza/`, nahradí placeholdery (`__PROJECT__`, `__GCP_PROJECT__`, `__SERVER_TYPE__`, `__VITEPRESS_COMMON_DEP__`).
+3. `git init` + první commit (vypneš přes `--no-git`).
+
+Pak:
+
+```bash
+cd moje_analyza
+pnpm install            # natáhne peer deps + ana-docs z gitu (prepare hook postaví dist/)
+pnpm docs:dev           # http://localhost:5173
+```
 
 Deployment přes `terraform apply` v `infra/` + push do GitLabu (CI postaví image a nasadí na Cloud Run).
 
-## Lokální vývoj
+### Volby `--source`
 
-Pro iteraci na balíčku vedle aplikačního repa stačí, aby oba repos ležely vedle sebe (např. `tf-analysis/ana-docs/` a `tf-analysis/<něco>_ana/`):
+| Volba | Hodnota v `package.json` | Kdy |
+|---|---|---|
+| `--source=git` (doporučeno) | `git+ssh://…/ana-docs.git#<ref>` | Produkce — pinováno na tag |
+| `--source=npm` (default) | `^<verze>` | Až bude balíček publikován v npm registry |
+| `--source=file` / `--dev` | `file:../ana-docs` | Lokální vývoj balíčku vedle consumer repa |
+| `--source=workspace` | `workspace:*` | Pokud máš pnpm workspace |
+
+## Lokální vývoj balíčku
+
+Pro iteraci na samotném `ana-docs`:
 
 ```bash
 # 1. v balíčku — jednorázově po cloningu
 cd ana-docs
-pnpm install                  # nainstaluje deps; "prepare" hook postaví dist/
-pnpm dev                      # tsc --watch + auto-copy statických assetů
+pnpm install                  # deps + "prepare" hook postaví dist/
+pnpm dev                      # tsc --watch + auto-copy statických assetů (.vue/.css/.json/.ico)
 
-# 2. v aplikačním repu
+# 2. ve vedlejším aplikačním repu, scaffoldnutém s --dev
 cd ../<něco>_ana
 pnpm install                  # natáhne peer deps a slinkuje file:../ana-docs
-pnpm docs:dev                 # http://localhost:5173 — vidí změny z dist/ přes Vite HMR
+pnpm docs:dev                 # vidí změny z dist/ přes Vite HMR
 ```
 
-Aplikační repo deklaruje závislost přes `file:` (typicky vygenerované `create-ana --dev`):
+Aplikační repo s `--dev` deklaruje závislost přes `file:`:
 
 ```json
 "dependencies": { "@techfides/ana-docs": "file:../ana-docs" }
 ```
 
-Pro produkci se hodnota přepíše na `^0.1.0` (po publishi do registry) nebo `git+ssh://…/ana-docs.git#v0.1.0`.
+Předpoklad pro `file:` install: oba adresáře leží vedle sebe (relativní cesta `../ana-docs`). Když je jinde, `--file-path=/abs/path` při scaffoldování přepíše.
 
 ## Sync šablony do existujícího repa
 

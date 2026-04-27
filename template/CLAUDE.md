@@ -52,6 +52,8 @@ pnpm docs:validate     # frontmatter, broken links, lint
 pnpm docs:normalize    # kanonické řazení frontmatter
 pnpm docs:pdf          # export do PDF (artifacts/docs-full.pdf)
 pnpm fix               # full polish (LF, normalize, format, lint, typecheck, validate)
+pnpm sync              # diff infra/CI/config souborů proti šabloně @techfides/ana-docs
+pnpm sync:apply        # přepsat drifted soubory podle šablony
 ```
 
 Doporučené před každým commitem:
