@@ -3,6 +3,7 @@
  * ana-docs — CLI dispatcher for project-level documentation tooling.
  *
  * Subcommands:
+ *   create       scaffold a new analysis docs repo (delegates to bin/create-ana.mjs)
  *   print        generate docs/print.md (build-print-page.ts)
  *   export-pdf   render artifacts/docs-full.pdf from /print
  *   pdf          shortcut: print → vitepress build → export-pdf
@@ -10,8 +11,9 @@
  *   normalize    canonical frontmatter ordering
  *   ensure-lf    convert CRLF → LF
  *   fix          full pipeline (LF, normalize, format, lint --fix, typecheck, validate)
+ *   sync         diff infra/CI/config files against bundled template
  *
- * All scripts run with cwd = project root. They look for `docs/` there.
+ * All scripts (except `create`) run with cwd = project root. They look for `docs/` there.
  */
 
 import { spawn, spawnSync } from "node:child_process";
@@ -53,6 +55,8 @@ function usage(exitCode = 0) {
 ana-docs <command>
 
 Commands:
+  create <name>   Scaffold a new analysis docs repo from the bundled template
+                    (see: ana-docs create --help for options)
   print           Generate docs/print.md from sidebar order
   export-pdf      Render artifacts/docs-full.pdf from the /print page
   pdf             print → vitepress build docs → export-pdf
@@ -67,9 +71,21 @@ Commands:
   process.exit(exitCode);
 }
 
+function runCreateAna(extraArgs = []) {
+  const binPath = path.join(PKG_ROOT, "bin", "create-ana.mjs");
+  const result = spawnSync(process.execPath, [binPath, ...extraArgs], {
+    stdio: "inherit",
+  });
+  return result.status ?? 1;
+}
+
 const [, , cmd, ...rest] = process.argv;
 
 if (!cmd || cmd === "--help" || cmd === "-h") usage(0);
+
+if (cmd === "create") {
+  process.exit(runCreateAna(rest));
+}
 
 if (cmd === "pdf") {
   let code = runScript(COMMANDS.print);
