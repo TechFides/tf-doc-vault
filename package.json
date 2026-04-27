@@ -1,0 +1,85 @@
+{
+  "name": "@techfides/ana-docs",
+  "version": "0.1.0",
+  "description": "Sdílený VitePress tooling pro TFSA analýzové dokumentace — config factory, theme komponenty, sidebar generátor, build/export skripty, CI a Terraform modul.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
+  "files": [
+    "dist",
+    "src",
+    "bin",
+    "configs",
+    "template",
+    "infra",
+    "docker",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "default": "./dist/config/index.js"
+    },
+    "./sidebar": {
+      "types": "./dist/sidebar/index.d.ts",
+      "default": "./dist/sidebar/index.js"
+    },
+    "./theme": {
+      "types": "./dist/theme/index.d.ts",
+      "default": "./dist/theme/index.js"
+    },
+    "./theme/styles/print.css": "./dist/theme/styles/print.css",
+    "./theme/styles/base.css": "./dist/theme/styles/base.css",
+    "./scripts/*": "./dist/scripts/*.js",
+    "./eslint": "./configs/eslint.config.js",
+    "./prettier": "./configs/prettier.json",
+    "./tsconfig": "./configs/tsconfig.base.json",
+    "./template": "./template",
+    "./infra/terraform": "./infra/terraform",
+    "./docker/Dockerfile": "./docker/Dockerfile",
+    "./docker/nginx.conf": "./docker/nginx.conf",
+    "./docker/nginx-auth.conf": "./docker/nginx-auth.conf",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "ana-docs": "./bin/ana-docs.mjs",
+    "create-ana": "./bin/create-ana.mjs"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/build.mjs --watch",
+    "prepare": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src bin",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "peerDependencies": {
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-mermaid": "^2.0.17",
+    "mermaid": "^11.14.0",
+    "vue": "^3.5.33"
+  },
+  "dependencies": {
+    "markdownlint": "^0.40.0",
+    "playwright": "^1.59.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
+    "eslint": "^10.2.1",
+    "eslint-config-prettier": "^10.1.8",
+    "mermaid": "^11.14.0",
+    "prettier": "^3.8.3",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-mermaid": "^2.0.17",
+    "vue": "^3.5.33"
+  }
+}

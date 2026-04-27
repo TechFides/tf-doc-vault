@@ -1,0 +1,44 @@
+{
+  "name": "__PROJECT_DASHED__-docs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "docs:print": "ana-docs print",
+    "docs:export-pdf": "ana-docs export-pdf",
+    "docs:pdf": "ana-docs pdf",
+    "docs:validate": "ana-docs validate",
+    "docs:normalize": "ana-docs normalize",
+    "docs:lf": "ana-docs ensure-lf",
+    "sync": "ana-docs sync",
+    "sync:apply": "ana-docs sync --apply",
+    "docker:build": "docker build --build-arg SERVER_TYPE=__SERVER_TYPE__ -t docs-web .",
+    "docker:run": "docker run --rm -p 8080:8080 docs-web",
+    "lint": "eslint docs/.vitepress",
+    "lint:fix": "eslint docs/.vitepress --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc",
+    "fix": "ana-docs fix"
+  },
+  "dependencies": {
+    "@techfides/ana-docs": "__VITEPRESS_COMMON_DEP__"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
+    "eslint": "^10.2.1",
+    "eslint-config-prettier": "^10.1.8",
+    "mermaid": "^11.14.0",
+    "prettier": "^3.8.3",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-mermaid": "^2.0.17",
+    "vue": "^3.5.33"
+  }
+}

@@ -1,0 +1,179 @@
+image: node:22
+
+variables:
+  PNPM_STORE: "$CI_PROJECT_DIR/.pnpm-store"
+
+stages:
+  - install
+  - lint
+  - build
+  - deploy
+
+# ── Install ───────────────────────────────────────────────────────────────────
+
+📦 install:
+  stage: install
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      interruptible: true
+    - if: '$CI_PIPELINE_SOURCE != "merge_request_event" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      interruptible: true
+    - when: never
+  before_script:
+    - corepack enable
+  script:
+    - pnpm config set store-dir $PNPM_STORE
+    - pnpm install --frozen-lockfile
+  tags:
+    - docker-privileged
+  cache:
+    key: "$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
+    paths:
+      - node_modules/
+      - .pnpm-store/
+  variables:
+    KUBERNETES_POD_LABELS_1: section=install_resources
+    KUBERNETES_POD_LABELS_2: project=__PROJECT_DASHED__
+    KUBERNETES_POD_LABELS_3: step=install
+
+# ── Lint ──────────────────────────────────────────────────────────────────────
+
+🧹 lint:typecheck:
+  stage: lint
+  needs: ["📦 install"]
+  before_script: [corepack enable]
+  cache:
+    key: "$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
+    paths: [node_modules/, .pnpm-store/]
+    policy: pull
+  tags: [docker-privileged]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      interruptible: true
+    - if: '$CI_PIPELINE_SOURCE != "merge_request_event" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      interruptible: true
+    - when: never
+  script:
+    - pnpm run typecheck
+  variables:
+    KUBERNETES_POD_LABELS_1: section=lint_resources
+    KUBERNETES_POD_LABELS_2: project=__PROJECT_DASHED__
+    KUBERNETES_POD_LABELS_3: step=typecheck
+
+🧹 lint:eslint:
+  stage: lint
+  needs: ["📦 install"]
+  before_script: [corepack enable]
+  cache:
+    key: "$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
+    paths: [node_modules/, .pnpm-store/]
+    policy: pull
+  tags: [docker-privileged]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      interruptible: true
+    - if: '$CI_PIPELINE_SOURCE != "merge_request_event" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      interruptible: true
+    - when: never
+  script:
+    - pnpm run lint
+    - pnpm run format:check
+  variables:
+    KUBERNETES_POD_LABELS_1: section=lint_resources
+    KUBERNETES_POD_LABELS_2: project=__PROJECT_DASHED__
+    KUBERNETES_POD_LABELS_3: step=eslint
+
+🧹 lint:docs:
+  stage: lint
+  needs: ["📦 install"]
+  before_script: [corepack enable]
+  cache:
+    key: "$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
+    paths: [node_modules/, .pnpm-store/]
+    policy: pull
+  tags: [docker-privileged]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      interruptible: true
+    - if: '$CI_PIPELINE_SOURCE != "merge_request_event" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      interruptible: true
+    - when: never
+  script:
+    - pnpm run docs:validate
+  variables:
+    KUBERNETES_POD_LABELS_1: section=lint_resources
+    KUBERNETES_POD_LABELS_2: project=__PROJECT_DASHED__
+    KUBERNETES_POD_LABELS_3: step=docs
+
+# ── Build ─────────────────────────────────────────────────────────────────────
+
+🐳 build:docs:
+  stage: build
+  needs: ["🧹 lint:typecheck", "🧹 lint:eslint", "🧹 lint:docs"]
+  image: google/cloud-sdk:slim
+  services:
+    - name: docker:26.1-dind
+      command: ["--registry-mirror", "https://mirror.gcr.io"]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    KUBERNETES_POD_LABELS_1: section=build_resources
+    KUBERNETES_POD_LABELS_2: project=__PROJECT_DASHED__
+    KUBERNETES_POD_LABELS_3: step=build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "merge_request_event" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      interruptible: true
+    - when: never
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends docker.io netcat-openbsd
+    - echo "$GCP_SA_KEY" | gcloud auth activate-service-account --key-file=-
+    - gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev --quiet
+    - export IMAGE="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/${SERVICE_NAME:-docs-web}/${SERVICE_NAME:-docs-web}"
+    - export DATE_TAG=$(date -u -d "$(echo "$CI_COMMIT_TIMESTAMP" | cut -d+ -f1 | sed 's/T/ /')" +"%Y%m%d-%H%M")
+    # Build args fed into the multi-stage Dockerfile (SERVER_TYPE picks runtime).
+    - export BUILD_ARGS="--build-arg SERVER_TYPE=__SERVER_TYPE__"
+    - if [ -n "$BASIC_AUTH_USER" ]; then BUILD_ARGS="$BUILD_ARGS --build-arg BASIC_AUTH_USER=$BASIC_AUTH_USER"; fi
+    - if [ -n "$BASIC_AUTH_PASS" ]; then BUILD_ARGS="$BUILD_ARGS --build-arg BASIC_AUTH_PASS=$BASIC_AUTH_PASS"; fi
+  tags:
+    - docker-privileged
+  script:
+    - while ! nc -z docker 2375; do sleep 0.1 ; done
+    - docker pull "${IMAGE}:latest" || true
+    - docker build $BUILD_ARGS --cache-from "${IMAGE}:latest" --tag "${IMAGE}:${DATE_TAG}" --tag "${IMAGE}:latest" .
+    - docker push "${IMAGE}:${DATE_TAG}"
+    - docker push "${IMAGE}:latest"
+
+# ── Deploy ────────────────────────────────────────────────────────────────────
+
+🚀 deploy:docs:
+  stage: deploy
+  needs: ["🐳 build:docs"]
+  image: google/cloud-sdk:slim
+  environment:
+    name: production
+  dependencies: []
+  tags: [docker-privileged]
+  variables:
+    KUBERNETES_POD_LABELS_1: section=deploy_resources
+    KUBERNETES_POD_LABELS_2: project=__PROJECT_DASHED__
+    KUBERNETES_POD_LABELS_3: step=docs
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "merge_request_event" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      interruptible: true
+    - when: never
+  before_script:
+    - echo "$GCP_SA_KEY" | gcloud auth activate-service-account --key-file=-
+    - export IMAGE="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/${SERVICE_NAME:-docs-web}/${SERVICE_NAME:-docs-web}"
+    - export DATE_TAG=$(date -u -d "$(echo "$CI_COMMIT_TIMESTAMP" | cut -d+ -f1 | sed 's/T/ /')" +"%Y%m%d-%H%M")
+  script:
+    - >
+      gcloud run deploy ${SERVICE_NAME:-docs-web}
+      --image="${IMAGE}:${DATE_TAG}"
+      --region=${GCP_REGION}
+      --project=${GCP_PROJECT}
+      --quiet
+    - >
+      gcloud run services describe ${SERVICE_NAME:-docs-web}
+      --region=${GCP_REGION}
+      --project=${GCP_PROJECT}
+      --format='value(status.url)'

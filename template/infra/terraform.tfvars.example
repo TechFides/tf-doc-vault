@@ -1,0 +1,3 @@
+project_id   = "__GCP_PROJECT__"
+region       = "europe-west1"
+service_name = "docs-web"

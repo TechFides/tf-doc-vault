@@ -1,0 +1,57 @@
+@media print {
+  /* Hide all chrome */
+  .VPNav,
+  .VPLocalNav,
+  .VPSidebar,
+  .VPDocFooter,
+  .VPFooter,
+  .edit-link,
+  .pager {
+    display: none !important;
+  }
+
+  /* Full width content */
+  .VPContent,
+  .VPDoc,
+  .VPDoc .container,
+  .VPDoc .content,
+  .VPDoc .content-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Page breaks on hr separators */
+  hr {
+    page-break-after: always;
+    border: none;
+    margin: 0;
+  }
+
+  /* Keep headings with their content */
+  h1,
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+
+  /* Avoid breaking inside code blocks and tables */
+  pre,
+  table {
+    page-break-inside: avoid;
+  }
+
+  /* Remove link decorations */
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* Clean typography */
+  body {
+    font-size: 11pt;
+    line-height: 1.5;
+    color: #000;
+  }
+}

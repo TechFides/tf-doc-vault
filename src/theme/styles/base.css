@@ -1,0 +1,79 @@
+/* Reserve space for scrollbar — prevents layout shift when lightbox opens */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Images and Mermaid diagrams in docs — lightbox cursor */
+.vp-doc img,
+.vp-doc svg {
+  cursor: zoom-in;
+}
+
+:root {
+  /* Hide language switcher (translations) — locales are used for versioning only */
+  --vp-nav-translations-display: none;
+
+  /* Sidebar 30% wider than the default 272 px */
+  --vp-sidebar-width: 354px;
+}
+
+.VPNavBarTranslations,
+.VPFlyout.translations,
+.VPNavBarExtra .group.translations {
+  display: none !important;
+}
+
+/* ── Layout width toggle ─────────────────────────────────────── */
+/*
+ * VPDoc.vue uses <style scoped>, so every selector gets an attribute hash
+ * [data-v-xxxxx] giving it specificity 0,4,0. Our overrides need
+ * !important to win.
+ */
+
+/* Default content column width +20% over VitePress defaults */
+.VPDoc.has-aside .content-container {
+  max-width: 826px !important;
+}
+
+.VPDoc:not(.has-sidebar) .content {
+  max-width: 902px !important;
+}
+
+@media (min-width: 1440px) {
+  .VPDoc:not(.has-sidebar) .content {
+    max-width: 941px !important;
+  }
+}
+
+html.layout-wide {
+  --vp-layout-max-width: 1800px;
+}
+
+html.layout-wide .VPDoc .content-container {
+  max-width: 1152px !important;
+}
+
+html.layout-wide .VPDoc .content {
+  max-width: 1152px !important;
+}
+
+html.layout-wide .VPDoc:not(.has-sidebar) .container {
+  max-width: 1400px !important;
+}
+
+html.layout-max {
+  --vp-layout-max-width: 100vw;
+}
+
+html.layout-max .VPDoc .content-container,
+html.layout-max .VPDoc .content {
+  max-width: 100% !important;
+}
+
+html.layout-max .VPDoc .container {
+  max-width: 100% !important;
+}
+
+html.layout-max .VPContent {
+  max-width: 100% !important;
+}
