@@ -105,11 +105,22 @@ function resolveDependencyValue(flags, targetDir) {
   }
 }
 
+/**
+ * Map a template filename to its on-disk consumer name.
+ * `npm pack` always strips `.npmrc` and `.gitignore` from published packages,
+ * so we ship them as `_npmrc` / `_gitignore` and rename on copy.
+ */
+function consumerName(templateName) {
+  if (templateName === "_npmrc") return ".npmrc";
+  if (templateName === "_gitignore") return ".gitignore";
+  return templateName;
+}
+
 function copyDirRecursive(src, dest) {
   fs.mkdirSync(dest, { recursive: true });
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
     const s = path.join(src, entry.name);
-    const d = path.join(dest, entry.name);
+    const d = path.join(dest, consumerName(entry.name));
     if (entry.isDirectory()) {
       copyDirRecursive(s, d);
     } else {
