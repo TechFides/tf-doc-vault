@@ -102,12 +102,28 @@ function detectPlaceholders(): Record<string, string> {
     }
   }
 
+  // Basic auth credentials live in consumer's .gitlab-ci.yml — sync must
+  // preserve them across runs, otherwise sync:apply blasts production auth.
+  let basicAuthUser = "";
+  let basicAuthPass = "";
+  try {
+    const ci = fs.readFileSync(path.join(PROJECT_ROOT, ".gitlab-ci.yml"), "utf-8");
+    const u = /^\s*BASIC_AUTH_USER:\s*"([^"]*)"/m.exec(ci);
+    const p = /^\s*BASIC_AUTH_PASS:\s*"([^"]*)"/m.exec(ci);
+    if (u?.[1] && !u[1].startsWith("__")) basicAuthUser = u[1];
+    if (p?.[1] && !p[1].startsWith("__")) basicAuthPass = p[1];
+  } catch {
+    // fresh repo — no consumer CI yet
+  }
+
   return {
     __PROJECT__: project,
     __PROJECT_DASHED__: dashed,
     __GCP_PROJECT__: gcpProject,
     __SERVER_TYPE__: serverType,
     __VITEPRESS_COMMON_DEP__: depValue,
+    __BASIC_AUTH_USER__: basicAuthUser,
+    __BASIC_AUTH_PASS__: basicAuthPass,
   };
 }
 

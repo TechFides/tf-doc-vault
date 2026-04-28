@@ -60,7 +60,7 @@ export default createTheme({ widthToggle: true });
     "fix": "ana-docs fix"
   },
   "dependencies": {
-    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.7"
+    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.8"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["@techfides/ana-docs"]
@@ -76,9 +76,9 @@ Předpoklad: SSH klíč na GitLabu (`gitlab.com:techfides/tf-analysis/...`).
 
 ```bash
 pnpm dlx --allow-build=@techfides/ana-docs \
-  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.7" \
+  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.8" \
   create moje_analyza \
-  --source=git --ref=v0.1.7 \
+  --source=git --ref=v0.1.8 \
   --gcp-project=tfsa-moje-analyza \
   --server=nginx
 ```
@@ -197,6 +197,10 @@ pnpm sync:apply     # přepíše drifted soubory šablonou (placeholdery se rend
 User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfvars) je vyloučen z přepisování.
 
 ## Changelog
+
+### v0.1.8
+
+- **Sync zachová `BASIC_AUTH_USER` / `BASIC_AUTH_PASS`.** Šablonové `.gitlab-ci.yml` mělo doteď statické `BASIC_AUTH_USER: ""` / `BASIC_AUTH_PASS: ""` — `pnpm sync:apply` tím přepisoval konzument-side credentials na prázdné. Přepnuto na placeholdery `__BASIC_AUTH_USER__` / `__BASIC_AUTH_PASS__`; `detectPlaceholders()` je čte z konzument-side `.gitlab-ci.yml`, takže sync zachová cokoli, co tam uživatel vyplnil. Nový scaffold dostane prázdné stringy (stejné chování jako dřív).
 
 ### v0.1.7
 

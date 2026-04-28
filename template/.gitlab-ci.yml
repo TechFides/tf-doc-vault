@@ -4,8 +4,8 @@ variables:
   PNPM_STORE: "$CI_PROJECT_DIR/.pnpm-store"
   # Basic auth pro runtime `nginx-auth` (jinak nech prázdné).
   # Není to tajný údaj — přístup do repa = přístup do aplikace.
-  BASIC_AUTH_USER: ""
-  BASIC_AUTH_PASS: ""
+  BASIC_AUTH_USER: "__BASIC_AUTH_USER__"
+  BASIC_AUTH_PASS: "__BASIC_AUTH_PASS__"
 
 stages:
   - install

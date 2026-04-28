@@ -70,7 +70,7 @@ function packageVersion() {
     const pkgPath = path.resolve(__dirname, "..", "package.json");
     return JSON.parse(fs.readFileSync(pkgPath, "utf-8")).version;
   } catch {
-    return "0.1.7";
+    return "0.1.8";
   }
 }
 
@@ -198,6 +198,10 @@ replacePlaceholders(targetDir, {
   __GCP_PROJECT__: gcpProject,
   __SERVER_TYPE__: serverType,
   __VITEPRESS_COMMON_DEP__: vitepressCommonDep,
+  // Basic auth defaultně prázdné; uživatel je vyplní v .gitlab-ci.yml
+  // až podle reálné potřeby (jen pro nginx-auth runtime).
+  __BASIC_AUTH_USER__: "",
+  __BASIC_AUTH_PASS__: "",
 });
 
 if (!flags["no-git"]) {
