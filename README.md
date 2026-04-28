@@ -60,7 +60,7 @@ export default createTheme({ widthToggle: true });
     "fix": "ana-docs fix"
   },
   "dependencies": {
-    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.2"
+    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["@techfides/ana-docs"]
@@ -76,9 +76,9 @@ Předpoklad: SSH klíč na GitLabu (`gitlab.com:techfides/tf-analysis/...`).
 
 ```bash
 pnpm dlx --allow-build=@techfides/ana-docs \
-  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.2" \
+  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.3" \
   create moje_analyza \
-  --source=git --ref=v0.1.2 \
+  --source=git --ref=v0.1.3 \
   --gcp-project=tfsa-moje-analyza \
   --server=nginx
 ```
@@ -99,14 +99,67 @@ pnpm docs:dev           # http://localhost:5173
 
 Deployment přes `terraform apply` v `infra/` + push do GitLabu (CI postaví image a nasadí na Cloud Run).
 
-### Volby `--source`
+### Push do GitLabu
 
-| Volba | Hodnota v `package.json` | Kdy |
+Repozitář na GitLabu **není potřeba předem vytvářet** — využíváme [push-to-create](https://docs.gitlab.com/topics/git/project/#create-a-project-using-git-push). Stačí přidat remote a pushnout; GitLab projekt automaticky založí v cílové skupině (`techfides/tf-analysis`):
+
+```bash
+cd moje_analyza
+git remote add origin git@gitlab.com:techfides/tf-analysis/moje_analyza.git
+git push -u origin master
+```
+
+Předpoklad: musíš mít v `techfides/tf-analysis` práva `Developer` nebo vyšší (push-to-create vyžaduje permission na vytváření projektů ve skupině). Po prvním pushi nezapomeň ve vytvořeném projektu nastavit CI/CD variables (`GCP_SA_KEY`, `GCP_PROJECT`, `GCP_REGION`, `SERVICE_NAME`) — bez nich `🐳 build:docs` neprojde.
+
+### Volby scaffolderu
+
+`create-ana <project-name> [options]`:
+
+| Volba | Default | Popis |
 |---|---|---|
-| `--source=git` (doporučeno) | `git+ssh://…/ana-docs.git#<ref>` | Produkce — pinováno na tag |
-| `--source=npm` (default) | `^<verze>` | Až bude balíček publikován v npm registry |
-| `--source=file` / `--dev` | `file:../ana-docs` | Lokální vývoj balíčku vedle consumer repa |
-| `--source=workspace` | `workspace:*` | Pokud máš pnpm workspace |
+| `--gcp-project=<id>` | `tfsa-<project>` | GCP project ID (jde do `terraform.tfvars`). |
+| `--server=<type>` | `nginx` | Runtime image: `serve` (Node `serve`, bez auth), `nginx` (Nginx, statika bez auth), `nginx-auth` (Nginx + Basic auth z `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`). |
+| `--source=<src>` | `git` | `git` → `git+ssh://…/ana-docs.git#<ref>` (produkce, pinováno na tag). `file` → `file:<path>` (lokální vývoj balíčku vedle consumer repa). |
+| `--ref=<git-ref>` | `v<package version>` | Tag/branch/SHA pro `--source=git`. |
+| `--git-url=<url>` | `git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git` | Override git URL pro `--source=git`. |
+| `--file-path=<path>` | relativní cesta k balíčku | Override `file:` cesty pro `--source=file`. |
+
+## Auth pro `nginx-auth`
+
+Runtime `nginx-auth` chrání aplikaci HTTP Basic auth. Login a heslo se nastavují **na buildu** přes Docker build-args `BASIC_AUTH_USER` / `BASIC_AUTH_PASS` — `Dockerfile` z nich vygeneruje `/etc/nginx/.htpasswd`. Pokud jsou prázdné, build padne fail-fast.
+
+Hodnoty se drží přímo v repu, v top-level `variables:` bloku `.gitlab-ci.yml`:
+
+```yaml
+variables:
+  PNPM_STORE: "$CI_PROJECT_DIR/.pnpm-store"
+  BASIC_AUTH_USER: "anadocs"
+  BASIC_AUTH_PASS: "anadocsTF"
+```
+
+Není to tajný údaj — kdo má přístup do repa, má přístup i do aplikace. Job `🐳 build:docs` je conditional propustí do `docker build` jen když nejsou prázdné, takže projekty bez auth (`serve` / `nginx`) je jen nechají nevyplněné.
+
+Lokální build:
+
+```bash
+docker build --build-arg SERVER_TYPE=nginx-auth \
+             --build-arg BASIC_AUTH_USER=anadocs \
+             --build-arg BASIC_AUTH_PASS=anadocsTF \
+             -t docs-web .
+```
+
+Rotace hesla = úprava `variables:` + commit + redeploy (htpasswd hash je zapečen do image vrstvy).
+
+### Přepnutí existujícího projektu z `nginx` na `nginx-auth`
+
+`__SERVER_TYPE__` se zapéká do dvou míst při scaffoldování — pro switch je potřeba upravit obojí:
+
+1. **`.gitlab-ci.yml`** — v `BUILD_ARGS` (job `🐳 build:docs`) změň `SERVER_TYPE=nginx` na `SERVER_TYPE=nginx-auth`.
+2. **`Dockerfile`** — `ARG SERVER_TYPE=nginx` → `ARG SERVER_TYPE=nginx-auth` (default pro lokální buildy bez build-argu; CI ho vždy přepíše).
+3. **`.gitlab-ci.yml`** `variables:` — vyplň `BASIC_AUTH_USER` / `BASIC_AUTH_PASS` (jinak build padne na fail-fast checku v `Dockerfile`).
+4. Commit + push → CI postaví nový image, Cloud Run rolne novou revizi.
+
+Zpátky na `nginx` = stejné kroky obráceně + vyprázdnit oba `BASIC_AUTH_*`.
 
 ## Lokální vývoj balíčku
 
@@ -144,6 +197,12 @@ pnpm sync:apply     # přepíše drifted soubory šablonou (placeholdery se rend
 User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfvars) je vyloučen z přepisování.
 
 ## Changelog
+
+### v0.1.3
+
+- **Scaffolder — `--source=git` jako default.** Volby `--source=npm` a `--source=workspace` odstraněny (npm publish není v plánu). Validní hodnoty: `git` | `file` (`--dev` shortcut zůstává).                                                                                                                   
+- **Auth pro `nginx-auth`** — `BASIC_AUTH_USER` / `BASIC_AUTH_PASS` se drží v top-level `variables:` bloku `.gitlab-ci.yml` (ne v GitLab CI/CD Variables). Šablona má prázdné placeholdery; CI je conditional propustí do `docker build` jen když nejsou prázdné.                                         
+- **README** — sekce "Volby scaffolderu" sjednocena do jedné tabulky s popisem všech voleb (včetně runtime variant pro `--server`). Nové sekce: "Auth pro `nginx-auth`", "Push do GitLabu" (push-to-create flow), "Přepnutí existujícího projektu z `nginx` na `nginx-auth`".                                    
 
 ### v0.1.2
 

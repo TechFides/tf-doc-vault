@@ -2,6 +2,10 @@ image: node:22
 
 variables:
   PNPM_STORE: "$CI_PROJECT_DIR/.pnpm-store"
+  # Basic auth pro runtime `nginx-auth` (jinak nech prázdné).
+  # Není to tajný údaj — přístup do repa = přístup do aplikace.
+  BASIC_AUTH_USER: ""
+  BASIC_AUTH_PASS: ""
 
 stages:
   - install

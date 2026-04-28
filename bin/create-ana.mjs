@@ -44,9 +44,7 @@ Options:
   --gcp-project=<id>      GCP project ID (filled into terraform.tfvars)
   --server=<type>         serve | nginx | nginx-auth   (default: nginx)
   --source=<src>          Where the new repo should pull @techfides/ana-docs from:
-                            npm        — semver range "^<version>" (default)
-                            workspace  — "workspace:*" (only valid inside the dev pnpm workspace)
-                            git        — git+ssh URL pinned to --ref tag
+                            git        — git+ssh URL pinned to --ref tag (default)
                             file       — file:<path> to local checkout (--dev shortcut)
   --dev                   Shortcut for --source=file. Points to the local
                             @techfides/ana-docs checkout (this CLI's package).
@@ -62,8 +60,7 @@ Examples:
   create-ana ajp_ana  --gcp-project=tfsa-ajp --server=nginx
   create-ana lapa_ana --gcp-project=tfsa-lapa --server=nginx-auth
   create-ana foo_ana  --dev                                    # local dev → file:../ana-docs
-  create-ana foo_ana  --source=workspace                       # local pnpm workspace dev
-  create-ana bar_ana  --source=git --ref=v0.2.0                # install from git tag
+  create-ana bar_ana  --ref=v0.2.0                             # pin to a specific git tag
 `);
   process.exit(exitCode);
 }
@@ -73,7 +70,7 @@ function packageVersion() {
     const pkgPath = path.resolve(__dirname, "..", "package.json");
     return JSON.parse(fs.readFileSync(pkgPath, "utf-8")).version;
   } catch {
-    return "0.1.2";
+    return "0.1.3";
   }
 }
 
@@ -81,7 +78,7 @@ const PACKAGE_DIR = path.resolve(__dirname, "..");
 
 function resolveDependencyValue(flags, targetDir) {
   // --dev is a shortcut for --source=file. Explicit --source still wins.
-  const source = flags.source ?? (flags.dev ? "file" : "npm");
+  const source = flags.source ?? (flags.dev ? "file" : "git");
   const version = packageVersion();
   const ref = flags.ref ?? `v${version}`;
   const gitUrl =
@@ -89,10 +86,6 @@ function resolveDependencyValue(flags, targetDir) {
     "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git";
 
   switch (source) {
-    case "npm":
-      return `^${version}`;
-    case "workspace":
-      return "workspace:*";
     case "git":
       return `${gitUrl}#${ref}`;
     case "file": {
@@ -100,7 +93,7 @@ function resolveDependencyValue(flags, targetDir) {
       return `file:${target}`;
     }
     default:
-      console.error(`✗ Invalid --source: ${source}. Use npm | workspace | git | file.`);
+      console.error(`✗ Invalid --source: ${source}. Use git | file.`);
       process.exit(1);
   }
 }
@@ -217,7 +210,7 @@ if (!flags["no-git"]) {
   );
 }
 
-const isDevSource = vitepressCommonDep.startsWith("file:") || vitepressCommonDep === "workspace:*";
+const isDevSource = vitepressCommonDep.startsWith("file:");
 const devBootstrap = isDevSource
   ? `
 Pokud je @techfides/ana-docs ještě nezbuildovaný, spusť jednou:
