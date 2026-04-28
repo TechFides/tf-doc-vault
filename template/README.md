@@ -27,16 +27,34 @@ GCP Cloud Run, image v Artifact Registry, deploy přes GitLab CI/CD po pushi do 
 
 ### První nasazení
 
+GitLab repozitář není potřeba předem vytvářet — push-to-create ho založí v `techfides/tf-analysis` při prvním pushi:
+
+```bash
+git remote add origin git@gitlab.com:techfides/tf-analysis/__PROJECT__.git
+git push -u origin master
+```
+
+Pak v nově vzniklém projektu nastav infra a CI/CD variables:
+
 ```bash
 cd infra
 cp terraform.tfvars.example terraform.tfvars     # vyplnit project_id
+
+# Bootstrap GCS bucketu pro tfstate (jednorázově, mimo terraform):
+gcloud storage buckets create gs://__GCP_PROJECT__-tfstate \
+  --project=__GCP_PROJECT__ --location=europe-west1 \
+  --uniform-bucket-level-access
+gcloud storage buckets update gs://__GCP_PROJECT__-tfstate --versioning
+
 terraform init && terraform apply
 terraform output -raw ci_service_account_key | base64 -d > /tmp/sa-key.json
 # Obsah /tmp/sa-key.json vlož do GitLab CI/CD Variables jako GCP_SA_KEY.
-# Dále nastav: GCP_PROJECT, GCP_REGION, SERVICE_NAME (volitelně BASIC_AUTH_USER/PASS).
+# Dále nastav: GCP_PROJECT, GCP_REGION, SERVICE_NAME.
+# Pokud používáš nginx-auth runtime, vyplň BASIC_AUTH_USER / BASIC_AUTH_PASS
+# přímo v `variables:` bloku .gitlab-ci.yml (není to tajné — přístup do repa = přístup do aplikace).
 ```
 
-Pak jen `git push` a první pipeline nasadí web.
+Další push (nebo retry pipeliny) už projde build i deploy.
 
 ## Struktura `docs/`
 
