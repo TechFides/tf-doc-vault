@@ -141,9 +141,18 @@ interface Result {
   expected?: string;
 }
 
+// `npm pack` strips dotfiles, so the template ships .gitignore / .npmrc
+// under _gitignore / _npmrc and the scaffolder renames on copy. Mirror the
+// same mapping when resolving the template counterpart of a consumer file.
+function templateNameFor(rel: string): string {
+  if (rel === ".gitignore") return "_gitignore";
+  if (rel === ".npmrc") return "_npmrc";
+  return rel;
+}
+
 function inspect(rel: string, placeholders: Record<string, string>): Result {
   const consumerPath = path.join(PROJECT_ROOT, rel);
-  const templatePath = path.join(TEMPLATE_DIR, rel);
+  const templatePath = path.join(TEMPLATE_DIR, templateNameFor(rel));
 
   if (!fs.existsSync(templatePath)) return { rel, status: "ok" };
 

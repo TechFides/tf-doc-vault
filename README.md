@@ -60,7 +60,7 @@ export default createTheme({ widthToggle: true });
     "fix": "ana-docs fix"
   },
   "dependencies": {
-    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.5"
+    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.6"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["@techfides/ana-docs"]
@@ -76,9 +76,9 @@ Předpoklad: SSH klíč na GitLabu (`gitlab.com:techfides/tf-analysis/...`).
 
 ```bash
 pnpm dlx --allow-build=@techfides/ana-docs \
-  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.5" \
+  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.6" \
   create moje_analyza \
-  --source=git --ref=v0.1.5 \
+  --source=git --ref=v0.1.6 \
   --gcp-project=tfsa-moje-analyza \
   --server=nginx
 ```
@@ -197,6 +197,10 @@ pnpm sync:apply     # přepíše drifted soubory šablonou (placeholdery se rend
 User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfvars) je vyloučen z přepisování.
 
 ## Changelog
+
+### v0.1.6
+
+- **Sync — fix `.gitignore` / `.npmrc` mapping.** `template/_gitignore` a `template/_npmrc` se kvůli npm pack stripu jmenují s `_` prefixem; `sync` je hledal pod `.gitignore` / `.npmrc` a tiše je přeskakoval. Doplněn mapping (`templateNameFor`), drift v dotfiles teď sync vidí.
 
 ### v0.1.5
 
