@@ -12,6 +12,9 @@
  *   ensure-lf    convert CRLF → LF
  *   fix          full pipeline (LF, normalize, format, lint --fix, typecheck, validate)
  *   sync         diff infra/CI/config files against bundled template
+ *   gen-diagrams generate business/technical analysis SVG diagrams
+ *   gen-wireframes generate wireframe SVGs
+ *   replace-wireframes replace ASCII wireframe code blocks in docs/v1/index.md with SVG image refs
  *
  * All scripts (except `create`) run with cwd = project root. They look for `docs/` there.
  */
@@ -32,6 +35,9 @@ const COMMANDS = {
   "ensure-lf": "ensure-lf.js",
   fix: "fix.js",
   sync: "sync-template.js",
+  "gen-diagrams": "generate-diagrams.cjs",
+  "gen-wireframes": "generate-wireframes.cjs",
+  "replace-wireframes": "replace-wireframes.cjs",
 };
 
 function runScript(scriptName, extraArgs = []) {
@@ -67,6 +73,9 @@ Commands:
   sync            Diff infra/CI/config files against bundled template
                     --apply             overwrite drifted files
                     --files=a,b,c       restrict to a subset
+  gen-diagrams    Generate analysis SVG diagrams to docs/public/images/diagrams/
+  gen-wireframes  Generate wireframe SVGs to docs/public/images/wireframes/
+  replace-wireframes  Replace ASCII wireframes in docs/v1/index.md with SVG image refs
 `);
   process.exit(exitCode);
 }

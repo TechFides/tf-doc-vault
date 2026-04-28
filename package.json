@@ -1,6 +1,6 @@
 {
   "name": "@techfides/ana-docs",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Sdílený VitePress tooling pro TFSA analýzové dokumentace — config factory, theme komponenty, sidebar generátor, build/export skripty, CI a Terraform modul.",
   "type": "module",
   "license": "UNLICENSED",

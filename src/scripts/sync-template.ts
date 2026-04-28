@@ -33,6 +33,7 @@ const TRACKED_FILES: string[] = [
   ".gitignore",
   ".npmrc",
   ".prettierrc",
+  ".prettierignore",
   "eslint.config.js",
   "tsconfig.json",
   "docker/nginx.conf",
@@ -76,7 +77,7 @@ function detectPlaceholders(): Record<string, string> {
   const dashed = project.replace(/_/g, "-");
 
   let serverType = "nginx";
-  let depValue = "^0.1.1";
+  let depValue = "^0.1.2";
   const pkg = readJSON(path.join(PROJECT_ROOT, "package.json"));
   if (pkg) {
     const scripts = (pkg.scripts ?? {}) as Record<string, string>;

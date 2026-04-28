@@ -60,7 +60,7 @@ export default createTheme({ widthToggle: true });
     "fix": "ana-docs fix"
   },
   "dependencies": {
-    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.1"
+    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["@techfides/ana-docs"]
@@ -76,9 +76,9 @@ Předpoklad: SSH klíč na GitLabu (`gitlab.com:techfides/tf-analysis/...`).
 
 ```bash
 pnpm dlx --allow-build=@techfides/ana-docs \
-  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.1" \
+  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.2" \
   create moje_analyza \
-  --source=git --ref=v0.1.1 \
+  --source=git --ref=v0.1.2 \
   --gcp-project=tfsa-moje-analyza \
   --server=nginx
 ```
@@ -144,6 +144,12 @@ pnpm sync:apply     # přepíše drifted soubory šablonou (placeholdery se rend
 User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfvars) je vyloučen z přepisování.
 
 ## Changelog
+
+### v0.1.2
+
+- **Nové CLI subcommandy** — `gen-diagrams`, `gen-wireframes`, `replace-wireframes` (porty z `lapa_ana/scripts`). Skripty zapisují do `<cwd>/docs/public/images/...` resp. čtou `<cwd>/docs/v1/index.md`.
+- **Build podporuje `.cjs`** — `scripts/build.mjs` kopíruje `.cjs` soubory ze `src/` do `dist/`.
+- **Šablona — `.prettierignore`** — nově obsahuje `pnpm-lock.yaml` a další generované soubory; `format:check` jinak řve na lockfile. Soubor je v `TRACKED_FILES` v `sync-template`, takže existující projekty si ho stáhnou přes `ana-docs sync --apply`.
 
 ### v0.1.1
 
