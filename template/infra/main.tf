@@ -3,6 +3,17 @@
 
 terraform {
   required_version = ">= 1.5"
+
+  # tfstate v GCS — bucket je per-projekt (`<gcp-project>-tfstate`).
+  # Bootstrap (jednorázově před `terraform init`):
+  #   gcloud storage buckets create gs://__GCP_PROJECT__-tfstate \
+  #     --project=__GCP_PROJECT__ --location=europe-west1 \
+  #     --uniform-bucket-level-access
+  #   gcloud storage buckets update gs://__GCP_PROJECT__-tfstate --versioning
+  backend "gcs" {
+    bucket = "__GCP_PROJECT__-tfstate"
+    prefix = "docs-web"
+  }
 }
 
 module "docs" {

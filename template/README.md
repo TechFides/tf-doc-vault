@@ -39,6 +39,13 @@ Pak v nově vzniklém projektu nastav infra a CI/CD variables:
 ```bash
 cd infra
 cp terraform.tfvars.example terraform.tfvars     # vyplnit project_id
+
+# Bootstrap GCS bucketu pro tfstate (jednorázově, mimo terraform):
+gcloud storage buckets create gs://__GCP_PROJECT__-tfstate \
+  --project=__GCP_PROJECT__ --location=europe-west1 \
+  --uniform-bucket-level-access
+gcloud storage buckets update gs://__GCP_PROJECT__-tfstate --versioning
+
 terraform init && terraform apply
 terraform output -raw ci_service_account_key | base64 -d > /tmp/sa-key.json
 # Obsah /tmp/sa-key.json vlož do GitLab CI/CD Variables jako GCP_SA_KEY.
