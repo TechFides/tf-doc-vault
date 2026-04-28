@@ -3,7 +3,6 @@
 # Multi-stage Dockerfile for TFSA analysis docs.
 #
 # Build-arg SERVER_TYPE selects the runtime:
-#   serve         Node `serve` (simplest; no auth)
 #   nginx         Nginx serving static files (no auth)
 #   nginx-auth    Nginx + Basic auth (htpasswd from BASIC_AUTH_USER / BASIC_AUTH_PASS)
 #
@@ -36,18 +35,7 @@ COPY tsconfig.json ./
 
 RUN pnpm run docs:print && pnpm run docs:build
 
-# ── Stage 2a: serve ───────────────────────────────────────────────────────────
-FROM node:22-slim AS runner-serve
-
-WORKDIR /app
-RUN npm install -g serve@14
-COPY --from=builder /app/docs/.vitepress/dist ./dist
-
-ENV PORT=8080
-EXPOSE 8080
-CMD ["serve", "-s", "dist", "-l", "8080", "--no-clipboard"]
-
-# ── Stage 2b: nginx (no auth) ─────────────────────────────────────────────────
+# ── Stage 2a: nginx (no auth) ─────────────────────────────────────────────────
 FROM node:22-slim AS runner-nginx
 
 WORKDIR /app
@@ -61,7 +49,7 @@ ENV PORT=8080
 EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
 
-# ── Stage 2c: nginx + Basic auth ──────────────────────────────────────────────
+# ── Stage 2b: nginx + Basic auth ──────────────────────────────────────────────
 FROM node:22-slim AS runner-nginx-auth
 
 ARG BASIC_AUTH_USER

@@ -1,5 +1,5 @@
 # Project Dockerfile — multi-stage builder + selectable runtime.
-# SERVER_TYPE selects the runtime stage: serve | nginx | nginx-auth.
+# SERVER_TYPE selects the runtime stage: nginx | nginx-auth.
 # Default for this project is set below; override at build with --build-arg.
 
 ARG SERVER_TYPE=__SERVER_TYPE__
@@ -33,18 +33,7 @@ COPY tsconfig.json ./
 
 RUN pnpm run docs:print && pnpm run docs:build
 
-# ── Stage 2a: serve ───────────────────────────────────────────────────────────
-FROM node:22-slim AS runner-serve
-
-WORKDIR /app
-RUN npm install -g serve@14
-COPY --from=builder /app/docs/.vitepress/dist ./dist
-
-ENV PORT=8080
-EXPOSE 8080
-CMD ["serve", "-s", "dist", "-l", "8080", "--no-clipboard"]
-
-# ── Stage 2b: nginx ───────────────────────────────────────────────────────────
+# ── Stage 2a: nginx ───────────────────────────────────────────────────────────
 FROM node:22-slim AS runner-nginx
 
 WORKDIR /app
@@ -58,7 +47,7 @@ ENV PORT=8080
 EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
 
-# ── Stage 2c: nginx + Basic auth ──────────────────────────────────────────────
+# ── Stage 2b: nginx + Basic auth ──────────────────────────────────────────────
 FROM node:22-slim AS runner-nginx-auth
 
 ARG BASIC_AUTH_USER

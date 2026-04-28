@@ -42,7 +42,7 @@ Arguments:
 
 Options:
   --gcp-project=<id>      GCP project ID (filled into terraform.tfvars)
-  --server=<type>         serve | nginx | nginx-auth   (default: nginx)
+  --server=<type>         nginx | nginx-auth   (default: nginx)
   --source=<src>          Where the new repo should pull @techfides/ana-docs from:
                             git        — git+ssh URL pinned to --ref tag (default)
                             file       — file:<path> to local checkout (--dev shortcut)
@@ -70,7 +70,7 @@ function packageVersion() {
     const pkgPath = path.resolve(__dirname, "..", "package.json");
     return JSON.parse(fs.readFileSync(pkgPath, "utf-8")).version;
   } catch {
-    return "0.1.6";
+    return "0.1.7";
   }
 }
 
@@ -170,8 +170,8 @@ if (!/^[a-z][a-z0-9_-]*$/.test(projectName)) {
 const gcpProject = flags["gcp-project"] ?? `tfsa-${projectName.replace(/_/g, "-")}`;
 const serverType = flags.server ?? "nginx";
 
-if (!["serve", "nginx", "nginx-auth"].includes(serverType)) {
-  console.error(`✗ Invalid --server: ${serverType}. Use serve | nginx | nginx-auth.`);
+if (!["nginx", "nginx-auth"].includes(serverType)) {
+  console.error(`✗ Invalid --server: ${serverType}. Use nginx | nginx-auth.`);
   process.exit(1);
 }
 

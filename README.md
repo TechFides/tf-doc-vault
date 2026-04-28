@@ -14,7 +14,7 @@ Cíl: nasadit nové analýzové repo do 5 minut. Vyřešit jednou — sdílet na
 - **`bin/create-ana`** — alias pro `ana-docs create` (přímá invokace scaffolderu).
 - **`configs`** — `eslint.config.js`, `prettier.json`, `tsconfig.base.json` k extends.
 - **`infra/terraform`** — reusable modul pro Cloud Run + Artifact Registry + IAM.
-- **`docker`** — multi-stage Dockerfile s `ARG SERVER_TYPE=serve|nginx|nginx-auth` + nginx confs.
+- **`docker`** — multi-stage Dockerfile s `ARG SERVER_TYPE=nginx|nginx-auth` + nginx confs.
 - **`template`** — kostra nového `*_ana` repa.
 
 ## Použití v aplikačním repu
@@ -60,7 +60,7 @@ export default createTheme({ widthToggle: true });
     "fix": "ana-docs fix"
   },
   "dependencies": {
-    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.6"
+    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.7"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["@techfides/ana-docs"]
@@ -76,9 +76,9 @@ Předpoklad: SSH klíč na GitLabu (`gitlab.com:techfides/tf-analysis/...`).
 
 ```bash
 pnpm dlx --allow-build=@techfides/ana-docs \
-  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.6" \
+  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.7" \
   create moje_analyza \
-  --source=git --ref=v0.1.6 \
+  --source=git --ref=v0.1.7 \
   --gcp-project=tfsa-moje-analyza \
   --server=nginx
 ```
@@ -118,7 +118,7 @@ Předpoklad: musíš mít v `techfides/tf-analysis` práva `Developer` nebo vyš
 | Volba | Default | Popis |
 |---|---|---|
 | `--gcp-project=<id>` | `tfsa-<project>` | GCP project ID (jde do `terraform.tfvars`). |
-| `--server=<type>` | `nginx` | Runtime image: `serve` (Node `serve`, bez auth), `nginx` (Nginx, statika bez auth), `nginx-auth` (Nginx + Basic auth z `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`). |
+| `--server=<type>` | `nginx` | Runtime image: `nginx` (statika bez auth) nebo `nginx-auth` (Nginx + Basic auth z `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`). |
 | `--source=<src>` | `git` | `git` → `git+ssh://…/ana-docs.git#<ref>` (produkce, pinováno na tag). `file` → `file:<path>` (lokální vývoj balíčku vedle consumer repa). |
 | `--ref=<git-ref>` | `v<package version>` | Tag/branch/SHA pro `--source=git`. |
 | `--git-url=<url>` | `git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git` | Override git URL pro `--source=git`. |
@@ -137,7 +137,7 @@ variables:
   BASIC_AUTH_PASS: "anadocsTF"
 ```
 
-Není to tajný údaj — kdo má přístup do repa, má přístup i do aplikace. Job `🐳 build:docs` je conditional propustí do `docker build` jen když nejsou prázdné, takže projekty bez auth (`serve` / `nginx`) je jen nechají nevyplněné.
+Není to tajný údaj — kdo má přístup do repa, má přístup i do aplikace. Job `🐳 build:docs` je conditional propustí do `docker build` jen když nejsou prázdné, takže projekty bez auth (runtime `nginx`) je jen nechají nevyplněné.
 
 Lokální build:
 
@@ -197,6 +197,10 @@ pnpm sync:apply     # přepíše drifted soubory šablonou (placeholdery se rend
 User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfvars) je vyloučen z přepisování.
 
 ## Changelog
+
+### v0.1.7
+
+- **Runtime `serve` odstraněn.** Multi-stage Dockerfile měl tři runtime varianty (`serve` / `nginx` / `nginx-auth`); `serve` byl mrtvá nožka — lokální dev jede přes Vite (`pnpm docs:dev`, ne přes Docker), produkce stejně chce nginx kvůli auth cestě. Zůstává `nginx | nginx-auth`. Scaffolder `--server` přijímá jen tyhle dvě hodnoty (default `nginx`); existující projekty s `SERVER_TYPE=serve` musí přepnout na `nginx` v `Dockerfile` a `.gitlab-ci.yml`.
 
 ### v0.1.6
 
