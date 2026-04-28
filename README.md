@@ -60,7 +60,7 @@ export default createTheme({ widthToggle: true });
     "fix": "ana-docs fix"
   },
   "dependencies": {
-    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.0"
+    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["@techfides/ana-docs"]
@@ -76,9 +76,9 @@ Předpoklad: SSH klíč na GitLabu (`gitlab.com:techfides/tf-analysis/...`).
 
 ```bash
 pnpm dlx --allow-build=@techfides/ana-docs \
-  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.0" \
+  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.1" \
   create moje_analyza \
-  --source=git --ref=v0.1.0 \
+  --source=git --ref=v0.1.1 \
   --gcp-project=tfsa-moje-analyza \
   --server=nginx
 ```
@@ -142,3 +142,17 @@ pnpm sync:apply     # přepíše drifted soubory šablonou (placeholdery se rend
 ```
 
 User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfvars) je vyloučen z přepisování.
+
+## Changelog
+
+### v0.1.1
+
+- **CI/Docker fixy v šabloně** — `pnpm install` v Docker builderu teď funguje s `git+ssh` závislostmi: token se předává přes `--build-arg GITLAB_CI_TOKEN`, uvnitř builderu se přepíše SSH URL na HTTPS s `gitlab-ci-token` a `/root/.gitconfig` se po install smaže (token nezůstane v image layerech). Builder image dostal `ca-certificates`, jinak HTTPS clone padá na `server certificate verification failed`.
+- **CI shell** — `📦 install` job má `git config insteadOf` v `before_script`, takže pnpm git fetch funguje i mimo Dockerfile.
+- **Prettier** — šablona ignoruje `.pnpm-store/`, jinak `format:check` řve na obsah pnpm cache v CI.
+- **TypeScript** — šablona obsahuje `docs/.vitepress/theme/shims.d.ts` s `declare module "*.css";`, jinak `tsc` padá na `TS2882: Cannot find module ... ./custom.css` při `module: NodeNext`.
+- **Předpoklad pro CI**: ve zdrojovém repu (`techfides/tf-analysis/ana-docs`) musí být v Settings → CI/CD → Token Access povolený consumer projekt — `CI_JOB_TOKEN` jinak nemá oprávnění klonovat.
+
+### v0.1.0
+
+- Initial release.

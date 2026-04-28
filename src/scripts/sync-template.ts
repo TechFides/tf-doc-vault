@@ -76,7 +76,7 @@ function detectPlaceholders(): Record<string, string> {
   const dashed = project.replace(/_/g, "-");
 
   let serverType = "nginx";
-  let depValue = "^0.1.0";
+  let depValue = "^0.1.1";
   const pkg = readJSON(path.join(PROJECT_ROOT, "package.json"));
   if (pkg) {
     const scripts = (pkg.scripts ?? {}) as Record<string, string>;
