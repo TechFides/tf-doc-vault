@@ -70,7 +70,7 @@ function packageVersion() {
     const pkgPath = path.resolve(__dirname, "..", "package.json");
     return JSON.parse(fs.readFileSync(pkgPath, "utf-8")).version;
   } catch {
-    return "0.1.4";
+    return "0.1.5";
   }
 }
 

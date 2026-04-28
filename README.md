@@ -60,7 +60,7 @@ export default createTheme({ widthToggle: true });
     "fix": "ana-docs fix"
   },
   "dependencies": {
-    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.4"
+    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.5"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["@techfides/ana-docs"]
@@ -76,9 +76,9 @@ Předpoklad: SSH klíč na GitLabu (`gitlab.com:techfides/tf-analysis/...`).
 
 ```bash
 pnpm dlx --allow-build=@techfides/ana-docs \
-  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.4" \
+  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.5" \
   create moje_analyza \
-  --source=git --ref=v0.1.4 \
+  --source=git --ref=v0.1.5 \
   --gcp-project=tfsa-moje-analyza \
   --server=nginx
 ```
@@ -197,6 +197,10 @@ pnpm sync:apply     # přepíše drifted soubory šablonou (placeholdery se rend
 User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfvars) je vyloučen z přepisování.
 
 ## Changelog
+
+### v0.1.5
+
+- **`terraform.tfvars` v gitu** — `_gitignore` šablony už `infra/terraform.tfvars` neignoruje. Soubor je projektově malý a stabilní (project_id, region, service_name), patří k repu. Existující projekty: `pnpm sync:apply` přepíše `.gitignore`, pak `git add infra/terraform.tfvars && git commit`.
 
 ### v0.1.4
 

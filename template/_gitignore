@@ -6,8 +6,7 @@ docs/print.md
 artifacts/
 .idea/
 
-# Terraform
+# Terraform — tfstate v GCS, tfvars trackujeme v repu.
 infra/.terraform/
 infra/*.tfplan
 infra/terraform.tfstate*
-infra/terraform.tfvars
