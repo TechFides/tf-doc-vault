@@ -14,7 +14,7 @@ Cíl: nasadit nové analýzové repo do 5 minut. Vyřešit jednou — sdílet na
 - **`bin/create-ana`** — alias pro `ana-docs create` (přímá invokace scaffolderu).
 - **`configs`** — `eslint.config.js`, `prettier.json`, `tsconfig.base.json` k extends.
 - **`infra/terraform`** — reusable modul pro Cloud Run + Artifact Registry + IAM.
-- **`docker`** — multi-stage Dockerfile s `ARG SERVER_TYPE=serve|nginx|nginx-auth` + nginx confs.
+- **`docker`** — multi-stage Dockerfile s `ARG SERVER_TYPE=nginx|nginx-auth` + nginx confs.
 - **`template`** — kostra nového `*_ana` repa.
 
 ## Použití v aplikačním repu
@@ -60,7 +60,7 @@ export default createTheme({ widthToggle: true });
     "fix": "ana-docs fix"
   },
   "dependencies": {
-    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.0"
+    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.8"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["@techfides/ana-docs"]
@@ -76,9 +76,9 @@ Předpoklad: SSH klíč na GitLabu (`gitlab.com:techfides/tf-analysis/...`).
 
 ```bash
 pnpm dlx --allow-build=@techfides/ana-docs \
-  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.0" \
+  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.8" \
   create moje_analyza \
-  --source=git --ref=v0.1.0 \
+  --source=git --ref=v0.1.8 \
   --gcp-project=tfsa-moje-analyza \
   --server=nginx
 ```
@@ -99,14 +99,67 @@ pnpm docs:dev           # http://localhost:5173
 
 Deployment přes `terraform apply` v `infra/` + push do GitLabu (CI postaví image a nasadí na Cloud Run).
 
-### Volby `--source`
+### Push do GitLabu
 
-| Volba | Hodnota v `package.json` | Kdy |
+Repozitář na GitLabu **není potřeba předem vytvářet** — využíváme [push-to-create](https://docs.gitlab.com/topics/git/project/#create-a-project-using-git-push). Stačí přidat remote a pushnout; GitLab projekt automaticky založí v cílové skupině (`techfides/tf-analysis`):
+
+```bash
+cd moje_analyza
+git remote add origin git@gitlab.com:techfides/tf-analysis/moje_analyza.git
+git push -u origin master
+```
+
+Předpoklad: musíš mít v `techfides/tf-analysis` práva `Developer` nebo vyšší (push-to-create vyžaduje permission na vytváření projektů ve skupině). Po prvním pushi nezapomeň ve vytvořeném projektu nastavit CI/CD variables (`GCP_SA_KEY`, `GCP_PROJECT`, `GCP_REGION`, `SERVICE_NAME`) — bez nich `🐳 build:docs` neprojde.
+
+### Volby scaffolderu
+
+`create-ana <project-name> [options]`:
+
+| Volba | Default | Popis |
 |---|---|---|
-| `--source=git` (doporučeno) | `git+ssh://…/ana-docs.git#<ref>` | Produkce — pinováno na tag |
-| `--source=npm` (default) | `^<verze>` | Až bude balíček publikován v npm registry |
-| `--source=file` / `--dev` | `file:../ana-docs` | Lokální vývoj balíčku vedle consumer repa |
-| `--source=workspace` | `workspace:*` | Pokud máš pnpm workspace |
+| `--gcp-project=<id>` | `tfsa-<project>` | GCP project ID (jde do `terraform.tfvars`). |
+| `--server=<type>` | `nginx` | Runtime image: `nginx` (statika bez auth) nebo `nginx-auth` (Nginx + Basic auth z `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`). |
+| `--source=<src>` | `git` | `git` → `git+ssh://…/ana-docs.git#<ref>` (produkce, pinováno na tag). `file` → `file:<path>` (lokální vývoj balíčku vedle consumer repa). |
+| `--ref=<git-ref>` | `v<package version>` | Tag/branch/SHA pro `--source=git`. |
+| `--git-url=<url>` | `git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git` | Override git URL pro `--source=git`. |
+| `--file-path=<path>` | relativní cesta k balíčku | Override `file:` cesty pro `--source=file`. |
+
+## Auth pro `nginx-auth`
+
+Runtime `nginx-auth` chrání aplikaci HTTP Basic auth. Login a heslo se nastavují **na buildu** přes Docker build-args `BASIC_AUTH_USER` / `BASIC_AUTH_PASS` — `Dockerfile` z nich vygeneruje `/etc/nginx/.htpasswd`. Pokud jsou prázdné, build padne fail-fast.
+
+Hodnoty se drží přímo v repu, v top-level `variables:` bloku `.gitlab-ci.yml`:
+
+```yaml
+variables:
+  PNPM_STORE: "$CI_PROJECT_DIR/.pnpm-store"
+  BASIC_AUTH_USER: "anadocs"
+  BASIC_AUTH_PASS: "anadocsTF"
+```
+
+Není to tajný údaj — kdo má přístup do repa, má přístup i do aplikace. Job `🐳 build:docs` je conditional propustí do `docker build` jen když nejsou prázdné, takže projekty bez auth (runtime `nginx`) je jen nechají nevyplněné.
+
+Lokální build:
+
+```bash
+docker build --build-arg SERVER_TYPE=nginx-auth \
+             --build-arg BASIC_AUTH_USER=anadocs \
+             --build-arg BASIC_AUTH_PASS=anadocsTF \
+             -t docs-web .
+```
+
+Rotace hesla = úprava `variables:` + commit + redeploy (htpasswd hash je zapečen do image vrstvy).
+
+### Přepnutí existujícího projektu z `nginx` na `nginx-auth`
+
+`__SERVER_TYPE__` se zapéká do dvou míst při scaffoldování — pro switch je potřeba upravit obojí:
+
+1. **`.gitlab-ci.yml`** — v `BUILD_ARGS` (job `🐳 build:docs`) změň `SERVER_TYPE=nginx` na `SERVER_TYPE=nginx-auth`.
+2. **`Dockerfile`** — `ARG SERVER_TYPE=nginx` → `ARG SERVER_TYPE=nginx-auth` (default pro lokální buildy bez build-argu; CI ho vždy přepíše).
+3. **`.gitlab-ci.yml`** `variables:` — vyplň `BASIC_AUTH_USER` / `BASIC_AUTH_PASS` (jinak build padne na fail-fast checku v `Dockerfile`).
+4. Commit + push → CI postaví nový image, Cloud Run rolne novou revizi.
+
+Zpátky na `nginx` = stejné kroky obráceně + vyprázdnit oba `BASIC_AUTH_*`.
 
 ## Lokální vývoj balíčku
 
@@ -142,3 +195,49 @@ pnpm sync:apply     # přepíše drifted soubory šablonou (placeholdery se rend
 ```
 
 User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfvars) je vyloučen z přepisování.
+
+## Changelog
+
+### v0.1.8
+
+- **Sync zachová `BASIC_AUTH_USER` / `BASIC_AUTH_PASS`.** Šablonové `.gitlab-ci.yml` mělo doteď statické `BASIC_AUTH_USER: ""` / `BASIC_AUTH_PASS: ""` — `pnpm sync:apply` tím přepisoval konzument-side credentials na prázdné. Přepnuto na placeholdery `__BASIC_AUTH_USER__` / `__BASIC_AUTH_PASS__`; `detectPlaceholders()` je čte z konzument-side `.gitlab-ci.yml`, takže sync zachová cokoli, co tam uživatel vyplnil. Nový scaffold dostane prázdné stringy (stejné chování jako dřív).
+
+### v0.1.7
+
+- **Runtime `serve` odstraněn.** Multi-stage Dockerfile měl tři runtime varianty (`serve` / `nginx` / `nginx-auth`); `serve` byl mrtvá nožka — lokální dev jede přes Vite (`pnpm docs:dev`, ne přes Docker), produkce stejně chce nginx kvůli auth cestě. Zůstává `nginx | nginx-auth`. Scaffolder `--server` přijímá jen tyhle dvě hodnoty (default `nginx`); existující projekty s `SERVER_TYPE=serve` musí přepnout na `nginx` v `Dockerfile` a `.gitlab-ci.yml`.
+
+### v0.1.6
+
+- **Sync — fix `.gitignore` / `.npmrc` mapping.** `template/_gitignore` a `template/_npmrc` se kvůli npm pack stripu jmenují s `_` prefixem; `sync` je hledal pod `.gitignore` / `.npmrc` a tiše je přeskakoval. Doplněn mapping (`templateNameFor`), drift v dotfiles teď sync vidí.
+
+### v0.1.5
+
+- **`terraform.tfvars` v gitu** — `_gitignore` šablony už `infra/terraform.tfvars` neignoruje. Soubor je projektově malý a stabilní (project_id, region, service_name), patří k repu. Existující projekty: `pnpm sync:apply` přepíše `.gitignore`, pak `git add infra/terraform.tfvars && git commit`.
+
+### v0.1.4
+
+- **Terraform tfstate v GCS** — `template/infra/main.tf` má `backend "gcs"` blok s bucketem `<gcp-project>-tfstate` a prefixem `docs-web`. Bootstrap bucketu je jednorázový krok přes `gcloud storage buckets create` před prvním `terraform init` (viz `template/README.md`). Pro existující projekty: bucket vytvořit, doplnit backend block, `terraform init -migrate-state` a smazat lokální `terraform.tfstate*` z gitu.
+
+### v0.1.3
+
+- **Scaffolder — `--source=git` jako default.** Volby `--source=npm` a `--source=workspace` odstraněny (npm publish není v plánu). Validní hodnoty: `git` | `file` (`--dev` shortcut zůstává).                                                                                                                   
+- **Auth pro `nginx-auth`** — `BASIC_AUTH_USER` / `BASIC_AUTH_PASS` se drží v top-level `variables:` bloku `.gitlab-ci.yml` (ne v GitLab CI/CD Variables). Šablona má prázdné placeholdery; CI je conditional propustí do `docker build` jen když nejsou prázdné.                                         
+- **README** — sekce "Volby scaffolderu" sjednocena do jedné tabulky s popisem všech voleb (včetně runtime variant pro `--server`). Nové sekce: "Auth pro `nginx-auth`", "Push do GitLabu" (push-to-create flow), "Přepnutí existujícího projektu z `nginx` na `nginx-auth`".                                    
+
+### v0.1.2
+
+- **Nové CLI subcommandy** — `gen-diagrams`, `gen-wireframes`, `replace-wireframes` (porty z `lapa_ana/scripts`). Skripty zapisují do `<cwd>/docs/public/images/...` resp. čtou `<cwd>/docs/v1/index.md`.
+- **Build podporuje `.cjs`** — `scripts/build.mjs` kopíruje `.cjs` soubory ze `src/` do `dist/`.
+- **Šablona — `.prettierignore`** — nově obsahuje `pnpm-lock.yaml` a další generované soubory; `format:check` jinak řve na lockfile. Soubor je v `TRACKED_FILES` v `sync-template`, takže existující projekty si ho stáhnou přes `ana-docs sync --apply`.
+
+### v0.1.1
+
+- **CI/Docker fixy v šabloně** — `pnpm install` v Docker builderu teď funguje s `git+ssh` závislostmi: token se předává přes `--build-arg GITLAB_CI_TOKEN`, uvnitř builderu se přepíše SSH URL na HTTPS s `gitlab-ci-token` a `/root/.gitconfig` se po install smaže (token nezůstane v image layerech). Builder image dostal `ca-certificates`, jinak HTTPS clone padá na `server certificate verification failed`.
+- **CI shell** — `📦 install` job má `git config insteadOf` v `before_script`, takže pnpm git fetch funguje i mimo Dockerfile.
+- **Prettier** — šablona ignoruje `.pnpm-store/`, jinak `format:check` řve na obsah pnpm cache v CI.
+- **TypeScript** — šablona obsahuje `docs/.vitepress/theme/shims.d.ts` s `declare module "*.css";`, jinak `tsc` padá na `TS2882: Cannot find module ... ./custom.css` při `module: NodeNext`.
+- **Předpoklad pro CI**: ve zdrojovém repu (`techfides/tf-analysis/ana-docs`) musí být v Settings → CI/CD → Token Access povolený consumer projekt — `CI_JOB_TOKEN` jinak nemá oprávnění klonovat.
+
+### v0.1.0
+
+- Initial release.

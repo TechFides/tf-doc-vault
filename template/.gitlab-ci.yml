@@ -2,6 +2,10 @@ image: node:22
 
 variables:
   PNPM_STORE: "$CI_PROJECT_DIR/.pnpm-store"
+  # Basic auth pro runtime `nginx-auth` (jinak nech prázdné).
+  # Není to tajný údaj — přístup do repa = přístup do aplikace.
+  BASIC_AUTH_USER: "__BASIC_AUTH_USER__"
+  BASIC_AUTH_PASS: "__BASIC_AUTH_PASS__"
 
 stages:
   - install
@@ -21,6 +25,8 @@ stages:
     - when: never
   before_script:
     - corepack enable
+    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "ssh://git@gitlab.com/"
+    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"
   script:
     - pnpm config set store-dir $PNPM_STORE
     - pnpm install --frozen-lockfile
@@ -131,7 +137,7 @@ stages:
     - export IMAGE="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/${SERVICE_NAME:-docs-web}/${SERVICE_NAME:-docs-web}"
     - export DATE_TAG=$(date -u -d "$(echo "$CI_COMMIT_TIMESTAMP" | cut -d+ -f1 | sed 's/T/ /')" +"%Y%m%d-%H%M")
     # Build args fed into the multi-stage Dockerfile (SERVER_TYPE picks runtime).
-    - export BUILD_ARGS="--build-arg SERVER_TYPE=__SERVER_TYPE__"
+    - export BUILD_ARGS="--build-arg SERVER_TYPE=__SERVER_TYPE__ --build-arg GITLAB_CI_TOKEN=$CI_JOB_TOKEN"
     - if [ -n "$BASIC_AUTH_USER" ]; then BUILD_ARGS="$BUILD_ARGS --build-arg BASIC_AUTH_USER=$BASIC_AUTH_USER"; fi
     - if [ -n "$BASIC_AUTH_PASS" ]; then BUILD_ARGS="$BUILD_ARGS --build-arg BASIC_AUTH_PASS=$BASIC_AUTH_PASS"; fi
   tags:

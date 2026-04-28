@@ -16,7 +16,7 @@ const PKG = path.resolve(__dirname, "..");
 const SRC = path.join(PKG, "src");
 const DIST = path.join(PKG, "dist");
 
-const STATIC_EXTENSIONS = new Set([".vue", ".css", ".json", ".ico", ".png", ".svg", ".jpg", ".webp"]);
+const STATIC_EXTENSIONS = new Set([".vue", ".css", ".json", ".ico", ".png", ".svg", ".jpg", ".webp", ".cjs"]);
 const WATCH = process.argv.includes("--watch");
 
 function rmrf(p) {
