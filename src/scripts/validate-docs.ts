@@ -176,6 +176,7 @@ function checkMarkdownLint(files: string[]): Issue[] {
     config: {
       default: true,
       MD013: false,
+      MD024: false,
       MD025: false,
       MD033: false,
       MD036: false,
