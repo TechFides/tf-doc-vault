@@ -131,7 +131,7 @@ stages:
       interruptible: true
     - when: never
   before_script:
-    - apt-get update -qq && apt-get install -y -qq --no-install-recommends docker.io netcat-openbsd
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends docker-cli netcat-openbsd
     - echo "$GCP_SA_KEY" | gcloud auth activate-service-account --key-file=-
     - gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev --quiet
     - export IMAGE="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/${SERVICE_NAME:-docs-web}/${SERVICE_NAME:-docs-web}"
