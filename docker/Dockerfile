@@ -59,11 +59,14 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends nginx apache2-utils \
  && rm -rf /var/lib/apt/lists/*
 
-# Generate htpasswd from build args. If empty, the build fails — fail fast rather
-# than ship an unauthenticated production image when auth was expected.
-RUN test -n "$BASIC_AUTH_USER" || (echo "BASIC_AUTH_USER must be set" >&2 && exit 1)
-RUN test -n "$BASIC_AUTH_PASS" || (echo "BASIC_AUTH_PASS must be set" >&2 && exit 1)
-RUN htpasswd -bc /etc/nginx/.htpasswd "$BASIC_AUTH_USER" "$BASIC_AUTH_PASS"
+# Generate htpasswd from build args. Pokud nejsou nastavené, vytvoří se prázdný
+# soubor — stage se postaví v pohodě (důležité u legacy builderu, který staví
+# všechny stage), ale runtime auth zablokuje všechny požadavky (fail-secure).
+RUN if [ -n "$BASIC_AUTH_USER" ] && [ -n "$BASIC_AUTH_PASS" ]; then \
+      htpasswd -bc /etc/nginx/.htpasswd "$BASIC_AUTH_USER" "$BASIC_AUTH_PASS"; \
+    else \
+      touch /etc/nginx/.htpasswd; \
+    fi
 
 COPY docker/nginx-auth.conf /etc/nginx/sites-available/default
 COPY --from=builder /app/docs/.vitepress/dist /app/docs/.vitepress/dist
