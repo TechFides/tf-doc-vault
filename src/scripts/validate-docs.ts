@@ -14,7 +14,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { lint as markdownlint } from "markdownlint/sync";
 
-const DOCS_ROOT = path.resolve(process.cwd(), "docs");
+const args = process.argv.slice(2);
+const rootArg =  args.find((a) => a.startsWith("--root="))?.split("=")[1] ?? "docs";
+const root = rootArg ?? "docs";
+const DOCS_ROOT = path.resolve(process.cwd(), root);
 const PUBLIC_ROOT = path.resolve(DOCS_ROOT, "public");
 const REQUIRED_FIELDS = ["title", "status", "updated_at"] as const;
 const VALID_STATUSES = new Set(["published", "draft", "review", "archived"]);
@@ -198,7 +201,7 @@ function checkMarkdownLint(files: string[]): Issue[] {
 }
 
 const files = allMdFiles(DOCS_ROOT);
-console.log(`Kontroluji ${files.length} souborů v docs/\n`);
+console.log(`Kontroluji ${files.length} souborů v ${root}/\n`);
 
 const checks: { name: string; issues: Issue[] }[] = [
   { name: "Frontmatter", issues: checkFrontmatter(files) },

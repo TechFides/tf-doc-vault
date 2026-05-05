@@ -14,13 +14,16 @@ interface Task {
   args: string[];
 }
 
+const rootFlag = process.argv.slice(2).find((a) => a.startsWith("--root="));
+const rootArgs = rootFlag ? [rootFlag] : [];
+
 const tasks: Task[] = [
-  { name: "LF Conversion", command: "ana-docs", args: ["ensure-lf"] },
-  { name: "Normalize", command: "ana-docs", args: ["normalize"] },
+  { name: "LF Conversion", command: "tf-doc-vault", args: ["ensure-lf"] },
+  { name: "Normalize", command: "tf-doc-vault", args: ["normalize", ...rootArgs] },
   { name: "Prettier Fix", command: "prettier", args: ["--write", "."] },
   { name: "Lint Fix", command: "eslint", args: [".", "--fix"] },
   { name: "Typecheck", command: "tsc", args: [] },
-  { name: "Validate", command: "ana-docs", args: ["validate"] },
+  { name: "Validate", command: "tf-doc-vault", args: ["validate", ...rootArgs] },
   { name: "Prettier Check", command: "prettier", args: ["--check", "."] },
   { name: "Lint Check", command: "eslint", args: ["."] },
 ];
