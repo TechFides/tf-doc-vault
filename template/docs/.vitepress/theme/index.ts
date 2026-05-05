@@ -1,4 +1,4 @@
-import { createTheme } from "@techfides/ana-docs/theme";
+import { createTheme } from "@techfides/tf-doc-vault/theme";
 import "./custom.css";
 
 export default createTheme({

@@ -1,4 +1,4 @@
-import { makeConfig } from "@techfides/ana-docs/config";
+import { makeConfig } from "@techfides/tf-doc-vault/config";
 
 export default makeConfig({
   configDir: import.meta.dirname,

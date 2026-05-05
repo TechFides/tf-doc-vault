@@ -182,7 +182,7 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
     // which rejects it with ERR_UNKNOWN_FILE_EXTENSION.
     vite: {
       ssr: {
-        noExternal: ["@techfides/ana-docs"],
+        noExternal: ["@techfides/tf-doc-vault"],
       },
     },
     ...opts.override,

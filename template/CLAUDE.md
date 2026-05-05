@@ -2,7 +2,7 @@
 
 ## O projektu
 
-Repozitář **__PROJECT__** slouží k tvorbě byznys, funkčních a technických specifikací SW projektu __PROJECT__. Dokumentace je psána v češtině, verzovaná v Gitu a publikovaná jako webový portál (VitePress) přes sdílený tooling `@techfides/ana-docs`.
+Repozitář **__PROJECT__** slouží k tvorbě byznys, funkčních a technických specifikací SW projektu __PROJECT__. Dokumentace je psána v češtině, verzovaná v Gitu a publikovaná jako webový portál (VitePress) přes sdílený tooling `@techfides/tf-doc-vault`.
 
 Primární uživatel tohoto repozitáře je **SW analytik** — nepíše produkční kód, ale vytváří specifikační dokumenty v `docs/`.
 
@@ -52,7 +52,7 @@ pnpm docs:validate     # frontmatter, broken links, lint
 pnpm docs:normalize    # kanonické řazení frontmatter
 pnpm docs:pdf          # export do PDF (artifacts/docs-full.pdf)
 pnpm fix               # full polish (LF, normalize, format, lint, typecheck, validate)
-pnpm sync              # diff infra/CI/config souborů proti šabloně @techfides/ana-docs
+pnpm sync              # diff infra/CI/config souborů proti šabloně @techfides/tf-doc-vault
 pnpm sync:apply        # přepsat drifted soubory podle šablony
 ```
 
@@ -70,7 +70,7 @@ pnpm docs:build
 - Aktuální datum pro `updated_at` zjisti ze systémového kontextu (`currentDate`).
 - Pokud uživatel nespecifikuje `status`, použij `draft`.
 - Neupravuj soubory mimo `docs/`, pokud tě uživatel explicitně nepožádá.
-- Neupravuj `.vitepress/` konfiguraci bez explicitní žádosti — chování je řízené balíčkem `@techfides/ana-docs` (factory `makeConfig` / `createTheme`).
+- Neupravuj `.vitepress/` konfiguraci bez explicitní žádosti — chování je řízené balíčkem `@techfides/tf-doc-vault` (factory `makeConfig` / `createTheme`).
 - Při přidání nové skupiny nebo sekce přidej i `index.md` s frontmatter.
 - Obrázky sdílené přes více dokumentů patří do `docs/public/images/`; lokální obrázky ulož vedle `.md` souboru.
 
