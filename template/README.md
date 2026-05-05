@@ -1,6 +1,6 @@
 # __PROJECT__ — dokumentační portál
 
-Dokumentace projektu **__PROJECT__** generovaná přes VitePress + sdílený tooling [`@techfides/ana-docs`](https://gitlab.com/techfides/tf-analysis/ana-docs).
+Dokumentace projektu **__PROJECT__** generovaná přes VitePress + sdílený tooling [`@techfides/tf-doc-vault`](https://github.com/techfides/tf-doc-vault).
 
 ## Lokálně
 
@@ -17,7 +17,7 @@ pnpm docs:validate     # frontmatter, broken links, lint
 pnpm docs:normalize    # kanonické řazení frontmatter
 pnpm docs:pdf          # export do artifacts/docs-full.pdf
 pnpm fix               # LF, normalize, format, lint --fix, typecheck, validate
-pnpm sync              # diff infra/CI/config souborů proti šabloně @techfides/ana-docs
+pnpm sync              # diff infra/CI/config souborů proti šabloně @techfides/tf-doc-vault
 pnpm sync:apply        # přepsat drifted soubory podle šablony
 ```
 
