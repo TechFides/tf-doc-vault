@@ -5,7 +5,6 @@
  * Subcommands:
  *   create            scaffold a new analysis docs repo (delegates to bin/create-ana.mjs)
  *   init-tech-docs    initialise tech-docs/ in an existing service repo
- *   import-confluence import pages from Confluence into tech-docs/v1/
  *   print             generate docs/print.md (build-print-page.ts)
  *   export-pdf        render artifacts/docs-full.pdf from /print
  *   pdf               shortcut: print → vitepress build → export-pdf
@@ -18,10 +17,10 @@
  *   gen-wireframes    generate wireframe SVGs
  *   replace-wireframes replace ASCII wireframe code blocks in docs/v1/index.md with SVG image refs
  *
- * All scripts (except `create` and `init-tech-docs`) run with cwd = project root.
+ * `create` and `init-tech-docs` are bin scripts in bin/; all others run from dist/scripts/.
  */
 
-import { spawn, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -37,8 +36,6 @@ const COMMANDS = {
   "ensure-lf": "ensure-lf.js",
   fix: "fix.js",
   sync: "sync-template.js",
-  "init-tech-docs": "init-tech-docs.js",
-  "import-confluence": "import-confluence.js",
   "gen-diagrams": "generate-diagrams.cjs",
   "gen-wireframes": "generate-wireframes.cjs",
   "replace-wireframes": "replace-wireframes.cjs",
@@ -71,10 +68,6 @@ Commands:
                         --service-id=<ID>   (required) service identifier, e.g. BAT
                         --project=<name>    project name (default: cwd folder name)
                         --repo=<org/repo>   GitHub repo for edit links (optional)
-  import-confluence   Import pages from Confluence into tech-docs/v1/
-                        --site=<host>             e.g. example.atlassian.net
-                        --root-page-id=<id>       Confluence root page ID
-                        --output=<dir>            output directory (default: ./tech-docs/v1)
   print               Generate docs/print.md from sidebar order
   export-pdf          Render artifacts/docs-full.pdf from the /print page
   pdf                 print → vitepress build docs → export-pdf
@@ -95,8 +88,8 @@ Commands:
   process.exit(exitCode);
 }
 
-function runCreateAna(extraArgs = []) {
-  const binPath = path.join(PKG_ROOT, "bin", "create-ana.mjs");
+function runBinScript(scriptFile, extraArgs = []) {
+  const binPath = path.join(PKG_ROOT, "bin", scriptFile);
   const result = spawnSync(process.execPath, [binPath, ...extraArgs], {
     stdio: "inherit",
   });
@@ -108,7 +101,11 @@ const [, , cmd, ...rest] = process.argv;
 if (!cmd || cmd === "--help" || cmd === "-h") usage(0);
 
 if (cmd === "create") {
-  process.exit(runCreateAna(rest));
+  process.exit(runBinScript("create-ana.mjs", rest));
+}
+
+if (cmd === "init-tech-docs") {
+  process.exit(runBinScript("init-tech-docs.mjs", rest));
 }
 
 if (cmd === "pdf") {

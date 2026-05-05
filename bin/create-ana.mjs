@@ -12,26 +12,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { parseArgs, copyDir, replacePlaceholders } from "./utils.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATE_DIR = path.resolve(__dirname, "..", "template");
-
-function parseArgs(argv) {
-  const args = { positional: [], flags: {} };
-  for (const a of argv) {
-    if (a.startsWith("--")) {
-      const eq = a.indexOf("=");
-      if (eq === -1) {
-        args.flags[a.slice(2)] = true;
-      } else {
-        args.flags[a.slice(2, eq)] = a.slice(eq + 1);
-      }
-    } else {
-      args.positional.push(a);
-    }
-  }
-  return args;
-}
+const PACKAGE_DIR = path.resolve(__dirname, "..");
 
 function usage(exitCode = 0) {
   console.log(`
@@ -43,23 +28,23 @@ Arguments:
 Options:
   --gcp-project=<id>      GCP project ID (filled into terraform.tfvars)
   --server=<type>         nginx | nginx-auth   (default: nginx)
-  --source=<src>          Where the new repo should pull @techfides/ana-docs from:
+  --source=<src>          Where the new repo should pull @techfides/tf-doc-vault from:
                             git        — git+ssh URL pinned to --ref tag (default)
                             file       — file:<path> to local checkout (--dev shortcut)
   --dev                   Shortcut for --source=file. Points to the local
-                            @techfides/ana-docs checkout (this CLI's package).
+                            @techfides/tf-doc-vault checkout (this CLI's package).
                             Use for local development before publishing.
   --file-path=<path>      Override file: target when --source=file or --dev
                             (default: relative path from new repo to this package)
   --ref=<git-ref>         Git tag/branch/SHA to pin to when --source=git (default: v<package version>)
   --git-url=<url>         Override git URL when --source=git
-                            default: git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git
+                            default: git+ssh://git@github.com/techfides/tf-doc-vault.git
   --no-git                Skip git init + first commit
 
 Examples:
   create-ana ajp_ana  --gcp-project=tfsa-ajp --server=nginx
   create-ana lapa_ana --gcp-project=tfsa-lapa --server=nginx-auth
-  create-ana foo_ana  --dev                                    # local dev → file:../ana-docs
+  create-ana foo_ana  --dev                                    # local dev → file:../tf-doc-vault
   create-ana bar_ana  --ref=v0.2.0                             # pin to a specific git tag
 `);
   process.exit(exitCode);
@@ -70,11 +55,9 @@ function packageVersion() {
     const pkgPath = path.resolve(__dirname, "..", "package.json");
     return JSON.parse(fs.readFileSync(pkgPath, "utf-8")).version;
   } catch {
-    return "0.1.8";
+    return "0.1.0";
   }
 }
-
-const PACKAGE_DIR = path.resolve(__dirname, "..");
 
 function resolveDependencyValue(flags, targetDir) {
   // --dev is a shortcut for --source=file. Explicit --source still wins.
@@ -83,7 +66,7 @@ function resolveDependencyValue(flags, targetDir) {
   const ref = flags.ref ?? `v${version}`;
   const gitUrl =
     flags["git-url"] ??
-    "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git";
+    "git+ssh://git@github.com/techfides/tf-doc-vault.git";
 
   switch (source) {
     case "git":
@@ -107,53 +90,6 @@ function consumerName(templateName) {
   if (templateName === "_npmrc") return ".npmrc";
   if (templateName === "_gitignore") return ".gitignore";
   return templateName;
-}
-
-function copyDirRecursive(src, dest) {
-  fs.mkdirSync(dest, { recursive: true });
-  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
-    const s = path.join(src, entry.name);
-    const d = path.join(dest, consumerName(entry.name));
-    if (entry.isDirectory()) {
-      copyDirRecursive(s, d);
-    } else {
-      fs.copyFileSync(s, d);
-    }
-  }
-}
-
-// Binary extensions to skip — everything else is treated as text.
-const BINARY_EXTENSIONS = new Set([
-  ".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico",
-  ".pdf", ".woff", ".woff2", ".ttf", ".otf", ".eot",
-  ".zip", ".tar", ".gz", ".tgz",
-]);
-
-function replacePlaceholders(dir, replacements) {
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      replacePlaceholders(full, replacements);
-      continue;
-    }
-    const ext = path.extname(entry.name).toLowerCase();
-    if (BINARY_EXTENSIONS.has(ext)) continue;
-
-    let content;
-    try {
-      content = fs.readFileSync(full, "utf-8");
-    } catch {
-      continue;
-    }
-    let changed = false;
-    for (const [key, value] of Object.entries(replacements)) {
-      if (content.includes(key)) {
-        content = content.split(key).join(value);
-        changed = true;
-      }
-    }
-    if (changed) fs.writeFileSync(full, content);
-  }
 }
 
 const { positional, flags } = parseArgs(process.argv.slice(2));
@@ -190,7 +126,7 @@ console.log(`  GCP       : ${gcpProject}`);
 console.log(`  server    : ${serverType}`);
 console.log(`  common    : ${vitepressCommonDep}`);
 
-copyDirRecursive(TEMPLATE_DIR, targetDir);
+copyDir(TEMPLATE_DIR, targetDir, { renameEntry: consumerName, exclude: ["tech-docs"] });
 
 replacePlaceholders(targetDir, {
   __PROJECT__: projectName,
@@ -209,7 +145,7 @@ if (!flags["no-git"]) {
   spawnSync("git", ["add", "."], { cwd: targetDir, stdio: "inherit" });
   spawnSync(
     "git",
-    ["commit", "-q", "-m", `Initial scaffold from @techfides/ana-docs`],
+    ["commit", "-q", "-m", `Initial scaffold from @techfides/tf-doc-vault`],
     { cwd: targetDir, stdio: "inherit" }
   );
 }
@@ -217,7 +153,7 @@ if (!flags["no-git"]) {
 const isDevSource = vitepressCommonDep.startsWith("file:");
 const devBootstrap = isDevSource
   ? `
-Pokud je @techfides/ana-docs ještě nezbuildovaný, spusť jednou:
+Pokud je @techfides/tf-doc-vault ještě nezbuildovaný, spusť jednou:
   (cd ${path.relative(targetDir, PACKAGE_DIR) || "."} && pnpm install)
   # → nainstaluje deps a postaví dist/ (přes "prepare" hook)
 `
@@ -234,7 +170,7 @@ Další kroky:
 Deploy:
   cd infra
   terraform init && terraform apply
-  # nastavit GitLab CI/CD variables (GCP_SA_KEY, …) dle outputů terraformu
-  git remote add origin git@gitlab.com:techfides/tf-analysis/${projectName}.git
+  # nastavit CI/CD variables (GCP_SA_KEY, …) dle outputů terraformu
+  git remote add origin git@github.com:techfides/tf-analysis/${projectName}.git
   git push -u origin master
 `);
