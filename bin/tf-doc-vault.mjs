@@ -5,6 +5,7 @@
  * Subcommands:
  *   create            scaffold a new analysis docs repo (delegates to bin/create-ana.mjs)
  *   init-tech-docs    initialise tech-docs/ in an existing service repo
+ *   import-confluence import pages from Confluence into tech-docs/v1/
  *   print             generate docs/print.md (build-print-page.ts)
  *   export-pdf        render artifacts/docs-full.pdf from /print
  *   pdf               shortcut: print → vitepress build → export-pdf
@@ -17,7 +18,7 @@
  *   gen-wireframes    generate wireframe SVGs
  *   replace-wireframes replace ASCII wireframe code blocks in docs/v1/index.md with SVG image refs
  *
- * `create` and `init-tech-docs` are bin scripts in bin/; all others run from dist/scripts/.
+ * `create`, `init-tech-docs` and `import-confluence` are bin scripts in bin/; all others run from dist/scripts/.
  */
 
 import { spawnSync } from "node:child_process";
@@ -68,6 +69,10 @@ Commands:
                         --service-id=<ID>   (required) service identifier, e.g. BAT
                         --project=<name>    project name (default: cwd folder name)
                         --repo=<org/repo>   GitHub repo for edit links (optional)
+  import-confluence   Import pages from Confluence into tech-docs/v1/
+                        --site=<host>             e.g. myorg.atlassian.net
+                        --root-page-id=<id>       Confluence root page ID
+                        --output=<dir>            output directory (default: ./tech-docs/v1)
   print               Generate docs/print.md from sidebar order
   export-pdf          Render artifacts/docs-full.pdf from the /print page
   pdf                 print → vitepress build docs → export-pdf
@@ -106,6 +111,10 @@ if (cmd === "create") {
 
 if (cmd === "init-tech-docs") {
   process.exit(runBinScript("init-tech-docs.mjs", rest));
+}
+
+if (cmd === "import-confluence") {
+  process.exit(runBinScript("import-confluence.mjs", rest));
 }
 
 if (cmd === "pdf") {
