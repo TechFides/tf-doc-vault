@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "VitePress Dev",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
+      "runtimeArgs": ["node_modules\\vitepress\\dist\\node\\cli.js", "dev", "docs"],
+      "port": 5173
+    },
+    {
+      "name": "VitePress Preview",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
+      "runtimeArgs": ["node_modules\\vitepress\\dist\\node\\cli.js", "preview", "docs"],
+      "port": 4173
+    }
+  ]
+}
