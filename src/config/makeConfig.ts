@@ -146,7 +146,9 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
     lang: strings.lang,
     link: `/${v}/`,
     themeConfig: {
-      nav: [...generateNav(docsRoot, v), versionDropdown(v)],
+      nav: versions.length > 1
+        ? [...generateNav(docsRoot, v), versionDropdown(v)]
+        : generateNav(docsRoot, v),
     },
   });
 
@@ -163,13 +165,9 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
     locales,
     themeConfig: {
       logoLink: "/",
-      nav: [
-        {
-          text: "Verze",
-          activeMatch: "^/(v\\d+)/",
-          items: versions.map((ver) => ({ text: ver, link: `/${ver}/` })),
-        },
-      ],
+      nav: versions.length > 1
+        ? [{ text: "Verze", activeMatch: "^/(v\\d+)/", items: versions.map((ver) => ({ text: ver, link: `/${ver}/` })) }]
+        : [],
       sidebar: generateSidebar(docsRoot),
       search: { provider: "local" },
       outline: { label: strings.searchLabel, level: [2, 3] },
