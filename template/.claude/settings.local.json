@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "PowerShell($bytes = [System.IO.File]::ReadAllBytes\\('C:\\\\Users\\\\techfides2125\\\\Desktop\\\\Analýzy\\\\Inited\\\\Dokumentace_icnq_ana\\\\icnq_ana\\\\docs\\\\v1\\\\functional\\\\zakladni-prehled\\\\overview.md'\\); $first10 = $bytes[0..9]; $first10 | ForEach-Object { '{0:X2}' -f $_ })"
+    ]
+  }
+}
