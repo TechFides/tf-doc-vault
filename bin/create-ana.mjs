@@ -126,7 +126,7 @@ console.log(`  GCP       : ${gcpProject}`);
 console.log(`  server    : ${serverType}`);
 console.log(`  common    : ${vitepressCommonDep}`);
 
-copyDir(TEMPLATE_DIR, targetDir, { renameEntry: consumerName, exclude: ["tech-docs"] });
+copyDir(TEMPLATE_DIR, targetDir, { renameEntry: consumerName });
 
 replacePlaceholders(targetDir, {
   __PROJECT__: projectName,

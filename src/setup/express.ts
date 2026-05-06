@@ -7,7 +7,8 @@ export interface SetupTechDocsOptions {
   /** Absolute path to the built VitePress dist directory. Default: `<cwd>/tech-docs/.vitepress/dist`. */
   distDir?: string;
   auth?: {
-    username: string;
+    /** Basic-auth username. Default: `"docs"`. */
+    username?: string;
     password: string;
   };
   /** Custom logger. Default: `console.warn` with the [tech-docs] prefix. */
@@ -42,7 +43,7 @@ export async function createTechDocsHandler(
   const { default: express } = await import("express");
   const router = express.Router();
 
-  const { username, password } = opts.auth;
+  const { username = "docs", password } = opts.auth;
   const expected = Buffer.from(`${username}:${password}`);
 
   router.use((req, res, next) => {

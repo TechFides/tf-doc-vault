@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 import { parseArgs, copyDir, replacePlaceholders } from "./utils.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const TEMPLATE_DIR = path.resolve(__dirname, "..", "template", "tech-docs");
+const TEMPLATE_DIR = path.resolve(__dirname, "..", "template-tech-docs");
 
 function usage(exitCode = 0) {
   console.log(`
@@ -113,7 +113,9 @@ console.log();
 
 const { copied, skipped } = copyDir(TEMPLATE_DIR, outputDir, {
   idempotent: true,
-  exclude: ["docs"],
+  // config.ts → config.mts: forces esbuild to treat the file as ESM so it can
+  // import from @techfides/tf-doc-vault which is an ESM-only package.
+  renameEntry: (name) => (name === "config.ts" ? "config.mts" : name),
 });
 console.log(
   `  zkopírováno: ${copied} souborů, přeskočeno: ${skipped} (již existují)`,
@@ -136,7 +138,7 @@ console.log(`
        pnpm install && pnpm docs:dev
 
   2) Přidej docs-build stage do Dockerfile:
-       viz node_modules/@techfides/tf-doc-vault/docker/docs-build-stage.md
+       viz /tech-docs/docs-build-stage.md
 
   3) Zavolej setupTechDocs() v main.ts (NestJS):
        import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
