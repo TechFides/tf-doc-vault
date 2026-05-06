@@ -36,7 +36,7 @@ export async function createTechDocsHandler(
   }
 
   const mountFolder =
-    (opts.basePath ?? "/tech-docs").replace(/^\/+/, "") || "tech-docs";
+    (opts.basePath ?? "/tech-docs").replace(/^\/+/, "");
   const distDir =
     opts.distDir ?? path.resolve(process.cwd(), `${mountFolder}/.vitepress/dist`);
 
