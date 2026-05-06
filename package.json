@@ -22,6 +22,15 @@
   "publishConfig": {
     "access": "public"
   },
+  "typesVersions": {
+    "*": {
+      "config": ["./dist/config/index.d.ts"],
+      "sidebar": ["./dist/sidebar/index.d.ts"],
+      "theme": ["./dist/theme/index.d.ts"],
+      "setup/express": ["./dist/setup/express.d.ts"],
+      "setup/nest": ["./dist/setup/nest.d.ts"]
+    }
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
