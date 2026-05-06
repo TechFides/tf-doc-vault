@@ -10,9 +10,10 @@ export default makeConfig({
   //   domain: "docs-web.example.com",
   // },
   //
-  // Volitelné: Edit link na GitLabu
+  // Volitelné: Edit link na GitHubu
   // editLink: {
-  //   repo: "techfides/tf-analysis/__PROJECT__",
+  //   repo: "__REPO__",
   //   branch: "master",
+  //   host: "https://github.com",
   // },
 });

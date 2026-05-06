@@ -1,7 +1,7 @@
 ---
 title: Technická specifikace
 status: draft
-updated_at: 2026-04-27
+updated_at: __DATE__
 ---
 
 # Technická specifikace
@@ -18,4 +18,4 @@ _(doplnit)_
 
 ## Deployment
 
-Dokumentace se nasazuje jako Cloud Run služba postavená přes `@techfides/tf-doc-vault`. Detaily v `infra/`.
+_(doplnit)_

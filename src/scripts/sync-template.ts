@@ -3,13 +3,13 @@
  *
  * Compare a consumer repo's "infrastructure" files (Dockerfile, CI, configs,
  * Terraform, …) against the bundled `template/` baseline and report drift.
- * Useful after upgrading @techfides/ana-docs to pull in fixes that ship in the
+ * Useful after upgrading @techfides/tf-doc-vault to pull in fixes that ship in the
  * template.
  *
  * Usage:
- *   ana-docs sync                    show unified diff per drifted file
- *   ana-docs sync --apply            overwrite consumer files with rendered template
- *   ana-docs sync --files=a,b,c      restrict to specific paths
+ *   tf-doc-vault sync                    show unified diff per drifted file
+ *   tf-doc-vault sync --apply            overwrite consumer files with rendered template
+ *   tf-doc-vault sync --files=a,b,c      restrict to specific paths
  *
  * Placeholders (`__PROJECT__`, `__PROJECT_DASHED__`, `__GCP_PROJECT__`,
  * `__SERVER_TYPE__`, `__VITEPRESS_COMMON_DEP__`) are auto-detected from the
@@ -85,7 +85,7 @@ function detectPlaceholders(): Record<string, string> {
     if (m?.[1]) serverType = m[1];
 
     const deps = (pkg.dependencies ?? {}) as Record<string, string>;
-    if (deps["@techfides/ana-docs"]) depValue = deps["@techfides/ana-docs"]!;
+    if (deps["@techfides/tf-doc-vault"]) depValue = deps["@techfides/tf-doc-vault"]!;
   }
 
   let gcpProject = `tfsa-${dashed}`;
@@ -195,7 +195,7 @@ const flags = parseFlags(process.argv.slice(2));
 const placeholders = detectPlaceholders();
 const tracked = flags.files ?? TRACKED_FILES;
 
-console.log(`Porovnávám ${tracked.length} souborů proti šabloně @techfides/ana-docs.`);
+console.log(`Porovnávám ${tracked.length} souborů proti šabloně @techfides/tf-doc-vault.`);
 console.log(`  cwd      : ${PROJECT_ROOT}`);
 console.log(`  template : ${TEMPLATE_DIR}`);
 console.log(`  detected : ${JSON.stringify(placeholders)}\n`);
@@ -239,6 +239,6 @@ if (total === 0) {
   console.log(`✓ aplikováno: ${drifted} drift + ${missing} missing → vyřešeno`);
 } else {
   console.log(`✗ ${drifted} drift, ${missing} missing, ${okCount} ok`);
-  console.log(`  Pro aplikaci spusť: ana-docs sync --apply`);
+  console.log(`  Pro aplikaci spusť: tf-doc-vault sync --apply`);
   process.exit(1);
 }

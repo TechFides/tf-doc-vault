@@ -1,6 +1,6 @@
-# @techfides/ana-docs
+# @techfides/tf-doc-vault
 
-Sdílený VitePress tooling pro TFSA analýzové dokumentace.
+Sdílený VitePress tooling pro TFSA dokumentace — analytické `*_ana` repos i technická dokumentace přímo v service repu.
 
 Cíl: nasadit nové analýzové repo do 5 minut. Vyřešit jednou — sdílet napříč všemi `*_ana` repos.
 
@@ -9,9 +9,11 @@ Cíl: nasadit nové analýzové repo do 5 minut. Vyřešit jednou — sdílet na
 - **`config`** — factory `makeConfig()` postaví celou VitePress konfiguraci (locales, nav, sidebar, lokalizace, mermaid, volitelně analytics + editLink).
 - **`theme`** — `createTheme()` vrací VitePress theme se sdílenými komponentami: DocMeta, ImageLightbox, PrintLayout, VersionSwitcher, volitelně WidthToggle.
 - **`sidebar`** — generátor `nav` a `sidebar` z adresářové struktury `docs/<verze>/<sekce>/<skupina>/`.
-- **`scripts`** — `build-print-page`, `export-pdf`, `validate-docs`, `normalize-docs`, `ensure-lf`, `fix`, `sync-template`. Spouštěné přes CLI `ana-docs`.
-- **`bin/ana-docs`** — CLI dispatcher: `create | print | export-pdf | pdf | validate | normalize | ensure-lf | fix | sync`.
-- **`bin/create-ana`** — alias pro `ana-docs create` (přímá invokace scaffolderu).
+- **`scripts`** — `build-print-page`, `export-pdf`, `validate-docs`, `normalize-docs`, `ensure-lf`, `fix`, `sync-template`. Spouštěné přes CLI `tf-doc-vault`.
+- **`setup/express`** — `createTechDocsHandler()`: Express middleware pro servování `tech-docs/` s Basic auth.
+- **`setup/nest`** — `setupTechDocs()`: NestJS wrapper pro mount tech-docs do běžící aplikace.
+- **`bin/tf-doc-vault`** — CLI dispatcher: `create | init-tech-docs | import-confluence | print | export-pdf | pdf | validate | normalize | ensure-lf | fix | sync`.
+- **`bin/create-ana`** — alias pro `tf-doc-vault create` (přímá invokace scaffolderu).
 - **`configs`** — `eslint.config.js`, `prettier.json`, `tsconfig.base.json` k extends.
 - **`infra/terraform`** — reusable modul pro Cloud Run + Artifact Registry + IAM.
 - **`docker`** — multi-stage Dockerfile s `ARG SERVER_TYPE=nginx|nginx-auth` + nginx confs.
@@ -22,7 +24,7 @@ Cíl: nasadit nové analýzové repo do 5 minut. Vyřešit jednou — sdílet na
 `docs/.vitepress/config.ts`:
 
 ```ts
-import { makeConfig } from "@techfides/ana-docs/config";
+import { makeConfig } from "@techfides/tf-doc-vault/config";
 
 export default makeConfig({
   configDir: import.meta.dirname,
@@ -36,7 +38,7 @@ export default makeConfig({
 `docs/.vitepress/theme/index.ts`:
 
 ```ts
-import { createTheme } from "@techfides/ana-docs/theme";
+import { createTheme } from "@techfides/tf-doc-vault/theme";
 import "./custom.css"; // overrides nad base CSS
 
 export default createTheme({ widthToggle: true });
@@ -49,43 +51,38 @@ export default createTheme({ widthToggle: true });
   "scripts": {
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:print": "ana-docs print",
-    "docs:export-pdf": "ana-docs export-pdf",
-    "docs:pdf": "ana-docs pdf",
-    "docs:validate": "ana-docs validate",
-    "docs:normalize": "ana-docs normalize",
-    "docs:lf": "ana-docs ensure-lf",
-    "sync": "ana-docs sync",
-    "sync:apply": "ana-docs sync --apply",
-    "fix": "ana-docs fix"
+    "docs:print": "tf-doc-vault print",
+    "docs:export-pdf": "tf-doc-vault export-pdf",
+    "docs:pdf": "tf-doc-vault pdf",
+    "docs:validate": "tf-doc-vault validate",
+    "docs:normalize": "tf-doc-vault normalize",
+    "docs:lf": "tf-doc-vault ensure-lf",
+    "sync": "tf-doc-vault sync",
+    "sync:apply": "tf-doc-vault sync --apply",
+    "fix": "tf-doc-vault fix"
   },
   "dependencies": {
-    "@techfides/ana-docs": "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.8"
+    "@techfides/tf-doc-vault": "git+ssh://git@github.com/techfides/tf-doc-vault.git#v0.1.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@techfides/ana-docs"]
+    "onlyBuiltDependencies": ["@techfides/tf-doc-vault"]
   }
 }
 ```
 
-`pnpm.onlyBuiltDependencies` je nutný — pnpm 10 jinak odmítne spustit `prepare` hook git balíčku a `dist/` se nepostaví.
+`pnpm.onlyBuiltDependencies` je nutný — pnpm 10 jinak odmítne spustit `prepare` hook git závislosti a `dist/` se nepostaví.
 
-## Založení nového repa
-
-Předpoklad: SSH klíč na GitLabu (`gitlab.com:techfides/tf-analysis/...`).
+## Analytická dokumentace — Založení nového repa
 
 ```bash
-pnpm dlx --allow-build=@techfides/ana-docs \
-  "git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git#v0.1.8" \
-  create moje_analyza \
-  --source=git --ref=v0.1.8 \
+pnpm dlx @techfides/tf-doc-vault create moje_analyza \
   --gcp-project=tfsa-moje-analyza \
   --server=nginx
 ```
 
 Co se stane:
 
-1. `pnpm dlx` stáhne tooling z GitLabu, postaví `dist/` (díky `--allow-build`), spustí `ana-docs create`.
+1. `pnpm dlx` stáhne tooling z GitHubu, postaví `dist/` (díky `prepare` hooku), spustí `tf-doc-vault create`.
 2. Scaffolder zkopíruje `template/` do `./moje_analyza/`, nahradí placeholdery (`__PROJECT__`, `__GCP_PROJECT__`, `__SERVER_TYPE__`, `__VITEPRESS_COMMON_DEP__`).
 3. `git init` + první commit (vypneš přes `--no-git`).
 
@@ -93,7 +90,7 @@ Pak:
 
 ```bash
 cd moje_analyza
-pnpm install            # natáhne peer deps + ana-docs z gitu (prepare hook postaví dist/)
+pnpm install            # natáhne peer deps + tf-doc-vault z gitu (prepare hook postaví dist/)
 pnpm docs:dev           # http://localhost:5173
 ```
 
@@ -113,15 +110,15 @@ Předpoklad: musíš mít v `techfides/tf-analysis` práva `Developer` nebo vyš
 
 ### Volby scaffolderu
 
-`create-ana <project-name> [options]`:
+`tf-doc-vault create <project-name> [options]`:
 
 | Volba | Default | Popis |
 |---|---|---|
 | `--gcp-project=<id>` | `tfsa-<project>` | GCP project ID (jde do `terraform.tfvars`). |
 | `--server=<type>` | `nginx` | Runtime image: `nginx` (statika bez auth) nebo `nginx-auth` (Nginx + Basic auth z `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`). |
-| `--source=<src>` | `git` | `git` → `git+ssh://…/ana-docs.git#<ref>` (produkce, pinováno na tag). `file` → `file:<path>` (lokální vývoj balíčku vedle consumer repa). |
+| `--source=<src>` | `git` | `git` → `git+ssh://…/tf-doc-vault.git#<ref>` (produkce, pinováno na tag). `file` → `file:<path>` (lokální vývoj balíčku vedle consumer repa). |
 | `--ref=<git-ref>` | `v<package version>` | Tag/branch/SHA pro `--source=git`. |
-| `--git-url=<url>` | `git+ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git` | Override git URL pro `--source=git`. |
+| `--git-url=<url>` | `git+ssh://git@github.com/techfides/tf-doc-vault.git` | Override git URL pro `--source=git`. |
 | `--file-path=<path>` | relativní cesta k balíčku | Override `file:` cesty pro `--source=file`. |
 
 ## Auth pro `nginx-auth`
@@ -161,29 +158,75 @@ Rotace hesla = úprava `variables:` + commit + redeploy (htpasswd hash je zapeč
 
 Zpátky na `nginx` = stejné kroky obráceně + vyprázdnit oba `BASIC_AUTH_*`.
 
+## Technická dokumentace v service repu (tech-docs)
+
+Vedle analytických `*_ana` repos podporuje balíček i **tech-docs** use case: VitePress dokumentace žijí přímo v service repu a NestJS aplikace jí vystavuje na `/tech-docs` s Basic auth.
+
+### Inicializace
+
+```bash
+# V kořeni service repa
+pnpm exec tf-doc-vault init-tech-docs \
+  --service-id=BAT \
+  --project=flexifin \
+  --repo=myorg/myrepo       # volitelné — GitHub repo pro edit links
+```
+
+Idempotentně vytvoří `tech-docs/`, doplní `package.json` scripts a `.gitignore`.
+
+### NestJS wiring (`main.ts`)
+
+```ts
+import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
+
+await setupTechDocs(app, {
+  auth: { username: "docs", password: process.env.TECH_DOCS_PASSWORD ?? "" },
+});
+```
+
+Pokud je `auth.password` prázdné nebo `dist/` neexistuje, `setupTechDocs` nic neprovede.
+
+### Dockerfile
+
+Přidej `docs-build` stage — viz [`template-tech-docs/docs-build-stage.md`](docker/docs-build-stage.md).
+
+### Migrace z Confluence
+
+```bash
+export CONFLUENCE_USER_EMAIL=vas@email.cz
+export CONFLUENCE_API_TOKEN=<token>
+
+pnpm exec tf-doc-vault import-confluence \
+  --site=myorg.atlassian.net \
+  --root-page-id=<id> \
+  --output=./tech-docs/v1
+```
+
+Podrobný návod: [`template-tech-docs/import-confluence.md`](template-tech-docs/import-confluence.md).
+
 ## Lokální vývoj balíčku
 
-Pro iteraci na samotném `ana-docs`:
+Pro iteraci na samotném `tf-doc-vault`:
 
 ```bash
 # 1. v balíčku — jednorázově po cloningu
-cd ana-docs
+cd tf-doc-vault
 pnpm install                  # deps + "prepare" hook postaví dist/
 pnpm dev                      # tsc --watch + auto-copy statických assetů (.vue/.css/.json/.ico)
 
 # 2. ve vedlejším aplikačním repu, scaffoldnutém s --dev
 cd ../<něco>_ana
-pnpm install                  # natáhne peer deps a slinkuje file:../ana-docs
+pnpm install                  # natáhne peer deps a slinkuje file:../tf-doc-vault
 pnpm docs:dev                 # vidí změny z dist/ přes Vite HMR
 ```
 
 Aplikační repo s `--dev` deklaruje závislost přes `file:`:
 
 ```json
-"dependencies": { "@techfides/ana-docs": "file:../ana-docs" }
+"dependencies": { "@techfides/tf-doc-vault": "file:../tf-doc-vault" }
 ```
 
-Předpoklad pro `file:` install: oba adresáře leží vedle sebe (relativní cesta `../ana-docs`). Když je jinde, `--file-path=/abs/path` při scaffoldování přepíše.
+Předpoklad pro `file:` install: oba adresáře leží vedle sebe (relativní cesta `../tf-doc-vault`). Když je jinde, `--file-path=/abs/path` při scaffoldování přepíše.
 
 ## Sync šablony do existujícího repa
 
@@ -196,7 +239,17 @@ pnpm sync:apply     # přepíše drifted soubory šablonou (placeholdery se rend
 
 User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfvars) je vyloučen z přepisování.
 
+---
+
 ## Changelog
+
+### v0.1.0 (tf-doc-vault)
+
+- **Přejmenování:** `@techfides/tf-doc-vault` → `@techfides/tf-doc-vault`, CLI `tf-doc-vault` → `tf-doc-vault`. Publikováno veřejně na npmjs.com (GitHub Actions workflow na tag `v*`).
+- **Tech-docs use case:** `init-tech-docs` subcommand, `setupTechDocs()` Express/NestJS middleware, šablona `template/tech-docs/`, Docker fragment [`docker/docs-build-stage.md`](docker/docs-build-stage.md).
+- **`import-confluence`:** import stromů stránek z Confluence (ADF → Markdown, přílohy, inter-page linky).
+- **`--root=<dir>` flag:** `validate`, `normalize` a `fix` podporují volitelný kořenový adresář (default: `docs`).
+- **Version dropdown:** skrytý při jediné verzi dokumentace.
 
 ### v0.1.8
 
@@ -228,7 +281,7 @@ User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfv
 
 - **Nové CLI subcommandy** — `gen-diagrams`, `gen-wireframes`, `replace-wireframes` (porty z `lapa_ana/scripts`). Skripty zapisují do `<cwd>/docs/public/images/...` resp. čtou `<cwd>/docs/v1/index.md`.
 - **Build podporuje `.cjs`** — `scripts/build.mjs` kopíruje `.cjs` soubory ze `src/` do `dist/`.
-- **Šablona — `.prettierignore`** — nově obsahuje `pnpm-lock.yaml` a další generované soubory; `format:check` jinak řve na lockfile. Soubor je v `TRACKED_FILES` v `sync-template`, takže existující projekty si ho stáhnou přes `ana-docs sync --apply`.
+- **Šablona — `.prettierignore`** — nově obsahuje `pnpm-lock.yaml` a další generované soubory; `format:check` jinak řve na lockfile. Soubor je v `TRACKED_FILES` v `sync-template`, takže existující projekty si ho stáhnou přes `tf-doc-vault sync --apply`.
 
 ### v0.1.1
 
@@ -236,7 +289,7 @@ User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfv
 - **CI shell** — `📦 install` job má `git config insteadOf` v `before_script`, takže pnpm git fetch funguje i mimo Dockerfile.
 - **Prettier** — šablona ignoruje `.pnpm-store/`, jinak `format:check` řve na obsah pnpm cache v CI.
 - **TypeScript** — šablona obsahuje `docs/.vitepress/theme/shims.d.ts` s `declare module "*.css";`, jinak `tsc` padá na `TS2882: Cannot find module ... ./custom.css` při `module: NodeNext`.
-- **Předpoklad pro CI**: ve zdrojovém repu (`techfides/tf-analysis/ana-docs`) musí být v Settings → CI/CD → Token Access povolený consumer projekt — `CI_JOB_TOKEN` jinak nemá oprávnění klonovat.
+- **Předpoklad pro CI**: ve zdrojovém repu (`techfides/tf-analysis/tf-doc-vault`) musí být v Settings → CI/CD → Token Access povolený consumer projekt — `CI_JOB_TOKEN` jinak nemá oprávnění klonovat.
 
 ### v0.1.0
 

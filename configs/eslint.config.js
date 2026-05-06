@@ -6,12 +6,12 @@ import prettier from "eslint-config-prettier";
  * Shared ESLint config for TFSA analysis docs repos.
  * Consumers extend this from their own `eslint.config.js`:
  *
- *   import baseConfig from "@techfides/ana-docs/eslint";
+ *   import baseConfig from "@techfides/tf-doc-vault/eslint";
  *   export default baseConfig;
  *
  * Or spread + override:
  *
- *   import baseConfig from "@techfides/ana-docs/eslint";
+ *   import baseConfig from "@techfides/tf-doc-vault/eslint";
  *   export default [...baseConfig, { rules: { ... } }];
  */
 export default [

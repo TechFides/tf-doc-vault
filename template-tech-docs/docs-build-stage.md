@@ -1,0 +1,38 @@
+# Tech-docs build stage pro service Dockerfile
+
+Přidej před production stage:
+
+```dockerfile
+###################
+# TECH-DOCS BUILD
+###################
+
+FROM node:24-alpine AS docs-build
+
+RUN npm install -g pnpm@10
+WORKDIR /usr/src/app
+
+COPY --chown=node:node pnpm-lock.yaml package.json ./
+
+# tf-doc-vault je veřejný npm balíček, žádný auth není potřeba
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+COPY --chown=node:node ../tech-docs ./tech-docs
+
+RUN pnpm exec vitepress build tech-docs
+```
+
+A v production stage:
+
+```dockerfile
+COPY --chown=node:node --from=docs-build \
+  /usr/src/app/tech-docs/.vitepress/dist \
+  ./tech-docs/.vitepress/dist
+```
+
+**Důležité:**
+
+- docs-build stage běží paralelně s app build stage (Buildkit). Úprava
+  `tech-docs/architecture.md` invaliduje jen docs cache, ne app cache.
+- Žádný `GH_NPM_TOKEN` ani `.npmrc` registry override — `@techfides/tf-doc-vault`
+  je veřejně dostupný z npmjs.com.

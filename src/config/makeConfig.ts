@@ -124,6 +124,9 @@ function buildEditLink(editLink: EditLink): { pattern: string; text: string } {
  */
 export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMermaid> {
   const docsRoot = path.resolve(opts.configDir, "..");
+  const folderName = path.basename(docsRoot);
+  const base = `/${folderName}/`;
+
   const versions = getVersions(docsRoot);
   const defaultVersion = versions[0] ?? "v1";
   const strings: Strings = { ...defaultStrings, ...opts.strings };
@@ -135,7 +138,7 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
     items: versions.map((ver) => ({
       text: ver,
       link: `/${ver}/`,
-      activeMatch: `/${ver}/`,
+      activeMatch: `${base}${ver}/`.replace(/\/+/g, "/"),
     })),
   });
 
@@ -146,7 +149,9 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
     lang: strings.lang,
     link: `/${v}/`,
     themeConfig: {
-      nav: [...generateNav(docsRoot, v), versionDropdown(v)],
+      nav: versions.length > 1
+        ? [...generateNav(docsRoot, v), versionDropdown(v)]
+        : generateNav(docsRoot, v),
     },
   });
 
@@ -156,6 +161,7 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
   };
 
   const baseConfig: UserConfig = {
+    base,
     title: strings.title,
     description: strings.description,
     lang: strings.lang,
@@ -163,13 +169,9 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
     locales,
     themeConfig: {
       logoLink: "/",
-      nav: [
-        {
-          text: "Verze",
-          activeMatch: "^/(v\\d+)/",
-          items: versions.map((ver) => ({ text: ver, link: `/${ver}/` })),
-        },
-      ],
+      nav: versions.length > 1
+        ? [{ text: "Verze", activeMatch: `^${base}(v\\d+)/`.replace(/\/+/g, "/"), items: versions.map((ver) => ({ text: ver, link: `/${ver}/` })) }]
+        : [],
       sidebar: generateSidebar(docsRoot),
       search: { provider: "local" },
       outline: { label: strings.searchLabel, level: [2, 3] },
@@ -182,7 +184,7 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
     // which rejects it with ERR_UNKNOWN_FILE_EXTENSION.
     vite: {
       ssr: {
-        noExternal: ["@techfides/ana-docs"],
+        noExternal: ["@techfides/tf-doc-vault"],
       },
     },
     ...opts.override,
