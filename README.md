@@ -188,7 +188,7 @@ Pokud je `auth.password` prázdné nebo `dist/` neexistuje, `setupTechDocs` nic 
 
 ### Dockerfile
 
-Přidej `docs-build` stage — viz [`docker/docs-build-stage.md`](docker/docs-build-stage.md).
+Přidej `docs-build` stage — viz [`template-tech-docs/docs-build-stage.md`](docker/docs-build-stage.md).
 
 ### Migrace z Confluence
 
@@ -202,7 +202,7 @@ pnpm exec tf-doc-vault import-confluence \
   --output=./tech-docs/v1
 ```
 
-Podrobný návod: [`template/import-confluence.md`](template/import-confluence.md).
+Podrobný návod: [`template-tech-docs/import-confluence.md`](template-tech-docs/import-confluence.md).
 
 ## Lokální vývoj balíčku
 

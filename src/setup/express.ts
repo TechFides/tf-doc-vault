@@ -62,7 +62,7 @@ export async function createTechDocsHandler(
     express.static(distDir, { extensions: ["html"], index: "index.html" }),
   );
 
-  router.get("*", (_req, res) => {
+  router.get("*path", (_req, res) => {
     res.sendFile(path.join(distDir, "index.html"));
   });
 
