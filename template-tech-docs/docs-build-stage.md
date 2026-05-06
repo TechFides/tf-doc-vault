@@ -17,7 +17,7 @@ COPY --chown=node:node pnpm-lock.yaml package.json ./
 # tf-doc-vault je veřejný npm balíček, žádný auth není potřeba
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
-COPY --chown=node:node ../tech-docs ./tech-docs
+COPY --chown=node:node tech-docs ./tech-docs
 
 RUN pnpm exec vitepress build tech-docs
 ```

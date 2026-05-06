@@ -17,5 +17,12 @@
     "jsx": "preserve"
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "template", "dist", "src/**/*.vue", "src/**/*.css"]
+  "exclude": [
+    "node_modules",
+    "template",
+    "dist",
+    "src/**/*.vue",
+    "src/**/*.css",
+    "src/setup/**"
+  ]
 }

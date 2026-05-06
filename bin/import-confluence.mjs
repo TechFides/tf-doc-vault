@@ -24,6 +24,25 @@ const adfToMd = require("adf-to-md");
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+/**
+ * Escape bare <Tag> patterns that are not real HTML (e.g. <Epic>, <ServiceName>).
+ * VitePress compiles markdown through Vue, which treats unknown tags as components and
+ * throws "Element is missing end tag" when they are unclosed.
+ * We only escape tags that look like placeholders (PascalCase or ALL_CAPS single word).
+ */
+function escapeBareVueTags(md) {
+  return md.replace(/<([A-Z][A-Za-z0-9_-]*)>/g, "&lt;$1&gt;");
+}
+
+/** Quote a string for YAML only when needed; uses single quotes to avoid escaping. */
+function yamlString(value) {
+  if (/[[\]{}:#*!|>"%@`,]/.test(value) || /^[&]/.test(value) || /^\s|\s$/.test(value)) {
+    // Single-quote: only escape is '' for a literal single quote
+    return `'${value.replace(/'/g, "''")}'`;
+  }
+  return value;
+}
+
 function slugify(title) {
   return title
     .toLowerCase()
@@ -57,27 +76,80 @@ function fetchJson(url, authHeader) {
   });
 }
 
-function downloadBinary(url, destPath, authHeader) {
+function downloadBinary(url, destPath, authHeader, depth = 0) {
+  if (depth > 5) return Promise.reject(new Error(`Too many redirects: ${url}`));
   return new Promise((resolve, reject) => {
-    fs.mkdirSync(path.dirname(destPath), { recursive: true });
-    const file = fs.createWriteStream(destPath);
-    const req = https.get(url, { headers: { Authorization: authHeader } }, (res) => {
-      if (res.statusCode >= 400) {
-        reject(new Error(`HTTP ${res.statusCode} downloading ${url}`));
+    // Confluence attachment download links typically respond with 302 → signed
+    // S3 URL. We must follow Location, but drop the Authorization header on
+    // cross-origin hops so we don't leak the basic-auth token to S3.
+    const headers = depth === 0 ? { Authorization: authHeader } : {};
+    const req = https.get(url, { headers }, (res) => {
+      const status = res.statusCode ?? 0;
+      if (status >= 300 && status < 400 && res.headers.location) {
+        res.resume(); // discard body
+        const next = new URL(res.headers.location, url).toString();
+        const sameOrigin = new URL(next).host === new URL(url).host;
+        const nextAuth = sameOrigin ? authHeader : null;
+        downloadBinary(next, destPath, nextAuth, depth + 1).then(resolve, reject);
         return;
       }
+      if (status >= 400) {
+        reject(new Error(`HTTP ${status} downloading ${url}`));
+        return;
+      }
+      fs.mkdirSync(path.dirname(destPath), { recursive: true });
+      const file = fs.createWriteStream(destPath);
       res.pipe(file);
       file.on("finish", () => { file.close(); resolve(); });
+      file.on("error", reject);
     });
     req.on("error", reject);
   });
 }
 
-function adfToMarkdown(adfValue) {
+function preprocessAdf(adfValue) {
+  if (!adfValue) return null;
   try {
-    return adfToMd.convert(JSON.parse(adfValue)).result;
-  } catch {
-    return "";
+    return JSON.parse(adfValue);
+  } catch (err) {
+    console.warn(`  ⚠ ADF body není validní JSON (${err.message}).`);
+    return null;
+  }
+}
+
+/**
+ * Walk an ADF tree and replace `media` nodes (typically wrapped in
+ * `mediaSingle`/`mediaGroup`) with text-node placeholders that survive the
+ * adf-to-md conversion. The placeholders are post-processed in `writePage()`
+ * once the per-page attachment map is known.
+ *
+ * Confluence's ADF media nodes carry `attrs.id` — a media-platform UUID.
+ * Attachment list entries expose the same UUID as `extensions.fileId`, so the
+ * post-processing step matches by that field.
+ */
+function replaceMediaWithPlaceholders(node, mediaIds) {
+  if (!node || typeof node !== "object") return node;
+  if (Array.isArray(node)) {
+    return node.map((c) => replaceMediaWithPlaceholders(c, mediaIds));
+  }
+  if (node.type === "media" && node.attrs?.id) {
+    mediaIds.push(node.attrs.id);
+    return { type: "text", text: `__MEDIA_PLACEHOLDER_${node.attrs.id}__` };
+  }
+  if (node.content) {
+    return { ...node, content: replaceMediaWithPlaceholders(node.content, mediaIds) };
+  }
+  return node;
+}
+
+function convertAdf(adfRoot, pageTitle) {
+  const mediaIds = [];
+  const processed = replaceMediaWithPlaceholders(adfRoot, mediaIds);
+  try {
+    return { markdown: adfToMd.convert(processed).result, mediaIds };
+  } catch (err) {
+    console.warn(`  ⚠ "${pageTitle}": adf-to-md konverze selhala (${err.message}).`);
+    return { markdown: "", mediaIds: [] };
   }
 }
 
@@ -111,10 +183,13 @@ async function fetchChildren(site, pageId, authHeader) {
 
 async function fetchAttachments(site, pageId, authHeader) {
   try {
-    const url = `https://${site}/wiki/rest/api/content/${pageId}/child/attachment?limit=50`;
+    // expand=extensions surfaces extensions.fileId — the same UUID used by ADF
+    // media nodes in attrs.id, so we can map media → attachment downloads.
+    const url = `https://${site}/wiki/rest/api/content/${pageId}/child/attachment?limit=200&expand=extensions,metadata`;
     const data = await fetchJson(url, authHeader);
     return data.results ?? [];
-  } catch {
+  } catch (err) {
+    console.warn(`  ⚠ Nelze načíst seznam attachmentů pro page ${pageId}: ${err.message}`);
     return [];
   }
 }
@@ -155,7 +230,14 @@ function countNodes(node) {
 
 async function writePage(node, parentPath, isRoot, { site, authHeader, publicDir, pagePathMap }) {
   const adfValue = node.page.body?.atlas_doc_format?.value ?? "";
-  let markdown = adfToMarkdown(adfValue);
+  const adfRoot = preprocessAdf(adfValue);
+  if (!adfRoot) {
+    console.warn(`  ⚠ "${node.page.title}": prázdné nebo nevalidní ADF tělo.`);
+  }
+  const { markdown: rawMarkdown, mediaIds } = adfRoot
+    ? convertAdf(adfRoot, node.page.title)
+    : { markdown: "", mediaIds: [] };
+  let markdown = rawMarkdown;
 
   // Rewrite Confluence page links to relative MD paths
   markdown = markdown.replace(
@@ -166,8 +248,9 @@ async function writePage(node, parentPath, isRoot, { site, authHeader, publicDir
     },
   );
 
-  // Download image attachments
+  // Download image attachments + build a media-id → filename map
   const attachments = await fetchAttachments(site, node.page.id, authHeader);
+  const mediaToFilename = new Map();
   for (const att of attachments) {
     const downloadLink = att._links?.download;
     if (!downloadLink) continue;
@@ -181,10 +264,33 @@ async function writePage(node, parentPath, isRoot, { site, authHeader, publicDir
       if (!fs.existsSync(destPath)) {
         await downloadBinary(downloadUrl, destPath, authHeader);
       }
+      // Tracked by media UUID (ADF attrs.id) → typically attachment.extensions.fileId
+      const fileId = att.extensions?.fileId;
+      if (fileId) mediaToFilename.set(fileId, filename);
+      // Fallback: also expose by attachment id and title for diagnostics
+      mediaToFilename.set(att.id, filename);
+      // Best-effort: also catch the rare case where adf-to-md emits the raw URL
       markdown = markdown.split(downloadUrl).join(`/images/${filename}`);
-    } catch {
-      console.warn(`  ⚠ Nelze stáhnout přílohu: ${filename}`);
+    } catch (err) {
+      console.warn(`  ⚠ Nelze stáhnout přílohu "${filename}": ${err.message}`);
     }
+  }
+
+  // Post-process media placeholders left by replaceMediaWithPlaceholders()
+  markdown = markdown.replace(/__MEDIA_PLACEHOLDER_([\w-]+)__/g, (_match, mediaId) => {
+    const filename = mediaToFilename.get(mediaId);
+    if (filename) return `![${filename}](/images/${filename})`;
+    console.warn(
+      `  ⚠ "${node.page.title}": neznámé media id ${mediaId} (žádný odpovídající attachment).`,
+    );
+    return "";
+  });
+  // Surface any media references that we collected from ADF but didn't resolve
+  const unresolved = mediaIds.filter((id) => !mediaToFilename.has(id));
+  if (unresolved.length > 0) {
+    console.warn(
+      `  ⚠ "${node.page.title}": ${unresolved.length} obrázek(ů) bez attachmentu.`,
+    );
   }
 
   const filePath = isRoot
@@ -200,7 +306,7 @@ async function writePage(node, parentPath, isRoot, { site, authHeader, publicDir
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(
     filePath,
-    `---\ntitle: ${node.page.title}\nstatus: ${status}\nupdated_at: ${updatedAt}\n---\n\n${markdown.trimStart()}\n`,
+    `---\ntitle: ${yamlString(node.page.title.replace(/^\[.*?\]\s*/, ""))}\nstatus: ${status}\nupdated_at: ${updatedAt}\n---\n\n${escapeBareVueTags(markdown.trimStart())}\n`,
     "utf-8",
   );
 

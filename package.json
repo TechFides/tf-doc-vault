@@ -24,11 +24,21 @@
   },
   "typesVersions": {
     "*": {
-      "config": ["./dist/config/index.d.ts"],
-      "sidebar": ["./dist/sidebar/index.d.ts"],
-      "theme": ["./dist/theme/index.d.ts"],
-      "setup/express": ["./dist/setup/express.d.ts"],
-      "setup/nest": ["./dist/setup/nest.d.ts"]
+      "config": [
+        "./dist/config/index.d.ts"
+      ],
+      "sidebar": [
+        "./dist/sidebar/index.d.ts"
+      ],
+      "theme": [
+        "./dist/theme/index.d.ts"
+      ],
+      "setup/express": [
+        "./dist/setup/express.d.ts"
+      ],
+      "setup/nest": [
+        "./dist/setup/nest.d.ts"
+      ]
     }
   },
   "exports": {
@@ -53,11 +63,13 @@
     "./scripts/*": "./dist/scripts/*.js",
     "./setup/express": {
       "types": "./dist/setup/express.d.ts",
-      "default": "./dist/setup/express.js"
+      "import": "./dist/setup/express.mjs",
+      "require": "./dist/setup/express.cjs"
     },
     "./setup/nest": {
       "types": "./dist/setup/nest.d.ts",
-      "default": "./dist/setup/nest.js"
+      "import": "./dist/setup/nest.mjs",
+      "require": "./dist/setup/nest.cjs"
     },
     "./eslint": "./configs/eslint.config.js",
     "./prettier": "./configs/prettier.json",
@@ -78,10 +90,16 @@
     "build": "node scripts/build.mjs",
     "dev": "node scripts/build.mjs --watch",
     "prepare": "node scripts/build.mjs",
+    "prepack": "node scripts/build.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src bin",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "changelog": "changelogen --release",
+    "release": "pnpm build && pnpm publish --access=public",
+    "version:major": "pnpm version major",
+    "version:minor": "pnpm version minor",
+    "version:patch": "pnpm version patch"
   },
   "peerDependencies": {
     "@nestjs/common": "^10 || ^11",
@@ -110,12 +128,14 @@
     "@types/node": "^25.6.0",
     "@typescript-eslint/eslint-plugin": "^8.59.0",
     "@typescript-eslint/parser": "^8.59.0",
+    "changelogen": "^0.6.2",
     "eslint": "^10.2.1",
     "eslint-config-prettier": "^10.1.8",
     "mermaid": "^11.14.0",
     "prettier": "^3.8.3",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
+    "unbuild": "^3.6.1",
     "vitepress": "^1.6.4",
     "vitepress-plugin-mermaid": "^2.0.17",
     "vue": "^3.5.33"

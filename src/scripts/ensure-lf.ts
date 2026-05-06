@@ -8,7 +8,9 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const ROOT = process.cwd();
+const args = process.argv.slice(2);
+const rootArg = args.find((a) => a.startsWith("--root="))?.split("=")[1];
+const ROOT = path.resolve(process.cwd(), rootArg ?? ".");
 const EXTENSIONS = new Set([
   ".md",
   ".ts",

@@ -66,6 +66,15 @@ export async function createTechDocsHandler(
     res.status(401).end("Authentication required");
   });
 
+  // VitePress relies on inline scripts and styles (window.__VP_SITE_DATA__ etc.).
+  // Strip any upstream CSP headers (e.g. from helmet) for this sub-path only.
+  // The Basic-auth gate above already protects the route.
+  router.use((_req, res, next) => {
+    res.removeHeader("content-security-policy");
+    res.removeHeader("content-security-policy-report-only");
+    next();
+  });
+
   router.use(
     express.static(distDir, { extensions: ["html"], index: "index.html" }),
   );

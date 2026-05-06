@@ -188,7 +188,7 @@ Pokud je `auth.password` prázdné nebo `dist/` neexistuje, `setupTechDocs` nic 
 
 ### Dockerfile
 
-Přidej `docs-build` stage — viz [`template-tech-docs/docs-build-stage.md`](docker/docs-build-stage.md).
+Přidej `docs-build` stage — viz [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
 
 ### Migrace z Confluence
 
@@ -245,8 +245,8 @@ User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfv
 
 ### v0.1.0 (tf-doc-vault)
 
-- **Přejmenování:** `@techfides/tf-doc-vault` → `@techfides/tf-doc-vault`, CLI `tf-doc-vault` → `tf-doc-vault`. Publikováno veřejně na npmjs.com (GitHub Actions workflow na tag `v*`).
-- **Tech-docs use case:** `init-tech-docs` subcommand, `setupTechDocs()` Express/NestJS middleware, šablona `template/tech-docs/`, Docker fragment [`docker/docs-build-stage.md`](docker/docs-build-stage.md).
+- **Přejmenování:** `@techfides/ana-docs` → `@techfides/tf-doc-vault`, CLI `ana-docs` → `tf-doc-vault`. Publikováno veřejně na npmjs.com (GitHub Actions workflow na tag `v*`).
+- **Tech-docs use case:** `init-tech-docs` subcommand, `setupTechDocs()` Express/NestJS middleware, šablona `template-tech-docs/`, Docker fragment [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
 - **`import-confluence`:** import stromů stránek z Confluence (ADF → Markdown, přílohy, inter-page linky).
 - **`--root=<dir>` flag:** `validate`, `normalize` a `fix` podporují volitelný kořenový adresář (default: `docs`).
 - **Version dropdown:** skrytý při jediné verzi dokumentace.

@@ -18,7 +18,7 @@ const rootFlag = process.argv.slice(2).find((a) => a.startsWith("--root="));
 const rootArgs = rootFlag ? [rootFlag] : [];
 
 const tasks: Task[] = [
-  { name: "LF Conversion", command: "tf-doc-vault", args: ["ensure-lf"] },
+  { name: "LF Conversion", command: "tf-doc-vault", args: ["ensure-lf", ...rootArgs] },
   { name: "Normalize", command: "tf-doc-vault", args: ["normalize", ...rootArgs] },
   { name: "Prettier Fix", command: "prettier", args: ["--write", "."] },
   { name: "Lint Fix", command: "eslint", args: [".", "--fix"] },
