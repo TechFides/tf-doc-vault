@@ -1,5 +1,13 @@
-import type { INestApplication } from "@nestjs/common";
 import { createTechDocsHandler, type SetupTechDocsOptions } from "./express.js";
+
+/**
+ * Minimal structural interface — avoids importing INestApplication from
+ * @nestjs/common so consumers are never affected by version mismatches.
+ * Any real INestApplication satisfies this structurally.
+ */
+interface NestApp {
+  getHttpAdapter(): { use(path: string, handler: unknown): void };
+}
 
 /**
  * Mount technical documentation alongside the API.
@@ -12,32 +20,35 @@ import { createTechDocsHandler, type SetupTechDocsOptions } from "./express.js";
  *   });
  */
 export async function setupTechDocs(
-  app: INestApplication,
+  app: NestApp,
   opts?: SetupTechDocsOptions,
 ): Promise<void>;
 export async function setupTechDocs(
   basePath: string,
-  app: INestApplication,
+  app: NestApp,
   opts?: SetupTechDocsOptions,
 ): Promise<void>;
 export async function setupTechDocs(
-  pathOrApp: string | INestApplication,
-  appOrOpts?: INestApplication | SetupTechDocsOptions,
+  pathOrApp: string | NestApp,
+  appOrOpts?: NestApp | SetupTechDocsOptions,
   maybeOpts?: SetupTechDocsOptions,
 ): Promise<void> {
-  let app: INestApplication;
+  let app: NestApp;
   let basePath: string;
   let opts: SetupTechDocsOptions;
 
   if (typeof pathOrApp === "string") {
     basePath = pathOrApp.startsWith("/") ? pathOrApp : `/${pathOrApp}`;
-    app = appOrOpts as INestApplication;
+    app = appOrOpts as NestApp;
     opts = maybeOpts ?? {};
   } else {
-    basePath = '/tech-docs';
+    basePath = "/tech-docs";
     app = pathOrApp;
     opts = (appOrOpts as SetupTechDocsOptions) ?? {};
   }
+
+  // Ensure basePath is passed to createTechDocsHandler to correctly derive distDir
+  opts.basePath = opts.basePath ?? basePath;
 
   const handler = await createTechDocsHandler(opts);
   if (!handler) return;

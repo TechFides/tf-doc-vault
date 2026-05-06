@@ -4,7 +4,13 @@ import { timingSafeEqual } from "node:crypto";
 import type { RequestHandler } from "express";
 
 export interface SetupTechDocsOptions {
-  /** Absolute path to the built VitePress dist directory. Default: `<cwd>/tech-docs/.vitepress/dist`. */
+  /**
+   * Base path where the docs are mounted (e.g., "/tech-docs").
+   * Used to derive default distDir if not provided.
+   * Default: "/tech-docs"
+   */
+  basePath?: string;
+  /** Absolute path to the built VitePress dist directory. Default: `<cwd>/<basePath>/.vitepress/dist`. */
   distDir?: string;
   auth?: {
     /** Basic-auth username. Default: `"docs"`. */
@@ -29,8 +35,10 @@ export async function createTechDocsHandler(
     return null;
   }
 
+  const mountFolder =
+    (opts.basePath ?? "/tech-docs").replace(/^\/+/, "") || "tech-docs";
   const distDir =
-    opts.distDir ?? path.resolve(process.cwd(), "tech-docs/.vitepress/dist");
+    opts.distDir ?? path.resolve(process.cwd(), `${mountFolder}/.vitepress/dist`);
 
   if (
     !fs.existsSync(distDir) ||
@@ -62,7 +70,7 @@ export async function createTechDocsHandler(
     express.static(distDir, { extensions: ["html"], index: "index.html" }),
   );
 
-  router.get("*path", (_req, res) => {
+  router.get(/.*/, (_req, res) => {
     res.sendFile(path.join(distDir, "index.html"));
   });
 
