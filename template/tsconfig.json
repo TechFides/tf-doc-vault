@@ -1,4 +1,4 @@
 {
-  "extends": "@techfides/ana-docs/tsconfig",
+  "extends": "@techfides/tf-doc-vault/tsconfig",
   "include": ["docs/.vitepress/**/*.ts"]
 }

@@ -6,7 +6,7 @@
  *   2. Table of contents
  *   3. All page content in sidebar order, stripped of frontmatter
  *
- * Run from the project root: `ana-docs print`.
+ * Run from the project root: `tf-doc-vault print`.
  */
 
 import fs from "node:fs";

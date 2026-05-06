@@ -15,7 +15,7 @@ import path from "node:path";
 import { lint as markdownlint } from "markdownlint/sync";
 
 const args = process.argv.slice(2);
-const rootArg =  args.find((a) => a.startsWith("--root="))?.split("=")[1] ?? "docs";
+const rootArg =  args.find((a) => a.startsWith("--root="))?.split("=")[1];
 const root = rootArg ?? "docs";
 const DOCS_ROOT = path.resolve(process.cwd(), root);
 const PUBLIC_ROOT = path.resolve(DOCS_ROOT, "public");

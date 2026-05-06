@@ -1,5 +1,5 @@
 # Infrastructure for the docs site — wraps the shared module from
-# @techfides/ana-docs (Cloud Run + Artifact Registry + IAM).
+# @techfides/tf-doc-vault (Cloud Run + Artifact Registry + IAM).
 
 terraform {
   required_version = ">= 1.5"
@@ -17,10 +17,10 @@ terraform {
 }
 
 module "docs" {
-  # Use the version published with the consumed @techfides/ana-docs release.
+  # Use the version published with the consumed @techfides/tf-doc-vault release.
   # Until we publish a stable v1.0.0 you can also reference a pinned commit:
-  # source = "git::ssh://git@gitlab.com/techfides/tf-analysis/ana-docs.git//infra/terraform?ref=v0.1.0"
-  source = "../node_modules/@techfides/ana-docs/infra/terraform"
+  # source = "git::ssh://git@gitlab.com/techfides/tf-analysis/tf-doc-vault.git//infra/terraform?ref=v0.1.0"
+  source = "../node_modules/@techfides/tf-doc-vault/infra/terraform"
 
   project_id    = var.project_id
   region        = var.region

@@ -245,7 +245,7 @@ User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfv
 
 ### v0.1.0 (tf-doc-vault)
 
-- **Přejmenování:** `@techfides/ana-docs` → `@techfides/tf-doc-vault`, CLI `ana-docs` → `tf-doc-vault`. Publikováno veřejně na npmjs.com (GitHub Actions workflow na tag `v*`).
+- **Přejmenování:** `@techfides/tf-doc-vault` → `@techfides/tf-doc-vault`, CLI `tf-doc-vault` → `tf-doc-vault`. Publikováno veřejně na npmjs.com (GitHub Actions workflow na tag `v*`).
 - **Tech-docs use case:** `init-tech-docs` subcommand, `setupTechDocs()` Express/NestJS middleware, šablona `template/tech-docs/`, Docker fragment [`docker/docs-build-stage.md`](docker/docs-build-stage.md).
 - **`import-confluence`:** import stromů stránek z Confluence (ADF → Markdown, přílohy, inter-page linky).
 - **`--root=<dir>` flag:** `validate`, `normalize` a `fix` podporují volitelný kořenový adresář (default: `docs`).
@@ -281,7 +281,7 @@ User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfv
 
 - **Nové CLI subcommandy** — `gen-diagrams`, `gen-wireframes`, `replace-wireframes` (porty z `lapa_ana/scripts`). Skripty zapisují do `<cwd>/docs/public/images/...` resp. čtou `<cwd>/docs/v1/index.md`.
 - **Build podporuje `.cjs`** — `scripts/build.mjs` kopíruje `.cjs` soubory ze `src/` do `dist/`.
-- **Šablona — `.prettierignore`** — nově obsahuje `pnpm-lock.yaml` a další generované soubory; `format:check` jinak řve na lockfile. Soubor je v `TRACKED_FILES` v `sync-template`, takže existující projekty si ho stáhnou přes `ana-docs sync --apply`.
+- **Šablona — `.prettierignore`** — nově obsahuje `pnpm-lock.yaml` a další generované soubory; `format:check` jinak řve na lockfile. Soubor je v `TRACKED_FILES` v `sync-template`, takže existující projekty si ho stáhnou přes `tf-doc-vault sync --apply`.
 
 ### v0.1.1
 
@@ -289,7 +289,7 @@ User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfv
 - **CI shell** — `📦 install` job má `git config insteadOf` v `before_script`, takže pnpm git fetch funguje i mimo Dockerfile.
 - **Prettier** — šablona ignoruje `.pnpm-store/`, jinak `format:check` řve na obsah pnpm cache v CI.
 - **TypeScript** — šablona obsahuje `docs/.vitepress/theme/shims.d.ts` s `declare module "*.css";`, jinak `tsc` padá na `TS2882: Cannot find module ... ./custom.css` při `module: NodeNext`.
-- **Předpoklad pro CI**: ve zdrojovém repu (`techfides/tf-analysis/ana-docs`) musí být v Settings → CI/CD → Token Access povolený consumer projekt — `CI_JOB_TOKEN` jinak nemá oprávnění klonovat.
+- **Předpoklad pro CI**: ve zdrojovém repu (`techfides/tf-analysis/tf-doc-vault`) musí být v Settings → CI/CD → Token Access povolený consumer projekt — `CI_JOB_TOKEN` jinak nemá oprávnění klonovat.
 
 ### v0.1.0
 

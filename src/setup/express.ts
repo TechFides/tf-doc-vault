@@ -6,7 +6,6 @@ import type { RequestHandler } from "express";
 export interface SetupTechDocsOptions {
   /** Absolute path to the built VitePress dist directory. Default: `<cwd>/tech-docs/.vitepress/dist`. */
   distDir?: string;
-  /** URL prefix used when mounting via the two-arg overload `setupTechDocs(app, opts)`. Default: "/tech-docs". */
   auth?: {
     username: string;
     password: string;

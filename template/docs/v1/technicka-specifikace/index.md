@@ -18,4 +18,4 @@ _(doplnit)_
 
 ## Deployment
 
-Dokumentace se nasazuje jako Cloud Run služba postavená přes `@techfides/ana-docs`. Detaily v `infra/`.
+Dokumentace se nasazuje jako Cloud Run služba postavená přes `@techfides/tf-doc-vault`. Detaily v `infra/`.
