@@ -4,6 +4,10 @@
   "description": "Sdílený VitePress tooling pro TFSA dokumentace — config factory, theme komponenty, sidebar generátor, build/export skripty, Express/NestJS tech-docs mount, CI a Terraform modul.",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/techfides/tf-doc-vault.git"
+  },
   "private": false,
   "files": [
     "dist",
@@ -90,7 +94,6 @@
     "build": "node scripts/build.mjs",
     "dev": "node scripts/build.mjs --watch",
     "prepare": "node scripts/build.mjs",
-    "prepack": "node scripts/build.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src bin",
     "format": "prettier --write .",
