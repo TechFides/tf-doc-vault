@@ -327,6 +327,9 @@ async function writePage(
     : { markdown: "", mediaIds: [] };
   let markdown = rawMarkdown;
 
+  // Ensure code fences (``` or ~~~) always start on their own line.
+  markdown = markdown.replace(/([^\n])(```|~~~)/g, "$1\n$2");
+
   markdown = escapeAngleBrackets(markdown);
 
   // Rewrite Confluence page links to VitePress paths (e.g. /v1/page)

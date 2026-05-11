@@ -91,7 +91,7 @@ function buildSidebarItems(dir: string, urlBase: string): DefaultTheme.SidebarIt
     items.push({
       text: fs.existsSync(indexPath) ? extractTitle(indexPath) : sub,
       link: fs.existsSync(indexPath) ? subBase : undefined,
-      collapsed: false,
+      collapsed: true,
       items: buildSidebarItems(subDir, subBase),
     });
   }
