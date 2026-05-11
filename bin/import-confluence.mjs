@@ -25,13 +25,19 @@ const adfToMd = require("adf-to-md");
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /**
- * Escape bare <Tag> patterns that are not real HTML (e.g. <Epic>, <ServiceName>).
- * VitePress compiles markdown through Vue, which treats unknown tags as components and
- * throws "Element is missing end tag" when they are unclosed.
- * We only escape tags that look like placeholders (PascalCase or ALL_CAPS single word).
+ * Escape all `<` and `>` in markdown outside fenced code blocks and inline code spans.
+ * VitePress compiles markdown through Vue, which throws "element is missing end tag"
+ * for any unrecognised `<tag>` in the rendered output.
  */
-function escapeBareVueTags(md) {
-  return md.replace(/<([A-Z][A-Za-z0-9_-]*)>/g, "&lt;$1&gt;");
+
+function escapeAngleBrackets(md) {
+  // Match fenced code blocks, inline code spans, or angle brackets.
+  // Capturing group 1 matches code blocks/spans; if it's missing, we matched an angle bracket.
+  const CODE_OR_BRACKET = /(```[\s\S]*?```|~~~[\s\S]*?~~~|`[^`\n]*`)|[<>]/g;
+
+  return md.replace(CODE_OR_BRACKET, (match, code) => {
+    return code ? code : match === "<" ? "\\<" : "\\>";
+  });
 }
 
 /** Quote a string for YAML only when needed; uses single quotes to avoid escaping. */
@@ -321,6 +327,8 @@ async function writePage(
     : { markdown: "", mediaIds: [] };
   let markdown = rawMarkdown;
 
+  markdown = escapeAngleBrackets(markdown);
+
   // Rewrite Confluence page links to relative MD paths
   markdown = markdown.replace(
     /\[([^\]]+)\]\(https?:\/\/[^/]+\/wiki\/spaces\/[^/]+\/pages\/(\d+)[^)]*\)/g,
@@ -395,7 +403,14 @@ async function writePage(
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(
     filePath,
-    `---\ntitle: ${yamlString(displayTitle)}\nstatus: ${status}\nupdated_at: ${updatedAt}\n---\n\n${escapeBareVueTags(markdown.trimStart())}\n`,
+    `---
+title: ${yamlString(displayTitle)}
+status: ${status}
+updated_at: ${updatedAt}
+---
+
+${markdown.trimStart()}
+`,
     "utf-8",
   );
 
