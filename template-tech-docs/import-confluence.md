@@ -16,24 +16,6 @@ tf-doc-vault import-confluence \
 
 Root page ID najdeš v URL Confluence stránky: `.../pages/**1184333837**/...`
 
-## Doporučená struktura Confluence stromu
-
-Pro nejlepší výsledek organizuj Confluence stránky do tří úrovní:
-
-```
-Root stránka
-  ├── Autentizace a autorizace          # sekce (má potomky)
-  │     ├── Přihlášení                  # list stránka
-  │     └── Odhlášení                   # list stránka
-  └── Architektura                      # sekce (má potomky)
-        ├── Moduly                      # skupina (má vlastní potomky)
-        │     ├── Auth modul
-        │     └── API modul
-        └── Deployment                  # list stránka
-```
-
-Vyhni se listovým stránkám přímo pod root stránkou — ty nemají v sidebaru sekci.
-
 ## Co importer udělá
 
 - Stáhne root stránku a rekurzivně všechny potomky

@@ -72,7 +72,88 @@ export default createTheme({ widthToggle: true });
 
 `pnpm.onlyBuiltDependencies` je nutný — pnpm 10 jinak odmítne spustit `prepare` hook git závislosti a `dist/` se nepostaví.
 
+## Technická dokumentace v service repu (tech-docs)
+
+Balíček podporuje **tech-docs** use case: VitePress dokumentace žijí přímo v service repu a NestJS aplikace jí vystavuje na `/tech-docs` s Basic auth.
+
+### Inicializace
+
+```bash
+# V kořeni service repa
+pnpm exec tf-doc-vault init-tech-docs \
+  --service-id=BAT \        # zkratka service
+  --project=flexifin \      # název projektu
+  --repo=myorg/myrepo       # volitelné — GitHub repo pro edit links
+```
+
+### Použití
+
+Příkaz idempotentně vytvoří `tech-docs/`, doplní `package.json` scripts a `.gitignore`. Po inicializaci následuj tyto kroky:
+
+1. **Nainstaluj závislosti a spusť lokální preview:**
+
+   ```bash
+   npm install
+   npm docs:dev
+   ```
+
+2. **Přidej `docs-build` stage do Dockerfile** — viz [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
+
+3. **Zavolej `setupTechDocs()` v `main.ts`:**
+
+   ```ts
+   import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
+
+   await setupTechDocs("tech-docs", app, {
+     auth: { username: "docs", password: process.env.TECH_DOCS_PASSWORD },
+     basePath: '/tech-docs/',
+   });
+   ```
+
+4. **Nastav `TECH_DOCS_PASSWORD` env proměnnou** (jen dev/staging, ne prod).
+
+5. **Zbuildi dokumentaci a ověř nasazení:**
+
+   ```bash
+   npm docs:build
+   npm run dev   # nebo jak spouštíš aplikaci
+   ```
+
+   Dokumentace bude dostupná na `/tech-docs/` s HTTP Basic auth (**username**: `docs`, **heslo** z `TECH_DOCS_PASSWORD`).
+
+### NestJS wiring (`main.ts`)
+
+```ts
+import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
+
+await setupTechDocs(app, {
+  auth: { username: "docs", password: process.env.TECH_DOCS_PASSWORD ?? "" },
+});
+```
+
+Pokud je `auth.password` prázdné nebo `dist/` neexistuje, `setupTechDocs` nic neprovede.
+
+### Dockerfile
+
+Přidej `docs-build` stage — viz [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
+
+### Migrace z Confluence
+
+```bash
+export CONFLUENCE_USER_EMAIL=vas@email.cz
+export CONFLUENCE_API_TOKEN=<token>
+
+pnpm exec tf-doc-vault import-confluence \
+  --site=myorg.atlassian.net \
+  --root-page-id=<id> \
+  --output=./tech-docs/v1
+```
+
+Podrobný návod: [`template-tech-docs/import-confluence.md`](template-tech-docs/import-confluence.md).
+
 ## Analytická dokumentace — Založení nového repa
+
+Balíček podporuje use case, kdy dokumentace má vystavené vlastní repo.
 
 ```bash
 pnpm dlx @techfides/tf-doc-vault create moje_analyza \
@@ -157,52 +238,6 @@ Rotace hesla = úprava `variables:` + commit + redeploy (htpasswd hash je zapeč
 4. Commit + push → CI postaví nový image, Cloud Run rolne novou revizi.
 
 Zpátky na `nginx` = stejné kroky obráceně + vyprázdnit oba `BASIC_AUTH_*`.
-
-## Technická dokumentace v service repu (tech-docs)
-
-Vedle analytických `*_ana` repos podporuje balíček i **tech-docs** use case: VitePress dokumentace žijí přímo v service repu a NestJS aplikace jí vystavuje na `/tech-docs` s Basic auth.
-
-### Inicializace
-
-```bash
-# V kořeni service repa
-pnpm exec tf-doc-vault init-tech-docs \
-  --service-id=BAT \
-  --project=flexifin \
-  --repo=myorg/myrepo       # volitelné — GitHub repo pro edit links
-```
-
-Idempotentně vytvoří `tech-docs/`, doplní `package.json` scripts a `.gitignore`.
-
-### NestJS wiring (`main.ts`)
-
-```ts
-import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
-
-await setupTechDocs(app, {
-  auth: { username: "docs", password: process.env.TECH_DOCS_PASSWORD ?? "" },
-});
-```
-
-Pokud je `auth.password` prázdné nebo `dist/` neexistuje, `setupTechDocs` nic neprovede.
-
-### Dockerfile
-
-Přidej `docs-build` stage — viz [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
-
-### Migrace z Confluence
-
-```bash
-export CONFLUENCE_USER_EMAIL=vas@email.cz
-export CONFLUENCE_API_TOKEN=<token>
-
-pnpm exec tf-doc-vault import-confluence \
-  --site=myorg.atlassian.net \
-  --root-page-id=<id> \
-  --output=./tech-docs/v1
-```
-
-Podrobný návod: [`template-tech-docs/import-confluence.md`](template-tech-docs/import-confluence.md).
 
 ## Lokální vývoj balíčku
 

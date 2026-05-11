@@ -135,16 +135,26 @@ console.log(`
 ✓ Hotovo. Další kroky:
 
   1) Nainstaluj závislosti a spusť lokální preview:
-       pnpm install && pnpm docs:dev
+       npm install && npm docs:dev
 
   2) Přidej docs-build stage do Dockerfile:
        viz /tech-docs/docs-build-stage.md
 
   3) Zavolej setupTechDocs() v main.ts (NestJS):
        import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
-       await setupTechDocs("tech-docs/docs", app, {
+       await setupTechDocs("tech-docs", app, {
          auth: { username: "docs", password: process.env.TECH_DOCS_PASSWORD },
+         basePath: '/tech-docs/',
        });
 
   4) Nastav TECH_DOCS_PASSWORD env proměnnou (dev/staging pouze, ne prod).
+  
+  5) Zbuildi lokálně dokumentaci:
+      npm run docs:build
+  
+  6) Nastartuj aplikaci (pravděpodobně \`npm run dev\`):
+      Zkontroluj, že na route /tech-docs/ beží dokumentace
+      
+      Username: docs
+      Password: uloženo v env TECH_DOCS_PASSWORD
 `);
