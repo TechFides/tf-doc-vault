@@ -10,11 +10,10 @@ hero:
   tagline: Technická specifikace služby __SERVICE_ID__ projektu __PROJECT__.
   actions:
     - theme: brand
-      text: Otevřít dokumentaci
+      text: Technická specifikace
       link: /v1/
-
-features:
-  - title: Technická specifikace
-    details: Architektura, moduly, integrace, deployment.
-    link: /v1/technicka-specifikace/
 ---
+
+Vítejte v technické dokumentaci služby **__SERVICE_ID__** projektu **__PROJECT__**.
+
+Tato dokumentace je generovaná z markdown zdrojů a verzovaná v Gitu přímo v repozitáři služby.

@@ -1,15 +1,21 @@
 ---
-title: Technická dokumentace __SERVICE_ID__
+title: Technická specifikace
 status: draft
 updated_at: __DATE__
 ---
 
-# Technická dokumentace __SERVICE_ID__
+# Technická specifikace
 
-Vítejte v technické dokumentaci služby **__SERVICE_ID__** projektu **__PROJECT__**.
+Jak je to postavené — architektura, integrace, deployment.
 
-V levém menu najdete sekce:
+## Architektura
 
-- **Technická specifikace** — architektura, moduly, integrace, deployment.
+_(doplnit)_
 
-Tato dokumentace je generovaná z markdown zdrojů a verzovaná v Gitu přímo v repozitáři služby.
+## Integrace
+
+_(doplnit)_
+
+## Deployment
+
+_(doplnit)_
