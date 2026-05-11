@@ -1,6 +1,6 @@
 # Tech-docs build stage pro service Dockerfile
 
-Přidej před production stage:
+Přidej před production stage (některé comandy mohou být redundantní s již existujícími v Dockerfile):
 
 ```dockerfile
 ###################
@@ -9,17 +9,15 @@ Přidej před production stage:
 
 FROM node:24-alpine AS docs-build
 
-RUN npm install -g pnpm@10
 WORKDIR /usr/src/app
 
-COPY --chown=node:node pnpm-lock.yaml package.json ./
+COPY --chown=node:node package-lock.json package.json ./
 
-# tf-doc-vault je veřejný npm balíček, žádný auth není potřeba
-RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN npm ci --ignore-scripts
 
 COPY --chown=node:node tech-docs ./tech-docs
 
-RUN pnpm exec vitepress build tech-docs/docs
+RUN npx vitepress build tech-docs/docs
 ```
 
 A v production stage:

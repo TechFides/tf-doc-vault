@@ -40,7 +40,12 @@ const SCRIPTS_TO_ADD = {
   "docs:dev": "vitepress dev tech-docs/docs",
   "docs:build": "vitepress build tech-docs/docs",
   "docs:validate": "tf-doc-vault validate --root=tech-docs/docs",
+  "docs:normalize": "tf-doc-vault normalize --root=tech-docs/docs",
   "docs:fix": "tf-doc-vault fix --root=tech-docs/docs",
+  "docs:lf": "tf-doc-vault ensure-lf --root=tech-docs/docs",
+  "docs:print": "tf-doc-vault print --root=tech-docs/docs",
+  "docs:export-pdf": "tf-doc-vault export-pdf --root=tech-docs/docs",
+  "docs:import-confluence": "tf-doc-vault import-confluence",
 };
 
 function updatePackageJson(dir) {
