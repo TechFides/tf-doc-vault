@@ -5,6 +5,7 @@ export default makeConfig({
   project: "__PROJECT__",
   // Docs žijí v docs/ uvnitř tech-docs/; base musí odpovídat NestJS mount pointu.
   override: { base: "/tech-docs/" },
+  outlineLevel: [1, 3],
   // Volitelné: Umami analytics
   // analytics: {
   //   provider: "umami",

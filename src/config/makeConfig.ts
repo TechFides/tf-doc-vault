@@ -73,6 +73,9 @@ export interface MakeConfigOptions {
   /** Extra `<head>` tags appended after analytics. */
   head?: HeadConfig[];
 
+  /** Heading levels shown in the right-side outline. Defaults to [2, 3]. */
+  outlineLevel?: [number, number];
+
   /**
    * Override / extend final UserConfig. Merged shallowly on top of the generated config.
    * Use sparingly — most use-cases should be covered by typed options above.
@@ -174,7 +177,7 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
         : [],
       sidebar: generateSidebar(docsRoot),
       search: { provider: "local" },
-      outline: { label: strings.searchLabel, level: [2, 3] },
+      outline: { label: strings.searchLabel, level: opts.outlineLevel ?? [2, 3] },
       docFooter: { prev: strings.footerPrev, next: strings.footerNext },
       lastUpdated: { text: strings.lastUpdatedText },
       ...(opts.editLink && { editLink: buildEditLink(opts.editLink) }),

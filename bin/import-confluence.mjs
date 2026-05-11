@@ -244,7 +244,14 @@ async function buildTree(site, pageId, authHeader) {
   const children = await Promise.all(
     childPages.map((c) => buildTree(site, c.id, authHeader)),
   );
-  return { page, children, slug: slugify(page.title), emoji, cleanTitle };
+  const title = page.title;
+  return {
+    page,
+    children,
+    slug: slugify(title),
+    emoji,
+    cleanTitle: title.replace(/^\[.*?\]\s*/, ""),
+  };
 }
 
 function buildPathMap(node, parentPath, isRoot, map) {
