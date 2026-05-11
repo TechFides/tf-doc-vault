@@ -28,7 +28,7 @@ export interface SetupTechDocsOptions {
 export async function createTechDocsHandler(
   opts: SetupTechDocsOptions = {},
 ): Promise<RequestHandler | null> {
-  const log = opts.logger ?? ((m: string): void => console.warn(`[tech-docs] ${m}`));
+  const log = opts.logger ?? ((m: string): void => console.warn(`[tech-docs] - ${m}`));
 
   if (!opts.auth?.password) {
     log("auth.password not set; tech-docs endpoint disabled");
@@ -82,6 +82,8 @@ export async function createTechDocsHandler(
   router.get(/.*/, (_req, res) => {
     res.sendFile(path.join(distDir, "index.html"));
   });
+
+  log(`docs are running at route /${mountFolder}`);
 
   return router;
 }
