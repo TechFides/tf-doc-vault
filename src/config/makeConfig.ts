@@ -190,6 +190,10 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
         noExternal: ["@techfides/tf-doc-vault"],
       },
     },
+    ignoreDeadLinks: [
+      // ignore all localhost links
+      /^https?:\/\/localhost/,
+    ],
     ...opts.override,
   };
 

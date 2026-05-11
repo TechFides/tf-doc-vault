@@ -36,7 +36,7 @@ function escapeAngleBrackets(md) {
   const CODE_OR_BRACKET = /(```[\s\S]*?```|~~~[\s\S]*?~~~|`[^`\n]*`)|[<>]/g;
 
   return md.replace(CODE_OR_BRACKET, (match, code) => {
-    return code ? code : match === "<" ? "\\<" : "\\>";
+    return !!code ? code : match === "<" ? "\\<" : "\\>";
   });
 }
 
@@ -315,7 +315,7 @@ async function writePage(
   node,
   parentPath,
   isRoot,
-  { site, authHeader, publicDir, pagePathMap },
+  { site, authHeader, publicDir, pagePathMap, docsRoot },
 ) {
   const adfValue = node.page.body?.atlas_doc_format?.value ?? "";
   const adfRoot = preprocessAdf(adfValue);
@@ -329,12 +329,14 @@ async function writePage(
 
   markdown = escapeAngleBrackets(markdown);
 
-  // Rewrite Confluence page links to relative MD paths
+  // Rewrite Confluence page links to VitePress paths (e.g. /v1/page)
   markdown = markdown.replace(
     /\[([^\]]+)\]\(https?:\/\/[^/]+\/wiki\/spaces\/[^/]+\/pages\/(\d+)[^)]*\)/g,
     (match, text, linkedId) => {
-      const target = pagePathMap.get(linkedId);
-      return target ? `[${text}](${target})` : match;
+      const absPath = pagePathMap.get(linkedId);
+      if (!absPath) return match;
+      const relativePath = "/" + path.relative(docsRoot, absPath).replace(/\.md$/, "");
+      return `[${text}](${relativePath})`;
     },
   );
 
@@ -425,6 +427,7 @@ ${markdown.trimStart()}
       authHeader,
       publicDir,
       pagePathMap,
+      docsRoot,
     });
   }
 }
@@ -458,7 +461,8 @@ const outputDir = path.resolve(
   process.cwd(),
   flags.output ?? "tech-docs/docs/v1",
 );
-const publicDir = path.resolve(outputDir, "..", "public", "images");
+const docsRoot = path.resolve(outputDir, "..");
+const publicDir = path.resolve(docsRoot, "public", "images");
 
 const email = process.env["CONFLUENCE_USER_EMAIL"];
 const token = process.env["CONFLUENCE_API_TOKEN"];
@@ -500,6 +504,7 @@ await writePage(tree, outputDir, true, {
   authHeader,
   publicDir,
   pagePathMap,
+  docsRoot,
 });
 
 console.log(
