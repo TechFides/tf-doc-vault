@@ -118,10 +118,13 @@ function preprocessAdf(adfValue) {
 }
 
 /**
- * Walk an ADF tree and replace `media` nodes (typically wrapped in
- * `mediaSingle`/`mediaGroup`) with text-node placeholders that survive the
- * adf-to-md conversion. The placeholders are post-processed in `writePage()`
- * once the per-page attachment map is known.
+ * Walk an ADF tree and replace media container nodes with paragraph placeholders
+ * that survive the adf-to-md conversion.
+ *
+ * `mediaSingle`/`mediaGroup` are replaced at the block level with a `paragraph`
+ * containing a placeholder text node. Replacing only the inner `media` child with
+ * a text node is not sufficient — adf-to-md expects a `media` child inside those
+ * containers and emits nothing when it finds a text node instead.
  *
  * Confluence's ADF media nodes carry `attrs.id` — a media-platform UUID.
  * Attachment list entries expose the same UUID as `extensions.fileId`, so the
@@ -132,6 +135,21 @@ function replaceMediaWithPlaceholders(node, mediaIds) {
   if (Array.isArray(node)) {
     return node.map((c) => replaceMediaWithPlaceholders(c, mediaIds));
   }
+  // Block-level media containers: replace the whole element so adf-to-md emits the placeholder.
+  if (node.type === "mediaSingle" || node.type === "mediaGroup") {
+    const mediaNode = Array.isArray(node.content)
+      ? node.content.find((c) => c.type === "media" && c.attrs?.id)
+      : null;
+    if (mediaNode) {
+      mediaIds.push(mediaNode.attrs.id);
+      return {
+        type: "paragraph",
+        content: [{ type: "text", text: `__MEDIA_PLACEHOLDER_${mediaNode.attrs.id}__` }],
+      };
+    }
+    return node;
+  }
+  // Fallback for any remaining inline media nodes.
   if (node.type === "media" && node.attrs?.id) {
     mediaIds.push(node.attrs.id);
     return { type: "text", text: `__MEDIA_PLACEHOLDER_${node.attrs.id}__` };
@@ -140,6 +158,26 @@ function replaceMediaWithPlaceholders(node, mediaIds) {
     return { ...node, content: replaceMediaWithPlaceholders(node.content, mediaIds) };
   }
   return node;
+}
+
+/**
+ * Fetch the Confluence emoji-title-published page property.
+ * Confluence stores the emoji as a hex Unicode code point (e.g. "1f680" for 🚀),
+ * so we convert it to the actual character. Returns null if not set / request fails.
+ */
+async function fetchPageEmoji(site, pageId, authHeader) {
+  try {
+    const url = `https://${site}/wiki/rest/api/content/${pageId}/property/emoji-title-published`;
+    const data = await fetchJson(url, authHeader);
+    if (typeof data.value !== "string") return null;
+    // Hex code point → actual emoji character
+    if (/^[0-9a-f]{4,6}$/i.test(data.value)) {
+      return String.fromCodePoint(parseInt(data.value, 16));
+    }
+    return data.value;
+  } catch {
+    return null;
+  }
 }
 
 function convertAdf(adfRoot, pageTitle) {
@@ -197,14 +235,16 @@ async function fetchAttachments(site, pageId, authHeader) {
 // ─── Tree ─────────────────────────────────────────────────────────────────────
 
 async function buildTree(site, pageId, authHeader) {
-  const [page, childPages] = await Promise.all([
+  const [page, childPages, emojiProperty] = await Promise.all([
     fetchPage(site, pageId, authHeader),
     fetchChildren(site, pageId, authHeader),
+    fetchPageEmoji(site, pageId, authHeader),
   ]);
+  const emoji = emojiProperty;
   const children = await Promise.all(
     childPages.map((c) => buildTree(site, c.id, authHeader)),
   );
-  return { page, children, slug: slugify(page.title) };
+  return { page, children, slug: slugify(page.title), emoji, cleanTitle };
 }
 
 function buildPathMap(node, parentPath, isRoot, map) {
@@ -302,11 +342,12 @@ async function writePage(node, parentPath, isRoot, { site, authHeader, publicDir
   const updatedAt =
     node.page.version?.createdAt?.slice(0, 10) ?? new Date().toISOString().slice(0, 10);
   const status = preservedStatus(filePath);
+  const displayTitle = node.emoji ? `${node.emoji} ${node.cleanTitle}` : node.cleanTitle;
 
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(
     filePath,
-    `---\ntitle: ${yamlString(node.page.title.replace(/^\[.*?\]\s*/, ""))}\nstatus: ${status}\nupdated_at: ${updatedAt}\n---\n\n${escapeBareVueTags(markdown.trimStart())}\n`,
+    `---\ntitle: ${yamlString(displayTitle)}\nstatus: ${status}\nupdated_at: ${updatedAt}\n---\n\n${escapeBareVueTags(markdown.trimStart())}\n`,
     "utf-8",
   );
 
