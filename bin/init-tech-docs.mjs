@@ -139,25 +139,30 @@ updateGitignore(cwd);
 console.log(`
 ✓ Hotovo. Další kroky:
 
-  1) Nainstaluj závislosti a spusť lokální preview:
-       npm install && npm docs:dev
+  1) Přidej VitePress závislosti do devDependencies v package.json:
+       "vitepress": "^1.6.4",
+       "vitepress-plugin-mermaid": "^2.0.17",
+       "mermaid": "^11.14.0"
 
-  2) Přidej docs-build stage do Dockerfile:
+  2) Nainstaluj závislosti a spusť lokální preview:
+       npm install && npm run docs:dev
+
+  3) Přidej docs-build stage do Dockerfile:
        viz /tech-docs/docs-build-stage.md
 
-  3) Zavolej setupTechDocs() v main.ts (NestJS):
+  4) Zavolej setupTechDocs() v main.ts (NestJS):
        import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
        await setupTechDocs("tech-docs", app, {
          auth: { username: "docs", password: process.env.TECH_DOCS_PASSWORD },
          basePath: '/tech-docs/',
        });
 
-  4) Nastav TECH_DOCS_PASSWORD env proměnnou (dev/staging pouze, ne prod).
+  5) Nastav TECH_DOCS_PASSWORD env proměnnou (dev/staging pouze, ne prod).
   
-  5) Zbuildi lokálně dokumentaci:
+  6) Zbuildi lokálně dokumentaci:
       npm run docs:build
   
-  6) Nastartuj aplikaci (pravděpodobně \`npm run dev\`):
+  7) Nastartuj aplikaci (pravděpodobně \`npm run dev\`):
       Zkontroluj, že na route /tech-docs/ beží dokumentace
       
       Username: docs

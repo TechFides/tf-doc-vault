@@ -92,10 +92,20 @@ Příkaz idempotentně vytvoří `tech-docs/`, doplní `package.json` scripts a 
 
 1. **Nainstaluj závislosti a spusť lokální preview:**
 
-   ```bash
-   npm install
-   npm docs:dev
-   ```
+Přidej do `devDependencies` v `package.json` service repa:
+
+```json
+"vitepress": "^1.6.4",
+"vitepress-plugin-mermaid": "^2.0.17",
+"mermaid": "^11.14.0"
+```
+
+Spusť:
+
+```bash
+npm install
+npm docs:dev
+```
 
 2. **Přidej `docs-build` stage do Dockerfile** — viz [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
 
