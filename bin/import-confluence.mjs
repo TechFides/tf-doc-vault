@@ -36,7 +36,11 @@ function escapeBareVueTags(md) {
 
 /** Quote a string for YAML only when needed; uses single quotes to avoid escaping. */
 function yamlString(value) {
-  if (/[[\]{}:#*!|>"%@`,]/.test(value) || /^[&]/.test(value) || /^\s|\s$/.test(value)) {
+  if (
+    /[[\]{}:#*!|>"%@`,]/.test(value) ||
+    /^[&]/.test(value) ||
+    /^\s|\s$/.test(value)
+  ) {
     // Single-quote: only escape is '' for a literal single quote
     return `'${value.replace(/'/g, "''")}'`;
   }
@@ -46,9 +50,9 @@ function yamlString(value) {
 function slugify(title) {
   return title
     .toLowerCase()
-    .replace(/^\[.*?\]\s*/, "")       // strip [SERVICE_ID] prefix
+    .replace(/^\[.*?\]\s*/, "") // strip [SERVICE_ID] prefix
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")  // remove diacritics
+    .replace(/[̀-ͯ]/g, "") // remove diacritics
     .replace(/[^\w\s-]/g, "")
     .trim()
     .replace(/[\s_]+/g, "-")
@@ -62,12 +66,22 @@ function fetchJson(url, authHeader) {
       { headers: { Authorization: authHeader, Accept: "application/json" } },
       (res) => {
         let body = "";
-        res.on("data", (chunk) => { body += chunk.toString(); });
+        res.on("data", (chunk) => {
+          body += chunk.toString();
+        });
         res.on("end", () => {
           if (res.statusCode >= 400) {
-            reject(new Error(`HTTP ${res.statusCode} for ${url}: ${body.slice(0, 300)}`));
+            reject(
+              new Error(
+                `HTTP ${res.statusCode} for ${url}: ${body.slice(0, 300)}`,
+              ),
+            );
           } else {
-            try { resolve(JSON.parse(body)); } catch { reject(new Error(`Invalid JSON from ${url}`)); }
+            try {
+              resolve(JSON.parse(body));
+            } catch {
+              reject(new Error(`Invalid JSON from ${url}`));
+            }
           }
         });
       },
@@ -90,7 +104,10 @@ function downloadBinary(url, destPath, authHeader, depth = 0) {
         const next = new URL(res.headers.location, url).toString();
         const sameOrigin = new URL(next).host === new URL(url).host;
         const nextAuth = sameOrigin ? authHeader : null;
-        downloadBinary(next, destPath, nextAuth, depth + 1).then(resolve, reject);
+        downloadBinary(next, destPath, nextAuth, depth + 1).then(
+          resolve,
+          reject,
+        );
         return;
       }
       if (status >= 400) {
@@ -100,7 +117,10 @@ function downloadBinary(url, destPath, authHeader, depth = 0) {
       fs.mkdirSync(path.dirname(destPath), { recursive: true });
       const file = fs.createWriteStream(destPath);
       res.pipe(file);
-      file.on("finish", () => { file.close(); resolve(); });
+      file.on("finish", () => {
+        file.close();
+        resolve();
+      });
       file.on("error", reject);
     });
     req.on("error", reject);
@@ -144,7 +164,9 @@ function replaceMediaWithPlaceholders(node, mediaIds) {
       mediaIds.push(mediaNode.attrs.id);
       return {
         type: "paragraph",
-        content: [{ type: "text", text: `__MEDIA_PLACEHOLDER_${mediaNode.attrs.id}__` }],
+        content: [
+          { type: "text", text: `__MEDIA_PLACEHOLDER_${mediaNode.attrs.id}__` },
+        ],
       };
     }
     return node;
@@ -155,7 +177,10 @@ function replaceMediaWithPlaceholders(node, mediaIds) {
     return { type: "text", text: `__MEDIA_PLACEHOLDER_${node.attrs.id}__` };
   }
   if (node.content) {
-    return { ...node, content: replaceMediaWithPlaceholders(node.content, mediaIds) };
+    return {
+      ...node,
+      content: replaceMediaWithPlaceholders(node.content, mediaIds),
+    };
   }
   return node;
 }
@@ -186,7 +211,9 @@ function convertAdf(adfRoot, pageTitle) {
   try {
     return { markdown: adfToMd.convert(processed).result, mediaIds };
   } catch (err) {
-    console.warn(`  ⚠ "${pageTitle}": adf-to-md konverze selhala (${err.message}).`);
+    console.warn(
+      `  ⚠ "${pageTitle}": adf-to-md konverze selhala (${err.message}).`,
+    );
     return { markdown: "", mediaIds: [] };
   }
 }
@@ -213,7 +240,8 @@ async function fetchChildren(site, pageId, authHeader) {
     const resp = await fetchJson(url, authHeader);
     pages.push(...resp.results);
     cursor = resp._links?.next
-      ? new URLSearchParams(resp._links.next.split("?")[1]).get("cursor") ?? undefined
+      ? (new URLSearchParams(resp._links.next.split("?")[1]).get("cursor") ??
+        undefined)
       : undefined;
   } while (cursor);
   return pages;
@@ -227,7 +255,9 @@ async function fetchAttachments(site, pageId, authHeader) {
     const data = await fetchJson(url, authHeader);
     return data.results ?? [];
   } catch (err) {
-    console.warn(`  ⚠ Nelze načíst seznam attachmentů pro page ${pageId}: ${err.message}`);
+    console.warn(
+      `  ⚠ Nelze načíst seznam attachmentů pro page ${pageId}: ${err.message}`,
+    );
     return [];
   }
 }
@@ -275,7 +305,12 @@ function countNodes(node) {
 
 // ─── Writer ───────────────────────────────────────────────────────────────────
 
-async function writePage(node, parentPath, isRoot, { site, authHeader, publicDir, pagePathMap }) {
+async function writePage(
+  node,
+  parentPath,
+  isRoot,
+  { site, authHeader, publicDir, pagePathMap },
+) {
   const adfValue = node.page.body?.atlas_doc_format?.value ?? "";
   const adfRoot = preprocessAdf(adfValue);
   if (!adfRoot) {
@@ -324,14 +359,17 @@ async function writePage(node, parentPath, isRoot, { site, authHeader, publicDir
   }
 
   // Post-process media placeholders left by replaceMediaWithPlaceholders()
-  markdown = markdown.replace(/__MEDIA_PLACEHOLDER_([\w-]+)__/g, (_match, mediaId) => {
-    const filename = mediaToFilename.get(mediaId);
-    if (filename) return `![${filename}](/images/${filename})`;
-    console.warn(
-      `  ⚠ "${node.page.title}": neznámé media id ${mediaId} (žádný odpovídající attachment).`,
-    );
-    return "";
-  });
+  markdown = markdown.replace(
+    /__MEDIA_PLACEHOLDER_([\w-]+)__/g,
+    (_match, mediaId) => {
+      const filename = mediaToFilename.get(mediaId);
+      if (filename) return `![${filename}](/images/${filename})`;
+      console.warn(
+        `  ⚠ "${node.page.title}": neznámé media id ${mediaId} (žádný odpovídající attachment).`,
+      );
+      return "";
+    },
+  );
   // Surface any media references that we collected from ADF but didn't resolve
   const unresolved = mediaIds.filter((id) => !mediaToFilename.has(id));
   if (unresolved.length > 0) {
@@ -347,9 +385,12 @@ async function writePage(node, parentPath, isRoot, { site, authHeader, publicDir
       : path.join(parentPath, `${node.slug}.md`);
 
   const updatedAt =
-    node.page.version?.createdAt?.slice(0, 10) ?? new Date().toISOString().slice(0, 10);
+    node.page.version?.createdAt?.slice(0, 10) ??
+    new Date().toISOString().slice(0, 10);
   const status = preservedStatus(filePath);
-  const displayTitle = node.emoji ? `${node.emoji} ${node.cleanTitle}` : node.cleanTitle;
+  const displayTitle = node.emoji
+    ? `${node.emoji} ${node.cleanTitle}`
+    : node.cleanTitle;
 
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(
@@ -364,7 +405,12 @@ async function writePage(node, parentPath, isRoot, { site, authHeader, publicDir
       ? path.join(parentPath, node.slug)
       : parentPath;
   for (const child of node.children) {
-    await writePage(child, childBase, false, { site, authHeader, publicDir, pagePathMap });
+    await writePage(child, childBase, false, {
+      site,
+      authHeader,
+      publicDir,
+      pagePathMap,
+    });
   }
 }
 
@@ -393,20 +439,32 @@ Env vars:
 
 const site = flags.site;
 const rootPageId = flags["root-page-id"];
-const outputDir = path.resolve(process.cwd(), flags.output ?? "tech-docs/docs/v1");
+const outputDir = path.resolve(
+  process.cwd(),
+  flags.output ?? "tech-docs/docs/v1",
+);
 const publicDir = path.resolve(outputDir, "..", "public", "images");
 
 const email = process.env["CONFLUENCE_USER_EMAIL"];
 const token = process.env["CONFLUENCE_API_TOKEN"];
 
-if (!site) { console.error("✗ --site je povinný argument."); process.exit(1); }
-if (!rootPageId) { console.error("✗ --root-page-id je povinný argument."); process.exit(1); }
+if (!site) {
+  console.error("✗ --site je povinný argument.");
+  process.exit(1);
+}
+if (!rootPageId) {
+  console.error("✗ --root-page-id je povinný argument.");
+  process.exit(1);
+}
 if (!email || !token) {
-  console.error("✗ CONFLUENCE_USER_EMAIL a CONFLUENCE_API_TOKEN musí být nastaveny.");
+  console.error(
+    "✗ CONFLUENCE_USER_EMAIL a CONFLUENCE_API_TOKEN musí být nastaveny.",
+  );
   process.exit(1);
 }
 
-const authHeader = "Basic " + Buffer.from(`${email}:${token}`).toString("base64");
+const authHeader =
+  "Basic " + Buffer.from(`${email}:${token}`).toString("base64");
 
 console.log(`\nImportuji z Confluence`);
 console.log(`  site         : ${site}`);
@@ -422,7 +480,14 @@ buildPathMap(tree, outputDir, true, pagePathMap);
 fs.mkdirSync(outputDir, { recursive: true });
 fs.mkdirSync(publicDir, { recursive: true });
 
-await writePage(tree, outputDir, true, { site, authHeader, publicDir, pagePathMap });
+await writePage(tree, outputDir, true, {
+  site,
+  authHeader,
+  publicDir,
+  pagePathMap,
+});
 
-console.log(`✓ Hotovo. Importováno ${countNodes(tree)} stránek do ${outputDir}`);
+console.log(
+  `✓ Hotovo. Importováno ${countNodes(tree)} stránek do ${outputDir}`,
+);
 console.log(`  Zkontroluj soubory a nastav status: published kde je vhodné.`);
