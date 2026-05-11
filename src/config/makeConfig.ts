@@ -146,15 +146,18 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
   });
 
   const localeFor = (
-    v: string
-  ): { label: string; lang: string; link: string; themeConfig: { nav: ReturnType<typeof generateNav> } } => ({
+    v: string,
+  ): {
+    label: string;
+    lang: string;
+    link: string;
+    themeConfig: { nav: ReturnType<typeof generateNav> };
+  } => ({
     label: v,
     lang: strings.lang,
     link: `/${v}/`,
     themeConfig: {
-      nav: versions.length > 1
-        ? [...generateNav(docsRoot, v), versionDropdown(v)]
-        : generateNav(docsRoot, v),
+      nav: versions.length > 1 ? [versionDropdown(v)] : [],
     },
   });
 
