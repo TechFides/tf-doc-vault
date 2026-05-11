@@ -11,10 +11,28 @@ export CONFLUENCE_API_TOKEN=<token>          # Atlassian API token (Settings →
 tf-doc-vault import-confluence \
   --site=myorg.atlassian.net \
   --root-page-id=<id> \
-  --output=./tech-docs/v1
+  --output=./tech-docs/docs/v1
 ```
 
 Root page ID najdeš v URL Confluence stránky: `.../pages/**1184333837**/...`
+
+## Doporučená struktura Confluence stromu
+
+Pro nejlepší výsledek organizuj Confluence stránky do tří úrovní:
+
+```
+Root stránka
+  ├── Autentizace a autorizace          # sekce (má potomky)
+  │     ├── Přihlášení                  # list stránka
+  │     └── Odhlášení                   # list stránka
+  └── Architektura                      # sekce (má potomky)
+        ├── Moduly                      # skupina (má vlastní potomky)
+        │     ├── Auth modul
+        │     └── API modul
+        └── Deployment                  # list stránka
+```
+
+Vyhni se listovým stránkám přímo pod root stránkou — ty nemají v sidebaru sekci.
 
 ## Co importer udělá
 
@@ -22,7 +40,7 @@ Root page ID najdeš v URL Confluence stránky: `.../pages/**1184333837**/...`
 - Převede ADF (Atlassian Document Format) → Markdown
 - Zachová hierarchii: stránky s dětmi → podsložka + `index.md`; listy → `.md`
 - Slugifikuje názvy souborů (lowercase, bez diakritiky, bez `[SERVICE_ID]` prefixů)
-- Stáhne přílohy obrázků do `tech-docs/public/images/`
+- Stáhne přílohy obrázků do `tech-docs/docs/public/images/`
 - Interní Confluence linky přepíše na relativní MD cesty
 - Vygeneruje frontmatter: `title`, `status: review`, `updated_at`
 - **Idempotentní:** existující soubor s `status: published` si zachová svůj status
@@ -30,19 +48,28 @@ Root page ID najdeš v URL Confluence stránky: `.../pages/**1184333837**/...`
 ## Výstupní struktura
 
 ```
-tech-docs/v1/
-  index.md                         ← root stránka
-  autentizace-autorizace.md        ← leaf stránka
+tech-docs/docs/v1/
+  index.md                              ← root stránka
+  autentizace-autorizace/
+    index.md                            ← sekce s přímými potomky
+    prihlaseni.md
+    odhlaseni.md
   architektura/
-    index.md                       ← stránka s dětmi
-    moduly.md
+    index.md                            ← sekce s podskupinami
+    moduly/
+      index.md                          ← skupina (má vlastní potomky)
+      auth-modul.md
+      api-modul.md
     deployment.md
 ```
+
+Tato struktura odpovídá ana-docs konvenci (`sekce/skupina/stránka`),
+takže sidebar se generuje stejnou logikou jako u analytické dokumentace.
 
 ## Po importu
 
 ```bash
-pnpm docs:dev        # vizuální kontrola na http://localhost:5173
+pnpm docs:dev        # vizuální kontrola na http://localhost:5174
 pnpm docs:validate   # frontmatter, broken links, lint
 ```
 

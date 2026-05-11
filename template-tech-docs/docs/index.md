@@ -10,7 +10,7 @@ hero:
   tagline: Technická specifikace služby __SERVICE_ID__ projektu __PROJECT__.
   actions:
     - theme: brand
-      text: Technická specifikace
+      text: Otevřít technickou specifikaci
       link: /v1/
 ---
 

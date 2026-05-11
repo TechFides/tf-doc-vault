@@ -345,7 +345,7 @@ Env vars:
 
 const site = flags.site;
 const rootPageId = flags["root-page-id"];
-const outputDir = path.resolve(process.cwd(), flags.output ?? "tech-docs/v1");
+const outputDir = path.resolve(process.cwd(), flags.output ?? "tech-docs/docs/v1");
 const publicDir = path.resolve(outputDir, "..", "public", "images");
 
 const email = process.env["CONFLUENCE_USER_EMAIL"];

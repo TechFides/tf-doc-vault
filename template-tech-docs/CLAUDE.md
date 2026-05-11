@@ -4,18 +4,19 @@ Tato složka obsahuje technickou dokumentaci pro službu **__SERVICE_ID__** proj
 
 ## Struktura
 
-Versioned struktura — všechny `.md` soubory aktuální dokumentace jsou v `v1/`.
-Sidebar v UI se generuje automaticky z file struktury + H2/H3 nadpisů.
+```
+docs/
+  v1/
+    <sekce>/              # top-menu položka (= Confluence stránka s potomky)
+      index.md            # popis sekce
+      <skupina>/          # collapsible skupina (= vnořená stránka s potomky)
+        index.md
+        stranka.md
+      list-stranka.md     # přímý potomek sekce bez vlastních potomků
+```
 
-```
-v1/
-├── index.md          # úvod, klíčové vlastnosti služby, kontakty
-├── architektura.md   # high-level overview
-├── moduly/           # podadresáře jsou povolené pro logické grupování
-│   ├── auth.md
-│   └── api.md
-└── deployment.md
-```
+Sidebar se generuje automaticky z adresářové struktury. Sekce bez podsložek
+zobrazují soubory přímo; sekce s podsložkami je seskupují do collapsible skupin.
 
 ## Konvence pro úpravu
 
@@ -31,13 +32,13 @@ updated_at: 2026-04-30
 
 - `updated_at` aktualizuj při každé úpravě obsahu (formát `YYYY-MM-DD`).
 - Pro diagramy používej Mermaid v code blocks (` ```mermaid `).
-- Obrázky ukládej do `tech-docs/public/images/` a odkazuj absolutně `/images/foo.png`.
+- Obrázky ukládej do `tech-docs/docs/public/images/` a odkazuj absolutně `/images/foo.png`.
 
 ## Pravidla pro AI agenty
 
 - Při úpravě jakéhokoli `.md` souboru aktualizuj `updated_at` na dnešní datum.
 - Pokud měníš strukturu (přidáváš/odebíráš soubory), aktualizuj odkazy v `index.md`.
-- Nezasahuj do `.vitepress/config.ts` bez explicitní instrukce — sidebar se generuje automaticky.
+- Nezasahuj do `docs/.vitepress/config.ts` bez explicitní instrukce — sidebar se generuje automaticky.
 - Před commitem spusť `pnpm docs:fix`.
 
 ## Lokální preview

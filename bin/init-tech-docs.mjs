@@ -37,10 +37,10 @@ Example:
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const SCRIPTS_TO_ADD = {
-  "docs:dev": "vitepress dev tech-docs",
-  "docs:build": "vitepress build tech-docs",
-  "docs:validate": "tf-doc-vault validate --root=tech-docs",
-  "docs:fix": "tf-doc-vault fix --root=tech-docs",
+  "docs:dev": "vitepress dev tech-docs/docs",
+  "docs:build": "vitepress build tech-docs/docs",
+  "docs:validate": "tf-doc-vault validate --root=tech-docs/docs",
+  "docs:fix": "tf-doc-vault fix --root=tech-docs/docs",
 };
 
 function updatePackageJson(dir) {
@@ -68,8 +68,8 @@ function updatePackageJson(dir) {
 }
 
 const GITIGNORE_ENTRIES = [
-  "tech-docs/.vitepress/dist/",
-  "tech-docs/.vitepress/cache/",
+  "tech-docs/docs/.vitepress/dist/",
+  "tech-docs/docs/.vitepress/cache/",
 ];
 
 function updateGitignore(dir) {
@@ -142,7 +142,7 @@ console.log(`
 
   3) Zavolej setupTechDocs() v main.ts (NestJS):
        import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
-       await setupTechDocs("tech-docs", app, {
+       await setupTechDocs("tech-docs/docs", app, {
          auth: { username: "docs", password: process.env.TECH_DOCS_PASSWORD },
        });
 

@@ -19,15 +19,15 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 
 COPY --chown=node:node tech-docs ./tech-docs
 
-RUN pnpm exec vitepress build tech-docs
+RUN pnpm exec vitepress build tech-docs/docs
 ```
 
 A v production stage:
 
 ```dockerfile
 COPY --chown=node:node --from=docs-build \
-  /usr/src/app/tech-docs/.vitepress/dist \
-  ./tech-docs/.vitepress/dist
+  /usr/src/app/tech-docs/docs/.vitepress/dist \
+  ./tech-docs/docs/.vitepress/dist
 ```
 
 **Důležité:**
