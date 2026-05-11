@@ -3,6 +3,9 @@ import { makeConfig } from "@techfides/tf-doc-vault/config";
 export default makeConfig({
   configDir: import.meta.dirname,
   project: "__PROJECT__",
+  // Docs žijí v docs/ uvnitř tech-docs/; base musí odpovídat NestJS mount pointu.
+  override: { base: "/tech-docs/" },
+  outlineLevel: [1, 3],
   // Volitelné: Umami analytics
   // analytics: {
   //   provider: "umami",
@@ -10,9 +13,10 @@ export default makeConfig({
   //   domain: "docs-web.example.com",
   // },
   //
-  // Volitelné: Edit link na GitLabu
+  // Volitelné: Edit link na GitHubu
   // editLink: {
-  //   repo: "techfides/tf-analysis/__PROJECT__",
+  //   repo: "__REPO__",
   //   branch: "master",
+  //   host: "https://github.com",
   // },
 });

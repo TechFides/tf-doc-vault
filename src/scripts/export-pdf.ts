@@ -3,8 +3,8 @@
  *
  * Generates artifacts/docs-full.pdf from the /print page of the built VitePress site.
  *
- * Prerequisites: run `ana-docs print` and `vitepress build docs` first,
- * or use `ana-docs pdf` which chains all three steps.
+ * Prerequisites: run `tf-doc-vault print` and `vitepress build docs` first,
+ * or use `tf-doc-vault pdf` which chains all three steps.
  */
 
 import { chromium } from "playwright";
@@ -50,7 +50,7 @@ function startPreviewServer(): ChildProcess {
 
 const distDir = path.resolve(PROJECT_ROOT, "docs/.vitepress/dist");
 if (!fs.existsSync(distDir)) {
-  console.error("✗ docs/.vitepress/dist nenalezen. Spusť nejdříve: ana-docs print && vitepress build docs");
+  console.error("✗ docs/.vitepress/dist nenalezen. Spusť nejdříve: tf-doc-vault print && vitepress build docs");
   process.exit(1);
 }
 

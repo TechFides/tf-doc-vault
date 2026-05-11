@@ -73,6 +73,9 @@ export interface MakeConfigOptions {
   /** Extra `<head>` tags appended after analytics. */
   head?: HeadConfig[];
 
+  /** Heading levels shown in the right-side outline. Defaults to [2, 3]. */
+  outlineLevel?: [number, number];
+
   /**
    * Override / extend final UserConfig. Merged shallowly on top of the generated config.
    * Use sparingly — most use-cases should be covered by typed options above.
@@ -124,6 +127,9 @@ function buildEditLink(editLink: EditLink): { pattern: string; text: string } {
  */
 export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMermaid> {
   const docsRoot = path.resolve(opts.configDir, "..");
+  const folderName = path.basename(docsRoot);
+  const base = `/${folderName}/`;
+
   const versions = getVersions(docsRoot);
   const defaultVersion = versions[0] ?? "v1";
   const strings: Strings = { ...defaultStrings, ...opts.strings };
@@ -135,18 +141,23 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
     items: versions.map((ver) => ({
       text: ver,
       link: `/${ver}/`,
-      activeMatch: `/${ver}/`,
+      activeMatch: `${base}${ver}/`.replace(/\/+/g, "/"),
     })),
   });
 
   const localeFor = (
-    v: string
-  ): { label: string; lang: string; link: string; themeConfig: { nav: ReturnType<typeof generateNav> } } => ({
+    v: string,
+  ): {
+    label: string;
+    lang: string;
+    link: string;
+    themeConfig: { nav: ReturnType<typeof generateNav> };
+  } => ({
     label: v,
     lang: strings.lang,
     link: `/${v}/`,
     themeConfig: {
-      nav: [...generateNav(docsRoot, v), versionDropdown(v)],
+      nav: versions.length > 1 ? [versionDropdown(v)] : [],
     },
   });
 
@@ -156,6 +167,7 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
   };
 
   const baseConfig: UserConfig = {
+    base,
     title: strings.title,
     description: strings.description,
     lang: strings.lang,
@@ -163,16 +175,12 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
     locales,
     themeConfig: {
       logoLink: "/",
-      nav: [
-        {
-          text: "Verze",
-          activeMatch: "^/(v\\d+)/",
-          items: versions.map((ver) => ({ text: ver, link: `/${ver}/` })),
-        },
-      ],
+      nav: versions.length > 1
+        ? [{ text: "Verze", activeMatch: `^${base}(v\\d+)/`.replace(/\/+/g, "/"), items: versions.map((ver) => ({ text: ver, link: `/${ver}/` })) }]
+        : [],
       sidebar: generateSidebar(docsRoot),
       search: { provider: "local" },
-      outline: { label: strings.searchLabel, level: [2, 3] },
+      outline: { label: strings.searchLabel, level: opts.outlineLevel ?? [2, 3] },
       docFooter: { prev: strings.footerPrev, next: strings.footerNext },
       lastUpdated: { text: strings.lastUpdatedText },
       ...(opts.editLink && { editLink: buildEditLink(opts.editLink) }),
@@ -182,9 +190,13 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
     // which rejects it with ERR_UNKNOWN_FILE_EXTENSION.
     vite: {
       ssr: {
-        noExternal: ["@techfides/ana-docs"],
+        noExternal: ["@techfides/tf-doc-vault"],
       },
     },
+    ignoreDeadLinks: [
+      // ignore all localhost links
+      /^https?:\/\/localhost/,
+    ],
     ...opts.override,
   };
 

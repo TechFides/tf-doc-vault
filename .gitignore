@@ -2,3 +2,7 @@ node_modules/
 .npm/
 dist/
 *.tsbuildinfo
+
+# pnpm pack output for local pre-publish testing — never commit
+*.tgz
+.pnpm-store/

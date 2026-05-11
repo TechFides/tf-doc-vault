@@ -10,7 +10,10 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const DOCS_ROOT = path.resolve(process.cwd(), "docs");
+const args = process.argv.slice(2);
+const rootArg = args.find((a) => a.startsWith("--root="))?.split("=")[1];
+const root = rootArg ?? "docs";
+const DOCS_ROOT = path.resolve(process.cwd(), root);
 const FIELD_ORDER = ["title", "status", "updated_at"];
 
 function allMdFiles(dir: string): string[] {
@@ -76,7 +79,7 @@ function fieldsEqual(a: [string, string][], b: [string, string][]): boolean {
 }
 
 const files = allMdFiles(DOCS_ROOT);
-console.log(`Normalizuji ${files.length} souborů v docs/\n`);
+console.log(`Normalizuji ${files.length} souborů v ${root}/\n`);
 
 let changed = 0;
 let skipped = 0;

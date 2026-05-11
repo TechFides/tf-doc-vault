@@ -1,0 +1,55 @@
+name: 📦 Release & Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: ${{ github.ref }}-publish
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: 🚀 Build & Publish to npmjs.com
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔀 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          HUSKY: '0'
+
+      - name: 🏗️ Build
+        run: pnpm build
+
+      - name: 📜 Generate changelog
+        run: pnpm changelog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: 🚀 Publish to npmjs.com
+        run: pnpm publish --access=public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
