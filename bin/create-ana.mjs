@@ -69,14 +69,14 @@ function resolveDependencyValue(flags, targetDir) {
   const version = packageVersion();
   const ref = flags.ref ?? `v${version}`;
   const gitUrl =
-    flags["git-url"] ??
-    "git+ssh://git@github.com/techfides/tf-doc-vault.git";
+    flags["git-url"] ?? "git+ssh://git@github.com/techfides/tf-doc-vault.git";
 
   switch (source) {
     case "git":
       return `${gitUrl}#${ref}`;
     case "file": {
-      const target = flags["file-path"] ?? path.relative(targetDir, PACKAGE_DIR);
+      const target =
+        flags["file-path"] ?? path.relative(targetDir, PACKAGE_DIR);
       return `file:${target}`;
     }
     default:
@@ -103,11 +103,14 @@ if (flags.help || flags.h || positional.length === 0) usage(0);
 const projectName = positional[0];
 if (!/^[a-z][a-z0-9_-]*$/.test(projectName)) {
   console.error(`✗ Invalid project name: ${projectName}`);
-  console.error(`  Use lowercase letters, digits, hyphens or underscores; must start with a letter.`);
+  console.error(
+    `  Use lowercase letters, digits, hyphens or underscores; must start with a letter.`,
+  );
   process.exit(1);
 }
 
-const gcpProject = flags["gcp-project"] ?? `tfsa-${projectName.replace(/_/g, "-")}`;
+const gcpProject =
+  flags["gcp-project"] ?? `tfsa-${projectName.replace(/_/g, "-")}`;
 const serverType = flags.server ?? "nginx";
 
 if (!["nginx", "nginx-auth"].includes(serverType)) {
@@ -152,7 +155,7 @@ if (!skipGit) {
   spawnSync(
     "git",
     ["commit", "-q", "-m", `Initial scaffold from @techfides/tf-doc-vault`],
-    { cwd: targetDir, stdio: "inherit" }
+    { cwd: targetDir, stdio: "inherit" },
   );
 }
 

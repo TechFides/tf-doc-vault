@@ -95,7 +95,7 @@
     "dev": "node scripts/build.mjs --watch",
     "prepare": "node scripts/build.mjs",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src bin",
+    "lint": "eslint --config configs/eslint.config.js src bin --ignore-pattern 'src/setup/**'",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "release": "changelogen --release --no-github"

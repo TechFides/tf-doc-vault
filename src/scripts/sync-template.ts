@@ -85,13 +85,20 @@ function detectPlaceholders(): Record<string, string> {
     if (m?.[1]) serverType = m[1];
 
     const deps = (pkg.dependencies ?? {}) as Record<string, string>;
-    if (deps["@techfides/tf-doc-vault"]) depValue = deps["@techfides/tf-doc-vault"]!;
+    if (deps["@techfides/tf-doc-vault"])
+      depValue = deps["@techfides/tf-doc-vault"]!;
   }
 
   let gcpProject = `tfsa-${dashed}`;
-  for (const tfvarsName of ["infra/terraform.tfvars", "infra/terraform.tfvars.example"]) {
+  for (const tfvarsName of [
+    "infra/terraform.tfvars",
+    "infra/terraform.tfvars.example",
+  ]) {
     try {
-      const tfvars = fs.readFileSync(path.join(PROJECT_ROOT, tfvarsName), "utf-8");
+      const tfvars = fs.readFileSync(
+        path.join(PROJECT_ROOT, tfvarsName),
+        "utf-8",
+      );
       const m = /project_id\s*=\s*"([^"]+)"/.exec(tfvars);
       if (m?.[1] && !m[1].startsWith("__")) {
         gcpProject = m[1];
@@ -107,7 +114,10 @@ function detectPlaceholders(): Record<string, string> {
   let basicAuthUser = "";
   let basicAuthPass = "";
   try {
-    const ci = fs.readFileSync(path.join(PROJECT_ROOT, ".gitlab-ci.yml"), "utf-8");
+    const ci = fs.readFileSync(
+      path.join(PROJECT_ROOT, ".gitlab-ci.yml"),
+      "utf-8",
+    );
     const u = /^\s*BASIC_AUTH_USER:\s*"([^"]*)"/m.exec(ci);
     const p = /^\s*BASIC_AUTH_PASS:\s*"([^"]*)"/m.exec(ci);
     if (u?.[1] && !u[1].startsWith("__")) basicAuthUser = u[1];
@@ -127,7 +137,10 @@ function detectPlaceholders(): Record<string, string> {
   };
 }
 
-function renderTemplate(content: string, placeholders: Record<string, string>): string {
+function renderTemplate(
+  content: string,
+  placeholders: Record<string, string>,
+): string {
   let out = content;
   for (const [key, value] of Object.entries(placeholders)) {
     out = out.split(key).join(value);
@@ -136,13 +149,24 @@ function renderTemplate(content: string, placeholders: Record<string, string>): 
 }
 
 function unifiedDiff(actualPath: string, expected: string): string {
-  const tmp = path.join(os.tmpdir(), `sync-${Date.now()}-${Math.random().toString(36).slice(2)}.tmp`);
+  const tmp = path.join(
+    os.tmpdir(),
+    `sync-${Date.now()}-${Math.random().toString(36).slice(2)}.tmp`,
+  );
   fs.writeFileSync(tmp, expected);
   try {
     const r = spawnSync(
       "diff",
-      ["-u", "--label", actualPath, "--label", "(template, rendered)", actualPath, tmp],
-      { encoding: "utf-8" }
+      [
+        "-u",
+        "--label",
+        actualPath,
+        "--label",
+        "(template, rendered)",
+        actualPath,
+        tmp,
+      ],
+      { encoding: "utf-8" },
     );
     return r.stdout ?? "";
   } finally {
@@ -172,7 +196,10 @@ function inspect(rel: string, placeholders: Record<string, string>): Result {
 
   if (!fs.existsSync(templatePath)) return { rel, status: "ok" };
 
-  const expected = renderTemplate(fs.readFileSync(templatePath, "utf-8"), placeholders);
+  const expected = renderTemplate(
+    fs.readFileSync(templatePath, "utf-8"),
+    placeholders,
+  );
 
   if (!fs.existsSync(consumerPath)) {
     return { rel, status: "missing", expected };
@@ -181,7 +208,12 @@ function inspect(rel: string, placeholders: Record<string, string>): Result {
   const actual = fs.readFileSync(consumerPath, "utf-8");
   if (actual === expected) return { rel, status: "ok" };
 
-  return { rel, status: "drift", diff: unifiedDiff(consumerPath, expected), expected };
+  return {
+    rel,
+    status: "drift",
+    diff: unifiedDiff(consumerPath, expected),
+    expected,
+  };
 }
 
 function applyResult(r: Result): void {
@@ -195,7 +227,9 @@ const flags = parseFlags(process.argv.slice(2));
 const placeholders = detectPlaceholders();
 const tracked = flags.files ?? TRACKED_FILES;
 
-console.log(`Porovnávám ${tracked.length} souborů proti šabloně @techfides/tf-doc-vault.`);
+console.log(
+  `Porovnávám ${tracked.length} souborů proti šabloně @techfides/tf-doc-vault.`,
+);
 console.log(`  cwd      : ${PROJECT_ROOT}`);
 console.log(`  template : ${TEMPLATE_DIR}`);
 console.log(`  detected : ${JSON.stringify(placeholders)}\n`);

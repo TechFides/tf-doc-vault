@@ -15,7 +15,7 @@ import path from "node:path";
 import { lint as markdownlint } from "markdownlint/sync";
 
 const args = process.argv.slice(2);
-const rootArg =  args.find((a) => a.startsWith("--root="))?.split("=")[1];
+const rootArg = args.find((a) => a.startsWith("--root="))?.split("=")[1];
 const root = rootArg ?? "docs";
 const DOCS_ROOT = path.resolve(process.cwd(), root);
 const PUBLIC_ROOT = path.resolve(DOCS_ROOT, "public");
@@ -28,7 +28,11 @@ function allMdFiles(dir: string): string[] {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory() && entry.name !== ".vitepress") {
       results.push(...allMdFiles(full));
-    } else if (entry.isFile() && entry.name.endsWith(".md") && entry.name !== "print.md") {
+    } else if (
+      entry.isFile() &&
+      entry.name.endsWith(".md") &&
+      entry.name !== "print.md"
+    ) {
       results.push(full);
     }
   }
@@ -106,7 +110,10 @@ function checkDuplicateSlugs(files: string[]): Issue[] {
   for (const file of files) {
     const slug = slugOf(file);
     if (seen.has(slug)) {
-      issues.push({ file: slug, message: `duplicitní slug (konflikt s ${seen.get(slug)})` });
+      issues.push({
+        file: slug,
+        message: `duplicitní slug (konflikt s ${seen.get(slug)})`,
+      });
     } else {
       seen.set(slug, file);
     }
@@ -217,7 +224,9 @@ for (const { name, issues } of checks) {
   if (issues.length === 0) {
     console.log(`✓ ${name}`);
   } else {
-    console.log(`✗ ${name} (${issues.length} problém${issues.length > 1 ? "ů" : ""})`);
+    console.log(
+      `✗ ${name} (${issues.length} problém${issues.length > 1 ? "ů" : ""})`,
+    );
     for (const issue of issues) {
       console.log(`  ${issue.file}: ${issue.message}`);
     }

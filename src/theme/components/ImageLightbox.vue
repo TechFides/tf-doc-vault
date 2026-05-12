@@ -1,8 +1,15 @@
 <template>
   <Teleport to="body">
     <Transition name="lightbox">
-      <div v-if="src" class="lightbox-overlay" @click="close" @keydown.esc="close">
-        <button class="lightbox-close" @click.stop="close" aria-label="Zavřít">✕</button>
+      <div
+        v-if="src"
+        class="lightbox-overlay"
+        @click="close"
+        @keydown.esc="close"
+      >
+        <button class="lightbox-close" @click.stop="close" aria-label="Zavřít">
+          ✕
+        </button>
         <img :src="src" :alt="alt" class="lightbox-img" @click.stop />
       </div>
     </Transition>
@@ -38,8 +45,10 @@ function svgToDataUrl(svgEl: SVGSVGElement): string {
   // Ensure the SVG has explicit dimensions so the img renders correctly
   const clone = svgEl.cloneNode(true) as SVGSVGElement;
   const bbox = svgEl.getBoundingClientRect();
-  if (!clone.getAttribute("width")) clone.setAttribute("width", String(bbox.width));
-  if (!clone.getAttribute("height")) clone.setAttribute("height", String(bbox.height));
+  if (!clone.getAttribute("width"))
+    clone.setAttribute("width", String(bbox.width));
+  if (!clone.getAttribute("height"))
+    clone.setAttribute("height", String(bbox.height));
   const serialized = new XMLSerializer().serializeToString(clone);
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(serialized);
 }

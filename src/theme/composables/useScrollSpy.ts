@@ -27,7 +27,8 @@ export function useScrollSpy(): void {
     clearActive();
 
     // Find matching sidebar link — match the hash portion at the end of href
-    const links = document.querySelectorAll<HTMLAnchorElement>(".VPSidebar a[href]");
+    const links =
+      document.querySelectorAll<HTMLAnchorElement>(".VPSidebar a[href]");
     let link: HTMLAnchorElement | null = null;
     for (const a of links) {
       const href = a.getAttribute("href") ?? "";
@@ -45,7 +46,8 @@ export function useScrollSpy(): void {
     while (parent) {
       const caret = parent.querySelector<HTMLElement>(".caret");
       if (caret) caret.click();
-      parent = parent.parentElement?.closest(".VPSidebarItem.collapsed") ?? null;
+      parent =
+        parent.parentElement?.closest(".VPSidebarItem.collapsed") ?? null;
     }
   }
 
@@ -75,9 +77,9 @@ export function useScrollSpy(): void {
   }
 
   function collectHeadings(): HTMLElement[] {
-    return Array.from(document.querySelectorAll<HTMLElement>(".VPDoc h2[id], .VPDoc h3[id]")).sort(
-      (a, b) => a.offsetTop - b.offsetTop
-    );
+    return Array.from(
+      document.querySelectorAll<HTMLElement>(".VPDoc h2[id], .VPDoc h3[id]"),
+    ).sort((a, b) => a.offsetTop - b.offsetTop);
   }
 
   function setup(): void {
@@ -116,7 +118,7 @@ export function useScrollSpy(): void {
     () => {
       cleanup();
       delayedSetup();
-    }
+    },
   );
 
   onUnmounted(cleanup);

@@ -16,7 +16,17 @@ const PKG = path.resolve(__dirname, "..");
 const SRC = path.join(PKG, "src");
 const DIST = path.join(PKG, "dist");
 
-const STATIC_EXTENSIONS = new Set([".vue", ".css", ".json", ".ico", ".png", ".svg", ".jpg", ".webp", ".cjs"]);
+const STATIC_EXTENSIONS = new Set([
+  ".vue",
+  ".css",
+  ".json",
+  ".ico",
+  ".png",
+  ".svg",
+  ".jpg",
+  ".webp",
+  ".cjs",
+]);
 const WATCH = process.argv.includes("--watch");
 
 function rmrf(p) {
@@ -55,17 +65,27 @@ rmrf(DIST);
 if (WATCH) {
   console.log("→ tsc --watch + static asset watcher");
   // tsc in watch mode (long-running, prints diagnostics on each rebuild)
-  const tsc = spawn("tsc", ["--project", path.join(PKG, "tsconfig.json"), "--watch", "--preserveWatchOutput"], {
-    stdio: "inherit",
-    cwd: PKG,
-    shell: process.platform === "win32",
-  });
+  const tsc = spawn(
+    "tsc",
+    [
+      "--project",
+      path.join(PKG, "tsconfig.json"),
+      "--watch",
+      "--preserveWatchOutput",
+    ],
+    {
+      stdio: "inherit",
+      cwd: PKG,
+      shell: process.platform === "win32",
+    },
+  );
 
   // initial copy + watch for static asset changes (.vue/.css/.json/.ico/...)
   copyStaticFiles(SRC, DIST);
   const isStaticOrAmbient = (name) =>
     STATIC_EXTENSIONS.has(path.extname(name)) ||
-    (isAmbientDts(name) && !fs.existsSync(path.join(SRC, name.replace(/\.d\.ts$/, ".ts"))));
+    (isAmbientDts(name) &&
+      !fs.existsSync(path.join(SRC, name.replace(/\.d\.ts$/, ".ts"))));
 
   fs.watch(SRC, { recursive: true }, (_event, filename) => {
     if (!filename) return;

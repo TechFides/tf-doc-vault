@@ -29,24 +29,24 @@ Goal: spin up a new analysis repo in under 5 minutes. Solve once — share acros
 `docs/.vitepress/config.ts`:
 
 ```ts
-import {makeConfig} from "@techfides/tf-doc-vault/config";
+import { makeConfig } from "@techfides/tf-doc-vault/config";
 
 export default makeConfig({
-    configDir: import.meta.dirname,
-    project: "lapa",
-    // optional:
-    analytics: {provider: "umami", websiteId: "...", domain: "..."},
-    editLink: {repo: "techfides/tf-analysis/lapa_ana", branch: "master"},
+  configDir: import.meta.dirname,
+  project: "lapa",
+  // optional:
+  analytics: { provider: "umami", websiteId: "...", domain: "..." },
+  editLink: { repo: "techfides/tf-analysis/lapa_ana", branch: "master" },
 });
 ```
 
 `docs/.vitepress/theme/index.ts`:
 
 ```ts
-import {createTheme} from "@techfides/tf-doc-vault/theme";
+import { createTheme } from "@techfides/tf-doc-vault/theme";
 import "./custom.css"; // overrides on top of base CSS
 
-export default createTheme({widthToggle: true});
+export default createTheme({ widthToggle: true });
 ```
 
 `package.json`:
@@ -70,9 +70,7 @@ export default createTheme({widthToggle: true});
     "@techfides/tf-doc-vault": "git+ssh://git@github.com/techfides/tf-doc-vault.git#v0.1.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "@techfides/tf-doc-vault"
-    ]
+    "onlyBuiltDependencies": ["@techfides/tf-doc-vault"]
   }
 }
 ```
@@ -97,10 +95,10 @@ pnpm exec tf-doc-vault init-tech-docs \
 #### tf-doc-vault init-tech-docs [options]:
 
 | Option              | Default         | Description                                                     |
-|---------------------|-----------------|-----------------------------------------------------------------|
-| `--service-id=<ID>` | *(required)*    | Service identifier, e.g. `TST`. Used in frontmatter and titles. |
+| ------------------- | --------------- | --------------------------------------------------------------- |
+| `--service-id=<ID>` | _(required)_    | Service identifier, e.g. `TST`. Used in frontmatter and titles. |
 | `--project=<name>`  | cwd folder name | Project name substituted into templates.                        |
-| `--repo=<org/repo>` | *(none)*        | GitHub/GitLab repo path for edit links, e.g. `myorg/myrepo`.    |
+| `--repo=<org/repo>` | _(none)_        | GitHub/GitLab repo path for edit links, e.g. `myorg/myrepo`.    |
 
 ### Dependencies
 
@@ -152,10 +150,10 @@ The command idempotently creates `tech-docs/`, adds `package.json` scripts and `
 ### NestJS wiring (`main.ts`)
 
 ```ts
-import {setupTechDocs} from "@techfides/tf-doc-vault/setup/nest";
+import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
 
 await setupTechDocs(app, {
-    auth: {username: "docs", password: process.env.TECH_DOCS_PASSWORD ?? ""},
+  auth: { username: "docs", password: process.env.TECH_DOCS_PASSWORD ?? "" },
 });
 ```
 
@@ -199,14 +197,14 @@ Deployment via `terraform apply` in `infra/` + push to GitLab (CI builds the ima
 `tf-doc-vault create <project-name> [options]`:
 
 | Option               | Default                                               | Description                                                                                                                                             |
-|----------------------|-------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--gcp-project=<id>` | `tfsa-<project>`                                      | GCP project ID (written to `terraform.tfvars`).                                                                                                         |
 | `--server=<type>`    | `nginx`                                               | Runtime image: `nginx` (static, no auth) or `nginx-auth` (Nginx + Basic auth from `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`).                                 |
 | `--source=<src>`     | `git`                                                 | `git` → `git+ssh://…/tf-doc-vault.git#<ref>` (production, pinned to tag). `file` → `file:<path>` (local package development next to the consumer repo). |
 | `--ref=<git-ref>`    | `v<package version>`                                  | Tag/branch/SHA for `--source=git`.                                                                                                                      |
 | `--git-url=<url>`    | `git+ssh://git@github.com/techfides/tf-doc-vault.git` | Override git URL for `--source=git`.                                                                                                                    |
 | `--file-path=<path>` | relative path to the package                          | Override `file:` path for `--source=file`.                                                                                                              |
-| `--no-git`           | *(false)*                                             | Skip `git init` + first commit. Use when embedding the docs inside an existing repo — all infrastructure is still generated.                            |
+| `--no-git`           | _(false)_                                             | Skip `git init` + first commit. Use when embedding the docs inside an existing repo — all infrastructure is still generated.                            |
 
 ### 1. Push to a new GitLab repository
 
@@ -268,7 +266,7 @@ GitLab only reads the root-level `.gitlab-ci.yml`, so the generated `ana_project
 
 ```yaml
 ana_project:docs:
-  stage: build   # any stage that already exists in the parent pipeline
+  stage: build # any stage that already exists in the parent pipeline
   trigger:
     include: ana_project/.gitlab-ci.yml
     strategy: depend
@@ -304,11 +302,11 @@ pnpm exec tf-doc-vault import-confluence \
 #### tf-doc-vault import-confluence [options]
 
 | Option                | Default      | Description                                                                                     |
-|-----------------------|--------------|-------------------------------------------------------------------------------------------------|
-| `--site=<host>`       | *(required)* | Confluence hostname, e.g. `myorg.atlassian.net`.                                                |
-| `--root-page-id=<id>` | *(required)* | ID of the root Confluence page to import. Found in the page URL: `.../pages/**123456789**/...`. |
-| `--output=<dir>`      | *(required)* | Output directory for generated Markdown files.                                                  |
-| `--space=<KEY>`       | *(none)*     | Confluence space key — informational only, not used during import.                              |
+| --------------------- | ------------ | ----------------------------------------------------------------------------------------------- |
+| `--site=<host>`       | _(required)_ | Confluence hostname, e.g. `myorg.atlassian.net`.                                                |
+| `--root-page-id=<id>` | _(required)_ | ID of the root Confluence page to import. Found in the page URL: `.../pages/**123456789**/...`. |
+| `--output=<dir>`      | _(required)_ | Output directory for generated Markdown files.                                                  |
+| `--space=<KEY>`       | _(none)_     | Confluence space key — informational only, not used during import.                              |
 
 Required environment variables: `CONFLUENCE_USER_EMAIL`, `CONFLUENCE_API_TOKEN` (Atlassian API token from Settings → Security → API tokens).
 

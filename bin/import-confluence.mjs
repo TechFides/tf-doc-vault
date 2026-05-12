@@ -338,7 +338,8 @@ async function writePage(
     (match, text, linkedId) => {
       const absPath = pagePathMap.get(linkedId);
       if (!absPath) return match;
-      const relativePath = "/" + path.relative(docsRoot, absPath).replace(/\.md$/, "");
+      const relativePath =
+        "/" + path.relative(docsRoot, absPath).replace(/\.md$/, "");
       return `[${text}](${relativePath})`;
     },
   );

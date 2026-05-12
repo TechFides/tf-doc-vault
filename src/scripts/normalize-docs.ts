@@ -107,4 +107,6 @@ for (const file of files) {
   changed++;
 }
 
-console.log(`\nHotovo. Upraveno: ${changed} souborů, přeskočeno: ${skipped} souborů.`);
+console.log(
+  `\nHotovo. Upraveno: ${changed} souborů, přeskočeno: ${skipped} souborů.`,
+);

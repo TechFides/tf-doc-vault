@@ -18,12 +18,24 @@ const rootFlag = process.argv.slice(2).find((a) => a.startsWith("--root="));
 const rootArgs = rootFlag ? [rootFlag] : [];
 
 const tasks: Task[] = [
-  { name: "LF Conversion", command: "tf-doc-vault", args: ["ensure-lf", ...rootArgs] },
-  { name: "Normalize", command: "tf-doc-vault", args: ["normalize", ...rootArgs] },
+  {
+    name: "LF Conversion",
+    command: "tf-doc-vault",
+    args: ["ensure-lf", ...rootArgs],
+  },
+  {
+    name: "Normalize",
+    command: "tf-doc-vault",
+    args: ["normalize", ...rootArgs],
+  },
   { name: "Prettier Fix", command: "prettier", args: ["--write", "."] },
   { name: "Lint Fix", command: "eslint", args: [".", "--fix"] },
   { name: "Typecheck", command: "tsc", args: [] },
-  { name: "Validate", command: "tf-doc-vault", args: ["validate", ...rootArgs] },
+  {
+    name: "Validate",
+    command: "tf-doc-vault",
+    args: ["validate", ...rootArgs],
+  },
   { name: "Prettier Check", command: "prettier", args: ["--check", "."] },
   { name: "Lint Check", command: "eslint", args: ["."] },
 ];
@@ -49,7 +61,7 @@ function printTable(results: Result[]): void {
   for (const res of results) {
     const status = res.status === "OK" ? "✅ OK" : "❌ FAIL";
     console.log(
-      `| ${res.name.padEnd(nameWidth)} | ${status.padEnd(statusWidth)} | ${res.duration.padStart(durationWidth)} |`
+      `| ${res.name.padEnd(nameWidth)} | ${status.padEnd(statusWidth)} | ${res.duration.padStart(durationWidth)} |`,
     );
   }
 
@@ -78,7 +90,10 @@ function runTasks(): void {
       results.push({ name: task.name, status: "OK", duration });
     } else {
       console.log("❌\n");
-      const output = [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
+      const output = [result.stdout, result.stderr]
+        .filter(Boolean)
+        .join("\n")
+        .trim();
       if (output) {
         console.error(output.replace(/^/gm, "  "));
         console.log();

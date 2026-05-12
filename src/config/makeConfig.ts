@@ -13,7 +13,10 @@ import defaultStrings from "./strings.cs.json" with { type: "json" };
  */
 function bundledFaviconLink(): HeadConfig | null {
   try {
-    const faviconPath = path.resolve(import.meta.dirname, "../theme/assets/favicon.ico");
+    const faviconPath = path.resolve(
+      import.meta.dirname,
+      "../theme/assets/favicon.ico",
+    );
     const buf = fs.readFileSync(faviconPath);
     const dataUrl = `data:image/x-icon;base64,${buf.toString("base64")}`;
     return ["link", { rel: "icon", type: "image/x-icon", href: dataUrl }];
@@ -110,8 +113,12 @@ function buildHead(opts: MakeConfigOptions): HeadConfig[] {
 }
 
 function buildEditLink(editLink: EditLink): { pattern: string; text: string } {
-  const { repo, branch = "master", text = "Upravit online", host = "https://gitlab.com" } =
-    editLink;
+  const {
+    repo,
+    branch = "master",
+    text = "Upravit online",
+    host = "https://gitlab.com",
+  } = editLink;
   // GitLab uses `/-/edit/<branch>/...`; GitHub uses `/edit/<branch>/...`.
   const isGitLab = host.includes("gitlab");
   const editPath = isGitLab ? `/-/edit/${branch}` : `/edit/${branch}`;
@@ -125,7 +132,9 @@ function buildEditLink(editLink: EditLink): { pattern: string; text: string } {
  * Build a VitePress UserConfig wrapped in `withMermaid`, derived from the docs/
  * directory layout (`docs/<version>/<section>/<group>/`).
  */
-export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMermaid> {
+export function makeConfig(
+  opts: MakeConfigOptions,
+): ReturnType<typeof withMermaid> {
   const docsRoot = path.resolve(opts.configDir, "..");
   const folderName = path.basename(docsRoot);
   const base = `/${folderName}/`;
@@ -136,7 +145,12 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
 
   const head = buildHead(opts);
 
-  const versionDropdown = (label: string): { text: string; items: { text: string; link: string; activeMatch: string }[] } => ({
+  const versionDropdown = (
+    label: string,
+  ): {
+    text: string;
+    items: { text: string; link: string; activeMatch: string }[];
+  } => ({
     text: label,
     items: versions.map((ver) => ({
       text: ver,
@@ -175,12 +189,22 @@ export function makeConfig(opts: MakeConfigOptions): ReturnType<typeof withMerma
     locales,
     themeConfig: {
       logoLink: "/",
-      nav: versions.length > 1
-        ? [{ text: "Verze", activeMatch: `^${base}(v\\d+)/`.replace(/\/+/g, "/"), items: versions.map((ver) => ({ text: ver, link: `/${ver}/` })) }]
-        : [],
+      nav:
+        versions.length > 1
+          ? [
+              {
+                text: "Verze",
+                activeMatch: `^${base}(v\\d+)/`.replace(/\/+/g, "/"),
+                items: versions.map((ver) => ({ text: ver, link: `/${ver}/` })),
+              },
+            ]
+          : [],
       sidebar: generateSidebar(docsRoot),
       search: { provider: "local" },
-      outline: { label: strings.searchLabel, level: opts.outlineLevel ?? [2, 3] },
+      outline: {
+        label: strings.searchLabel,
+        level: opts.outlineLevel ?? [2, 3],
+      },
       docFooter: { prev: strings.footerPrev, next: strings.footerNext },
       lastUpdated: { text: strings.lastUpdatedText },
       ...(opts.editLink && { editLink: buildEditLink(opts.editLink) }),

@@ -29,7 +29,11 @@ function switchVersion(link: string): void {
 
 <template>
   <div class="version-switcher" v-if="versions.length > 0">
-    <button class="version-btn" @click="isOpen = !isOpen" @blur="isOpen = false">
+    <button
+      class="version-btn"
+      @click="isOpen = !isOpen"
+      @blur="isOpen = false"
+    >
       {{ currentVersion }}
       <svg
         xmlns="http://www.w3.org/2000/svg"
