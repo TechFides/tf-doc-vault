@@ -98,7 +98,7 @@
     "lint": "eslint src bin",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "release": "changelogen --release"
+    "release": "changelogen --release --no-github"
   },
   "peerDependencies": {
     "@nestjs/common": "^10 || ^11",
