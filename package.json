@@ -98,11 +98,7 @@
     "lint": "eslint src bin",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "changelog": "changelogen --release",
-    "release": "pnpm build && pnpm publish --access=public",
-    "version:major": "pnpm version major",
-    "version:minor": "pnpm version minor",
-    "version:patch": "pnpm version patch"
+    "release": "changelogen --release"
   },
   "peerDependencies": {
     "@nestjs/common": "^10 || ^11",
