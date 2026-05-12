@@ -80,7 +80,15 @@ function cardRect(x, y, w, h, rx = 8) {
   return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${C.card}" rx="${rx}" filter="url(#shadow)" stroke="${C.border}" stroke-width="1"/>`;
 }
 
-function text(x, y, content, size = 13, fill = C.text, anchor = "start", weight = "normal") {
+function text(
+  x,
+  y,
+  content,
+  size = 13,
+  fill = C.text,
+  anchor = "start",
+  weight = "normal",
+) {
   return `<text x="${x}" y="${y}" font-size="${size}" fill="${fill}" text-anchor="${anchor}" font-weight="${weight}" ${FONT}>${esc(content)}</text>`;
 }
 
@@ -98,7 +106,11 @@ function btn(x, y, w, h, label, type = "primary") {
   };
   const textColor = type === "secondary" || type === "ghost" ? C.text : C.white;
   const stroke =
-    type === "secondary" ? `stroke="${C.border}" stroke-width="1"` : type === "ghost" ? "" : "";
+    type === "secondary"
+      ? `stroke="${C.border}" stroke-width="1"`
+      : type === "ghost"
+        ? ""
+        : "";
   return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fills[type]}" rx="6" ${stroke} style="cursor:pointer"/>
   <text x="${x + w / 2}" y="${y + h / 2 + 4.5}" font-size="13" fill="${textColor}" text-anchor="middle" font-weight="500" ${FONT}>${esc(label)}</text>`;
 }
@@ -164,12 +176,22 @@ function navAnnotation(x, y, targetScreen, direction = "right") {
 }
 
 function esc(s) {
-  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 // ── Header component (top navigation bar) ──────────────────
 function header(w, activeItem = "Pripady", userName = "J. Novak") {
-  const items = ["Dashboard", "Pripady", "SLA", "Reporty", "Fakturace", "Admin"];
+  const items = [
+    "Dashboard",
+    "Pripady",
+    "SLA",
+    "Reporty",
+    "Fakturace",
+    "Admin",
+  ];
   let s = `<rect x="0" y="0" width="${w}" height="56" fill="url(#headerGrad)" rx="8"/>
   <rect x="0" y="48" width="${w}" height="8" fill="url(#headerGrad)"/>
   <line x1="0" y1="56" x2="${w}" y2="56" stroke="${C.border}" stroke-width="1"/>
@@ -224,7 +246,8 @@ function tableHeader(x, y, w, cols) {
 
 function tableRow(x, y, w, cells, cols, highlight = false) {
   let s = "";
-  if (highlight) s += `<rect x="${x}" y="${y}" width="${w}" height="40" fill="#FFFBEB" rx="0"/>`;
+  if (highlight)
+    s += `<rect x="${x}" y="${y}" width="${w}" height="40" fill="#FFFBEB" rx="0"/>`;
   s += `<line x1="${x}" y1="${y + 40}" x2="${x + w}" y2="${y + 40}" stroke="${C.border}" stroke-width="0.5"/>`;
   let cx = x;
   for (let i = 0; i < cells.length; i++) {
@@ -274,7 +297,15 @@ function activityItem(x, y, time, actor, action) {
 }
 
 // ── Form label ─────────────────────────────────────────────
-function formField(x, y, label, w, required = false, value = "", placeholder = "") {
+function formField(
+  x,
+  y,
+  label,
+  w,
+  required = false,
+  value = "",
+  placeholder = "",
+) {
   let s = `<text x="${x}" y="${y}" font-size="12" fill="${C.textSecondary}" font-weight="500" ${FONT}>${esc(label)}${required ? " *" : ""}</text>`;
   s += input(x, y + 6, w, 36, placeholder, value);
   return s;
@@ -304,7 +335,14 @@ function genLogin() {
   // Logo area
   s += `<rect x="${cx + 60}" y="${cy + 30}" width="${cw - 120}" height="64" fill="${C.primaryLight}" rx="12"/>`;
   s += boldText(cx + cw / 2, cy + 55, "LAPA SERVICE", 22, C.primary, "middle");
-  s += text(cx + cw / 2, cy + 75, "Informacni system", 13, C.textSecondary, "middle");
+  s += text(
+    cx + cw / 2,
+    cy + 75,
+    "Informacni system",
+    13,
+    C.textSecondary,
+    "middle",
+  );
   // Form
   s += formField(cx + 40, cy + 130, "Email", cw - 80, true, "", "vas@email.cz");
   s += formField(cx + 40, cy + 206, "Heslo", cw - 80, true, "", "••••••••");
@@ -343,7 +381,15 @@ function genDashboardTL() {
     { v: "128", l: "Uzavreno (mesic)", c: C.success },
   ];
   for (let i = 0; i < stats.length; i++) {
-    s += statCard(mx + i * (cw + gap), my + 38, cw, 72, stats[i].v, stats[i].l, stats[i].c);
+    s += statCard(
+      mx + i * (cw + gap),
+      my + 38,
+      cw,
+      72,
+      stats[i].v,
+      stats[i].l,
+      stats[i].c,
+    );
   }
 
   // Unassigned cases table
@@ -434,7 +480,13 @@ function genDashboardTL() {
     ["13:22", "P. Svoboda", "pridal fotky k #2026-0340"],
   ];
   for (let i = 0; i < acts.length; i++) {
-    s += activityItem(mx + 16, ay + 50 + i * 22, acts[i][0], acts[i][1], acts[i][2]);
+    s += activityItem(
+      mx + 16,
+      ay + 50 + i * 22,
+      acts[i][0],
+      acts[i][1],
+      acts[i][2],
+    );
   }
 
   s += svgClose();
@@ -457,7 +509,13 @@ function genDashboardMgmt() {
   s += cardRect(mx, my + 40, kw, 100);
   s += boldText(mx + 20, my + 64, "Pripady tento mesic", 12, C.textSecondary);
   s += boldText(mx + 20, my + 94, "Prijato: 45", 14, C.text);
-  s += text(mx + 20, my + 114, "Uzavreno: 38  |  Rozpracovano: 52", 12, C.textSecondary);
+  s += text(
+    mx + 20,
+    my + 114,
+    "Uzavreno: 38  |  Rozpracovano: 52",
+    12,
+    C.textSecondary,
+  );
 
   s += cardRect(mx + kw + 16, my + 40, kw, 100);
   s += boldText(mx + kw + 36, my + 64, "SLA plneni", 12, C.textSecondary);
@@ -468,14 +526,32 @@ function genDashboardMgmt() {
   s += text(mx + kw + 80, my + 114, "(cil: 95%)", 12, C.textSecondary);
 
   s += cardRect(mx, my + 156, kw, 100);
-  s += boldText(mx + 20, my + 180, "Prumerna doba zpracovani", 12, C.textSecondary);
+  s += boldText(
+    mx + 20,
+    my + 180,
+    "Prumerna doba zpracovani",
+    12,
+    C.textSecondary,
+  );
   s += boldText(mx + 20, my + 216, "8.3 dnu", 22, C.primary);
   s += text(mx + 100, my + 216, "(cil: 10 dnu) ✓", 12, C.success);
 
   s += cardRect(mx + kw + 16, my + 156, kw, 100);
-  s += boldText(mx + kw + 36, my + 180, "Obrat (fakturace)", 12, C.textSecondary);
+  s += boldText(
+    mx + kw + 36,
+    my + 180,
+    "Obrat (fakturace)",
+    12,
+    C.textSecondary,
+  );
   s += boldText(mx + kw + 36, my + 216, "485 000 Kc", 22, C.success);
-  s += text(mx + kw + 170, my + 216, "(min. mesic: 462 000 Kc)", 11, C.textSecondary);
+  s += text(
+    mx + kw + 170,
+    my + 216,
+    "(min. mesic: 462 000 Kc)",
+    11,
+    C.textSecondary,
+  );
 
   // Profitability table
   const ty = my + 278;
@@ -507,7 +583,7 @@ function genDashboardMgmt() {
         12,
         j === 0 ? C.text : C.textSecondary,
         "start",
-        j === 0 ? "500" : "400"
+        j === 0 ? "500" : "400",
       );
       pcx += pcols[j].width;
     }
@@ -676,10 +752,33 @@ function genCaseNew() {
   s += boldText(mx + 20, fy + 28, "Zakladni udaje", 14, C.text);
   s += divider(mx + 20, fy + 36, w - 88);
   const fw = (w - 108) / 2;
-  s += formSelect(mx + 20, fy + 54, "Pojistovna", fw, true, "Vyberte pojistovnu");
-  s += formField(mx + 40 + fw, fy + 54, "Cislo skody", fw, true, "", "4200012345");
+  s += formSelect(
+    mx + 20,
+    fy + 54,
+    "Pojistovna",
+    fw,
+    true,
+    "Vyberte pojistovnu",
+  );
+  s += formField(
+    mx + 40 + fw,
+    fy + 54,
+    "Cislo skody",
+    fw,
+    true,
+    "",
+    "4200012345",
+  );
   s += formSelect(mx + 20, fy + 116, "Typ skody", fw, true, "Vyberte typ");
-  s += formField(mx + 40 + fw, fy + 116, "Datum vzniku skody", fw / 2 - 5, true, "", "DD.MM.RRRR");
+  s += formField(
+    mx + 40 + fw,
+    fy + 116,
+    "Datum vzniku skody",
+    fw / 2 - 5,
+    true,
+    "",
+    "DD.MM.RRRR",
+  );
   s += formField(
     mx + 50 + fw + fw / 2,
     fy + 116,
@@ -687,7 +786,7 @@ function genCaseNew() {
     fw / 2 - 5,
     true,
     "",
-    "DD.MM.RRRR"
+    "DD.MM.RRRR",
   );
 
   // Section: Pojisteny
@@ -708,7 +807,13 @@ function genCaseNew() {
   // Uploaded file
   s += `<rect x="${mx + 190}" y="${fy + 472}" width="240" height="34" fill="#F8FAFC" rx="6" stroke="${C.border}" stroke-width="1"/>`;
   s += `<g>${icon(mx + 198, fy + 480, "file", 16, C.textSecondary)}</g>`;
-  s += text(mx + 220, fy + 494, "objednavka_email.eml (120 KB)", 11, C.textSecondary);
+  s += text(
+    mx + 220,
+    fy + 494,
+    "objednavka_email.eml (120 KB)",
+    11,
+    C.textSecondary,
+  );
 
   // Action buttons
   s += btn(w - 310, fy + 530 - 16, 120, 40, "Zrusit", "secondary");
@@ -738,7 +843,14 @@ function genCaseDetail() {
   s += slaIndicator(w - 175, my + 18, C.success);
 
   // Tabs
-  const tabs = ["Zakladni udaje", "Dokumenty", "Zprava", "Vykony", "Komunikace", "Historie"];
+  const tabs = [
+    "Zakladni udaje",
+    "Dokumenty",
+    "Zprava",
+    "Vykony",
+    "Komunikace",
+    "Historie",
+  ];
   s += tabBar(mx, my + 34, w - 48, tabs, 0);
   // Tab nav annotations
   s += navAnnotation(mx + 205, my + 34, "Dokumenty");
@@ -785,7 +897,15 @@ function genCaseDetail() {
   s += text(mx + 16, cy2 + 92, "Email:", 12, C.textSecondary);
   s += text(mx + 110, cy2 + 92, "dvorak@email.cz", 12, C.text, "start", "500");
   s += text(mx + 16, cy2 + 112, "Adresa:", 12, C.textSecondary);
-  s += text(mx + 110, cy2 + 112, "Vodickova 12, Praha 1", 12, C.text, "start", "500");
+  s += text(
+    mx + 110,
+    cy2 + 112,
+    "Vodickova 12, Praha 1",
+    12,
+    C.text,
+    "start",
+    "500",
+  );
 
   // Solver card
   s += cardRect(mx + cw2 + 16, cy2, cw2, 130);
@@ -794,7 +914,13 @@ function genCaseDetail() {
   s += `<circle cx="${mx + cw2 + 52}" cy="${cy2 + 62}" r="18" fill="${C.primaryLight}"/>`;
   s += boldText(mx + cw2 + 52, cy2 + 66, "JN", 12, C.primary, "middle");
   s += boldText(mx + cw2 + 80, cy2 + 60, "Jan Novak", 14, C.text);
-  s += text(mx + cw2 + 80, cy2 + 78, "Aktivni pripady: 8/15", 12, C.textSecondary);
+  s += text(
+    mx + cw2 + 80,
+    cy2 + 78,
+    "Aktivni pripady: 8/15",
+    12,
+    C.textSecondary,
+  );
   s += btn(mx + cw2 + 32, cy2 + 94, 160, 28, "Predat jinemu >>", "secondary");
   s += navAnnotation(mx + cw2 + 200, cy2 + 100, "Prirazeni resitele");
 
@@ -833,7 +959,7 @@ function genCaseDetail() {
       cy3 + 56 + i * 28,
       detActs[i][0],
       detActs[i][1],
-      detActs[i][2]
+      detActs[i][2],
     );
   }
 
@@ -886,9 +1012,16 @@ function genAssignSolver() {
     s += `<line x1="${mx + 1}" y1="${ry + 40}" x2="${w - 49}" y2="${ry + 40}" stroke="${C.border}" stroke-width="0.5"/>`;
     // Radio
     s += `<circle cx="${mx + 21}" cy="${ry + 20}" r="8" fill="${C.white}" stroke="${isSelected ? C.primary : C.border}" stroke-width="2"/>`;
-    if (isSelected) s += `<circle cx="${mx + 21}" cy="${ry + 20}" r="4" fill="${C.primary}"/>`;
+    if (isSelected)
+      s += `<circle cx="${mx + 21}" cy="${ry + 20}" r="4" fill="${C.primary}"/>`;
     s += text(mx + 53, ry + 24, solvers[i][1], 12, C.text, "start", "500");
-    s += text(mx + 233, ry + 24, solvers[i][2], 12, isWarning ? C.danger : C.textSecondary);
+    s += text(
+      mx + 233,
+      ry + 24,
+      solvers[i][2],
+      12,
+      isWarning ? C.danger : C.textSecondary,
+    );
     s += text(mx + 313, ry + 24, solvers[i][3], 12, C.textSecondary);
     s += text(mx + 433, ry + 24, solvers[i][4], 12, C.textSecondary);
     // Mini progress
@@ -904,7 +1037,7 @@ function genAssignSolver() {
       10,
       pct >= 100 ? C.danger : C.textSecondary,
       "start",
-      "600"
+      "600",
     );
 
     if (isWarning) {
@@ -958,7 +1091,13 @@ function genFieldWork() {
     const gy2 = gy + Math.floor(i / 2) * (58 + 8);
     s += cardRect(gx, gy2, gw, 58);
     s += `<g>${icon(gx + 12, gy2 + 14, statsGrid[i].icon, 20, statsGrid[i].color)}</g>`;
-    s += boldText(gx + 40, gy2 + 24, statsGrid[i].value, 16, statsGrid[i].color);
+    s += boldText(
+      gx + 40,
+      gy2 + 24,
+      statsGrid[i].value,
+      16,
+      statsGrid[i].color,
+    );
     s += text(gx + 40, gy2 + 44, statsGrid[i].label, 11, C.textSecondary);
   }
 
@@ -1001,7 +1140,7 @@ function genFieldWork() {
       10,
       i === 1 ? C.primary : C.textMuted,
       "middle",
-      i === 1 ? "600" : "400"
+      i === 1 ? "600" : "400",
     );
   }
 
@@ -1050,7 +1189,13 @@ function genPhotoDoc() {
   s += cardRect(12, dy, w - 24, 100);
   s += `<text x="24" y="${dy + 20}" font-size="12" fill="${C.textSecondary}" font-weight="500" ${FONT}>Popisek</text>`;
   s += `<rect x="24" y="${dy + 28}" width="${w - 48}" height="48" fill="${C.inputBg}" rx="6" stroke="${C.inputBorder}" stroke-width="1"/>`;
-  s += text(36, dy + 50, "Pohled na strop, viditelne zatekani...", 12, C.textMuted);
+  s += text(
+    36,
+    dy + 50,
+    "Pohled na strop, viditelne zatekani...",
+    12,
+    C.textMuted,
+  );
 
   // GPS + Time
   const gy = dy + 108;
@@ -1074,7 +1219,14 @@ function genDocuments() {
   const mx = 24,
     my = 72;
   s += boldText(mx, my + 18, "Pripad #2026-0342", 14, C.textSecondary);
-  const tabs = ["Zakladni udaje", "Dokumenty", "Zprava", "Vykony", "Komunikace", "Historie"];
+  const tabs = [
+    "Zakladni udaje",
+    "Dokumenty",
+    "Zprava",
+    "Vykony",
+    "Komunikace",
+    "Historie",
+  ];
   s += tabBar(mx, my + 28, w - 48, tabs, 1);
   s += navAnnotation(mx + 12, my + 28, "Zakladni udaje");
   s += navAnnotation(mx + 270, my + 28, "Expert. zprava");
@@ -1090,7 +1242,10 @@ function genDocuments() {
   const folders = [
     {
       name: "Objednavka",
-      files: ["objednavka_pojistovny.pdf  120 KB", "priloha_objednavky.pdf  85 KB"],
+      files: [
+        "objednavka_pojistovny.pdf  120 KB",
+        "priloha_objednavky.pdf  85 KB",
+      ],
       count: 2,
       open: true,
     },
@@ -1107,11 +1262,19 @@ function genDocuments() {
     },
     {
       name: "Podklady od pojisteneho",
-      files: ["pojistna_smlouva.pdf  340 KB", "doklad_o_vlastnictvi.pdf  210 KB"],
+      files: [
+        "pojistna_smlouva.pdf  340 KB",
+        "doklad_o_vlastnictvi.pdf  210 KB",
+      ],
       count: 2,
       open: false,
     },
-    { name: "Expertni zprava", files: ["expertni_zprava_v2.docx  450 KB"], count: 2, open: false },
+    {
+      name: "Expertni zprava",
+      files: ["expertni_zprava_v2.docx  450 KB"],
+      count: 2,
+      open: false,
+    },
   ];
 
   let oy = fy + 16;
@@ -1123,7 +1286,7 @@ function genDocuments() {
       oy + 14,
       `(${folder.count} soubory)`,
       11,
-      C.textSecondary
+      C.textSecondary,
     );
     s += text(w - 80, oy + 14, folder.open ? "▼" : "▶", 12, C.textSecondary);
     oy += 28;
@@ -1153,7 +1316,14 @@ function genExpertReport() {
   const mx = 24,
     my = 72;
   s += boldText(mx, my + 18, "Pripad #2026-0342", 14, C.textSecondary);
-  const tabs = ["Zakladni udaje", "Dokumenty", "Zprava", "Vykony", "Komunikace", "Historie"];
+  const tabs = [
+    "Zakladni udaje",
+    "Dokumenty",
+    "Zprava",
+    "Vykony",
+    "Komunikace",
+    "Historie",
+  ];
   s += tabBar(mx, my + 28, w - 48, tabs, 2);
 
   const ty = my + 80;
@@ -1210,7 +1380,14 @@ function genExpertReport() {
   // Photo thumbnails
   for (let i = 0; i < 4; i++) {
     s += `<rect x="${mx + 16 + i * 78}" y="${sy + 70}" width="68" height="22" fill="#E2E8F0" rx="4"/>`;
-    s += text(mx + 50 + i * 78, sy + 84, `foto ${i + 1}`, 10, C.textSecondary, "middle");
+    s += text(
+      mx + 50 + i * 78,
+      sy + 84,
+      `foto ${i + 1}`,
+      10,
+      C.textSecondary,
+      "middle",
+    );
   }
   sy += 108;
 
@@ -1233,8 +1410,20 @@ function genExpertReport() {
     s += boldText(mx + 428, ry + 14, costs[i][1], 12, C.text);
   }
   s += divider(mx + 16, sy + 70 + costs.length * 24, w - 80);
-  s += boldText(mx + 28, sy + 80 + costs.length * 24 + 14, "CELKEM", 12, C.text);
-  s += boldText(mx + 428, sy + 80 + costs.length * 24 + 14, "21 260 Kc", 14, C.primary);
+  s += boldText(
+    mx + 28,
+    sy + 80 + costs.length * 24 + 14,
+    "CELKEM",
+    12,
+    C.text,
+  );
+  s += boldText(
+    mx + 428,
+    sy + 80 + costs.length * 24 + 14,
+    "21 260 Kc",
+    14,
+    C.primary,
+  );
   sy += 158;
 
   // Action buttons
@@ -1256,11 +1445,23 @@ function genReview() {
   const mx = 24,
     my = 72;
   s += sectionTitle(mx, my + 20, "Revize zpravy");
-  s += text(mx, my + 46, "Pripad #2026-0342   |   Resitel: Jan Novak", 13, C.textSecondary);
+  s += text(
+    mx,
+    my + 46,
+    "Pripad #2026-0342   |   Resitel: Jan Novak",
+    13,
+    C.textSecondary,
+  );
 
   const ry = my + 62;
   s += cardRect(mx, ry, w - 48, 360);
-  s += boldText(mx + 16, ry + 24, "Obsah zpravy (pouze pro cteni)", 13, C.textSecondary);
+  s += boldText(
+    mx + 16,
+    ry + 24,
+    "Obsah zpravy (pouze pro cteni)",
+    13,
+    C.textSecondary,
+  );
 
   const secs = [
     { title: "1. Zakladni udaje", status: "ok" },
@@ -1304,7 +1505,7 @@ function genReview() {
     sy + 30,
     "Zprava je kvalitni, drobne pripominky viz komentare.",
     12,
-    C.textSecondary
+    C.textSecondary,
   );
 
   // Buttons
@@ -1334,12 +1535,26 @@ function genSlaOverview() {
   const cw = (w - 48 - 32) / 3;
   s += statCard(mx, my + 46, cw, 80, "3", "Kriticke (prekroceno)", C.danger);
   s += statCard(mx + cw + 16, my + 46, cw, 80, "7", "Varovani", C.warning);
-  s += statCard(mx + (cw + 16) * 2, my + 46, cw, 80, "42", "V poradku", C.success);
+  s += statCard(
+    mx + (cw + 16) * 2,
+    my + 46,
+    cw,
+    80,
+    "42",
+    "V poradku",
+    C.success,
+  );
 
   // Critical table
   const ty = my + 144;
   s += cardRect(mx, ty, w - 48, 160);
-  s += boldText(mx + 16, ty + 24, "Kriticke pripady (SLA prekroceno)", 14, C.danger);
+  s += boldText(
+    mx + 16,
+    ty + 24,
+    "Kriticke pripady (SLA prekroceno)",
+    14,
+    C.danger,
+  );
   const scols = [
     { label: "# Pripad", width: 120 },
     { label: "Pojistovna", width: 150 },
@@ -1366,7 +1581,7 @@ function genSlaOverview() {
         12,
         j === 3 ? C.danger : C.textSecondary,
         "start",
-        j === 0 ? "500" : "400"
+        j === 0 ? "500" : "400",
       );
       cx2 += scols[j].width;
     }
@@ -1375,7 +1590,13 @@ function genSlaOverview() {
   // Warning table
   const wy = ty + 176;
   s += cardRect(mx, wy, w - 48, 130);
-  s += boldText(mx + 16, wy + 24, "Varovani (SLA blizi se terminu)", 14, C.warning);
+  s += boldText(
+    mx + 16,
+    wy + 24,
+    "Varovani (SLA blizi se terminu)",
+    14,
+    C.warning,
+  );
   s += tableHeader(mx + 1, wy + 36, w - 50, scols);
   const warnings = [
     ["#2026-0330", "Generali", "Exp. zprava", "2 dny", "Novak"],
@@ -1394,7 +1615,7 @@ function genSlaOverview() {
         12,
         j === 3 ? C.warning : C.textSecondary,
         "start",
-        j === 0 ? "500" : "400"
+        j === 0 ? "500" : "400",
       );
       cx2 += scols[j].width;
     }
@@ -1454,7 +1675,14 @@ function genTimeTracking() {
   const mx = 24,
     my = 72;
   s += boldText(mx, my + 18, "Pripad #2026-0342", 14, C.textSecondary);
-  const tabs = ["Zakladni udaje", "Dokumenty", "Zprava", "Vykony", "Komunikace", "Historie"];
+  const tabs = [
+    "Zakladni udaje",
+    "Dokumenty",
+    "Zprava",
+    "Vykony",
+    "Komunikace",
+    "Historie",
+  ];
   s += tabBar(mx, my + 28, w - 48, tabs, 3);
 
   const ty = my + 82;
@@ -1489,7 +1717,7 @@ function genTimeTracking() {
         12,
         j === 2 ? C.primary : C.textSecondary,
         "start",
-        j === 2 ? "600" : "400"
+        j === 2 ? "600" : "400",
       );
       cx += tcols[j].width;
     }
@@ -1506,9 +1734,22 @@ function genTimeTracking() {
   s += boldText(mx + 16, fy + 24, "Pridat vykon", 14, C.text);
   const ffw = (w - 108) / 3;
   s += formField(mx + 16, fy + 50, "Datum", ffw, true, "07.04.2026");
-  s += formSelect(mx + 36 + ffw, fy + 50, "Typ cinnosti", ffw, true, "Terenni setreni");
+  s += formSelect(
+    mx + 36 + ffw,
+    fy + 50,
+    "Typ cinnosti",
+    ffw,
+    true,
+    "Terenni setreni",
+  );
   s += formField(mx + 56 + ffw * 2, fy + 50, "Cas (hodiny)", ffw, true, "2.50");
-  s += text(mx + 56 + ffw * 2, fy + 108, "Krok: 0.05 h (= 3 min)", 10, C.textMuted);
+  s += text(
+    mx + 56 + ffw * 2,
+    fy + 108,
+    "Krok: 0.05 h (= 3 min)",
+    10,
+    C.textMuted,
+  );
   s += formField(mx + 16, fy + 112, "Poznamka", ffw * 2 + 20);
   s += btn(w - 166, fy + 130, 60, 32, "Zrusit", "secondary");
   s += btn(w - 96, fy + 130, 70, 32, "✓ Ulozit", "primary");
@@ -1556,7 +1797,13 @@ function genTravel() {
   s += boldText(mx + 443, totY + 20, "70", 12, C.primary);
   s += boldText(mx + 523, totY + 20, "370 Kc", 12, C.primary);
 
-  s += text(mx + 16, totY + 54, "Sazba 2026: 5.30 Kc/km (dle vyhlasky)", 11, C.textMuted);
+  s += text(
+    mx + 16,
+    totY + 54,
+    "Sazba 2026: 5.30 Kc/km (dle vyhlasky)",
+    11,
+    C.textMuted,
+  );
 
   s += svgClose();
   return s;
@@ -1608,7 +1855,7 @@ function genBilling() {
         12,
         j === 5 ? C.text : C.textSecondary,
         "start",
-        j === 0 || j === 5 ? "500" : "400"
+        j === 0 || j === 5 ? "500" : "400",
       );
       cx += bcols[j].width;
     }
@@ -1640,7 +1887,14 @@ function genCommunication() {
   const mx = 24,
     my = 72;
   s += boldText(mx, my + 18, "Pripad #2026-0342", 14, C.textSecondary);
-  const tabs = ["Zakladni udaje", "Dokumenty", "Zprava", "Vykony", "Komunikace", "Historie"];
+  const tabs = [
+    "Zakladni udaje",
+    "Dokumenty",
+    "Zprava",
+    "Vykony",
+    "Komunikace",
+    "Historie",
+  ];
   s += tabBar(mx, my + 28, w - 48, tabs, 4);
 
   const ty = my + 82;
@@ -1676,7 +1930,13 @@ function genCommunication() {
     s += `<g>${icon(mx + 16, my2 + 12, "mail", 18, msg.color)}</g>`;
     s += boldText(mx + 42, my2 + 24, msg.date, 11, C.textSecondary);
     s += badge(mx + 160, my2 + 10, msg.dir, msg.color);
-    s += text(mx + 16, my2 + 48, msg.dir === "ODCHOZI" ? "Komu:" : "Od:", 11, C.textSecondary);
+    s += text(
+      mx + 16,
+      my2 + 48,
+      msg.dir === "ODCHOZI" ? "Komu:" : "Od:",
+      11,
+      C.textSecondary,
+    );
     s += text(mx + 50, my2 + 48, msg.to, 11, C.text);
     s += text(mx + 16, my2 + 66, "Predmet:", 11, C.textSecondary);
     s += boldText(mx + 70, my2 + 66, msg.subject, 12, C.text);
@@ -1719,7 +1979,8 @@ function genEmailTemplate() {
     const iy = ty + 46 + i * 30;
     const sel = i === 2;
     s += `<circle cx="${mx + 26}" cy="${iy + 4}" r="8" fill="${C.white}" stroke="${sel ? C.primary : C.border}" stroke-width="2"/>`;
-    if (sel) s += `<circle cx="${mx + 26}" cy="${iy + 4}" r="4" fill="${C.primary}"/>`;
+    if (sel)
+      s += `<circle cx="${mx + 26}" cy="${iy + 4}" r="4" fill="${C.primary}"/>`;
     s += text(
       mx + 42,
       iy + 8,
@@ -1727,7 +1988,7 @@ function genEmailTemplate() {
       12,
       sel ? C.text : C.textSecondary,
       "start",
-      sel ? "500" : "400"
+      sel ? "500" : "400",
     );
   }
 
@@ -1738,7 +1999,13 @@ function genEmailTemplate() {
   s += text(mx + 332, ty + 52, "Komu:", 11, C.textSecondary);
   s += text(mx + 380, ty + 52, "pojistovna@kooperativa.cz", 11, C.text);
   s += text(mx + 332, ty + 72, "Predmet:", 11, C.textSecondary);
-  s += boldText(mx + 380, ty + 72, "Prubezna informace — pripad c. 4200012345", 11, C.text);
+  s += boldText(
+    mx + 380,
+    ty + 72,
+    "Prubezna informace — pripad c. 4200012345",
+    11,
+    C.text,
+  );
   s += divider(mx + 332, ty + 82, w - 48 - 332 - 16);
 
   const previewLines = [
@@ -1756,7 +2023,13 @@ function genEmailTemplate() {
   ];
   for (let i = 0; i < previewLines.length; i++) {
     if (previewLines[i]) {
-      s += text(mx + 332, ty + 104 + i * 18, previewLines[i], 12, C.textSecondary);
+      s += text(
+        mx + 332,
+        ty + 104 + i * 18,
+        previewLines[i],
+        12,
+        C.textSecondary,
+      );
     }
   }
 
@@ -1775,14 +2048,21 @@ function genNavigation() {
     h = 600;
   let s = svgOpen(w, h);
 
-  s += boldText(w / 2, 30, "LAPA SERVICE IS — Mapa navigace", 18, C.text, "middle");
+  s += boldText(
+    w / 2,
+    30,
+    "LAPA SERVICE IS — Mapa navigace",
+    18,
+    C.text,
+    "middle",
+  );
   s += text(
     w / 2,
     50,
     "Prehled obrazovek a navigacnich cest mezi nimi",
     12,
     C.textSecondary,
-    "middle"
+    "middle",
   );
 
   // Nodes
@@ -1793,7 +2073,13 @@ function genNavigation() {
     { id: "sla", x: 320, y: 250, label: "SLA prehled", color: C.danger },
     { id: "reports", x: 500, y: 250, label: "Reporty", color: C.success },
     { id: "billing", x: 680, y: 250, label: "Fakturace", color: C.purple },
-    { id: "admin", x: 820, y: 250, label: "Administrace", color: C.textSecondary },
+    {
+      id: "admin",
+      x: 820,
+      y: 250,
+      label: "Administrace",
+      color: C.textSecondary,
+    },
     { id: "new", x: 40, y: 350, label: "Novy pripad", color: C.primary },
     { id: "detail", x: 200, y: 350, label: "Detail pripadu", color: C.primary },
     { id: "info", x: 40, y: 440, label: "Zakladni udaje", color: "#64748B" },

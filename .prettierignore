@@ -1,0 +1,5 @@
+template/
+template-tech-docs/
+CHANGELOG.md
+pnpm-lock.yaml
+dist/

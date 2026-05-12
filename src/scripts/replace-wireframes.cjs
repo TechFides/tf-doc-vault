@@ -15,8 +15,18 @@ if (hadCRLF) content = content.replace(/\r\n/g, "\n");
 
 // [labelPrefix (up to and including ```), endSection identifier, svg filename, alt text]
 const wireframes = [
-  ["**Wireframe:**\n\n```", "UC-02", "wf-case-new.svg", "Wireframe: Formulář nového případu"],
-  ["**Wireframe:**\n\n```", "UC-03", "wf-assign-solver.svg", "Wireframe: Přiřazení řešitele"],
+  [
+    "**Wireframe:**\n\n```",
+    "UC-02",
+    "wf-case-new.svg",
+    "Wireframe: Formulář nového případu",
+  ],
+  [
+    "**Wireframe:**\n\n```",
+    "UC-03",
+    "wf-assign-solver.svg",
+    "Wireframe: Přiřazení řešitele",
+  ],
   [
     "**Wireframe (mobilni zarizeni):**\n\n```",
     "UC-07",
@@ -41,14 +51,24 @@ const wireframes = [
     "wf-expert-report.svg",
     "Wireframe: Editor expertní zprávy",
   ],
-  ["**Wireframe - Revize zpravy:**\n\n```", "UC-13", "wf-review.svg", "Wireframe: Revize zprávy"],
+  [
+    "**Wireframe - Revize zpravy:**\n\n```",
+    "UC-13",
+    "wf-review.svg",
+    "Wireframe: Revize zprávy",
+  ],
   [
     "**Wireframe - SLA prehled (dashboard):**\n\n```",
     "UC-15",
     "wf-sla-overview.svg",
     "Wireframe: SLA přehled",
   ],
-  ["**Pravidla eskalace:**\n\n```", "UC-16", "wf-escalation.svg", "Wireframe: Eskalační matice"],
+  [
+    "**Pravidla eskalace:**\n\n```",
+    "UC-16",
+    "wf-escalation.svg",
+    "Wireframe: Eskalační matice",
+  ],
   [
     "**Wireframe - Evidence vykonu:**\n\n```",
     "UC-17",
@@ -157,7 +177,8 @@ for (const [labelPrefix, _endSection, svg, alt] of wireframes) {
 
   const blockEnd = closingFenceIdx + 3;
   const imgTag = `![${alt}](/images/wireframes/${svg})`;
-  content = content.substring(0, fenceStartIdx) + imgTag + content.substring(blockEnd);
+  content =
+    content.substring(0, fenceStartIdx) + imgTag + content.substring(blockEnd);
   replacedCount++;
   console.log(`✓ Replaced ${svg}`);
 }
@@ -167,7 +188,10 @@ const navInsertPoint = content.indexOf("## 5. Wireframe - Seznam pripadu");
 if (navInsertPoint !== -1) {
   const navImg =
     "\n### Wireframe navigačního menu\n\n![Wireframe: Navigační menu](/images/wireframes/wf-navigation.svg)\n\n---\n\n";
-  content = content.substring(0, navInsertPoint) + navImg + content.substring(navInsertPoint);
+  content =
+    content.substring(0, navInsertPoint) +
+    navImg +
+    content.substring(navInsertPoint);
   console.log("✓ Added navigation wireframe");
 }
 

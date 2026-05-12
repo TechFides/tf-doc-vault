@@ -10,7 +10,9 @@ function extractTitle(filePath: string): string {
   const match = content.match(/^---\s*\n([\s\S]*?)\n---/);
   const body = match?.[1];
   if (body) {
-    const titleLine = body.split("\n").find((l: string) => l.startsWith("title:"));
+    const titleLine = body
+      .split("\n")
+      .find((l: string) => l.startsWith("title:"));
     if (titleLine) return titleLine.replace(/^title:\s*/, "").trim();
   }
   return path.basename(filePath, ".md");
@@ -31,7 +33,10 @@ function subDirs(dir: string): string[] {
   if (!fs.existsSync(dir)) return [];
   return fs
     .readdirSync(dir, { withFileTypes: true })
-    .filter((e: fs.Dirent) => e.isDirectory() && !IGNORE.has(e.name) && !e.name.startsWith("."))
+    .filter(
+      (e: fs.Dirent) =>
+        e.isDirectory() && !IGNORE.has(e.name) && !e.name.startsWith("."),
+    )
     .map((e: fs.Dirent) => e.name)
     .sort((a: string, b: string) => a.localeCompare(b, "cs"));
 }
@@ -42,7 +47,10 @@ export function getVersions(docsRoot: string): string[] {
 }
 
 /** Top-level dirs in `docs/<version>/` → navbar items. */
-export function generateNav(docsRoot: string, version: string): DefaultTheme.NavItem[] {
+export function generateNav(
+  docsRoot: string,
+  version: string,
+): DefaultTheme.NavItem[] {
   const versionRoot = path.join(docsRoot, version);
   const sections = subDirs(versionRoot);
 
@@ -64,7 +72,7 @@ export function generateNav(docsRoot: string, version: string): DefaultTheme.Nav
       (f): DefaultTheme.NavItemWithLink => ({
         text: extractTitle(path.join(versionRoot, f)),
         link: `/${version}/${f.replace(/\.md$/, "")}`,
-      })
+      }),
     );
 }
 
@@ -73,7 +81,10 @@ export function generateNav(docsRoot: string, version: string): DefaultTheme.Nav
  * Files become leaf items; subdirectories become collapsible groups
  * linked to their index.md (if present).
  */
-function buildSidebarItems(dir: string, urlBase: string): DefaultTheme.SidebarItem[] {
+function buildSidebarItems(
+  dir: string,
+  urlBase: string,
+): DefaultTheme.SidebarItem[] {
   const items: DefaultTheme.SidebarItem[] = [];
 
   for (const f of mdFilesIn(dir)) {

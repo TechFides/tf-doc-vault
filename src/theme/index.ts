@@ -28,7 +28,8 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
     extends: DefaultTheme,
     Layout(): VNode {
       const slots: Record<string, () => VNode> = {
-        "doc-before": (): VNode => h("div", { class: "doc-meta-wrapper" }, [h(DocMeta)]),
+        "doc-before": (): VNode =>
+          h("div", { class: "doc-meta-wrapper" }, [h(DocMeta)]),
         "layout-bottom": (): VNode => h(ImageLightbox),
       };
       if (widthToggle) {

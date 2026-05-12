@@ -44,13 +44,18 @@ const DATETIME_FORMAT = new Intl.DateTimeFormat("cs-CZ", {
  * UTC parsing shifting the date by one day.
  */
 function formatDate(value: unknown): string {
-  if (typeof value !== "string" && typeof value !== "number") return String(value);
+  if (typeof value !== "string" && typeof value !== "number")
+    return String(value);
   const raw = String(value).trim();
 
   // Date-only: YYYY-MM-DD — parse as Prague local date to avoid UTC shift.
   const dateOnly = /^\d{4}-\d{2}-\d{2}$/.exec(raw);
   if (dateOnly) {
-    const [year, month, day] = raw.split("-").map(Number) as [number, number, number];
+    const [year, month, day] = raw.split("-").map(Number) as [
+      number,
+      number,
+      number,
+    ];
     // new Date(y, m, d) creates a local-time Date — DST is irrelevant for date-only display.
     return DATE_FORMAT.format(new Date(year, month - 1, day));
   }
@@ -62,7 +67,11 @@ function formatDate(value: unknown): string {
     const normalized = raw.replace(" ", "T");
     // Parse as local time; Intl will re-express it in Europe/Prague.
     const [datePart, timePart] = normalized.split("T") as [string, string];
-    const [year, month, day] = datePart.split("-").map(Number) as [number, number, number];
+    const [year, month, day] = datePart.split("-").map(Number) as [
+      number,
+      number,
+      number,
+    ];
     const [hour, minute] = timePart.split(":").map(Number) as [number, number];
     return DATETIME_FORMAT.format(new Date(year, month - 1, day, hour, minute));
   }
@@ -78,8 +87,15 @@ function formatDate(value: unknown): string {
 </script>
 
 <template>
-  <div v-if="isMounted && (frontmatter.status || frontmatter.updated_at)" class="doc-meta">
-    <span v-if="frontmatter.status" class="doc-meta__badge" :data-status="frontmatter.status">
+  <div
+    v-if="isMounted && (frontmatter.status || frontmatter.updated_at)"
+    class="doc-meta"
+  >
+    <span
+      v-if="frontmatter.status"
+      class="doc-meta__badge"
+      :data-status="frontmatter.status"
+    >
       {{ STATUS_LABEL[frontmatter.status] ?? frontmatter.status }}
     </span>
     <span v-if="frontmatter.updated_at" class="doc-meta__date">

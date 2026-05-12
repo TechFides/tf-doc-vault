@@ -69,7 +69,15 @@ const rect = (x, y, w, h, fill, rx = 8, extra = "") =>
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" rx="${rx}" ${extra}/>`;
 const card = (x, y, w, h, rx = 12) =>
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${C.card}" rx="${rx}" filter="url(#shadow)" stroke="${C.border}" stroke-width="1"/>`;
-const text = (x, y, content, size = 14, fill = C.text, anchor = "start", extra = "") =>
+const text = (
+  x,
+  y,
+  content,
+  size = 14,
+  fill = C.text,
+  anchor = "start",
+  extra = "",
+) =>
   `<text x="${x}" y="${y}" font-size="${size}" fill="${fill}" text-anchor="${anchor}" ${extra}>${content}</text>`;
 const boldText = (x, y, content, size = 14, fill = C.text, anchor = "start") =>
   text(x, y, content, size, fill, anchor, 'font-weight="600"');
@@ -126,10 +134,26 @@ function genCurrentState() {
   ];
   tools.forEach((t) => {
     s += rect(t.x, t.y, 80, 35, C.dangerLight, 6);
-    s += text(t.x + 40, t.y + 22, t.icon, 12, C.danger, "middle", 'font-weight="500"');
+    s += text(
+      t.x + 40,
+      t.y + 22,
+      t.icon,
+      12,
+      C.danger,
+      "middle",
+      'font-weight="500"',
+    );
   });
   s += rect(340, 175, 180, 35, C.dangerLight, 6);
-  s += text(430, 197, "Slozky na disku", 12, C.danger, "middle", 'font-weight="500"');
+  s += text(
+    430,
+    197,
+    "Slozky na disku",
+    12,
+    C.danger,
+    "middle",
+    'font-weight="500"',
+  );
   s += text(430, 240, "Manualni evidence", 11, C.textMuted, "middle");
 
   // Pojistovna (right) - receives
@@ -213,7 +237,7 @@ function genLegalDeadlines() {
       24,
       C.warningLight,
       12,
-      `stroke="${C.warning}" stroke-width="1"`
+      `stroke="${C.warning}" stroke-width="1"`,
     );
     s += boldText(mid, d.y + 3, d.label, 11, C.warning, "middle");
   });
@@ -226,12 +250,14 @@ function genLegalDeadlines() {
   const reqs = [
     {
       icon: "i",
-      label: "Prodlouzeni setreni nad 3 mesice nutno pisemne zduvodnit pojistovne",
+      label:
+        "Prodlouzeni setreni nad 3 mesice nutno pisemne zduvodnit pojistovne",
       color: C.warning,
     },
     {
       icon: "!",
-      label: "Mesicni report otevrenych pripadu - zaslani pojistovne 1x mesicne",
+      label:
+        "Mesicni report otevrenych pripadu - zaslani pojistovne 1x mesicne",
       color: C.primary,
     },
     {
@@ -285,16 +311,64 @@ function genTargetState() {
     const row = Math.floor(i / 4);
     const mx = 260 + col * 92;
     const my = 125 + row * 70;
-    s += rect(mx, my, 80, 55, m.color + "15", 8, `stroke="${m.color}" stroke-width="1"`);
+    s += rect(
+      mx,
+      my,
+      80,
+      55,
+      m.color + "15",
+      8,
+      `stroke="${m.color}" stroke-width="1"`,
+    );
     s += iconCircle(mx + 15, my + 20, 10, m.color, m.icon, 9);
-    s += text(mx + 40, my + 42, m.label, 11, C.text, "middle", 'font-weight="500"');
+    s += text(
+      mx + 40,
+      my + 42,
+      m.label,
+      11,
+      C.text,
+      "middle",
+      'font-weight="500"',
+    );
   });
 
   // Database
-  s += rect(280, 290, 150, 35, C.primaryLight, 6, `stroke="${C.primary}" stroke-width="1"`);
-  s += text(355, 312, "PostgreSQL DB", 11, C.primary, "middle", 'font-weight="500"');
-  s += rect(450, 290, 150, 35, C.successLight, 6, `stroke="${C.success}" stroke-width="1"`);
-  s += text(525, 312, "GCP Hosting", 11, C.success, "middle", 'font-weight="500"');
+  s += rect(
+    280,
+    290,
+    150,
+    35,
+    C.primaryLight,
+    6,
+    `stroke="${C.primary}" stroke-width="1"`,
+  );
+  s += text(
+    355,
+    312,
+    "PostgreSQL DB",
+    11,
+    C.primary,
+    "middle",
+    'font-weight="500"',
+  );
+  s += rect(
+    450,
+    290,
+    150,
+    35,
+    C.successLight,
+    6,
+    `stroke="${C.success}" stroke-width="1"`,
+  );
+  s += text(
+    525,
+    312,
+    "GCP Hosting",
+    11,
+    C.success,
+    "middle",
+    'font-weight="500"',
+  );
 
   // Pojistovna right
   s += card(670, 75, 160, 110);
@@ -456,14 +530,22 @@ function genErpVsCustom() {
       35,
       C.dangerLight,
       6,
-      `stroke="${C.danger}" stroke-width="1" stroke-dasharray="4,2"`
+      `stroke="${C.danger}" stroke-width="1" stroke-dasharray="4,2"`,
     );
     s += text(mx + 30, 147, m, 11, C.danger, "middle");
   });
 
   s += text(220, 185, "+ rozsahle customizace", 12, C.textSecondary, "middle");
   s += text(220, 205, "+ dalsi customizace", 12, C.textSecondary, "middle");
-  s += text(220, 225, "= drahe a krehke reseni", 12, C.danger, "middle", 'font-weight="500"');
+  s += text(
+    220,
+    225,
+    "= drahe a krehke reseni",
+    12,
+    C.danger,
+    "middle",
+    'font-weight="500"',
+  );
 
   s += line(50, 245, 390, 245, C.border, 1, true);
 
@@ -476,7 +558,14 @@ function genErpVsCustom() {
   s += text(310, 298, "licenci", 11, C.textSecondary, "middle");
 
   s += rect(60, 325, 330, 35, C.danger + "15", 8);
-  s += boldText(220, 348, "Vyssi TCO (3 roky) kvuli licencim", 12, C.danger, "middle");
+  s += boldText(
+    220,
+    348,
+    "Vyssi TCO (3 roky) kvuli licencim",
+    12,
+    C.danger,
+    "middle",
+  );
 
   // RIGHT: Custom IS
   s += card(450, 70, 380, 310);
@@ -492,8 +581,24 @@ function genErpVsCustom() {
   ];
   customModules.forEach((m, i) => {
     const mx = 475 + i * 70;
-    s += rect(mx, 125, 60, 35, m.color + "20", 6, `stroke="${m.color}" stroke-width="1.5"`);
-    s += text(mx + 30, 147, m.label, 10, m.color, "middle", 'font-weight="500"');
+    s += rect(
+      mx,
+      125,
+      60,
+      35,
+      m.color + "20",
+      6,
+      `stroke="${m.color}" stroke-width="1.5"`,
+    );
+    s += text(
+      mx + 30,
+      147,
+      m.label,
+      10,
+      m.color,
+      "middle",
+      'font-weight="500"',
+    );
   });
 
   s += text(
@@ -503,10 +608,18 @@ function genErpVsCustom() {
     12,
     C.success,
     "middle",
-    'font-weight="500"'
+    'font-weight="500"',
   );
   s += text(640, 205, "Zadne zbytecne moduly", 12, C.textSecondary, "middle");
-  s += text(640, 225, "Plna kontrola nad kodem", 12, C.success, "middle", 'font-weight="500"');
+  s += text(
+    640,
+    225,
+    "Plna kontrola nad kodem",
+    12,
+    C.success,
+    "middle",
+    'font-weight="500"',
+  );
 
   s += line(470, 245, 810, 245, C.border, 1, true);
 
@@ -519,7 +632,14 @@ function genErpVsCustom() {
   s += text(730, 298, "pouzitelneho", 11, C.textSecondary, "middle");
 
   s += rect(480, 325, 330, 35, C.success + "15", 8);
-  s += boldText(640, 348, "Nizsi TCO - jedna investice + provoz", 12, C.success, "middle");
+  s += boldText(
+    640,
+    348,
+    "Nizsi TCO - jedna investice + provoz",
+    12,
+    C.success,
+    "middle",
+  );
 
   s += svgClose();
   return s;
@@ -534,14 +654,38 @@ function genValueSummary() {
   s += title(20, 15, "Pridana hodnota noveho IS", w - 40);
 
   const items = [
-    { text: "Uspora ~1 170 000 Kc rocne na manualni praci", color: C.success, icon: "Kc" },
+    {
+      text: "Uspora ~1 170 000 Kc rocne na manualni praci",
+      color: C.success,
+      icon: "Kc",
+    },
     { text: "Eliminace rizik z prekroceni SLA", color: C.danger, icon: "!" },
-    { text: "Zvyseni kvality expertních zprav (sablony + revize)", color: C.purple, icon: "Q" },
-    { text: "Plna mobilní podpora pro terénní experty", color: C.warning, icon: "M" },
+    {
+      text: "Zvyseni kvality expertních zprav (sablony + revize)",
+      color: C.purple,
+      icon: "Q",
+    },
+    {
+      text: "Plna mobilní podpora pro terénní experty",
+      color: C.warning,
+      icon: "M",
+    },
     { text: "Automaticke reporty pro pojistovny", color: C.teal, icon: "R" },
-    { text: "Centralni misto pravdy - zadne roztristene informace", color: C.primary, icon: "C" },
-    { text: "Skalovatelnost pro rust firmy (CZ + SK)", color: C.orange, icon: "S" },
-    { text: "Plna kontrola nad systemem - zadny vendor lock-in", color: C.success, icon: "V" },
+    {
+      text: "Centralni misto pravdy - zadne roztristene informace",
+      color: C.primary,
+      icon: "C",
+    },
+    {
+      text: "Skalovatelnost pro rust firmy (CZ + SK)",
+      color: C.orange,
+      icon: "S",
+    },
+    {
+      text: "Plna kontrola nad systemem - zadny vendor lock-in",
+      color: C.success,
+      icon: "V",
+    },
     {
       text: "Soulad s ceskou legislativou (OZ, zakon o pojistovnictvi)",
       color: C.primary,
@@ -597,7 +741,7 @@ function genTechStack() {
     11,
     C.primary,
     "middle",
-    'font-weight="500"'
+    'font-weight="500"',
   );
 
   // Arrow down
@@ -608,7 +752,11 @@ function genTechStack() {
   s += card(40, 220, w - 80, 90);
   s += rect(40, 220, w - 80, 36, C.warningLight, 12);
   s += boldText(w / 2, 243, "BACKEND", 13, C.warning, "middle");
-  const backendItems = ["Node.js + TypeScript", "REST API", "Autentizace (JWT)"];
+  const backendItems = [
+    "Node.js + TypeScript",
+    "REST API",
+    "Autentizace (JWT)",
+  ];
   backendItems.forEach((b, i) => {
     const bx = 120 + i * 210;
     s += rect(bx, 268, 180, 28, C.warningLight, 6);
@@ -623,9 +771,25 @@ function genTechStack() {
   s += rect(40, 335, w - 80, 36, C.purpleLight, 12);
   s += boldText(w / 2, 358, "DATABAZE", 13, C.purple, "middle");
   s += rect(200, 375, 180, 18, C.purpleLight, 4);
-  s += text(290, 389, "PostgreSQL", 11, C.purple, "middle", 'font-weight="500"');
+  s += text(
+    290,
+    389,
+    "PostgreSQL",
+    11,
+    C.purple,
+    "middle",
+    'font-weight="500"',
+  );
   s += rect(400, 375, 180, 18, C.purpleLight, 4);
-  s += text(490, 389, "Relacni databaze", 11, C.purple, "middle", 'font-weight="500"');
+  s += text(
+    490,
+    389,
+    "Relacni databaze",
+    11,
+    C.purple,
+    "middle",
+    'font-weight="500"',
+  );
 
   // Arrow down
   s += arrow(w / 2, 400, w / 2, 420);
@@ -636,9 +800,25 @@ function genTechStack() {
   s += boldText(w / 2, 448, "HOSTING", 13, C.success, "middle");
 
   s += rect(150, 468, 250, 22, C.successLight, 6);
-  s += text(275, 483, "Google Cloud Platform (GCP)", 11, C.success, "middle", 'font-weight="500"');
+  s += text(
+    275,
+    483,
+    "Google Cloud Platform (GCP)",
+    11,
+    C.success,
+    "middle",
+    'font-weight="500"',
+  );
   s += rect(420, 468, 210, 22, C.successLight, 6);
-  s += text(525, 483, "Podpora: Techfides s.r.o.", 11, C.success, "middle", 'font-weight="500"');
+  s += text(
+    525,
+    483,
+    "Podpora: Techfides s.r.o.",
+    11,
+    C.success,
+    "middle",
+    'font-weight="500"',
+  );
 
   s += svgClose();
   return s;
@@ -661,7 +841,15 @@ function genResponsiveDesign() {
   s += rect(50, 120, 60, 150, "#1E293B", 4);
   s += text(80, 140, "Menu", 9, "#CBD5E1", "middle");
   s += text(80, 160, "Nav", 9, "#CBD5E1", "middle");
-  s += rect(115, 120, 155, 150, C.white, 4, `stroke="${C.border}" stroke-width="1"`);
+  s += rect(
+    115,
+    120,
+    155,
+    150,
+    C.white,
+    4,
+    `stroke="${C.border}" stroke-width="1"`,
+  );
   s += text(192, 145, "Obsah", 11, C.text, "middle");
   s += rect(125, 155, 135, 15, C.primaryLight, 3);
   s += text(192, 166, "Tabulky", 9, C.primary, "middle");
@@ -676,7 +864,15 @@ function genResponsiveDesign() {
   s += boldText(420, 93, "TABLET (768-1024px)", 12, C.warning, "middle");
 
   // Tablet wireframe mini
-  s += rect(340, 120, 160, 150, C.white, 4, `stroke="${C.border}" stroke-width="1"`);
+  s += rect(
+    340,
+    120,
+    160,
+    150,
+    C.white,
+    4,
+    `stroke="${C.border}" stroke-width="1"`,
+  );
   s += rect(340, 120, 30, 150, "#1E293B", 4);
   s += text(355, 140, "☰", 12, "#CBD5E1", "middle");
   s += text(440, 145, "Obsah", 11, C.text, "middle");
@@ -693,7 +889,15 @@ function genResponsiveDesign() {
   s += boldText(690, 93, "MOBIL (< 768px)", 12, C.success, "middle");
 
   // Mobile wireframe mini
-  s += rect(625, 120, 110, 150, C.white, 8, `stroke="${C.border}" stroke-width="1"`);
+  s += rect(
+    625,
+    120,
+    110,
+    150,
+    C.white,
+    8,
+    `stroke="${C.border}" stroke-width="1"`,
+  );
   s += rect(625, 120, 110, 25, "#1E293B", 8);
   s += text(640, 136, "☰", 10, "#CBD5E1");
   s += text(680, 137, "LAPA IS", 10, "#CBD5E1", "middle");
@@ -711,7 +915,14 @@ function genResponsiveDesign() {
   // Key mobile functions
   s += card(30, 310, w - 60, 90);
   s += rect(30, 310, w - 60, 32, C.primaryLight, 12);
-  s += boldText(w / 2, 332, "Klicove funkce na mobilnim zarizeni", 12, C.primary, "middle");
+  s += boldText(
+    w / 2,
+    332,
+    "Klicove funkce na mobilnim zarizeni",
+    12,
+    C.primary,
+    "middle",
+  );
 
   const mobileFuncs = [
     "Prehled pripadu",
@@ -759,7 +970,13 @@ function genBackupStrategy() {
     const row = Math.floor(i / 2);
     const ix = 60 + col * 350;
     const iy = 115 + row * 24;
-    s += text(ix, iy, item.icon, 8, item.icon === "●" ? C.success : C.textMuted);
+    s += text(
+      ix,
+      iy,
+      item.icon,
+      8,
+      item.icon === "●" ? C.success : C.textMuted,
+    );
     s += text(ix + 14, iy, item.label, 12, C.text);
   });
 

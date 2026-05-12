@@ -1,5 +1,10 @@
 <template>
-  <button class="width-toggle" :title="title" @click="cycle" :aria-label="title">
+  <button
+    class="width-toggle"
+    :title="title"
+    @click="cycle"
+    :aria-label="title"
+  >
     <svg
       class="icon"
       xmlns="http://www.w3.org/2000/svg"
@@ -9,9 +14,24 @@
       aria-hidden="true"
     >
       <!-- page / background -->
-      <rect x="0" y="0" width="20" height="10" rx="2" fill="currentColor" opacity="0.25" />
+      <rect
+        x="0"
+        y="0"
+        width="20"
+        height="10"
+        rx="2"
+        fill="currentColor"
+        opacity="0.25"
+      />
       <!-- content column — width changes per mode -->
-      <rect :x="icon.x" y="0" :width="icon.w" height="10" :rx="icon.rx" fill="currentColor" />
+      <rect
+        :x="icon.x"
+        y="0"
+        :width="icon.w"
+        height="10"
+        :rx="icon.rx"
+        fill="currentColor"
+      />
     </svg>
   </button>
 </template>

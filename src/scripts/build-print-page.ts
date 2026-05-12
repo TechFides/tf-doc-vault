@@ -27,7 +27,9 @@ const PRAGUE_DATE = new Intl.DateTimeFormat("cs-CZ", {
 function subDirs(dir: string): string[] {
   return fs
     .readdirSync(dir, { withFileTypes: true })
-    .filter((e) => e.isDirectory() && !IGNORE.has(e.name) && !e.name.startsWith("."))
+    .filter(
+      (e) => e.isDirectory() && !IGNORE.has(e.name) && !e.name.startsWith("."),
+    )
     .map((e) => e.name)
     .sort((a, b) => a.localeCompare(b, "cs"));
 }
@@ -59,16 +61,19 @@ function extractTitle(filePath: string): string {
 }
 
 function rewriteLinks(content: string, fromFile: string): string {
-  return content.replace(/\[([^\]]+)\]\((\.[^)]+\.md[^)]*)\)/g, (_, text, href) => {
-    const target = href.split("#")[0] as string;
-    const abs = path.resolve(path.dirname(fromFile), target);
-    const slug = path
-      .relative(DOCS_ROOT, abs)
-      .replace(/\.md$/, "")
-      .replace(/\//g, "-")
-      .toLowerCase();
-    return `[${text}](#${slug})`;
-  });
+  return content.replace(
+    /\[([^\]]+)\]\((\.[^)]+\.md[^)]*)\)/g,
+    (_, text, href) => {
+      const target = href.split("#")[0] as string;
+      const abs = path.resolve(path.dirname(fromFile), target);
+      const slug = path
+        .relative(DOCS_ROOT, abs)
+        .replace(/\.md$/, "")
+        .replace(/\//g, "-")
+        .toLowerCase();
+      return `[${text}](#${slug})`;
+    },
+  );
 }
 
 interface Page {
@@ -113,7 +118,9 @@ function collectPages(): Page[] {
 const pages = collectPages();
 const parts: string[] = [];
 
-parts.push(`---\ntitle: Dokumentace — kompletní výstup\nlayout: PrintLayout\n---\n`);
+parts.push(
+  `---\ntitle: Dokumentace — kompletní výstup\nlayout: PrintLayout\n---\n`,
+);
 parts.push(`# Dokumentační portál\n`);
 parts.push(`**Generováno:** ${PRAGUE_DATE}\n`);
 parts.push(`**Počet stránek:** ${pages.length}\n`);
@@ -123,7 +130,9 @@ let currentGroup = "";
 for (const page of pages) {
   const groupKey = `${page.section}/${page.group}`;
   if (groupKey !== currentGroup) {
-    parts.push(`\n**${page.group.charAt(0).toUpperCase() + page.group.slice(1)}**\n`);
+    parts.push(
+      `\n**${page.group.charAt(0).toUpperCase() + page.group.slice(1)}**\n`,
+    );
     currentGroup = groupKey;
   }
   parts.push(`- [${page.title}](#${page.slug})\n`);

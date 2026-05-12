@@ -3,7 +3,7 @@ name: 📦 Release & Publish
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
@@ -26,15 +26,13 @@ jobs:
 
       - name: 🔧 Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'pnpm'
+          registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
 
       - name: 🔒 Verify tag matches package.json version
         run: |
@@ -48,7 +46,7 @@ jobs:
       - name: 📦 Install dependencies
         run: pnpm install --frozen-lockfile
         env:
-          HUSKY: '0'
+          HUSKY: "0"
 
       - name: 🏗️ Build
         run: pnpm build

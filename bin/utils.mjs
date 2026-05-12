@@ -25,9 +25,22 @@ export function parseArgs(argv) {
 
 // Binary extensions to skip — everything else is treated as text.
 export const BINARY_EXTENSIONS = new Set([
-  ".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico",
-  ".pdf", ".woff", ".woff2", ".ttf", ".otf", ".eot",
-  ".zip", ".tar", ".gz", ".tgz",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".webp",
+  ".ico",
+  ".pdf",
+  ".woff",
+  ".woff2",
+  ".ttf",
+  ".otf",
+  ".eot",
+  ".zip",
+  ".tar",
+  ".gz",
+  ".tgz",
 ]);
 
 /**

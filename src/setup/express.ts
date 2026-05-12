@@ -28,17 +28,18 @@ export interface SetupTechDocsOptions {
 export async function createTechDocsHandler(
   opts: SetupTechDocsOptions = {},
 ): Promise<RequestHandler | null> {
-  const log = opts.logger ?? ((m: string): void => console.warn(`[tech-docs] - ${m}`));
+  const log =
+    opts.logger ?? ((m: string): void => console.warn(`[tech-docs] - ${m}`));
 
   if (!opts.auth?.password) {
     log("auth.password not set; tech-docs endpoint disabled");
     return null;
   }
 
-  const mountFolder =
-    (opts.basePath ?? "/tech-docs").replace(/^\/+/, "");
+  const mountFolder = (opts.basePath ?? "/tech-docs").replace(/^\/+/, "");
   const distDir =
-    opts.distDir ?? path.resolve(process.cwd(), `${mountFolder}/docs/.vitepress/dist`);
+    opts.distDir ??
+    path.resolve(process.cwd(), `${mountFolder}/docs/.vitepress/dist`);
 
   if (
     !fs.existsSync(distDir) ||
@@ -58,11 +59,17 @@ export async function createTechDocsHandler(
     const header = req.headers.authorization;
     if (header?.startsWith("Basic ")) {
       const provided = Buffer.from(header.slice(6), "base64");
-      if (provided.length === expected.length && timingSafeEqual(provided, expected)) {
+      if (
+        provided.length === expected.length &&
+        timingSafeEqual(provided, expected)
+      ) {
         return next();
       }
     }
-    res.setHeader("WWW-Authenticate", `Basic realm="Tech Docs", charset="UTF-8"`);
+    res.setHeader(
+      "WWW-Authenticate",
+      `Basic realm="Tech Docs", charset="UTF-8"`,
+    );
     res.status(401).end("Authentication required");
   });
 

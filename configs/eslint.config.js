@@ -16,7 +16,11 @@ import prettier from "eslint-config-prettier";
  */
 export default [
   {
-    ignores: ["docs/.vitepress/dist/**", "docs/.vitepress/cache/**", "node_modules/**"],
+    ignores: [
+      "docs/.vitepress/dist/**",
+      "docs/.vitepress/cache/**",
+      "node_modules/**",
+    ],
   },
   {
     files: ["**/*.ts"],
@@ -31,7 +35,10 @@ export default [
     },
     rules: {
       ...tseslint.configs.recommended.rules,
-      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
       "@typescript-eslint/explicit-function-return-type": "error",
       "@typescript-eslint/no-explicit-any": "error",
     },

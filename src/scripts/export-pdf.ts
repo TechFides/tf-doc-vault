@@ -36,11 +36,18 @@ async function waitForServer(url: string, timeoutMs: number): Promise<void> {
 }
 
 function startPreviewServer(): ChildProcess {
-  const vitepressBin = path.resolve(PROJECT_ROOT, "node_modules/vitepress/bin/vitepress.js");
-  const server = spawn("node", [vitepressBin, "preview", "docs", "--port", String(PORT)], {
-    stdio: "pipe",
-    cwd: PROJECT_ROOT,
-  });
+  const vitepressBin = path.resolve(
+    PROJECT_ROOT,
+    "node_modules/vitepress/bin/vitepress.js",
+  );
+  const server = spawn(
+    "node",
+    [vitepressBin, "preview", "docs", "--port", String(PORT)],
+    {
+      stdio: "pipe",
+      cwd: PROJECT_ROOT,
+    },
+  );
   server.stderr?.on("data", (d: Buffer) => {
     const line = d.toString().trim();
     if (line) process.stderr.write(`  [preview] ${line}\n`);
@@ -50,7 +57,9 @@ function startPreviewServer(): ChildProcess {
 
 const distDir = path.resolve(PROJECT_ROOT, "docs/.vitepress/dist");
 if (!fs.existsSync(distDir)) {
-  console.error("✗ docs/.vitepress/dist nenalezen. Spusť nejdříve: tf-doc-vault print && vitepress build docs");
+  console.error(
+    "✗ docs/.vitepress/dist nenalezen. Spusť nejdříve: tf-doc-vault print && vitepress build docs",
+  );
   process.exit(1);
 }
 
@@ -64,7 +73,9 @@ try {
   console.log(`✓ Server běží na ${BASE_URL}`);
 
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const page = await browser.newPage({
+    viewport: { width: 1280, height: 900 },
+  });
 
   await page.emulateMedia({ media: "screen", colorScheme: "light" });
 
