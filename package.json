@@ -93,7 +93,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "dev": "node scripts/build.mjs --watch",
-    "prepare": "node scripts/build.mjs",
+    "prepare": "node scripts/build.mjs && husky",
     "typecheck": "tsc --noEmit",
     "lint": "eslint --config configs/eslint.config.js src bin --ignore-pattern 'src/setup/**'",
     "format": "prettier --write .",
@@ -123,6 +123,8 @@
     "playwright": "^1.59.1"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.0.1",
+    "@commitlint/config-conventional": "^21.0.1",
     "@nestjs/common": "^10",
     "@types/express": "^4",
     "@types/node": "^25.6.0",
@@ -131,6 +133,7 @@
     "changelogen": "^0.6.2",
     "eslint": "^10.2.1",
     "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
     "mermaid": "^11.14.0",
     "prettier": "^3.8.3",
     "tf-licence-checker": "^1.1.9",
