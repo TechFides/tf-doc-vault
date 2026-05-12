@@ -39,13 +39,17 @@ Options:
   --ref=<git-ref>         Git tag/branch/SHA to pin to when --source=git (default: v<package version>)
   --git-url=<url>         Override git URL when --source=git
                             default: git+ssh://git@github.com/techfides/tf-doc-vault.git
-  --no-git                Skip git init + first commit
+  --no-git                Skip git init + first commit.
+                            Use when embedding the docs inside an existing repo.
+                            All infrastructure is still generated so the docs
+                            can be deployed to Cloud Run independently.
 
 Examples:
   create-ana ajp_ana  --gcp-project=tfsa-ajp --server=nginx
   create-ana lapa_ana --gcp-project=tfsa-lapa --server=nginx-auth
   create-ana foo_ana  --dev                                    # local dev → file:../tf-doc-vault
   create-ana bar_ana  --ref=v0.2.0                             # pin to a specific git tag
+  create-ana erp_ana  --no-git                                 # embed inside an existing repo
 `);
   process.exit(exitCode);
 }
@@ -113,6 +117,7 @@ if (!["nginx", "nginx-auth"].includes(serverType)) {
 
 const targetDir = path.resolve(process.cwd(), projectName);
 const vitepressCommonDep = resolveDependencyValue(flags, targetDir);
+const skipGit = flags["no-git"];
 
 if (fs.existsSync(targetDir)) {
   console.error(`✗ Cíl už existuje: ${targetDir}`);
@@ -125,6 +130,7 @@ console.log(`  projekt   : ${projectName}`);
 console.log(`  GCP       : ${gcpProject}`);
 console.log(`  server    : ${serverType}`);
 console.log(`  common    : ${vitepressCommonDep}`);
+console.log(`  git       : ${skipGit ? "ne (embedded)" : "ano"}`);
 
 copyDir(TEMPLATE_DIR, targetDir, { renameEntry: consumerName });
 
@@ -140,7 +146,7 @@ replacePlaceholders(targetDir, {
   __BASIC_AUTH_PASS__: "",
 });
 
-if (!flags["no-git"]) {
+if (!skipGit) {
   spawnSync("git", ["init", "-q"], { cwd: targetDir, stdio: "inherit" });
   spawnSync("git", ["add", "."], { cwd: targetDir, stdio: "inherit" });
   spawnSync(
@@ -159,7 +165,28 @@ Pokud je @techfides/tf-doc-vault ještě nezbuildovaný, spusť jednou:
 `
   : "";
 
-console.log(`
+if (skipGit) {
+  console.log(`
+✓ Hotovo (embedded — bez vlastního git repozitáře).
+${devBootstrap}
+Další kroky:
+  cd ${projectName}
+  pnpm install
+  pnpm docs:dev          # http://localhost:5173
+
+Dokumentace žije uvnitř nadřazeného repozitáře.
+Commitni ji spolu s ostatními změnami:
+  git add ${projectName}/
+  git commit -m "docs: add ${projectName} analytical documentation"
+  git push
+
+Deploy (Cloud Run — vlastní pipeline nezávisle na službě):
+  cd ${projectName}/infra
+  terraform init && terraform apply
+  # nastavit CI/CD variables (GCP_SA_KEY, …) dle outputů terraformu
+`);
+} else {
+  console.log(`
 ✓ Hotovo.
 ${devBootstrap}
 Další kroky:
@@ -174,3 +201,4 @@ Deploy:
   git remote add origin git@github.com:techfides/tf-analysis/${projectName}.git
   git push -u origin master
 `);
+}

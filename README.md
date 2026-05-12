@@ -165,34 +165,11 @@ If `auth.password` is empty or `dist/` does not exist, `setupTechDocs` does noth
 
 Add the `docs-build` stage — see [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
 
-### Confluence migration
-
-```bash
-export CONFLUENCE_USER_EMAIL=you@email.com
-export CONFLUENCE_API_TOKEN=<token>
-
-pnpm exec tf-doc-vault import-confluence \
-  --site=myorg.atlassian.net \
-  --root-page-id=<id> \
-  --output=./tech-docs/docs/v1
-```
-
-#### tf-doc-vault import-confluence [options]
-
-| Option                | Default               | Description                                                                                     |
-|-----------------------|-----------------------|-------------------------------------------------------------------------------------------------|
-| `--site=<host>`       | *(required)*          | Confluence hostname, e.g. `myorg.atlassian.net`.                                                |
-| `--root-page-id=<id>` | *(required)*          | ID of the root Confluence page to import. Found in the page URL: `.../pages/**123456789**/...`. |
-| `--output=<dir>`      | `./tech-docs/docs/v1` | Output directory for generated Markdown files.                                                  |
-| `--space=<KEY>`       | *(none)*              | Confluence space key — informational only, not used during import.                              |
-
-Required environment variables: `CONFLUENCE_USER_EMAIL`, `CONFLUENCE_API_TOKEN` (Atlassian API token from Settings → Security → API tokens).
-
-Detailed guide: [`template-tech-docs/import-confluence.md`](template-tech-docs/import-confluence.md).
-
 ## Analytical documentation — Creating a new repo
 
-The package supports the use case where documentation has its own dedicated repo.
+The package supports the use case where documentation has its own dedicated infrastructure.
+
+### Initialisation
 
 ```bash
 pnpm dlx @techfides/tf-doc-vault create my_analysis \
@@ -217,7 +194,21 @@ pnpm docs:dev           # http://localhost:5173
 
 Deployment via `terraform apply` in `infra/` + push to GitLab (CI builds the image and deploys to Cloud Run).
 
-### Push to GitLab
+#### tf-doc-vault create [options]
+
+`tf-doc-vault create <project-name> [options]`:
+
+| Option               | Default                                               | Description                                                                                                                                             |
+|----------------------|-------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `--gcp-project=<id>` | `tfsa-<project>`                                      | GCP project ID (written to `terraform.tfvars`).                                                                                                         |
+| `--server=<type>`    | `nginx`                                               | Runtime image: `nginx` (static, no auth) or `nginx-auth` (Nginx + Basic auth from `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`).                                 |
+| `--source=<src>`     | `git`                                                 | `git` → `git+ssh://…/tf-doc-vault.git#<ref>` (production, pinned to tag). `file` → `file:<path>` (local package development next to the consumer repo). |
+| `--ref=<git-ref>`    | `v<package version>`                                  | Tag/branch/SHA for `--source=git`.                                                                                                                      |
+| `--git-url=<url>`    | `git+ssh://git@github.com/techfides/tf-doc-vault.git` | Override git URL for `--source=git`.                                                                                                                    |
+| `--file-path=<path>` | relative path to the package                          | Override `file:` path for `--source=file`.                                                                                                              |
+| `--no-git`           | *(false)*                                             | Skip `git init` + first commit. Use when embedding the docs inside an existing repo — all infrastructure is still generated.                            |
+
+### 1. Push to a new GitLab repository
 
 The GitLab repository **does not need to be created in advance** — we
 use [push-to-create](https://docs.gitlab.com/topics/git/project/#create-a-project-using-git-push). Just add the remote and push; GitLab will automatically
@@ -233,18 +224,59 @@ Prerequisite: you need at least `Developer` rights in `techfides/tf-analysis` (p
 first push, set the CI/CD variables (`GCP_SA_KEY`, `GCP_PROJECT`, `GCP_REGION`, `SERVICE_NAME`) in the newly created project — without them the `🐳 build:docs`
 job will fail.
 
-### Scaffolder options
+### 2. Embedded analytical docs (no standalone repo)
 
-`tf-doc-vault create <project-name> [options]`:
+If the analytical documentation should live inside an existing service or project repo rather than having its own git repository, add `--no-git`:
 
-| Option               | Default                                               | Description                                                                                                                                             |
-|----------------------|-------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `--gcp-project=<id>` | `tfsa-<project>`                                      | GCP project ID (written to `terraform.tfvars`).                                                                                                         |
-| `--server=<type>`    | `nginx`                                               | Runtime image: `nginx` (static, no auth) or `nginx-auth` (Nginx + Basic auth from `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`).                                 |
-| `--source=<src>`     | `git`                                                 | `git` → `git+ssh://…/tf-doc-vault.git#<ref>` (production, pinned to tag). `file` → `file:<path>` (local package development next to the consumer repo). |
-| `--ref=<git-ref>`    | `v<package version>`                                  | Tag/branch/SHA for `--source=git`.                                                                                                                      |
-| `--git-url=<url>`    | `git+ssh://git@github.com/techfides/tf-doc-vault.git` | Override git URL for `--source=git`.                                                                                                                    |
-| `--file-path=<path>` | relative path to the package                          | Override `file:` path for `--source=file`.                                                                                                              |
+```bash
+pnpm dlx @techfides/tf-doc-vault create ana_project \
+  --gcp-project=ana_project \
+  --server=nginx \
+  --no-git
+```
+
+This creates the `ana_project/` directory with the full analytical docs structure and all infrastructure files (Dockerfile, CI, Terraform, nginx configs) — the
+only difference is that no `git init` is run. The docs are committed as part of the parent repo and can still be deployed to Cloud Run independently using their
+own CI/CD pipeline.
+
+After scaffolding:
+
+```bash
+cd ana_project
+pnpm install
+pnpm docs:dev          # http://localhost:5173
+
+# commit as part of the parent repo
+cd ..
+git add ana_project/
+git commit -m "docs: add ana_project analytical documentation"
+git push
+```
+
+## Confluence migration
+
+```bash
+export CONFLUENCE_USER_EMAIL=you@email.com
+export CONFLUENCE_API_TOKEN=<token>
+
+pnpm exec tf-doc-vault import-confluence \
+  --site=myorg.atlassian.net \
+  --root-page-id=<id> \
+  --output=./ana_docs_folder/docs/v1
+```
+
+#### tf-doc-vault import-confluence [options]
+
+| Option                | Default               | Description                                                                                     |
+|-----------------------|-----------------------|-------------------------------------------------------------------------------------------------|
+| `--site=<host>`       | *(required)*          | Confluence hostname, e.g. `myorg.atlassian.net`.                                                |
+| `--root-page-id=<id>` | *(required)*          | ID of the root Confluence page to import. Found in the page URL: `.../pages/**123456789**/...`. |
+| `--output=<dir>`      | `./tech-docs/docs/v1` | Output directory for generated Markdown files.                                                  |
+| `--space=<KEY>`       | *(none)*              | Confluence space key — informational only, not used during import.                              |
+
+Required environment variables: `CONFLUENCE_USER_EMAIL`, `CONFLUENCE_API_TOKEN` (Atlassian API token from Settings → Security → API tokens).
+
+Detailed guide: [`template-tech-docs/import-confluence.md`](template-tech-docs/import-confluence.md).
 
 ## Updating documentation
 
