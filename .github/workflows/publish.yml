@@ -17,6 +17,7 @@ jobs:
   release:
     name: 🚀 Build & Publish to npmjs.com
     runs-on: ubuntu-latest
+    environment: npm-publish
     steps:
       - name: 🔀 Checkout
         uses: actions/checkout@v4
@@ -35,6 +36,15 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'pnpm'
 
+      - name: 🔒 Verify tag matches package.json version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(node -p "require('./package.json').version")
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::Tag v$TAG does not match package.json $PKG. Aborting."
+            exit 1
+          fi
+
       - name: 📦 Install dependencies
         run: pnpm install --frozen-lockfile
         env:
@@ -43,11 +53,10 @@ jobs:
       - name: 🏗️ Build
         run: pnpm build
 
-      - name: 📜 Generate changelog
-        run: pnpm changelog
+      - name: 🚀 Publish to npmjs.com
+        run: pnpm publish --provenance --access=public --no-git-checks
+
+      - name: 📝 Create GitHub Release
+        run: pnpm dlx changelogen@latest gh release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: 🚀 Publish to npmjs.com
-        run: pnpm publish --access=public --no-git-checks

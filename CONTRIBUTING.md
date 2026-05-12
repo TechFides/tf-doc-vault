@@ -12,9 +12,68 @@ pnpm dev       # watch mode: tsc --watch + asset copy
 ## Workflow
 
 - Use **pnpm** (enforced via corepack).
-- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/).
+- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/). `changelogen` derives the next version and changelog entries from these, so keep them well-formed.
 - Run `pnpm typecheck && pnpm lint` before submitting a PR.
-- Releases are tagged `vX.Y.Z` and trigger the npm publish GitHub Action automatically.
+- Releases: see [Releasing](#releasing) below.
+
+## Releasing
+
+Releases are cut **locally** with `changelogen`, then a tag push triggers a publish workflow that requires manual approval. Anyone with write access can prepare a release, but a designated reviewer must approve before anything reaches npm.
+
+### 1. Cut the release locally
+
+```bash
+git checkout master
+git pull --ff-only
+pnpm release         # = changelogen --release
+```
+
+`pnpm release` reads conventional commits since the last `v*` tag, computes the next version, writes it to `package.json`, prepends a section to `CHANGELOG.md`, and creates a commit + annotated tag (`chore(release): v0.x.y` / `v0.x.y`).
+
+> **Semver note for 0.x versions:** under `0.x.y`, `feat:` bumps the middle digit and `fix:` bumps the last. Standard semver kicks in at `1.0.0`.
+
+To force a specific bump or version:
+
+```bash
+pnpm changelogen --release --minor      # force minor bump
+pnpm changelogen --release -r 0.2.0     # pin exact version
+```
+
+### 2. Review and push
+
+```bash
+git show HEAD                # the chore(release) commit — sanity check
+git tag --list 'v*' | tail -3
+git push --follow-tags       # pushes the commit AND the tag
+```
+
+### 3. Approve the deployment
+
+Pushing the `v*` tag starts the `Release & Publish` workflow, which **pauses on the `npm-publish` environment** waiting for a required reviewer.
+
+- Open the run in the **Actions** tab.
+- Click **Review deployments** → tick `npm-publish` → **Approve and deploy**.
+
+Until you approve, nothing builds, publishes, or releases.
+
+### 4. Verify
+
+- **npmjs.com**: the new version page shows a **Provenance** badge linking to the workflow run.
+- **GitHub Releases**: a new release exists, body matches the just-added `CHANGELOG.md` section.
+
+### Recovery: CI failed after the tag was pushed
+
+The tag and `chore(release)` commit are already on `master`. Nothing was published. Two options:
+
+- **Fix forward** (recommended): make the fix, run `pnpm release` again — that cuts the next patch (the failed tag stays in history as a dead tag).
+- **Clean up the dead tag** (optional, cosmetic): `git push --delete origin vX.Y.Z && git tag -d vX.Y.Z`.
+
+### Security model
+
+- **Tag push** requires write access to the repo.
+- **`npm-publish` environment** requires manual approval from a named reviewer — a contributor with write access cannot publish on their own.
+- **npm trusted publisher** is pinned to this repo, the `publish.yml` workflow, the `release` job, and the `npm-publish` environment. Any drift (e.g. someone edits the workflow to drop the environment) makes npm reject the publish, even if the workflow itself runs.
+- No `NPM_TOKEN` exists in the repo; auth is via OIDC at publish time.
 
 ## Testing changes locally
 
