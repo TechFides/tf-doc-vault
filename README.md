@@ -1,47 +1,52 @@
+# Free from TechFides ❤️
+
+---
+
 # @techfides/tf-doc-vault
 
-Sdílený VitePress tooling pro TFSA dokumentace — analytické `*_ana` repos i technická dokumentace přímo v service repu.
+Shared VitePress tooling for TFSA documentation — analytical `*_ana` repos and technical documentation living directly in service repos.
 
-Cíl: nasadit nové analýzové repo do 5 minut. Vyřešit jednou — sdílet napříč všemi `*_ana` repos.
+Goal: spin up a new analysis repo in under 5 minutes. Solve once — share across all `*_ana` repos.
 
-## Co balíček obsahuje
+## What the package includes
 
-- **`config`** — factory `makeConfig()` postaví celou VitePress konfiguraci (locales, nav, sidebar, lokalizace, mermaid, volitelně analytics + editLink).
-- **`theme`** — `createTheme()` vrací VitePress theme se sdílenými komponentami: DocMeta, ImageLightbox, PrintLayout, VersionSwitcher, volitelně WidthToggle.
-- **`sidebar`** — generátor `nav` a `sidebar` z adresářové struktury `docs/<verze>/<sekce>/<skupina>/`.
-- **`scripts`** — `build-print-page`, `export-pdf`, `validate-docs`, `normalize-docs`, `ensure-lf`, `fix`, `sync-template`. Spouštěné přes CLI `tf-doc-vault`.
-- **`setup/express`** — `createTechDocsHandler()`: Express middleware pro servování `tech-docs/` s Basic auth.
-- **`setup/nest`** — `setupTechDocs()`: NestJS wrapper pro mount tech-docs do běžící aplikace.
-- **`bin/tf-doc-vault`** — CLI dispatcher: `create | init-tech-docs | import-confluence | print | export-pdf | pdf | validate | normalize | ensure-lf | fix | sync`.
-- **`bin/create-ana`** — alias pro `tf-doc-vault create` (přímá invokace scaffolderu).
-- **`configs`** — `eslint.config.js`, `prettier.json`, `tsconfig.base.json` k extends.
-- **`infra/terraform`** — reusable modul pro Cloud Run + Artifact Registry + IAM.
-- **`docker`** — multi-stage Dockerfile s `ARG SERVER_TYPE=nginx|nginx-auth` + nginx confs.
-- **`template`** — kostra nového `*_ana` repa.
+- **`config`** — factory `makeConfig()` builds a complete VitePress config (locales, nav, sidebar, i18n, mermaid, optional analytics + editLink).
+- **`theme`** — `createTheme()` returns a VitePress theme with shared components: DocMeta, ImageLightbox, PrintLayout, VersionSwitcher, optional WidthToggle.
+- **`sidebar`** — `nav` and `sidebar` generator from the `docs/<version>/<section>/<group>/` directory structure.
+- **`scripts`** — `build-print-page`, `export-pdf`, `validate-docs`, `normalize-docs`, `ensure-lf`, `fix`, `sync-template`. Invoked via the `tf-doc-vault` CLI.
+- **`setup/express`** — `createTechDocsHandler()`: Express middleware for serving `tech-docs/` with Basic auth.
+- **`setup/nest`** — `setupTechDocs()`: NestJS wrapper for mounting tech-docs into a running application.
+- **`bin/tf-doc-vault`** — CLI dispatcher:
+  `create | init-tech-docs | import-confluence | print | export-pdf | pdf | validate | normalize | ensure-lf | fix | sync`.
+- **`bin/create-ana`** — alias for `tf-doc-vault create` (direct scaffolder invocation).
+- **`configs`** — `eslint.config.js`, `prettier.json`, `tsconfig.base.json` to extend.
+- **`infra/terraform`** — reusable module for Cloud Run + Artifact Registry + IAM.
+- **`docker`** — multi-stage Dockerfile with `ARG SERVER_TYPE=nginx|nginx-auth` + nginx configs.
+- **`template`** — skeleton for a new `*_ana` repo.
 
-## Použití v aplikačním repu
+## Usage in an application repo
 
 `docs/.vitepress/config.ts`:
 
 ```ts
-import { makeConfig } from "@techfides/tf-doc-vault/config";
+import {makeConfig} from "@techfides/tf-doc-vault/config";
 
 export default makeConfig({
-  configDir: import.meta.dirname,
-  project: "lapa",
-  // volitelné:
-  analytics: { provider: "umami", websiteId: "...", domain: "..." },
-  editLink: { repo: "techfides/tf-analysis/lapa_ana", branch: "master" },
+    configDir: import.meta.dirname,
+    project: "lapa",
+    // optional:
+    analytics: {provider: "umami", websiteId: "...", domain: "..."},
+    editLink: {repo: "techfides/tf-analysis/lapa_ana", branch: "master"},
 });
 ```
 
 `docs/.vitepress/theme/index.ts`:
 
 ```ts
-import { createTheme } from "@techfides/tf-doc-vault/theme";
-import "./custom.css"; // overrides nad base CSS
+import {createTheme} from "@techfides/tf-doc-vault/theme";
+import "./custom.css"; // overrides on top of base CSS
 
-export default createTheme({ widthToggle: true });
+export default createTheme({widthToggle: true});
 ```
 
 `package.json`:
@@ -65,34 +70,41 @@ export default createTheme({ widthToggle: true });
     "@techfides/tf-doc-vault": "git+ssh://git@github.com/techfides/tf-doc-vault.git#v0.1.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@techfides/tf-doc-vault"]
+    "onlyBuiltDependencies": [
+      "@techfides/tf-doc-vault"
+    ]
   }
 }
 ```
 
-`pnpm.onlyBuiltDependencies` je nutný — pnpm 10 jinak odmítne spustit `prepare` hook git závislosti a `dist/` se nepostaví.
+`pnpm.onlyBuiltDependencies` is required — pnpm 10 otherwise refuses to run the `prepare` hook for git dependencies and `dist/` won't be built.
 
-## Technická dokumentace v service repu (tech-docs)
+## Technical documentation in a service repo (tech-docs)
 
-Balíček podporuje **tech-docs** use case: VitePress dokumentace žijí přímo v service repu a NestJS aplikace jí vystavuje na `/tech-docs` s Basic auth.
+The package supports the **tech-docs** use case: VitePress documentation lives directly in the service repo and the NestJS application serves it at `/tech-docs`
+with Basic auth.
 
-### Inicializace
+### Initialisation
 
 ```bash
-# V kořeni service repa
+# In the service repo root
 pnpm exec tf-doc-vault init-tech-docs \
-  --service-id=BAT \        # zkratka service
-  --project=flexifin \      # název projektu
-  --repo=myorg/myrepo       # volitelné — GitHub repo pro edit links
+  --service-id=TST \        # service identifier
+  --project=testProject \      # project name
+  --repo=myorg/myrepo       # optional — GitHub repo for edit links
 ```
 
-### Použití
+#### tf-doc-vault init-tech-docs [options]:
 
-Příkaz idempotentně vytvoří `tech-docs/`, doplní `package.json` scripts a `.gitignore`. Po inicializaci následuj tyto kroky:
+| Option              | Default         | Description                                                     |
+|---------------------|-----------------|-----------------------------------------------------------------|
+| `--service-id=<ID>` | *(required)*    | Service identifier, e.g. `TST`. Used in frontmatter and titles. |
+| `--project=<name>`  | cwd folder name | Project name substituted into templates.                        |
+| `--repo=<org/repo>` | *(none)*        | GitHub/GitLab repo path for edit links, e.g. `myorg/myrepo`.    |
 
-1. **Nainstaluj závislosti a spusť lokální preview:**
+### Dependencies
 
-Přidej do `devDependencies` v `package.json` service repa:
+Add to `devDependencies` in the service repo's `package.json`:
 
 ```json
 "vitepress": "^1.6.4",
@@ -100,123 +112,146 @@ Přidej do `devDependencies` v `package.json` service repa:
 "mermaid": "^11.14.0"
 ```
 
-Spusť:
+These packages are peer dependencies of `@techfides/tf-doc-vault` — they must be present directly in the project so the `vitepress` binary is available when
+running `docs:dev` and `docs:build`.
 
-```bash
-npm install
-npm docs:dev
-```
+### Usage
 
-2. **Přidej `docs-build` stage do Dockerfile** — viz [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
+The command idempotently creates `tech-docs/`, adds `package.json` scripts and `.gitignore` entries. After initialisation, follow these steps:
 
-3. **Zavolej `setupTechDocs()` v `main.ts`:**
+1. **Install dependencies and start a local preview:**
+
+   ```bash
+   npm install
+   npm run docs:dev
+   ```
+
+2. **Add the `docs-build` stage to the Dockerfile** — see [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
+
+3. **Call `setupTechDocs()` in `main.ts`:**
 
    ```ts
    import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
 
-   await setupTechDocs("tech-docs", app, {
+   await setupTechDocs("tech-docs/docs", app, {
      auth: { username: "docs", password: process.env.TECH_DOCS_PASSWORD },
-     basePath: '/tech-docs/',
    });
    ```
 
-4. **Nastav `TECH_DOCS_PASSWORD` env proměnnou** (jen dev/staging, ne prod).
+4. **Set the `TECH_DOCS_PASSWORD` env variable** (dev/staging only, not prod).
 
-5. **Zbuildi dokumentaci a ověř nasazení:**
+5. **Build the docs and verify the deployment:**
 
    ```bash
-   npm docs:build
-   npm run dev   # nebo jak spouštíš aplikaci
+   npm run docs:build
+   npm run dev   # or however you start the application
    ```
 
-   Dokumentace bude dostupná na `/tech-docs/` s HTTP Basic auth (**username**: `docs`, **heslo** z `TECH_DOCS_PASSWORD`).
+   The docs will be available at `/tech-docs/` with HTTP Basic auth (**username**: `docs`, **password** from `TECH_DOCS_PASSWORD`).
 
 ### NestJS wiring (`main.ts`)
 
 ```ts
-import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
+import {setupTechDocs} from "@techfides/tf-doc-vault/setup/nest";
 
 await setupTechDocs(app, {
-  auth: { username: "docs", password: process.env.TECH_DOCS_PASSWORD ?? "" },
+    auth: {username: "docs", password: process.env.TECH_DOCS_PASSWORD ?? ""},
 });
 ```
 
-Pokud je `auth.password` prázdné nebo `dist/` neexistuje, `setupTechDocs` nic neprovede.
+If `auth.password` is empty or `dist/` does not exist, `setupTechDocs` does nothing.
 
 ### Dockerfile
 
-Přidej `docs-build` stage — viz [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
+Add the `docs-build` stage — see [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
 
-### Migrace z Confluence
+### Confluence migration
 
 ```bash
-export CONFLUENCE_USER_EMAIL=vas@email.cz
+export CONFLUENCE_USER_EMAIL=you@email.com
 export CONFLUENCE_API_TOKEN=<token>
 
 pnpm exec tf-doc-vault import-confluence \
   --site=myorg.atlassian.net \
   --root-page-id=<id> \
-  --output=./tech-docs/v1
+  --output=./tech-docs/docs/v1
 ```
 
-Podrobný návod: [`template-tech-docs/import-confluence.md`](template-tech-docs/import-confluence.md).
+#### tf-doc-vault import-confluence [options]
 
-## Analytická dokumentace — Založení nového repa
+| Option                | Default               | Description                                                                                     |
+|-----------------------|-----------------------|-------------------------------------------------------------------------------------------------|
+| `--site=<host>`       | *(required)*          | Confluence hostname, e.g. `myorg.atlassian.net`.                                                |
+| `--root-page-id=<id>` | *(required)*          | ID of the root Confluence page to import. Found in the page URL: `.../pages/**123456789**/...`. |
+| `--output=<dir>`      | `./tech-docs/docs/v1` | Output directory for generated Markdown files.                                                  |
+| `--space=<KEY>`       | *(none)*              | Confluence space key — informational only, not used during import.                              |
 
-Balíček podporuje use case, kdy dokumentace má vystavené vlastní repo.
+Required environment variables: `CONFLUENCE_USER_EMAIL`, `CONFLUENCE_API_TOKEN` (Atlassian API token from Settings → Security → API tokens).
+
+Detailed guide: [`template-tech-docs/import-confluence.md`](template-tech-docs/import-confluence.md).
+
+## Analytical documentation — Creating a new repo
+
+The package supports the use case where documentation has its own dedicated repo.
 
 ```bash
-pnpm dlx @techfides/tf-doc-vault create moje_analyza \
-  --gcp-project=tfsa-moje-analyza \
+pnpm dlx @techfides/tf-doc-vault create my_analysis \
+  --gcp-project=tfsa-my-analysis \
   --server=nginx
 ```
 
-Co se stane:
+What happens:
 
-1. `pnpm dlx` stáhne tooling z GitHubu, postaví `dist/` (díky `prepare` hooku), spustí `tf-doc-vault create`.
-2. Scaffolder zkopíruje `template/` do `./moje_analyza/`, nahradí placeholdery (`__PROJECT__`, `__GCP_PROJECT__`, `__SERVER_TYPE__`, `__VITEPRESS_COMMON_DEP__`).
-3. `git init` + první commit (vypneš přes `--no-git`).
+1. `pnpm dlx` downloads the tooling from GitHub, builds `dist/` (via the `prepare` hook), and runs `tf-doc-vault create`.
+2. The scaffolder copies `template/` to `./my_analysis/`, substituting placeholders (`__PROJECT__`, `__GCP_PROJECT__`, `__SERVER_TYPE__`,
+   `__VITEPRESS_COMMON_DEP__`).
+3. `git init` + first commit (disable with `--no-git`).
 
-Pak:
+Then:
 
 ```bash
-cd moje_analyza
-pnpm install            # natáhne peer deps + tf-doc-vault z gitu (prepare hook postaví dist/)
+cd my_analysis
+pnpm install            # pulls peer deps + tf-doc-vault from git (prepare hook builds dist/)
 pnpm docs:dev           # http://localhost:5173
 ```
 
-Deployment přes `terraform apply` v `infra/` + push do GitLabu (CI postaví image a nasadí na Cloud Run).
+Deployment via `terraform apply` in `infra/` + push to GitLab (CI builds the image and deploys to Cloud Run).
 
-### Push do GitLabu
+### Push to GitLab
 
-Repozitář na GitLabu **není potřeba předem vytvářet** — využíváme [push-to-create](https://docs.gitlab.com/topics/git/project/#create-a-project-using-git-push). Stačí přidat remote a pushnout; GitLab projekt automaticky založí v cílové skupině (`techfides/tf-analysis`):
+The GitLab repository **does not need to be created in advance** — we
+use [push-to-create](https://docs.gitlab.com/topics/git/project/#create-a-project-using-git-push). Just add the remote and push; GitLab will automatically
+create the project in the target group (`techfides/tf-analysis`):
 
 ```bash
-cd moje_analyza
-git remote add origin git@gitlab.com:techfides/tf-analysis/moje_analyza.git
+cd my_analysis
+git remote add origin git@gitlab.com:techfides/tf-analysis/my_analysis.git
 git push -u origin master
 ```
 
-Předpoklad: musíš mít v `techfides/tf-analysis` práva `Developer` nebo vyšší (push-to-create vyžaduje permission na vytváření projektů ve skupině). Po prvním pushi nezapomeň ve vytvořeném projektu nastavit CI/CD variables (`GCP_SA_KEY`, `GCP_PROJECT`, `GCP_REGION`, `SERVICE_NAME`) — bez nich `🐳 build:docs` neprojde.
+Prerequisite: you need at least `Developer` rights in `techfides/tf-analysis` (push-to-create requires permission to create projects in the group). After the
+first push, set the CI/CD variables (`GCP_SA_KEY`, `GCP_PROJECT`, `GCP_REGION`, `SERVICE_NAME`) in the newly created project — without them the `🐳 build:docs`
+job will fail.
 
-### Volby scaffolderu
+### Scaffolder options
 
 `tf-doc-vault create <project-name> [options]`:
 
-| Volba | Default | Popis |
-|---|---|---|
-| `--gcp-project=<id>` | `tfsa-<project>` | GCP project ID (jde do `terraform.tfvars`). |
-| `--server=<type>` | `nginx` | Runtime image: `nginx` (statika bez auth) nebo `nginx-auth` (Nginx + Basic auth z `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`). |
-| `--source=<src>` | `git` | `git` → `git+ssh://…/tf-doc-vault.git#<ref>` (produkce, pinováno na tag). `file` → `file:<path>` (lokální vývoj balíčku vedle consumer repa). |
-| `--ref=<git-ref>` | `v<package version>` | Tag/branch/SHA pro `--source=git`. |
-| `--git-url=<url>` | `git+ssh://git@github.com/techfides/tf-doc-vault.git` | Override git URL pro `--source=git`. |
-| `--file-path=<path>` | relativní cesta k balíčku | Override `file:` cesty pro `--source=file`. |
+| Option               | Default                                               | Description                                                                                                                                             |
+|----------------------|-------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `--gcp-project=<id>` | `tfsa-<project>`                                      | GCP project ID (written to `terraform.tfvars`).                                                                                                         |
+| `--server=<type>`    | `nginx`                                               | Runtime image: `nginx` (static, no auth) or `nginx-auth` (Nginx + Basic auth from `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`).                                 |
+| `--source=<src>`     | `git`                                                 | `git` → `git+ssh://…/tf-doc-vault.git#<ref>` (production, pinned to tag). `file` → `file:<path>` (local package development next to the consumer repo). |
+| `--ref=<git-ref>`    | `v<package version>`                                  | Tag/branch/SHA for `--source=git`.                                                                                                                      |
+| `--git-url=<url>`    | `git+ssh://git@github.com/techfides/tf-doc-vault.git` | Override git URL for `--source=git`.                                                                                                                    |
+| `--file-path=<path>` | relative path to the package                          | Override `file:` path for `--source=file`.                                                                                                              |
 
-## Auth pro `nginx-auth`
+## Auth for `nginx-auth`
 
-Runtime `nginx-auth` chrání aplikaci HTTP Basic auth. Login a heslo se nastavují **na buildu** přes Docker build-args `BASIC_AUTH_USER` / `BASIC_AUTH_PASS` — `Dockerfile` z nich vygeneruje `/etc/nginx/.htpasswd`. Pokud jsou prázdné, build padne fail-fast.
+The `nginx-auth` runtime protects the application with HTTP Basic auth. Username and password are set **at build time** via Docker build-args`BASIC_AUTH_USER` /
+`BASIC_AUTH_PASS` — the `Dockerfile` generates `/etc/nginx/.htpasswd` from them. If they are empty, the build fails fast.
 
-Hodnoty se drží přímo v repu, v top-level `variables:` bloku `.gitlab-ci.yml`:
+The values are stored directly in the repo, in the top-level `variables:` block of `.gitlab-ci.yml`:
 
 ```yaml
 variables:
@@ -225,9 +260,10 @@ variables:
   BASIC_AUTH_PASS: "anadocsTF"
 ```
 
-Není to tajný údaj — kdo má přístup do repa, má přístup i do aplikace. Job `🐳 build:docs` je conditional propustí do `docker build` jen když nejsou prázdné, takže projekty bez auth (runtime `nginx`) je jen nechají nevyplněné.
+This is not a secret — anyone with repo access has application access. The `🐳 build:docs` job conditionally passes them to `docker build` only when non-empty,
+so projects without auth (runtime `nginx`) just leave them blank.
 
-Lokální build:
+Local build:
 
 ```bash
 docker build --build-arg SERVER_TYPE=nginx-auth \
@@ -236,53 +272,55 @@ docker build --build-arg SERVER_TYPE=nginx-auth \
              -t docs-web .
 ```
 
-Rotace hesla = úprava `variables:` + commit + redeploy (htpasswd hash je zapečen do image vrstvy).
+Password rotation = update `variables:` + commit + redeploy (the htpasswd hash is baked into the image layer).
 
-### Přepnutí existujícího projektu z `nginx` na `nginx-auth`
+### Switching an existing project from `nginx` to `nginx-auth`
 
-`__SERVER_TYPE__` se zapéká do dvou míst při scaffoldování — pro switch je potřeba upravit obojí:
+`__SERVER_TYPE__` is baked into two places during scaffolding — switching requires updating both:
 
-1. **`.gitlab-ci.yml`** — v `BUILD_ARGS` (job `🐳 build:docs`) změň `SERVER_TYPE=nginx` na `SERVER_TYPE=nginx-auth`.
-2. **`Dockerfile`** — `ARG SERVER_TYPE=nginx` → `ARG SERVER_TYPE=nginx-auth` (default pro lokální buildy bez build-argu; CI ho vždy přepíše).
-3. **`.gitlab-ci.yml`** `variables:` — vyplň `BASIC_AUTH_USER` / `BASIC_AUTH_PASS` (jinak build padne na fail-fast checku v `Dockerfile`).
-4. Commit + push → CI postaví nový image, Cloud Run rolne novou revizi.
+1. **`.gitlab-ci.yml`** — in `BUILD_ARGS` (job `🐳 build:docs`) change `SERVER_TYPE=nginx` to `SERVER_TYPE=nginx-auth`.
+2. **`Dockerfile`** — `ARG SERVER_TYPE=nginx` → `ARG SERVER_TYPE=nginx-auth` (default for local builds without a build-arg; CI always overrides it).
+3. **`.gitlab-ci.yml`** `variables:` — fill in `BASIC_AUTH_USER` / `BASIC_AUTH_PASS` (otherwise the build fails on the fail-fast check in `Dockerfile`).
+4. Commit + push → CI builds a new image, Cloud Run rolls out a new revision.
 
-Zpátky na `nginx` = stejné kroky obráceně + vyprázdnit oba `BASIC_AUTH_*`.
+Back to `nginx` = the same steps in reverse + clear both `BASIC_AUTH_*` values.
 
-## Lokální vývoj balíčku
+## Local package development
 
-Pro iteraci na samotném `tf-doc-vault`:
+For iterating on `tf-doc-vault` itself:
 
 ```bash
-# 1. v balíčku — jednorázově po cloningu
+# 1. in the package — once after cloning
 cd tf-doc-vault
-pnpm install                  # deps + "prepare" hook postaví dist/
-pnpm dev                      # tsc --watch + auto-copy statických assetů (.vue/.css/.json/.ico)
+pnpm install                  # deps + "prepare" hook builds dist/
+pnpm dev                      # tsc --watch + auto-copy static assets (.vue/.css/.json/.ico)
 
-# 2. ve vedlejším aplikačním repu, scaffoldnutém s --dev
-cd ../<něco>_ana
-pnpm install                  # natáhne peer deps a slinkuje file:../tf-doc-vault
-pnpm docs:dev                 # vidí změny z dist/ přes Vite HMR
+# 2. in an adjacent application repo scaffolded with --dev
+cd ../<something>_ana
+pnpm install                  # pulls peer deps and symlinks file:../tf-doc-vault
+pnpm docs:dev                 # sees changes from dist/ via Vite HMR
 ```
 
-Aplikační repo s `--dev` deklaruje závislost přes `file:`:
+An application repo with `--dev` declares the dependency via `file:`:
 
 ```json
-"dependencies": { "@techfides/tf-doc-vault": "file:../tf-doc-vault" }
+"dependencies": {"@techfides/tf-doc-vault": "file:../tf-doc-vault"}
 ```
 
-Předpoklad pro `file:` install: oba adresáře leží vedle sebe (relativní cesta `../tf-doc-vault`). Když je jinde, `--file-path=/abs/path` při scaffoldování přepíše.
+Prerequisite for `file:` install: both directories must be siblings (relative path `../tf-doc-vault`). If the package is elsewhere, `--file-path=/abs/path`
+during scaffolding overrides it.
 
-## Sync šablony do existujícího repa
+## Syncing the template to an existing repo
 
-Když balíček přidá / opraví něco v `template/` (Dockerfile, CI, configs, Terraform), aplikační repos to nedostanou automaticky — patří jim. Pro kontrolu / přepsání:
+When the package adds or fixes something in `template/` (Dockerfile, CI, configs, Terraform), consumer repos don't receive the update automatically — those
+files belong to them. To inspect or apply the diff:
 
 ```bash
-pnpm sync           # ukáže unified diff všech driftnutých souborů
-pnpm sync:apply     # přepíše drifted soubory šablonou (placeholdery se renderují z aktuálního repa)
+pnpm sync           # shows a unified diff of all drifted files
+pnpm sync:apply     # overwrites drifted files with the template (placeholders are rendered from the current repo)
 ```
 
-User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfvars) je vyloučen z přepisování.
+User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfvars) is excluded from overwriting.
 
 ---
 
@@ -290,51 +328,71 @@ User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfv
 
 ### v0.1.0 (tf-doc-vault)
 
-- **Přejmenování:** `@techfides/ana-docs` → `@techfides/tf-doc-vault`, CLI `ana-docs` → `tf-doc-vault`. Publikováno veřejně na npmjs.com (GitHub Actions workflow na tag `v*`).
-- **Tech-docs use case:** `init-tech-docs` subcommand, `setupTechDocs()` Express/NestJS middleware, šablona `template-tech-docs/`, Docker fragment [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
-- **`import-confluence`:** import stromů stránek z Confluence (ADF → Markdown, přílohy, inter-page linky).
-- **`--root=<dir>` flag:** `validate`, `normalize` a `fix` podporují volitelný kořenový adresář (default: `docs`).
-- **Version dropdown:** skrytý při jediné verzi dokumentace.
+- **Rename:** `@techfides/ana-docs` → `@techfides/tf-doc-vault`, CLI `ana-docs` → `tf-doc-vault`. Published publicly to npmjs.com (GitHub Actions workflow on
+  `v*` tag).
+- **Tech-docs use case:** `init-tech-docs` subcommand, `setupTechDocs()` Express/NestJS middleware, `template-tech-docs/` scaffold, Docker fragment [
+  `template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
+- **`import-confluence`:** imports page trees from Confluence (ADF → Markdown, attachments, inter-page links).
+- **`--root=<dir>` flag:** `validate`, `normalize` and `fix` support an optional root directory (default: `docs`).
+- **Version dropdown:** hidden when there is only one documentation version.
 
 ### v0.1.8
 
-- **Sync zachová `BASIC_AUTH_USER` / `BASIC_AUTH_PASS`.** Šablonové `.gitlab-ci.yml` mělo doteď statické `BASIC_AUTH_USER: ""` / `BASIC_AUTH_PASS: ""` — `pnpm sync:apply` tím přepisoval konzument-side credentials na prázdné. Přepnuto na placeholdery `__BASIC_AUTH_USER__` / `__BASIC_AUTH_PASS__`; `detectPlaceholders()` je čte z konzument-side `.gitlab-ci.yml`, takže sync zachová cokoli, co tam uživatel vyplnil. Nový scaffold dostane prázdné stringy (stejné chování jako dřív).
+- **Sync preserves `BASIC_AUTH_USER` / `BASIC_AUTH_PASS`.** The template `.gitlab-ci.yml` previously had static `BASIC_AUTH_USER: ""` / `BASIC_AUTH_PASS: ""` —
+  `pnpm sync:apply` would overwrite consumer-side credentials with empty strings. Switched to placeholders `__BASIC_AUTH_USER__` / `__BASIC_AUTH_PASS__`;
+  `detectPlaceholders()` reads them from the consumer-side `.gitlab-ci.yml`, so sync preserves whatever the user has set. A fresh scaffold gets empty strings (
+  same behaviour as before).
 
 ### v0.1.7
 
-- **Runtime `serve` odstraněn.** Multi-stage Dockerfile měl tři runtime varianty (`serve` / `nginx` / `nginx-auth`); `serve` byl mrtvá nožka — lokální dev jede přes Vite (`pnpm docs:dev`, ne přes Docker), produkce stejně chce nginx kvůli auth cestě. Zůstává `nginx | nginx-auth`. Scaffolder `--server` přijímá jen tyhle dvě hodnoty (default `nginx`); existující projekty s `SERVER_TYPE=serve` musí přepnout na `nginx` v `Dockerfile` a `.gitlab-ci.yml`.
+- **`serve` runtime removed.** The multi-stage Dockerfile had three runtime variants (`serve` / `nginx` / `nginx-auth`); `serve` was dead code — local dev runs
+  via Vite (`pnpm docs:dev`, not Docker), and production always wants nginx for the auth path. Only `nginx | nginx-auth` remain. The `--server` scaffolder flag
+  only accepts these two values (default `nginx`); existing projects with `SERVER_TYPE=serve` must switch to `nginx` in `Dockerfile` and `.gitlab-ci.yml`.
 
 ### v0.1.6
 
-- **Sync — fix `.gitignore` / `.npmrc` mapping.** `template/_gitignore` a `template/_npmrc` se kvůli npm pack stripu jmenují s `_` prefixem; `sync` je hledal pod `.gitignore` / `.npmrc` a tiše je přeskakoval. Doplněn mapping (`templateNameFor`), drift v dotfiles teď sync vidí.
+- **Sync — fix `.gitignore` / `.npmrc` mapping.** `template/_gitignore` and `template/_npmrc` are prefixed with `_` to survive npm pack stripping; `sync` was
+  looking for `.gitignore` / `.npmrc` and silently skipping them. Added a mapping (`templateNameFor`), so drift in dotfiles is now detected.
 
 ### v0.1.5
 
-- **`terraform.tfvars` v gitu** — `_gitignore` šablony už `infra/terraform.tfvars` neignoruje. Soubor je projektově malý a stabilní (project_id, region, service_name), patří k repu. Existující projekty: `pnpm sync:apply` přepíše `.gitignore`, pak `git add infra/terraform.tfvars && git commit`.
+- **`terraform.tfvars` in git** — the `_gitignore` template no longer ignores `infra/terraform.tfvars`. The file is small and stable (project_id, region,
+  service_name) and belongs in the repo. Existing projects: `pnpm sync:apply` will update `.gitignore`, then `git add infra/terraform.tfvars && git commit`.
 
 ### v0.1.4
 
-- **Terraform tfstate v GCS** — `template/infra/main.tf` má `backend "gcs"` blok s bucketem `<gcp-project>-tfstate` a prefixem `docs-web`. Bootstrap bucketu je jednorázový krok přes `gcloud storage buckets create` před prvním `terraform init` (viz `template/README.md`). Pro existující projekty: bucket vytvořit, doplnit backend block, `terraform init -migrate-state` a smazat lokální `terraform.tfstate*` z gitu.
+- **Terraform tfstate in GCS** — `template/infra/main.tf` has a `backend "gcs"` block with bucket `<gcp-project>-tfstate` and prefix `docs-web`. Bootstrapping
+  the bucket is a one-time step via `gcloud storage buckets create` before the first `terraform init` (see `template/README.md`). For existing projects: create
+  the bucket, add the backend block, run `terraform init -migrate-state`, and delete local `terraform.tfstate*` files from git.
 
 ### v0.1.3
 
-- **Scaffolder — `--source=git` jako default.** Volby `--source=npm` a `--source=workspace` odstraněny (npm publish není v plánu). Validní hodnoty: `git` | `file` (`--dev` shortcut zůstává).                                                                                                                   
-- **Auth pro `nginx-auth`** — `BASIC_AUTH_USER` / `BASIC_AUTH_PASS` se drží v top-level `variables:` bloku `.gitlab-ci.yml` (ne v GitLab CI/CD Variables). Šablona má prázdné placeholdery; CI je conditional propustí do `docker build` jen když nejsou prázdné.                                         
-- **README** — sekce "Volby scaffolderu" sjednocena do jedné tabulky s popisem všech voleb (včetně runtime variant pro `--server`). Nové sekce: "Auth pro `nginx-auth`", "Push do GitLabu" (push-to-create flow), "Přepnutí existujícího projektu z `nginx` na `nginx-auth`".                                    
+- **Scaffolder — `--source=git` as default.** The `--source=npm` and `--source=workspace` options were removed (npm publish is not planned). Valid values:
+  `git` | `file` (`--dev` shortcut remains).
+- **Auth for `nginx-auth`** — `BASIC_AUTH_USER` / `BASIC_AUTH_PASS` are stored in the top-level `variables:` block of `.gitlab-ci.yml` (not in GitLab CI/CD
+  Variables). The template has empty placeholders; CI conditionally passes them to `docker build` only when non-empty.
+- **README** — the "Scaffolder options" section consolidated into a single table describing all options (including runtime variants for `--server`). New
+  sections: "Auth for `nginx-auth`", "Push to GitLab" (push-to-create flow), "Switching an existing project from `nginx` to `nginx-auth`".
 
 ### v0.1.2
 
-- **Nové CLI subcommandy** — `gen-diagrams`, `gen-wireframes`, `replace-wireframes` (porty z `lapa_ana/scripts`). Skripty zapisují do `<cwd>/docs/public/images/...` resp. čtou `<cwd>/docs/v1/index.md`.
-- **Build podporuje `.cjs`** — `scripts/build.mjs` kopíruje `.cjs` soubory ze `src/` do `dist/`.
-- **Šablona — `.prettierignore`** — nově obsahuje `pnpm-lock.yaml` a další generované soubory; `format:check` jinak řve na lockfile. Soubor je v `TRACKED_FILES` v `sync-template`, takže existující projekty si ho stáhnou přes `tf-doc-vault sync --apply`.
+- **New CLI subcommands** — `gen-diagrams`, `gen-wireframes`, `replace-wireframes` (ported from `lapa_ana/scripts`). Scripts write to
+  `<cwd>/docs/public/images/...` and read `<cwd>/docs/v1/index.md`.
+- **Build supports `.cjs`** — `scripts/build.mjs` copies `.cjs` files from `src/` to `dist/`.
+- **Template — `.prettierignore`** — now includes `pnpm-lock.yaml` and other generated files; `format:check` would otherwise complain about the lockfile. The
+  file is in `TRACKED_FILES` in `sync-template`, so existing projects pick it up via `tf-doc-vault sync --apply`.
 
 ### v0.1.1
 
-- **CI/Docker fixy v šabloně** — `pnpm install` v Docker builderu teď funguje s `git+ssh` závislostmi: token se předává přes `--build-arg GITLAB_CI_TOKEN`, uvnitř builderu se přepíše SSH URL na HTTPS s `gitlab-ci-token` a `/root/.gitconfig` se po install smaže (token nezůstane v image layerech). Builder image dostal `ca-certificates`, jinak HTTPS clone padá na `server certificate verification failed`.
-- **CI shell** — `📦 install` job má `git config insteadOf` v `before_script`, takže pnpm git fetch funguje i mimo Dockerfile.
-- **Prettier** — šablona ignoruje `.pnpm-store/`, jinak `format:check` řve na obsah pnpm cache v CI.
-- **TypeScript** — šablona obsahuje `docs/.vitepress/theme/shims.d.ts` s `declare module "*.css";`, jinak `tsc` padá na `TS2882: Cannot find module ... ./custom.css` při `module: NodeNext`.
-- **Předpoklad pro CI**: ve zdrojovém repu (`techfides/tf-analysis/tf-doc-vault`) musí být v Settings → CI/CD → Token Access povolený consumer projekt — `CI_JOB_TOKEN` jinak nemá oprávnění klonovat.
+- **CI/Docker fixes in template** — `pnpm install` in the Docker builder now works with `git+ssh` dependencies: the token is passed via
+  `--build-arg GITLAB_CI_TOKEN`, the SSH URL is rewritten to HTTPS with `gitlab-ci-token` inside the builder, and `/root/.gitconfig` is deleted after install (
+  token doesn't leak into image layers). The builder image got `ca-certificates`, otherwise HTTPS cloning fails with `server certificate verification failed`.
+- **CI shell** — the `📦 install` job has `git config insteadOf` in `before_script`, so pnpm git fetch works outside Docker too.
+- **Prettier** — template ignores `.pnpm-store/`, otherwise `format:check` complains about pnpm cache contents in CI.
+- **TypeScript** — template includes `docs/.vitepress/theme/shims.d.ts` with `declare module "*.css";`, otherwise `tsc` fails with
+  `TS2882: Cannot find module ... ./custom.css` when using `module: NodeNext`.
+- **CI prerequisite**: the source repo (`techfides/tf-analysis/tf-doc-vault`) must have the consumer project allowed in Settings → CI/CD → Token Access —
+  otherwise `CI_JOB_TOKEN` lacks permission to clone.
 
 ### v0.1.0
 
