@@ -262,6 +262,31 @@ git commit -m "docs: add ana_project analytical documentation"
 git push
 ```
 
+#### CI/CD integration
+
+GitLab only reads the root-level `.gitlab-ci.yml`, so the generated `ana_project/.gitlab-ci.yml` won't run automatically. Add a **child pipeline trigger** to the parent repo's `.gitlab-ci.yml`:
+
+```yaml
+ana_project:docs:
+  stage: build   # any stage that already exists in the parent pipeline
+  trigger:
+    include: ana_project/.gitlab-ci.yml
+    strategy: depend
+  rules:
+    - changes:
+        - ana_project/**
+      when: on_success
+    - when: never
+```
+
+Replace `ana_project` with the actual directory name. The child pipeline:
+
+- Runs only when files under `ana_project/` change (MR or default branch push).
+- Inherits CI/CD variables from Settings → CI/CD → Variables (`GCP_SA_KEY`, `GCP_PROJECT`, `GCP_REGION`, `SERVICE_NAME`).
+- Has its own isolated stages and jobs — no naming conflicts with the parent pipeline.
+
+`strategy: depend` makes the parent job wait for the child pipeline to finish and reflects its pass/fail status.
+
 ## Confluence migration
 
 Tool to migrate Confluence pages to Markdown format.
