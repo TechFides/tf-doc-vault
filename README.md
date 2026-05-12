@@ -271,7 +271,7 @@ pnpm exec tf-doc-vault import-confluence \
 |-----------------------|-----------------------|-------------------------------------------------------------------------------------------------|
 | `--site=<host>`       | *(required)*          | Confluence hostname, e.g. `myorg.atlassian.net`.                                                |
 | `--root-page-id=<id>` | *(required)*          | ID of the root Confluence page to import. Found in the page URL: `.../pages/**123456789**/...`. |
-| `--output=<dir>`      | `./tech-docs/docs/v1` | Output directory for generated Markdown files.                                                  |
+| `--output=<dir>`      | *(required)*          | Output directory for generated Markdown files.                                                  |
 | `--space=<KEY>`       | *(none)*              | Confluence space key — informational only, not used during import.                              |
 
 Required environment variables: `CONFLUENCE_USER_EMAIL`, `CONFLUENCE_API_TOKEN` (Atlassian API token from Settings → Security → API tokens).

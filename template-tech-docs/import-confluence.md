@@ -11,7 +11,7 @@ export CONFLUENCE_API_TOKEN=<token>          # Atlassian API token (Settings →
 tf-doc-vault import-confluence \
   --site=myorg.atlassian.net \
   --root-page-id=<id> \
-  --output=./tech-docs/docs/v1
+  --output=./tech-docs/docs/v1   # required — target directory
 ```
 
 Root page ID najdeš v URL Confluence stránky: `.../pages/**1184333837**/...`
