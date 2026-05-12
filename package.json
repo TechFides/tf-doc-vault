@@ -1,6 +1,6 @@
 {
   "name": "@techfides/tf-doc-vault",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "Sdílený VitePress tooling pro TFSA dokumentace — config factory, theme komponenty, sidebar generátor, build/export skripty, Express/NestJS tech-docs mount, CI a Terraform modul.",
   "type": "module",
   "license": "MIT",

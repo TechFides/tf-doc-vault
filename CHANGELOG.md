@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.3
+
+[compare changes](https://github.com/techfides/tf-doc-vault/compare/v0.1.1...v0.1.3)
+
+### 🏡 Chore
+
+- Update and tighten package publishing workflow ([f37b2ed](https://github.com/techfides/tf-doc-vault/commit/f37b2ed))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.1.2
 
 - **`create-ana --no-git`** — embedded mode for analysis docs that live inside an existing service or project repo. All infrastructure (Dockerfile, CI, Terraform) is still generated; only `git init` is skipped. The success message adapts to show how to commit to the parent repo and how to deploy independently. Documented in README with a child pipeline CI/CD integration snippet.
