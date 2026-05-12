@@ -165,9 +165,9 @@ If `auth.password` is empty or `dist/` does not exist, `setupTechDocs` does noth
 
 Add the `docs-build` stage — see [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
 
-## Analytical documentation — Creating a new repo
+## Analytical documentation
 
-The package supports the use case where documentation has its own dedicated infrastructure.
+Documentation has its own dedicated infrastructure and contains technical and business analysis and functional requirements.
 
 ### Initialisation
 
@@ -209,6 +209,15 @@ Deployment via `terraform apply` in `infra/` + push to GitLab (CI builds the ima
 | `--no-git`           | *(false)*                                             | Skip `git init` + first commit. Use when embedding the docs inside an existing repo — all infrastructure is still generated.                            |
 
 ### 1. Push to a new GitLab repository
+
+If the analytical documentation should have own git repo call the create command without `--no-git` option. This will create a git repository with first initial
+commit.
+
+```bash
+pnpm dlx @techfides/tf-doc-vault create ana_project \
+  --gcp-project=ana_project \
+  --server=nginx
+```
 
 The GitLab repository **does not need to be created in advance** — we
 use [push-to-create](https://docs.gitlab.com/topics/git/project/#create-a-project-using-git-push). Just add the remote and push; GitLab will automatically
@@ -255,6 +264,8 @@ git push
 
 ## Confluence migration
 
+Tool to migrate Confluence pages to Markdown format.
+
 ```bash
 export CONFLUENCE_USER_EMAIL=you@email.com
 export CONFLUENCE_API_TOKEN=<token>
@@ -267,12 +278,12 @@ pnpm exec tf-doc-vault import-confluence \
 
 #### tf-doc-vault import-confluence [options]
 
-| Option                | Default               | Description                                                                                     |
-|-----------------------|-----------------------|-------------------------------------------------------------------------------------------------|
-| `--site=<host>`       | *(required)*          | Confluence hostname, e.g. `myorg.atlassian.net`.                                                |
-| `--root-page-id=<id>` | *(required)*          | ID of the root Confluence page to import. Found in the page URL: `.../pages/**123456789**/...`. |
-| `--output=<dir>`      | *(required)*          | Output directory for generated Markdown files.                                                  |
-| `--space=<KEY>`       | *(none)*              | Confluence space key — informational only, not used during import.                              |
+| Option                | Default      | Description                                                                                     |
+|-----------------------|--------------|-------------------------------------------------------------------------------------------------|
+| `--site=<host>`       | *(required)* | Confluence hostname, e.g. `myorg.atlassian.net`.                                                |
+| `--root-page-id=<id>` | *(required)* | ID of the root Confluence page to import. Found in the page URL: `.../pages/**123456789**/...`. |
+| `--output=<dir>`      | *(required)* | Output directory for generated Markdown files.                                                  |
+| `--space=<KEY>`       | *(none)*     | Confluence space key — informational only, not used during import.                              |
 
 Required environment variables: `CONFLUENCE_USER_EMAIL`, `CONFLUENCE_API_TOKEN` (Atlassian API token from Settings → Security → API tokens).
 
