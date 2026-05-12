@@ -1,5 +1,32 @@
 # Changelog
 
+## v0.1.4
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.1.3...v0.1.4)
+
+### 🩹 Fixes
+
+- **tooling:** Make lint and format-check pass on master - Add root .prettierignore excluding template/ and template-tech-docs/.   These directories carry a consumer-facing .prettierrc that imports   @techfides/tf-doc-vault/prettier — that self-reference cannot resolve   when prettier runs from inside this repo's source tree. - Point the lint script at configs/eslint.config.js explicitly (ESLint 9   requires the config in repo root or via --config) and ignore src/setup/**,   which is excluded from tsconfig.json and breaks the project-aware parser. - Reformat 25 source files to match the existing Prettier config (no   semantic changes — only line wrapping and trailing commas). ([17b1ccf](https://github.com/TechFides/tf-doc-vault/commit/17b1ccf))
+
+### 📖 Documentation
+
+- Add readme badges, package.json metadata, English description ([d9b80b6](https://github.com/TechFides/tf-doc-vault/commit/d9b80b6))
+
+### 🏡 Chore
+
+- Add renovate config using config:best-practices ([f142010](https://github.com/TechFides/tf-doc-vault/commit/f142010))
+- Add commitlint and husky to enforce conventional commits ([44b0f09](https://github.com/TechFides/tf-doc-vault/commit/44b0f09))
+- Add CODEOWNERS ([f97f8b3](https://github.com/TechFides/tf-doc-vault/commit/f97f8b3))
+
+### 🤖 CI
+
+- Add lint, format-check, typecheck and build workflow Runs on every pull request and on push to master. Sequential job: format:check -> lint -> typecheck -> build. Concurrency group cancels in-flight runs on new commits to the same PR (master pushes are not cancelled). After this lands, require the "🔍 Verify" status check on the master branch ruleset so PRs cannot merge red. ([1543011](https://github.com/TechFides/tf-doc-vault/commit/1543011))
+- Add tf-licence-checker for dependency license validation ([f5eb607](https://github.com/TechFides/tf-doc-vault/commit/f5eb607))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.1.3
 
 [compare changes](https://github.com/techfides/tf-doc-vault/compare/v0.1.1...v0.1.3)
