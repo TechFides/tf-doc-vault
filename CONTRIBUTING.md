@@ -25,18 +25,20 @@ Releases are cut **locally** with `changelogen`, then a tag push triggers a publ
 ```bash
 git checkout master
 git pull --ff-only
-pnpm release         # = changelogen --release
+pnpm release         # = changelogen --release --no-github
 ```
 
 `pnpm release` reads conventional commits since the last `v*` tag, computes the next version, writes it to `package.json`, prepends a section to `CHANGELOG.md`, and creates a commit + annotated tag (`chore(release): v0.x.y` / `v0.x.y`).
 
+> **⚠️ Always pass `--no-github` (the `pnpm release` script already does).** Plain `changelogen --release` has an undocumented default that *also* creates a GitHub release — and if you don't have a GitHub token in your env, it opens your browser at a pre-filled `releases/new` URL. Clicking "Publish" creates the remote `vX.Y.Z` tag at the *remote's default-branch HEAD*, not at your local release commit. That locks the tag to the wrong commit and a later `git push --follow-tags` will silently reject your correct local tag. **CI is the only thing that should create the GitHub release**, and it does so as the final workflow step (`changelogen gh release`) — after the tag is already on the remote at the right commit.
+
 > **Semver note for 0.x versions:** under `0.x.y`, `feat:` bumps the middle digit and `fix:` bumps the last. Standard semver kicks in at `1.0.0`.
 
-To force a specific bump or version:
+To force a specific bump or version (remember to include `--no-github`):
 
 ```bash
-pnpm changelogen --release --minor      # force minor bump
-pnpm changelogen --release -r 0.2.0     # pin exact version
+pnpm changelogen --release --no-github --minor      # force minor bump
+pnpm changelogen --release --no-github -r 0.2.0     # pin exact version
 ```
 
 ### 2. Review and push
