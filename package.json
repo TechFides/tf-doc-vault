@@ -98,6 +98,7 @@
     "lint": "eslint --config configs/eslint.config.js src bin --ignore-pattern 'src/setup/**'",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "licence-check": "tf-licence-checker --config=licence-checker.config.cjs",
     "release": "changelogen --release --no-github"
   },
   "peerDependencies": {
@@ -132,6 +133,7 @@
     "eslint-config-prettier": "^10.1.8",
     "mermaid": "^11.14.0",
     "prettier": "^3.8.3",
+    "tf-licence-checker": "^1.1.9",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
     "unbuild": "^3.6.1",

@@ -33,6 +33,9 @@ jobs:
         env:
           HUSKY: '0'
 
+      - name: ⚖️ Licence check
+        run: pnpm licence-check
+
       - name: 🎨 Format check
         run: pnpm format:check
 
