@@ -4,6 +4,12 @@
 
 # @techfides/tf-doc-vault
 
+[![npm version](https://img.shields.io/npm/v/@techfides/tf-doc-vault.svg)](https://www.npmjs.com/package/@techfides/tf-doc-vault)
+[![npm downloads](https://img.shields.io/npm/dm/@techfides/tf-doc-vault.svg)](https://www.npmjs.com/package/@techfides/tf-doc-vault)
+[![License: MIT](https://img.shields.io/npm/l/@techfides/tf-doc-vault.svg)](./LICENSE)
+[![Node version](https://img.shields.io/node/v/@techfides/tf-doc-vault.svg)](https://www.npmjs.com/package/@techfides/tf-doc-vault)
+[![CI](https://github.com/TechFides/tf-doc-vault/actions/workflows/ci.yml/badge.svg)](https://github.com/TechFides/tf-doc-vault/actions/workflows/ci.yml)
+
 Shared VitePress tooling for TFSA documentation — analytical `*_ana` repos and technical documentation living directly in service repos.
 
 Goal: spin up a new analysis repo in under 5 minutes. Solve once — share across all `*_ana` repos.
