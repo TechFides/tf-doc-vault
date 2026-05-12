@@ -4,7 +4,7 @@
  * VitePress-compatible Markdown files in the output directory.
  *
  * Usage:
- *   import-confluence --site=<host> --root-page-id=<id> [--output=<dir>] [--space=<KEY>]
+ *   import-confluence --site=<host> --root-page-id=<id> --output=<dir> [--space=<KEY>]
  *
  * Env vars:
  *   CONFLUENCE_USER_EMAIL   Atlassian account e-mail
@@ -443,12 +443,12 @@ if (flags.help || flags.h) {
   console.log(`
 import-confluence [options]
 
-Import Confluence page tree into tech-docs/v1/ (or a custom output dir).
+Import Confluence page tree into a VitePress docs directory.
 
 Options:
   --site=<host>           e.g. myorg.atlassian.net  (required)
   --root-page-id=<id>     Confluence root page ID   (required)
-  --output=<dir>          output directory           (default: ./tech-docs/v1)
+  --output=<dir>          output directory           (required)
   --space=<KEY>           Confluence space key       (informational only)
 
 Env vars:
@@ -460,12 +460,9 @@ Env vars:
 
 const site = flags.site;
 const rootPageId = flags["root-page-id"];
-const outputDir = path.resolve(
-  process.cwd(),
-  flags.output ?? "tech-docs/docs/v1",
-);
-const docsRoot = path.resolve(outputDir, "..");
-const publicDir = path.resolve(docsRoot, "public", "images");
+const outputDir = flags.output
+  ? path.resolve(process.cwd(), flags.output)
+  : null;
 
 const email = process.env["CONFLUENCE_USER_EMAIL"];
 const token = process.env["CONFLUENCE_API_TOKEN"];
@@ -478,12 +475,19 @@ if (!rootPageId) {
   console.error("✗ --root-page-id je povinný argument.");
   process.exit(1);
 }
+if (!outputDir) {
+  console.error("✗ --output je povinný argument.");
+  process.exit(1);
+}
 if (!email || !token) {
   console.error(
     "✗ CONFLUENCE_USER_EMAIL a CONFLUENCE_API_TOKEN musí být nastaveny.",
   );
   process.exit(1);
 }
+
+const docsRoot = path.resolve(outputDir, "..");
+const publicDir = path.resolve(docsRoot, "public", "images");
 
 const authHeader =
   "Basic " + Buffer.from(`${email}:${token}`).toString("base64");
