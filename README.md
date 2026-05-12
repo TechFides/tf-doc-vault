@@ -432,6 +432,12 @@ User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfv
 
 ## Changelog
 
+### v0.1.2
+
+- **`create-ana --no-git`** — embedded mode for analysis docs that live inside an existing service or project repo. All infrastructure (Dockerfile, CI, Terraform) is still generated; only `git init` is skipped. The success message adapts to show how to commit to the parent repo and how to deploy independently. Documented in README with a child pipeline CI/CD integration snippet.
+- **`import-confluence --output` is now required** — previously defaulted to `./tech-docs/docs/v1`, which silently wrote to the wrong place in non-tech-docs projects. Validation added; help text and all documentation updated.
+- **README translated to English** and significantly restructured: options tables for `init-tech-docs` and `import-confluence`, "Updating documentation" subsections in both the tech-docs and analysis docs sections, clearer two-use-case structure for analysis documentation.
+
 ### v0.1.0 (tf-doc-vault)
 
 - **Rename:** `@techfides/ana-docs` → `@techfides/tf-doc-vault`, CLI `ana-docs` → `tf-doc-vault`. Published publicly to npmjs.com (GitHub Actions workflow on
