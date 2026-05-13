@@ -57,7 +57,7 @@ export default createTheme({ widthToggle: true });
 
 `package.json`:
 
-```json
+```jsonss
 {
   "scripts": {
     "docs:dev": "vitepress dev docs",
