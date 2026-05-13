@@ -412,7 +412,7 @@ pnpm docs:dev                 # sees changes from dist/ via Vite HMR
 ```dasd
 
 An application repo with `--dev` declares the dependency via `file:`:
-
+adad
 ```json
 "dependencies": {"@techfides/tf-doc-vault": "file:../tf-doc-vault"}
 ```
