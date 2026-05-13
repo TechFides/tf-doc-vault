@@ -118,7 +118,7 @@ stages:
   needs: ["🧹 lint:typecheck", "🧹 lint:eslint", "🧹 lint:docs"]
   image: google/cloud-sdk:slim@sha256:fef8545d38deede4ce1f57065e1b80cc32ca12795d122b18985168f176b48f5d
   services:
-    - name: docker:26.1-dind@sha256:dd43b430341a40d88f4f30edb03865daa9d6fa39c9b1da70f27e2a89cec3eae1
+    - name: docker:29.4-dind@sha256:685b91dca8eab7de1dce1c303dbb7a763e4082d6a60db10968adf3295fbd2495
       command: ["--registry-mirror", "https://mirror.gcr.io"]
   variables:
     DOCKER_HOST: tcp://docker:2375
