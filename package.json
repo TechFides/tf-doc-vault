@@ -147,9 +147,9 @@
     "@commitlint/config-conventional": "21.0.1",
     "@nestjs/common": "11.1.20",
     "@types/express": "4.17.25",
-    "@types/node": "25.6.0",
-    "@typescript-eslint/eslint-plugin": "8.59.0",
-    "@typescript-eslint/parser": "8.59.0",
+    "@types/node": "25.6.2",
+    "@typescript-eslint/eslint-plugin": "8.59.2",
+    "@typescript-eslint/parser": "8.59.2",
     "changelogen": "0.6.2",
     "eslint": "10.3.0",
     "eslint-config-prettier": "10.1.8",
@@ -162,6 +162,6 @@
     "unbuild": "3.6.1",
     "vitepress": "1.6.4",
     "vitepress-plugin-mermaid": "2.0.17",
-    "vue": "3.5.33"
+    "vue": "3.5.34"
   }
 }
