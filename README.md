@@ -1,6 +1,8 @@
 # Free from TechFides ❤️
 
-<img src="./assets/techfides.svg" alt="TechFides logo" width="50"/>
+<p align="center">
+  <img src="./assets/techfides.svg" alt="TechFides logo" width="50"/>
+</p>
 
 - https://techfides.cz
 - https://team.techfides.cz/
