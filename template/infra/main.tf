@@ -17,9 +17,6 @@ terraform {
 }
 
 module "docs" {
-  # Use the version published with the consumed @techfides/tf-doc-vault release.
-  # Until we publish a stable v1.0.0 you can also reference a pinned commit:
-  # source = "git::ssh://git@gitlab.com/techfides/tf-analysis/tf-doc-vault.git//infra/terraform?ref=v0.1.0"
   source = "../node_modules/@techfides/tf-doc-vault/infra/terraform"
 
   project_id    = var.project_id
