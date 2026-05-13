@@ -1,25 +1,43 @@
-# Free from TechFides ❤️
+<div align="center">
 
-<p align="center">
-  <img src="./assets/techfides.svg" alt="TechFides logo" width="50"/>
-</p>
+  <a href="https://techfides.cz">
+    <img src="./assets/techfides.svg" alt="TechFides" width="120"/>
+  </a>
 
-- https://techfides.cz
-- https://team.techfides.cz/
-- https://techfides.eu
+  <h1>Free from TechFides ❤️</h1>
+
+  <p><strong><em>Let's develop the future.</em></strong></p>
+
+  <p>
+    <a href="https://techfides.cz">techfides.cz</a> ·
+    <a href="https://team.techfides.cz/">team.techfides.cz</a> ·
+    <a href="https://techfides.eu">techfides.eu</a>
+  </p>
+
+</div>
+
+<br/>
+
+<div align="center">
+
+  <h2><code>@techfides/tf-doc-vault</code></h2>
+
+  <p>
+    <strong>Shared VitePress tooling for technical and analytical documentation.</strong><br/>
+    Spin up a fully-featured documentation site in under 5 minutes.
+  </p>
+
+  <p>
+    <a href="https://www.npmjs.com/package/@techfides/tf-doc-vault"><img src="https://img.shields.io/npm/v/@techfides/tf-doc-vault.svg?style=flat-square&color=cb3837&label=npm" alt="npm"/></a>
+    <a href="https://www.npmjs.com/package/@techfides/tf-doc-vault"><img src="https://img.shields.io/npm/dm/@techfides/tf-doc-vault.svg?style=flat-square&label=downloads" alt="downloads"/></a>
+    <a href="./LICENSE"><img src="https://img.shields.io/npm/l/@techfides/tf-doc-vault.svg?style=flat-square&color=green&label=license" alt="license"/></a>
+    <a href="https://www.npmjs.com/package/@techfides/tf-doc-vault"><img src="https://img.shields.io/node/v/@techfides/tf-doc-vault.svg?style=flat-square&label=node" alt="node"/></a>
+    <a href="https://github.com/TechFides/tf-doc-vault/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/TechFides/tf-doc-vault/ci.yml?style=flat-square&label=CI" alt="CI"/></a>
+  </p>
+
+</div>
 
 ---
-
-# @techfides/tf-doc-vault
-
-[![npm version](https://img.shields.io/npm/v/@techfides/tf-doc-vault.svg)](https://www.npmjs.com/package/@techfides/tf-doc-vault)
-[![npm downloads](https://img.shields.io/npm/dm/@techfides/tf-doc-vault.svg)](https://www.npmjs.com/package/@techfides/tf-doc-vault)
-[![License: MIT](https://img.shields.io/npm/l/@techfides/tf-doc-vault.svg)](./LICENSE)
-[![Node version](https://img.shields.io/node/v/@techfides/tf-doc-vault.svg)](https://www.npmjs.com/package/@techfides/tf-doc-vault)
-[![CI](https://github.com/TechFides/tf-doc-vault/actions/workflows/ci.yml/badge.svg)](https://github.com/TechFides/tf-doc-vault/actions/workflows/ci.yml)
-
-**Shared VitePress tooling for TFSA documentation** — spin up a fully featured documentation site in under 5 minutes, with consistent tooling across every
-project.
 
 ## Why this package exists
 
