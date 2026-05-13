@@ -409,7 +409,7 @@ pnpm dev                      # tsc --watch + auto-copy static assets (.vue/.css
 cd ../<something>_ana
 pnpm install                  # pulls peer deps and symlinks file:../tf-doc-vault
 pnpm docs:dev                 # sees changes from dist/ via Vite HMR
-```
+```dasd
 
 An application repo with `--dev` declares the dependency via `file:`:
 
