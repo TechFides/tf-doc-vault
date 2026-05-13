@@ -28,18 +28,18 @@
     "@techfides/tf-doc-vault": "__VITEPRESS_COMMON_DEP__"
   },
   "devDependencies": {
-    "@types/node": "^25.6.0",
-    "@typescript-eslint/eslint-plugin": "^8.59.0",
-    "@typescript-eslint/parser": "^8.59.0",
-    "eslint": "^10.2.1",
-    "eslint-config-prettier": "^10.1.8",
-    "mermaid": "^11.14.0",
-    "prettier": "^3.8.3",
-    "tsx": "^4.21.0",
-    "typescript": "^6.0.3",
-    "vitepress": "^1.6.4",
-    "vitepress-plugin-mermaid": "^2.0.17",
-    "vue": "^3.5.33"
+    "@types/node": "25.7.0",
+    "@typescript-eslint/eslint-plugin": "8.59.3",
+    "@typescript-eslint/parser": "8.59.3",
+    "eslint": "10.3.0",
+    "eslint-config-prettier": "10.1.8",
+    "mermaid": "11.15.0",
+    "prettier": "3.8.3",
+    "tsx": "4.21.0",
+    "typescript": "6.0.3",
+    "vitepress": "1.6.4",
+    "vitepress-plugin-mermaid": "2.0.17",
+    "vue": "3.5.34"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

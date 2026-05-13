@@ -5,7 +5,7 @@
 ARG SERVER_TYPE=__SERVER_TYPE__
 
 # ── Stage 1: build ────────────────────────────────────────────────────────────
-FROM node:22-slim AS builder
+FROM node:22-slim@sha256:9f6d5975c7dca860947d3915877f85607946403fc55349f39b4bc3688448bb6e AS builder
 
 WORKDIR /app
 
@@ -34,7 +34,7 @@ COPY tsconfig.json ./
 RUN pnpm run docs:print && pnpm run docs:build
 
 # ── Stage 2a: nginx ───────────────────────────────────────────────────────────
-FROM node:22-slim AS runner-nginx
+FROM node:22-slim@sha256:9f6d5975c7dca860947d3915877f85607946403fc55349f39b4bc3688448bb6e AS runner-nginx
 
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends nginx \
@@ -48,7 +48,7 @@ EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
 
 # ── Stage 2b: nginx + Basic auth ──────────────────────────────────────────────
-FROM node:22-slim AS runner-nginx-auth
+FROM node:22-slim@sha256:9f6d5975c7dca860947d3915877f85607946403fc55349f39b4bc3688448bb6e AS runner-nginx-auth
 
 ARG BASIC_AUTH_USER
 ARG BASIC_AUTH_PASS
