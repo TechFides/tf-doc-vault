@@ -48,3 +48,52 @@ jobs:
 
       - name: 🏗️ Build
         run: pnpm build
+
+  smoke:
+    name: 🧪 Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔀 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "pnpm"
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          HUSKY: "0"
+
+      - name: 🏗️ Build
+        run: pnpm build
+
+      - name: 📦 Pack
+        run: pnpm pack --pack-destination /tmp/
+
+      - name: 🧪 Build template-tech-docs against the packed artifact
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/smoke && cd /tmp/smoke
+          cp -r "$GITHUB_WORKSPACE/template-tech-docs/." .
+
+          # Substitute the placeholders the scaffolder would normally fill in
+          # (so vitepress doesn't choke on unsubstituted __PROJECT__ etc. anywhere).
+          find . -type f \( -name '*.md' -o -name '*.ts' -o -name '*.json' \) -exec sed -i \
+            -e 's/__SERVICE_ID__/SMK/g' \
+            -e 's/__PROJECT__/smoke/g' \
+            -e 's/__DATE__/2026-01-01/g' \
+            -e 's|__REPO__|test/test|g' {} \;
+
+          TGZ=$(ls /tmp/techfides-tf-doc-vault-*.tgz)
+          echo "Installing pack: $TGZ"
+          pnpm add "file:$TGZ" vitepress vitepress-plugin-mermaid mermaid vue
+
+          pnpm exec vitepress build docs
+          test -d docs/.vitepress/dist
+          echo "✓ template-tech-docs built successfully against the packed artifact"
