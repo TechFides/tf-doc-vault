@@ -416,7 +416,7 @@ An application repo with `--dev` declares the dependency via `file:`:
 ```json
 "dependencies": {"@techfides/tf-doc-vault": "file:../tf-doc-vault"}
 ```
-
+asdasd
 Prerequisite for `file:` install: both directories must be siblings (relative path `../tf-doc-vault`). If the package is elsewhere, `--file-path=/abs/path`
 during scaffolding overrides it.
 
