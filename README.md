@@ -29,7 +29,7 @@ Goal: spin up a new analysis repo in under 5 minutes. Solve once — share acros
 - **`infra/terraform`** — reusable module for Cloud Run + Artifact Registry + IAM.
 - **`docker`** — multi-stage Dockerfile with `ARG SERVER_TYPE=nginx|nginx-auth` + nginx configs.
 - **`template`** — skeleton for a new `*_ana` repo.
-
+aaaa
 ## Usage in an application repo
 
 `docs/.vitepress/config.ts`:
