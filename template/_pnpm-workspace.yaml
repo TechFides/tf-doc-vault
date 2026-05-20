@@ -1,0 +1,11 @@
+publicHoistPattern:
+  - "*mermaid*"
+  - dayjs
+  - debug
+  - "@braintree/*"
+  - cytoscape*
+  - "@types/d3*"
+  - d3-*
+allowBuilds:
+  "@techfides/tf-doc-vault": true
+  esbuild: true

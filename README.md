@@ -37,6 +37,9 @@
 
 </div>
 
+> [!WARNING]
+> **Preview release — `0.x`.** This package is under active development. The public API (CLI commands, exported functions, template structure, and config shape) may change between minor versions until the `1.0.0` release. Pin an exact version in production (`"@techfides/tf-doc-vault": "0.1.5"`, not `"^0.1.5"`) and review the [CHANGELOG](./CHANGELOG.md) before upgrading.
+
 ---
 
 ## Why this package exists
@@ -165,16 +168,25 @@ pnpm exec tf-doc-vault init-tech-docs \
 
    These must be installed directly in the project so the `vitepress` binary is available when running `docs:dev` and `docs:build`.
 
-2. **Install and preview locally:**
+2. **If you use pnpm v11+, approve the esbuild build script.** Create or amend `pnpm-workspace.yaml` at the service root:
+
+   ```yaml
+   allowBuilds:
+     esbuild: true
+   ```
+
+   Without this, pnpm 11's `verifyDepsBeforeRun` aborts every `pnpm <script>` invocation with `ERR_PNPM_IGNORED_BUILDS`. pnpm v10 ignores the setting harmlessly, so it's safe to ship in any repo.
+
+3. **Install and preview locally:**
 
    ```bash
    npm install
    npm run docs:dev   # http://localhost:5173/tech-docs/
    ```
 
-3. **Add the `docs-build` stage to the Dockerfile** — see [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
+4. **Add the `docs-build` stage to the Dockerfile** — see [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md).
 
-4. **Call `setupTechDocs()` in `main.ts`:**
+5. **Call `setupTechDocs()` in `main.ts`:**
 
    ```ts
    import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
@@ -186,9 +198,9 @@ pnpm exec tf-doc-vault init-tech-docs \
 
    If `auth.password` is empty or `dist/` does not exist, `setupTechDocs` does nothing — the middleware is a no-op in production where the env var is unset.
 
-5. **Set the `TECH_DOCS_PASSWORD` env variable** (dev/staging only, not prod).
+6. **Set the `TECH_DOCS_PASSWORD` env variable** (dev/staging only, not prod).
 
-6. **Build the docs and verify:**
+7. **Build the docs and verify:**
 
    ```bash
    npm run docs:build

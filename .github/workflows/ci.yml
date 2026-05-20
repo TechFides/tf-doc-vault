@@ -90,6 +90,14 @@ jobs:
             -e 's/__DATE__/2026-01-01/g' \
             -e 's|__REPO__|test/test|g' {} \;
 
+          # pnpm 11 aborts pnpm add with ERR_PNPM_IGNORED_BUILDS for esbuild
+          # unless its postinstall is whitelisted. Mirror what README §1 step 2
+          # instructs init-tech-docs consumers to do.
+          cat > pnpm-workspace.yaml <<'EOF'
+          allowBuilds:
+            esbuild: true
+          EOF
+
           TGZ=$(ls /tmp/techfides-tf-doc-vault-*.tgz)
           echo "Installing pack: $TGZ"
           pnpm add "file:$TGZ" vitepress vitepress-plugin-mermaid mermaid vue

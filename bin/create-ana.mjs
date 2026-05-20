@@ -93,6 +93,7 @@ function resolveDependencyValue(flags, targetDir) {
 function consumerName(templateName) {
   if (templateName === "_npmrc") return ".npmrc";
   if (templateName === "_gitignore") return ".gitignore";
+  if (templateName === "_pnpm-workspace.yaml") return "pnpm-workspace.yaml";
   return templateName;
 }
 
