@@ -1,5 +1,37 @@
 # Changelog
 
+## v0.1.5
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.1.4...v0.1.5)
+
+### 🚀 Enhancements
+
+- Add commitlint to CI ([2e122b7](https://github.com/TechFides/tf-doc-vault/commit/2e122b7))
+
+### 💅 Refactors
+
+- **config:** Remove `outlineLevel` configuration option ([647a4cb](https://github.com/TechFides/tf-doc-vault/commit/647a4cb))
+
+### 📖 Documentation
+
+- Overhaul README documentation ([d78b2e4](https://github.com/TechFides/tf-doc-vault/commit/d78b2e4))
+- Remove inline comments from Terraform template ([333a62d](https://github.com/TechFides/tf-doc-vault/commit/333a62d))
+- Center TechFides logo ([6592535](https://github.com/TechFides/tf-doc-vault/commit/6592535))
+- Redesign README hero for stronger brand presentation ([59cd783](https://github.com/TechFides/tf-doc-vault/commit/59cd783))
+
+### 🏡 Chore
+
+- Update node engine in package.json ([c78f0ff](https://github.com/TechFides/tf-doc-vault/commit/c78f0ff))
+
+### 🤖 CI
+
+- Add smoke job that builds template-tech-docs against the packed artifact ([4dc62dc](https://github.com/TechFides/tf-doc-vault/commit/4dc62dc))
+
+### ❤️ Contributors
+
+- Michal Vlček <michal.vlcek@techfides.cz>
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.1.4
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.1.3...v0.1.4)
