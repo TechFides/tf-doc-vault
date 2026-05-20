@@ -37,6 +37,9 @@
 
 </div>
 
+> [!WARNING]
+> **Preview release — `0.x`.** This package is under active development. The public API (CLI commands, exported functions, template structure, and config shape) may change between minor versions until the `1.0.0` release. Pin an exact version in production (`"@techfides/tf-doc-vault": "0.1.5"`, not `"^0.1.5"`) and review the [CHANGELOG](./CHANGELOG.md) before upgrading.
+
 ---
 
 ## Why this package exists
