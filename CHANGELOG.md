@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.1.6
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.1.5...v0.1.6)
+
+### 🏡 Chore
+
+- Update pnpm to version 11 ([d2371ca](https://github.com/TechFides/tf-doc-vault/commit/d2371ca))
+- Add preview disclaimer to readme ([c8133af](https://github.com/TechFides/tf-doc-vault/commit/c8133af))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.1.5
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.1.4...v0.1.5)
