@@ -144,25 +144,31 @@ console.log(`
        "vitepress-plugin-mermaid": "^2.0.17",
        "mermaid": "^11.14.0"
 
-  2) Nainstaluj závislosti a spusť lokální preview:
+  2) Pokud používáš pnpm v11+, povol build skript esbuildu —
+     vytvoř (nebo doplň) pnpm-workspace.yaml v rootu služby:
+       allowBuilds:
+         esbuild: true
+     Bez tohoto pnpm 11 ukončí každé "pnpm <script>" s ERR_PNPM_IGNORED_BUILDS.
+
+  3) Nainstaluj závislosti a spusť lokální preview:
        npm install && npm run docs:dev
 
-  3) Přidej docs-build stage do Dockerfile:
+  4) Přidej docs-build stage do Dockerfile:
        viz /tech-docs/docs-build-stage.md
 
-  4) Zavolej setupTechDocs() v main.ts (NestJS):
+  5) Zavolej setupTechDocs() v main.ts (NestJS):
        import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
        await setupTechDocs("tech-docs", app, {
          auth: { username: "docs", password: process.env.TECH_DOCS_PASSWORD },
          basePath: '/tech-docs/',
        });
 
-  5) Nastav TECH_DOCS_PASSWORD env proměnnou (dev/staging pouze, ne prod).
-  
-  6) Zbuildi lokálně dokumentaci:
+  6) Nastav TECH_DOCS_PASSWORD env proměnnou (dev/staging pouze, ne prod).
+
+  7) Zbuildi lokálně dokumentaci:
       npm run docs:build
-  
-  7) Nastartuj aplikaci (pravděpodobně \`npm run dev\`):
+
+  8) Nastartuj aplikaci (pravděpodobně \`npm run dev\`):
       Zkontroluj, že na route /tech-docs/ beží dokumentace
       
       Username: docs
