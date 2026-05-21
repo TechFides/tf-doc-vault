@@ -6,3 +6,8 @@ dist/
 # pnpm pack output for local pre-publish testing — never commit
 *.tgz
 .pnpm-store/
+
+# Test runners
+/playwright-report/
+/test-results/
+/coverage/
