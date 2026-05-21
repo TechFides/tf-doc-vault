@@ -121,4 +121,26 @@ describe("generateSidebar", () => {
     );
     expect(leaf?.text).toBe("no-frontmatter");
   });
+
+  test("multi-section sites get per-section sidebars without the section title", () => {
+    write("v1/byznys-specifikace/index.md", fm("Byznys specifikace"));
+    write("v1/byznys-specifikace/cil.md", fm("Cíl"));
+    write("v1/funkcni-specifikace/index.md", fm("Funkční specifikace"));
+    write("v1/funkcni-specifikace/use-cases.md", fm("Use cases"));
+    write("v1/technicka-specifikace/index.md", fm("Technická specifikace"));
+
+    const sidebar = generateSidebar(docsRoot);
+    expect(Object.keys(sidebar).sort()).toEqual([
+      "/v1/byznys-specifikace/",
+      "/v1/funkcni-specifikace/",
+      "/v1/technicka-specifikace/",
+    ]);
+
+    expect(sidebar["/v1/byznys-specifikace/"]).toEqual([
+      { text: "Cíl", link: "/v1/byznys-specifikace/cil" },
+    ]);
+    expect(sidebar["/v1/funkcni-specifikace/"]).toEqual([
+      { text: "Use cases", link: "/v1/funkcni-specifikace/use-cases" },
+    ]);
+  });
 });
