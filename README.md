@@ -292,6 +292,37 @@ git push
 
 The docs can still be deployed to Cloud Run independently using their own CI/CD pipeline.
 
+#### 2c. Embedding inside an existing pnpm workspace
+
+If the parent repo is itself a **pnpm workspace** (it has a `pnpm-workspace.yaml` at its root), `create` will print a warning telling you to merge a small config block into the parent file. This is necessary because **pnpm only honors workspace configuration at the workspace root** — the scaffolded `pnpm-workspace.yaml` and `.npmrc` inside `<your-folder>/` are silently ignored when pnpm sees an ancestor workspace.
+
+Without this step, `pnpm docs:dev` will render a blank page and the browser console will show:
+
+```
+Uncaught SyntaxError: The requested module '.../dayjs.min.js'
+does not provide an export named 'default'
+```
+
+The fix is to merge the following into the parent `pnpm-workspace.yaml`:
+
+```yaml
+packages:
+  - <your-folder>
+publicHoistPattern:
+  - "*mermaid*"
+  - dayjs
+  - debug
+  - "@braintree/*"
+  - cytoscape*
+  - "@types/d3*"
+  - d3-*
+allowBuilds:
+  "@techfides/tf-doc-vault": true
+  esbuild: true
+```
+
+Then re-run `pnpm install` from the monorepo root. The scaffolder prints these exact instructions on stderr whenever it detects an ancestor `pnpm-workspace.yaml`, so you don't need to memorise them.
+
 #### CI/CD integration
 
 GitLab only reads the root-level `.gitlab-ci.yml`, so the generated `ana_project/.gitlab-ci.yml` won't run automatically from the parent pipeline. Add a **child

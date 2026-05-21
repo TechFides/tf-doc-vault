@@ -78,6 +78,32 @@ export function copyDir(src, dest, opts = {}) {
 }
 
 /**
+ * Walk up from `startDir` looking for a file named `fileName`.
+ * Stops at the filesystem root. Returns the absolute path or null.
+ *
+ * Used by create-ana to detect an ancestor `pnpm-workspace.yaml` — pnpm only
+ * honors workspace config at the workspace root, so a scaffolded
+ * `pnpm-workspace.yaml` inside a subdirectory of an existing workspace is
+ * silently ignored.
+ *
+ * @param {string} startDir   Directory to begin the walk from. The walk begins
+ *                            at `startDir`'s PARENT (the scaffold target's own
+ *                            workspace file is never the answer).
+ * @param {string} fileName   Bare filename to look for at each level.
+ * @returns {string | null}   Absolute path of the first match, or null.
+ */
+export function findAncestorFile(startDir, fileName) {
+  let current = path.resolve(startDir, "..");
+  while (true) {
+    const candidate = path.join(current, fileName);
+    if (fs.existsSync(candidate)) return candidate;
+    const parent = path.dirname(current);
+    if (parent === current) return null; // hit the filesystem root
+    current = parent;
+  }
+}
+
+/**
  * Replace all placeholder strings in text files under a directory tree.
  *
  * @param {string} dir

@@ -12,7 +12,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { parseArgs, copyDir, replacePlaceholders } from "./utils.mjs";
+import {
+  parseArgs,
+  copyDir,
+  replacePlaceholders,
+  findAncestorFile,
+} from "./utils.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATE_DIR = path.resolve(__dirname, "..", "template");
@@ -97,6 +102,60 @@ function consumerName(templateName) {
   return templateName;
 }
 
+/**
+ * Detect an ancestor `pnpm-workspace.yaml` above the scaffold target and, if
+ * found, print a copy-pasteable instruction block to stderr explaining that
+ * pnpm will silently ignore the scaffolded `pnpm-workspace.yaml`. Without
+ * those instructions consumers hit a blank docs page with a cryptic dayjs
+ * default-export SyntaxError in the browser console.
+ *
+ * Read-only with respect to the parent workspace — never patches the
+ * ancestor file. The customer applies the diff themselves.
+ */
+function warnIfEmbeddedInWorkspace(targetDir) {
+  const ancestor = findAncestorFile(targetDir, "pnpm-workspace.yaml");
+  if (!ancestor) return;
+
+  const relativeFolder =
+    path.relative(path.dirname(ancestor), targetDir) ||
+    path.basename(targetDir);
+  const rule = "─".repeat(68);
+
+  process.stderr.write(`
+${rule}
+⚠  Detected parent pnpm workspace:
+   ${ancestor}
+
+Because pnpm only honors workspace config at the workspace root, the
+pnpm-workspace.yaml and .npmrc inside ${relativeFolder}/ will be
+IGNORED. Vitepress will fail to load mermaid's CJS transitive deps and
+the page will render blank with:
+
+   "dayjs.min.js does not provide an export named 'default'"
+
+To fix this, merge the following into your parent pnpm-workspace.yaml:
+
+   packages:
+     - ${relativeFolder}
+   publicHoistPattern:
+     - "*mermaid*"
+     - dayjs
+     - debug
+     - "@braintree/*"
+     - cytoscape*
+     - "@types/d3*"
+     - d3-*
+   allowBuilds:
+     "@techfides/tf-doc-vault": true
+     esbuild: true
+
+Then re-run \`pnpm install\` from your monorepo root.
+
+See README → "Embedding inside an existing pnpm workspace" for details.
+${rule}
+`);
+}
+
 const { positional, flags } = parseArgs(process.argv.slice(2));
 
 if (flags.help || flags.h || positional.length === 0) usage(0);
@@ -149,6 +208,8 @@ replacePlaceholders(targetDir, {
   __BASIC_AUTH_USER__: "",
   __BASIC_AUTH_PASS__: "",
 });
+
+warnIfEmbeddedInWorkspace(targetDir);
 
 if (!skipGit) {
   spawnSync("git", ["init", "-q"], { cwd: targetDir, stdio: "inherit" });
