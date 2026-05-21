@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.1.7
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.1.6...v0.1.7)
+
+### 🚀 Enhancements
+
+- Warn when embedded inside an existing pnpm workspace ([448e651](https://github.com/TechFides/tf-doc-vault/commit/448e651))
+
+### 🩹 Fixes
+
+- Add back root items to top navigation ([3fcf8ed](https://github.com/TechFides/tf-doc-vault/commit/3fcf8ed))
+
+### ✅ Tests
+
+- Setup a playwright + vitest test suite ([a565532](https://github.com/TechFides/tf-doc-vault/commit/a565532))
+
+### 🤖 CI
+
+- Show playwright progress ([6f20a1f](https://github.com/TechFides/tf-doc-vault/commit/6f20a1f))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.1.6
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.1.5...v0.1.6)
