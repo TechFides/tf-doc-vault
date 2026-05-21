@@ -110,24 +110,35 @@ function buildSidebarItems(
   return items;
 }
 
-/**
- * Single sidebar per version covering the full directory tree.
- * A single `/<version>/` key matches all pages so the sidebar
- * is visible everywhere, including the version root.
- */
 export function generateSidebar(docsRoot: string): DefaultTheme.SidebarMulti {
   const sidebar: DefaultTheme.SidebarMulti = {};
 
   for (const version of getVersions(docsRoot)) {
     const versionRoot = path.join(docsRoot, version);
     const versionBase = `/${version}/`;
-    const items: DefaultTheme.SidebarItem[] = [];
+    const sections = subDirs(versionRoot);
 
+    if (sections.length > 1) {
+      for (const section of sections) {
+        const sectionBase = `${versionBase}${section}/`;
+        const sectionDir = path.join(versionRoot, section);
+        sidebar[sectionBase] = buildSidebarItems(sectionDir, sectionBase);
+      }
+
+      const rootItems: DefaultTheme.SidebarItem[] = [];
+      const rootIndex = path.join(versionRoot, "index.md");
+      if (fs.existsSync(rootIndex)) {
+        rootItems.push({ text: extractTitle(rootIndex), link: versionBase });
+      }
+      if (rootItems.length > 0) sidebar[versionBase] = rootItems;
+      continue;
+    }
+
+    const items: DefaultTheme.SidebarItem[] = [];
     const indexPath = path.join(versionRoot, "index.md");
     if (fs.existsSync(indexPath)) {
       items.push({ text: extractTitle(indexPath), link: versionBase });
     }
-
     items.push(...buildSidebarItems(versionRoot, versionBase));
     sidebar[versionBase] = items;
   }

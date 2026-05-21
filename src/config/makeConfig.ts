@@ -163,14 +163,21 @@ export function makeConfig(
     lang: string;
     link: string;
     themeConfig: { nav: ReturnType<typeof generateNav> };
-  } => ({
-    label: v,
-    lang: strings.lang,
-    link: `/${v}/`,
-    themeConfig: {
-      nav: versions.length > 1 ? [versionDropdown(v)] : [],
-    },
-  });
+  } => {
+    const sectionNav = generateNav(docsRoot, v);
+    const showSections = sectionNav.length > 1;
+    return {
+      label: v,
+      lang: strings.lang,
+      link: `/${v}/`,
+      themeConfig: {
+        nav: [
+          ...(showSections ? sectionNav : []),
+          ...(versions.length > 1 ? [versionDropdown(v)] : []),
+        ],
+      },
+    };
+  };
 
   const locales: Record<string, ReturnType<typeof localeFor>> = {
     root: localeFor(defaultVersion),
@@ -185,7 +192,7 @@ export function makeConfig(
     head,
     locales,
     themeConfig: {
-      logoLink: "/",
+      logoLink: base,
       nav:
         versions.length > 1
           ? [
