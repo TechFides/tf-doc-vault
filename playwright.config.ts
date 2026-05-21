@@ -9,7 +9,7 @@ export default defineConfig({
   workers: 1,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI
-    ? [["github"], ["html", { open: "never" }]]
+    ? [["list"], ["github"], ["html", { open: "never" }]]
     : [["list"]],
   use: {
     trace: "retain-on-failure",

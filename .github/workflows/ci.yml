@@ -48,7 +48,7 @@ jobs:
       - name: 🛠 Setup
         uses: ./.github/actions/setup
 
-      - name: 🧪 Unit tests (with coverage)
+      - name: 🧪 Unit tests
         run: pnpm test:unit:coverage
 
       - name: 📤 Upload coverage report
