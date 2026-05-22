@@ -11,3 +11,10 @@ dist/
 /playwright-report/
 /test-results/
 /coverage/
+
+/.claude/worktrees
+.idea
+
+# Playground — only ignore VitePress generated artifacts, not config sources
+/playground/docs/.vitepress/cache/
+/playground/docs/.vitepress/dist/
