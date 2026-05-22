@@ -11,5 +11,13 @@ dist/
 /playwright-report/
 /test-results/
 /coverage/
+
 # IDE
-.idea/
+.idea
+
+# Claude Code worktrees (created on demand)
+/.claude/worktrees
+
+# Playground — only ignore VitePress generated artifacts, not config sources
+/playground/docs/.vitepress/cache/
+/playground/docs/.vitepress/dist/

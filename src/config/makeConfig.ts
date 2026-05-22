@@ -98,6 +98,13 @@ export interface MakeConfigOptions {
    * Use sparingly — most use-cases should be covered by typed options above.
    */
   override?: Partial<UserConfig>;
+
+  /**
+   * Whether to wrap the config with `withMermaid()`. Default `true`. Disable
+   * for environments where Mermaid sub-deps (dayjs, cytoscape, …) cause
+   * Vite optimizeDeps friction — typically a local playground.
+   */
+  mermaid?: boolean;
 }
 
 const UMAMI_DEFAULT_SRC = "https://cloud.umami.is/script.js";
@@ -169,7 +176,7 @@ function buildEditLink(editLink: EditLink): { pattern: string; text: string } {
  */
 export function makeConfig(
   opts: MakeConfigOptions,
-): ReturnType<typeof withMermaid> {
+): ReturnType<typeof withMermaid> | UserConfig {
   const docsRoot = path.resolve(opts.configDir, "..");
   const folderName = path.basename(docsRoot);
   const base = `/${folderName}/`;
@@ -272,5 +279,6 @@ export function makeConfig(
     ...opts.override,
   };
 
-  return withMermaid(defineConfig(baseConfig));
+  const config = defineConfig(baseConfig);
+  return opts.mermaid === false ? config : withMermaid(config);
 }
