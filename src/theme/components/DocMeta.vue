@@ -32,23 +32,11 @@ const DATETIME_FORMAT = new Intl.DateTimeFormat("cs-CZ", {
   minute: "2-digit",
 });
 
-/**
- * Parse and format a frontmatter date/datetime value.
- *
- * Accepts:
- *   "2026-04-02"           → date only   → "2. dubna 2026"
- *   "2026-04-02 16:13"     → datetime    → "2. dubna 2026 v 16:13"
- *   "2026-04-02T16:13:00Z" → ISO 8601    → "2. dubna 2026 v 18:13"  (UTC→Prague)
- *
- * Date-only strings are treated as Prague local midnight to avoid
- * UTC parsing shifting the date by one day.
- */
 function formatDate(value: unknown): string {
   if (typeof value !== "string" && typeof value !== "number")
     return String(value);
   const raw = String(value).trim();
 
-  // Date-only: YYYY-MM-DD — parse as Prague local date to avoid UTC shift.
   const dateOnly = /^\d{4}-\d{2}-\d{2}$/.exec(raw);
   if (dateOnly) {
     const [year, month, day] = raw.split("-").map(Number) as [
@@ -56,16 +44,12 @@ function formatDate(value: unknown): string {
       number,
       number,
     ];
-    // new Date(y, m, d) creates a local-time Date — DST is irrelevant for date-only display.
     return DATE_FORMAT.format(new Date(year, month - 1, day));
   }
 
-  // Datetime without timezone ("2026-04-02 16:13" or "2026-04-02 16:13:00"):
-  // Treat as Prague local time by replacing space with T and appending no Z.
   const localDatetime = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/.exec(raw);
   if (localDatetime) {
     const normalized = raw.replace(" ", "T");
-    // Parse as local time; Intl will re-express it in Europe/Prague.
     const [datePart, timePart] = normalized.split("T") as [string, string];
     const [year, month, day] = datePart.split("-").map(Number) as [
       number,
@@ -76,7 +60,6 @@ function formatDate(value: unknown): string {
     return DATETIME_FORMAT.format(new Date(year, month - 1, day, hour, minute));
   }
 
-  // ISO 8601 with explicit offset or Z — parse directly, Intl converts to Prague.
   const parsed = new Date(raw);
   if (!Number.isNaN(parsed.getTime())) {
     return DATETIME_FORMAT.format(parsed);
@@ -84,11 +67,14 @@ function formatDate(value: unknown): string {
 
   return raw;
 }
+
+// Skip DocMeta on pages that have a BrandHero (homepage-style pages).
+const isHeroPage = !!frontmatter.value?.hero;
 </script>
 
 <template>
   <div
-    v-if="isMounted && (frontmatter.status || frontmatter.updated_at)"
+    v-if="isMounted && !isHeroPage && (frontmatter.status || frontmatter.updated_at)"
     class="doc-meta"
   >
     <span
@@ -101,6 +87,22 @@ function formatDate(value: unknown): string {
     <span v-if="frontmatter.updated_at" class="doc-meta__date">
       Aktualizováno: {{ formatDate(frontmatter.updated_at) }}
     </span>
+    <span class="doc-meta__author">
+      <svg
+        class="doc-meta__check"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+          clip-rule="evenodd"
+        />
+      </svg>
+      Created by Techfides
+    </span>
   </div>
 </template>
 
@@ -108,9 +110,10 @@ function formatDate(value: unknown): string {
 .doc-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   margin-bottom: 24px;
   font-size: 13px;
+  flex-wrap: wrap;
 }
 
 .doc-meta__badge {
@@ -149,6 +152,20 @@ function formatDate(value: unknown): string {
   color: var(--vp-c-text-2);
 }
 
+.doc-meta__author {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #0074c8;
+  font-weight: 500;
+}
+
+.doc-meta__check {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
 .dark .doc-meta__badge[data-status="published"] {
   background: #052e16;
   color: #4ade80;
@@ -171,5 +188,9 @@ function formatDate(value: unknown): string {
   background: #1f2937;
   color: #9ca3af;
   border-color: #374151;
+}
+
+.dark .doc-meta__author {
+  color: #00a0e3;
 }
 </style>

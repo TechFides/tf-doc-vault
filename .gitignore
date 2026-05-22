@@ -11,3 +11,5 @@ dist/
 /playwright-report/
 /test-results/
 /coverage/
+# IDE
+.idea/

@@ -1,26 +1,55 @@
-/* Reserve space for scrollbar — prevents layout shift when lightbox opens */
+/* ── Brand color tokens ──────────────────────────────────────── */
+:root {
+  --tf-primary: #0074c8;
+  --tf-secondary: #00a0e3;
+  --tf-navy: #092646;
+  --tf-nav-navy: #082850;
+  --tf-surface: #f5f7fa;
+
+  --vp-c-brand-1: #0074c8;
+  --vp-c-brand-2: #0082d8;
+  --vp-c-brand-3: #1a8fd1;
+  --vp-c-brand-soft: rgba(0, 116, 200, 0.12);
+
+  /* Typography */
+  --vp-font-family-base: "Open Sans", "Inter", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+
+  /* Sidebar 30% wider than the default 272 px */
+  --vp-sidebar-width: 280px;
+
+  /* Hide language switcher (translations) — locales are used for versioning only */
+  --vp-nav-translations-display: none;
+}
+
+/* ── Dark mode — navy base ───────────────────────────────────── */
+.dark {
+  --vp-c-bg: #092646;
+  --vp-c-bg-soft: #0d2f5c;
+  --vp-c-bg-mute: #0f3870;
+  --vp-c-bg-elv: #0d2f5c;
+  --vp-c-bg-alt: #082850;
+
+  /* Keep code blocks clearly distinct from the page bg */
+  --vp-code-block-bg: #06213e;
+}
+
+/* ── Scrollbar gutter — prevents layout shift on lightbox open ─ */
 html {
   scrollbar-gutter: stable;
 }
 
-/* Images and Mermaid diagrams in docs — lightbox cursor */
-.vp-doc img,
-.vp-doc svg {
-  cursor: zoom-in;
-}
-
-:root {
-  /* Hide language switcher (translations) — locales are used for versioning only */
-  --vp-nav-translations-display: none;
-
-  /* Sidebar 30% wider than the default 272 px */
-  --vp-sidebar-width: 354px;
-}
-
+/* ── Nav translations / version switcher visibility ─────────── */
 .VPNavBarTranslations,
 .VPFlyout.translations,
 .VPNavBarExtra .group.translations {
   display: none !important;
+}
+
+/* ── Images and Mermaid diagrams — lightbox cursor ──────────── */
+.vp-doc img,
+.vp-doc svg {
+  cursor: zoom-in;
 }
 
 /* ── Layout width toggle ─────────────────────────────────────── */
@@ -36,12 +65,12 @@ html {
 }
 
 .VPDoc:not(.has-sidebar) .content {
-  max-width: 902px !important;
+  max-width: 860px !important;
 }
 
 @media (min-width: 1440px) {
   .VPDoc:not(.has-sidebar) .content {
-    max-width: 941px !important;
+    max-width: 900px !important;
   }
 }
 
@@ -76,4 +105,69 @@ html.layout-max .VPDoc .container {
 
 html.layout-max .VPContent {
   max-width: 100% !important;
+}
+
+/* ── Typography — heading rhythm (8pt grid) ─────────────────── */
+.vp-doc h1 {
+  font-size: 32px;
+  line-height: 1.25;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.vp-doc h2 {
+  font-size: 24px;
+  margin-top: 32px;
+  margin-bottom: 8px;
+  padding-top: 16px;
+}
+
+.vp-doc h3 {
+  font-size: 20px;
+  margin-top: 32px;
+  margin-bottom: 8px;
+}
+
+.vp-doc p {
+  margin-top: 0;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+/* ── Tables — striped rows ───────────────────────────────────── */
+.vp-doc table tr:nth-child(even) {
+  background-color: var(--tf-surface);
+}
+
+.dark .vp-doc table tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.vp-doc table th {
+  background-color: var(--tf-surface);
+  font-weight: 600;
+}
+
+.dark .vp-doc table th {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Sidebar — active item accent ───────────────────────────── */
+.VPSidebarItem.is-active > .item .link .text {
+  color: var(--tf-primary) !important;
+  font-weight: 600;
+}
+
+.VPSidebarItem.is-active > .item {
+  border-left: 2px solid var(--tf-primary);
+  padding-left: calc(var(--vp-sidebar-item-offset, 0px) + 14px);
+}
+
+/* ── Link colors ─────────────────────────────────────────────── */
+.vp-doc a {
+  color: var(--tf-primary);
+}
+
+.vp-doc a:hover {
+  color: var(--tf-secondary);
 }

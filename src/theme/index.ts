@@ -1,10 +1,13 @@
 import DefaultTheme from "vitepress/theme";
 import type { Theme } from "vitepress";
-import { h, type VNode } from "vue";
+import { h, Fragment, type VNode } from "vue";
 import DocMeta from "./components/DocMeta.vue";
 import PrintLayout from "./components/PrintLayout.vue";
 import ImageLightbox from "./components/ImageLightbox.vue";
 import WidthToggle from "./components/WidthToggle.vue";
+import BrandHero from "./components/BrandHero.vue";
+import FeatureCards from "./components/FeatureCards.vue";
+import BrandFooter from "./components/BrandFooter.vue";
 import "./styles/print.css";
 import "./styles/base.css";
 
@@ -16,11 +19,6 @@ export interface CreateThemeOptions {
   widthToggle?: boolean;
 }
 
-/**
- * Build a VitePress theme that extends DefaultTheme with TFSA's
- * shared slot components: DocMeta header, ImageLightbox, optional WidthToggle,
- * and PrintLayout (registered globally for the generated /print page).
- */
 export function createTheme(options: CreateThemeOptions = {}): Theme {
   const { widthToggle = false } = options;
 
@@ -30,7 +28,8 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
       const slots: Record<string, () => VNode> = {
         "doc-before": (): VNode =>
           h("div", { class: "doc-meta-wrapper" }, [h(DocMeta)]),
-        "layout-bottom": (): VNode => h(ImageLightbox),
+        "layout-bottom": (): VNode =>
+          h(Fragment, null, [h(ImageLightbox), h(BrandFooter)]),
       };
       if (widthToggle) {
         slots["nav-bar-content-after"] = (): VNode => h(WidthToggle);
@@ -39,9 +38,11 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
     },
     enhanceApp({ app }): void {
       app.component("PrintLayout", PrintLayout);
+      app.component("BrandHero", BrandHero);
+      app.component("FeatureCards", FeatureCards);
     },
   };
 }
 
-export { DocMeta, ImageLightbox, PrintLayout, WidthToggle };
+export { DocMeta, ImageLightbox, PrintLayout, WidthToggle, BrandHero, FeatureCards, BrandFooter };
 export { useScrollSpy } from "./composables/useScrollSpy.js";

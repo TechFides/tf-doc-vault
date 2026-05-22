@@ -25,6 +25,23 @@ function bundledFaviconLink(): HeadConfig | null {
   }
 }
 
+/**
+ * Read the bundled TF symbol SVG and return it as a data URL for themeConfig.logo.
+ * Resolved at build time relative to this compiled file (dist/config/makeConfig.js).
+ */
+function bundledLogoUrl(): string | null {
+  try {
+    const svgPath = path.resolve(
+      import.meta.dirname,
+      "../theme/assets/logo-symbol.svg",
+    );
+    const svg = fs.readFileSync(svgPath, "utf8");
+    return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+
 export interface Strings {
   title: string;
   description: string;
@@ -91,6 +108,26 @@ function buildHead(opts: MakeConfigOptions): HeadConfig[] {
   const favicon = bundledFaviconLink();
   if (favicon) head.push(favicon);
 
+  // Open Sans via Google Fonts — brand typography
+  head.push(
+    ["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
+    [
+      "link",
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossorigin: "",
+      },
+    ],
+    [
+      "link",
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap",
+      },
+    ],
+  );
+
   if (opts.analytics?.provider === "umami") {
     const { websiteId, domain, scriptSrc = UMAMI_DEFAULT_SRC } = opts.analytics;
     head.push([
@@ -141,6 +178,7 @@ export function makeConfig(
   const strings: Strings = { ...defaultStrings, ...opts.strings };
 
   const head = buildHead(opts);
+  const logoUrl = bundledLogoUrl();
 
   const versionDropdown = (
     label: string,
@@ -174,6 +212,7 @@ export function makeConfig(
         nav: [
           ...(showSections ? sectionNav : []),
           ...(versions.length > 1 ? [versionDropdown(v)] : []),
+          { text: "techfides.cz", link: "https://techfides.cz" },
         ],
       },
     };
@@ -192,6 +231,10 @@ export function makeConfig(
     head,
     locales,
     themeConfig: {
+      ...(logoUrl && {
+        logo: { src: logoUrl, alt: "TechFides" },
+      }),
+      siteTitle: "TechFides",
       logoLink: base,
       nav:
         versions.length > 1
@@ -201,8 +244,9 @@ export function makeConfig(
                 activeMatch: `^${base}(v\\d+)/`.replace(/\/+/g, "/"),
                 items: versions.map((ver) => ({ text: ver, link: `/${ver}/` })),
               },
+              { text: "techfides.cz", link: "https://techfides.cz" },
             ]
-          : [],
+          : [{ text: "techfides.cz", link: "https://techfides.cz" }],
       sidebar: generateSidebar(docsRoot),
       search: { provider: "local" },
       outline: {
