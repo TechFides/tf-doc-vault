@@ -71,13 +71,19 @@
   --vp-nav-translations-display: none;
 }
 
-/* ── Dark mode — navy base (CSO spec; David's DS doesn't cover dark) ─ */
+/* ── Dark mode ──────────────────────────────────────────────────
+ *
+ * Per wireframe: page background is a deep, near-black surface
+ * (subtle cool tint to stay brand-aligned). Navy #092646 is reserved
+ * for premium accents (hero, footer) — by CSO spec, those keep navy
+ * and now pop against the darker base.
+ */
 .dark {
-  --vp-c-bg: var(--tf-navy);              /* #092646 */
-  --vp-c-bg-soft: #0d2f5c;
-  --vp-c-bg-mute: #0f3870;
-  --vp-c-bg-elv: #0d2f5c;
-  --vp-c-bg-alt: var(--tf-nav-navy);      /* #082850 — sidebar */
+  --vp-c-bg: #0e1116;                     /* page background */
+  --vp-c-bg-alt: #080a0d;                 /* sidebar — slightly darker */
+  --vp-c-bg-soft: #171a21;                /* cards, panels */
+  --vp-c-bg-mute: #22262e;                /* interactive hover */
+  --vp-c-bg-elv: #171a21;                 /* popovers, modals */
 
   /* Text on dark — white default, lighter muted for readability */
   --vp-c-text-1: #ffffff;
@@ -88,11 +94,11 @@
   --vp-c-divider: rgba(255, 255, 255, 0.08);
   --vp-c-border: rgba(255, 255, 255, 0.08);
 
-  /* Brand on dark — secondary blue is brighter for hover/accent */
+  /* Brand on dark — secondary blue brighter for hover/accent */
   --vp-c-brand-2: var(--tf-secondary);    /* #00a0e3 — CSO: hover na tmavém */
 
-  /* Code block bg slightly darker than page bg for clear separation */
-  --vp-code-block-bg: #06213e;
+  /* Code block bg even darker than page for clear separation */
+  --vp-code-block-bg: #070a0d;
 }
 
 /* ── Sharp edges (David's DS: border-radius 0 globally, avatars excepted) ─ */
