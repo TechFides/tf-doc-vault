@@ -119,9 +119,9 @@ const isHeroPage = !!frontmatter.value?.hero;
 .doc-meta__badge {
   display: inline-block;
   padding: 2px 10px;
-  border-radius: 12px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  border-radius: 0;          /* David: sharp edges */
+  font-weight: 700;          /* David: label weight */
+  letter-spacing: 0;         /* David: letter-spacing = 0 always */
 }
 
 .doc-meta__badge[data-status="published"] {
@@ -156,7 +156,7 @@ const isHeroPage = !!frontmatter.value?.hero;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #0074c8;
+  color: var(--tf-primary);
   font-weight: 500;
 }
 
@@ -191,6 +191,6 @@ const isHeroPage = !!frontmatter.value?.hero;
 }
 
 .dark .doc-meta__author {
-  color: #00a0e3;
+  color: var(--tf-secondary);
 }
 </style>

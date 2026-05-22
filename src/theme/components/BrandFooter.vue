@@ -35,13 +35,13 @@
 }
 
 .brand-footer__link {
-  color: #0074c8;
+  color: var(--tf-primary);
   text-decoration: none;
 }
 
 .brand-footer__link:hover {
   text-decoration: underline;
-  color: #005fa3;
+  color: var(--tf-primary-hover);
 }
 
 .brand-footer__sep {
@@ -53,7 +53,7 @@
 }
 
 .dark .brand-footer__link {
-  color: #00a0e3;
+  color: var(--tf-secondary);
 }
 
 .dark .brand-footer__link:hover {

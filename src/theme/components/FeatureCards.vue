@@ -56,17 +56,16 @@ function getIcon(name: string): string {
   flex-direction: column;
   padding: 24px;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 12px;
+  border-radius: 0;                 /* David: sharp edges global */
   background: var(--vp-c-bg);
   text-decoration: none;
   color: inherit;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: border-color 0.15s ease;
   cursor: pointer;
 }
 
 .feature-card:hover {
-  border-color: #0074c8;
-  box-shadow: 0 4px 16px rgba(0, 116, 200, 0.12);
+  border-color: var(--tf-primary-hover);
   text-decoration: none;
 }
 
@@ -74,16 +73,16 @@ function getIcon(name: string): string {
   width: 40px;
   height: 40px;
   padding: 8px;
-  border-radius: 8px;
-  background: #f5f7fa;
-  color: #0074c8;
+  border-radius: 0;                 /* David: sharp edges */
+  background: var(--tf-surface);    /* CSO spec: #f5f7fa pro sekční pozadí */
+  color: var(--tf-primary);
   margin-bottom: 16px;
   flex-shrink: 0;
 }
 
 .dark .feature-card__icon {
   background: rgba(0, 116, 200, 0.12);
-  color: #00a0e3;
+  color: var(--tf-secondary);
 }
 
 .feature-card__icon :deep(svg) {
@@ -113,17 +112,17 @@ function getIcon(name: string): string {
   display: inline-block;
   margin-top: 24px;
   padding: 8px 24px;
-  border-radius: 6px;
-  background: #0074c8;
+  border-radius: 0;                 /* David: sharp edges */
+  background: var(--tf-primary);
   color: #fff;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;                 /* David: button text = label weight 700 */
   text-align: center;
   align-self: flex-start;
   transition: background 0.15s ease;
 }
 
 .feature-card:hover .feature-card__cta {
-  background: #005fa3;
+  background: var(--tf-primary-hover);
 }
 </style>

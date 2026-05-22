@@ -19,7 +19,7 @@ const { frontmatter } = useData();
 
 <style scoped>
 .brand-hero {
-  background: #092646;
+  background: var(--tf-navy);
   color: #fff;
   /* Full-bleed: compensate VitePress content padding */
   margin-top: -24px;

@@ -1,37 +1,113 @@
-/* ── Brand color tokens ──────────────────────────────────────── */
+/* ── Brand color tokens ────────────────────────────────────────
+ *
+ * Source priority:
+ *   1. Original CSO spec (Google Doc kap. 3.2) — WINS where defined.
+ *   2. David's DS (01-tokens.md, DESIGN.md) — fills gaps.
+ *
+ * Hard requirement (original spec): WCAG AA ≥ 4.5:1 for normal text.
+ * David's #7E8890 on white = 3.58:1 (fails) — body text uses
+ * David's #333333 Charcoal instead, which David himself flags as
+ * "max-contrast contexts".
+ */
 :root {
-  --tf-primary: #0074c8;
-  --tf-secondary: #00a0e3;
-  --tf-navy: #092646;
-  --tf-nav-navy: #082850;
-  --tf-surface: #f5f7fa;
+  /* Brand — from CSO spec 3.2 (5 official colors) */
+  --tf-primary: #0074c8;        /* Aktivní položky, CTA, odkazy, fokus */
+  --tf-secondary: #00a0e3;      /* Ikony, dekorace, hover na tmavém */
+  --tf-navy: #092646;           /* Tmavý režim, hero blok, footer */
+  --tf-nav-navy: #082850;       /* Text, sidebar v dark mode */
+  --tf-surface: #f5f7fa;        /* Sekční pozadí, tabulky, karty */
 
-  --vp-c-brand-1: #0074c8;
-  --vp-c-brand-2: #0082d8;
-  --vp-c-brand-3: #1a8fd1;
-  --vp-c-brand-soft: rgba(0, 116, 200, 0.12);
+  /* Interaction states — from David's DS (gaps in CSO spec) */
+  --tf-primary-hover: #0f75c5;  /* Hover na CTA (David: Primary Blue Dark) */
+  --tf-primary-active: #092646; /* Active/pressed link state (David) */
+  --tf-primary-soft: rgba(0, 116, 200, 0.10); /* Focus ring, subtle highlight */
 
-  /* Typography */
+  /* Text scale — David's neutrals, body uses Charcoal for WCAG */
+  --tf-text-default: #333333;   /* Body text (Charcoal — WCAG 4.5:1) */
+  --tf-text-muted: #7e8890;     /* Sekundární text, popisky (David Slate) */
+  --tf-text-disabled: #acb2b7;  /* Disabled, placeholder (David Medium) */
+
+  /* Surfaces & borders — David's neutrals */
+  --tf-bg-page: #ffffff;
+  --tf-bg-subtle: #eeeeee;      /* Alternujúce sekcie, code bg (David) */
+  --tf-border-default: #e9e9e9; /* Hairline borders, dividers (David) */
+  --tf-border-strong: #7e8890;  /* Secondary button border (David) */
+
+  /* Semantic feedback — David's DS */
+  --tf-success: #00dd0a;
+  --tf-success-bg: rgba(0, 221, 10, 0.08);
+  --tf-warning: #e08800;
+  --tf-warning-bg: rgba(224, 136, 0, 0.08);
+  --tf-danger: #c8232c;
+  --tf-danger-bg: rgba(200, 35, 44, 0.08);
+  --tf-info: #0074c8;
+  --tf-info-bg: rgba(0, 116, 200, 0.08);
+
+  /* ── VitePress variable overrides ──────────────────────────── */
+  --vp-c-brand-1: var(--tf-primary);
+  --vp-c-brand-2: var(--tf-primary-hover);
+  --vp-c-brand-3: var(--tf-primary-active);
+  --vp-c-brand-soft: var(--tf-primary-soft);
+
+  --vp-c-text-1: var(--tf-text-default);
+  --vp-c-text-2: var(--tf-text-muted);
+  --vp-c-text-3: var(--tf-text-disabled);
+
+  --vp-c-divider: var(--tf-border-default);
+  --vp-c-border: var(--tf-border-default);
+  --vp-c-gutter: var(--tf-border-default);
+
+  --vp-code-block-bg: var(--tf-bg-subtle);   /* David subtle bg for code */
+
+  /* Typography — CSO spec wins (Open Sans → Inter → system fallback) */
   --vp-font-family-base: "Open Sans", "Inter", -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
 
-  /* Sidebar 30% wider than the default 272 px */
+  /* Layout — David's container max + sidebar from CSO spec (260–300 range) */
+  --vp-layout-max-width: 1230px;
   --vp-sidebar-width: 280px;
 
-  /* Hide language switcher (translations) — locales are used for versioning only */
+  /* Hide language switcher — locales are used for versioning only */
   --vp-nav-translations-display: none;
 }
 
-/* ── Dark mode — navy base ───────────────────────────────────── */
+/* ── Dark mode — navy base (CSO spec; David's DS doesn't cover dark) ─ */
 .dark {
-  --vp-c-bg: #092646;
+  --vp-c-bg: var(--tf-navy);              /* #092646 */
   --vp-c-bg-soft: #0d2f5c;
   --vp-c-bg-mute: #0f3870;
   --vp-c-bg-elv: #0d2f5c;
-  --vp-c-bg-alt: #082850;
+  --vp-c-bg-alt: var(--tf-nav-navy);      /* #082850 — sidebar */
 
-  /* Keep code blocks clearly distinct from the page bg */
+  /* Text on dark — white default, lighter muted for readability */
+  --vp-c-text-1: #ffffff;
+  --vp-c-text-2: rgba(255, 255, 255, 0.72);
+  --vp-c-text-3: var(--tf-text-disabled); /* David #acb2b7 holds */
+
+  /* Borders on dark — subtle white */
+  --vp-c-divider: rgba(255, 255, 255, 0.08);
+  --vp-c-border: rgba(255, 255, 255, 0.08);
+
+  /* Brand on dark — secondary blue is brighter for hover/accent */
+  --vp-c-brand-2: var(--tf-secondary);    /* #00a0e3 — CSO: hover na tmavém */
+
+  /* Code block bg slightly darker than page bg for clear separation */
   --vp-code-block-bg: #06213e;
+}
+
+/* ── Sharp edges (David's DS: border-radius 0 globally, avatars excepted) ─ */
+.VPNavBarSearchButton,
+.vp-doc div[class*="language-"],
+.vp-doc div[class*="language-"] pre,
+.vp-doc div[class*="language-"] code,
+.vp-doc :not(pre) > code,
+.VPButton,
+.VPLocalSearchBox,
+.VPLocalSearchBox input,
+.VPSidebarItem .item,
+.VPMenu,
+.custom-block {
+  border-radius: 0 !important;
 }
 
 /* ── Scrollbar gutter — prevents layout shift on lightbox open ─ */
@@ -107,9 +183,10 @@ html.layout-max .VPContent {
   max-width: 100% !important;
 }
 
-/* ── Typography — heading rhythm (8pt grid) ─────────────────── */
+/* ── Typography — CSO spec heading sizes, David's medium weight (500) ─ */
 .vp-doc h1 {
   font-size: 32px;
+  font-weight: 500;
   line-height: 1.25;
   margin-top: 0;
   margin-bottom: 16px;
@@ -117,6 +194,7 @@ html.layout-max .VPContent {
 
 .vp-doc h2 {
   font-size: 24px;
+  font-weight: 500;
   margin-top: 32px;
   margin-bottom: 8px;
   padding-top: 16px;
@@ -124,17 +202,19 @@ html.layout-max .VPContent {
 
 .vp-doc h3 {
   font-size: 20px;
+  font-weight: 500;
   margin-top: 32px;
   margin-bottom: 8px;
 }
 
+/* CSO spec: body 16px / line-height 1.6 (David has 1.875 — CSO wins) */
 .vp-doc p {
   margin-top: 0;
   margin-bottom: 16px;
   line-height: 1.6;
 }
 
-/* ── Tables — striped rows ───────────────────────────────────── */
+/* ── Tables — striped rows (uses --tf-surface from CSO spec) ─ */
 .vp-doc table tr:nth-child(even) {
   background-color: var(--tf-surface);
 }
@@ -145,17 +225,17 @@ html.layout-max .VPContent {
 
 .vp-doc table th {
   background-color: var(--tf-surface);
-  font-weight: 600;
+  font-weight: 700;            /* David: labels are weight 700 */
 }
 
 .dark .vp-doc table th {
   background-color: rgba(255, 255, 255, 0.06);
 }
 
-/* ── Sidebar — active item accent ───────────────────────────── */
+/* ── Sidebar — active item 2px emphasis border (David's DS) ─ */
 .VPSidebarItem.is-active > .item .link .text {
   color: var(--tf-primary) !important;
-  font-weight: 600;
+  font-weight: 700;            /* David: emphasis = bold */
 }
 
 .VPSidebarItem.is-active > .item {
@@ -163,11 +243,17 @@ html.layout-max .VPContent {
   padding-left: calc(var(--vp-sidebar-item-offset, 0px) + 14px);
 }
 
-/* ── Link colors ─────────────────────────────────────────────── */
+/* ── Links — David's spec: weight 400, primary blue, hover blue dark ─ */
 .vp-doc a {
   color: var(--tf-primary);
+  text-decoration: none;
 }
 
 .vp-doc a:hover {
-  color: var(--tf-secondary);
+  color: var(--tf-primary-hover);
+  text-decoration: underline;  /* David spec for link hover */
+}
+
+.vp-doc a:active {
+  color: var(--tf-primary-active);  /* David: deep navy active */
 }

@@ -123,7 +123,8 @@ function buildHead(opts: MakeConfigOptions): HeadConfig[] {
       "link",
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap",
+        // David's DS: body 400, headings 500, labels/buttons 700
+        href: "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&display=swap",
       },
     ],
   );
