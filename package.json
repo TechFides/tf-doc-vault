@@ -113,6 +113,9 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "dev": "node scripts/build.mjs --watch",
+    "dev:docs": "vitepress dev playground/docs",
+    "build:docs": "vitepress build playground/docs",
+    "preview:docs": "vitepress preview playground/docs",
     "prepare": "node scripts/build.mjs && husky",
     "typecheck": "tsc --noEmit",
     "lint": "eslint --config configs/eslint.config.js src bin --ignore-pattern 'src/setup/**'",
