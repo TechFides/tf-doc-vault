@@ -1,36 +1,65 @@
 <script setup lang="ts">
 import { useData } from "vitepress";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
-const { frontmatter } = useData();
+const { frontmatter, site } = useData();
 const isMounted = ref(false);
 
 onMounted(() => {
   isMounted.value = true;
 });
 
-const STATUS_LABEL: Record<string, string> = {
+const isEnglish = computed(() => /^en/i.test(site.value.lang || ""));
+
+const STATUS_LABEL_CS: Record<string, string> = {
   published: "Publikováno",
   draft: "Koncept",
   review: "K revizi",
   archived: "Archivováno",
 };
 
-const DATE_FORMAT = new Intl.DateTimeFormat("cs-CZ", {
-  timeZone: "Europe/Prague",
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
+const STATUS_LABEL_EN: Record<string, string> = {
+  published: "Published",
+  draft: "Draft",
+  review: "In review",
+  archived: "Archived",
+};
 
-const DATETIME_FORMAT = new Intl.DateTimeFormat("cs-CZ", {
-  timeZone: "Europe/Prague",
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
+const STATUS_LABEL = computed(() =>
+  isEnglish.value ? STATUS_LABEL_EN : STATUS_LABEL_CS,
+);
+
+const UPDATED_LABEL = computed(() =>
+  isEnglish.value ? "Updated" : "Aktualizováno",
+);
+
+const AUTHOR_LABEL = computed(() =>
+  isEnglish.value ? "Created by Techfides" : "Created by Techfides",
+);
+
+const dateFormatLocale = computed(() => (isEnglish.value ? "en-US" : "cs-CZ"));
+
+const DATE_FORMAT = computed(
+  () =>
+    new Intl.DateTimeFormat(dateFormatLocale.value, {
+      timeZone: "Europe/Prague",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }),
+);
+
+const DATETIME_FORMAT = computed(
+  () =>
+    new Intl.DateTimeFormat(dateFormatLocale.value, {
+      timeZone: "Europe/Prague",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+);
 
 function formatDate(value: unknown): string {
   if (typeof value !== "string" && typeof value !== "number")
@@ -44,7 +73,7 @@ function formatDate(value: unknown): string {
       number,
       number,
     ];
-    return DATE_FORMAT.format(new Date(year, month - 1, day));
+    return DATE_FORMAT.value.format(new Date(year, month - 1, day));
   }
 
   const localDatetime = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/.exec(raw);
@@ -57,12 +86,14 @@ function formatDate(value: unknown): string {
       number,
     ];
     const [hour, minute] = timePart.split(":").map(Number) as [number, number];
-    return DATETIME_FORMAT.format(new Date(year, month - 1, day, hour, minute));
+    return DATETIME_FORMAT.value.format(
+      new Date(year, month - 1, day, hour, minute),
+    );
   }
 
   const parsed = new Date(raw);
   if (!Number.isNaN(parsed.getTime())) {
-    return DATETIME_FORMAT.format(parsed);
+    return DATETIME_FORMAT.value.format(parsed);
   }
 
   return raw;
@@ -85,7 +116,7 @@ const isHeroPage = !!frontmatter.value?.hero;
       {{ STATUS_LABEL[frontmatter.status] ?? frontmatter.status }}
     </span>
     <span v-if="frontmatter.updated_at" class="doc-meta__date">
-      Aktualizováno: {{ formatDate(frontmatter.updated_at) }}
+      {{ UPDATED_LABEL }}: {{ formatDate(frontmatter.updated_at) }}
     </span>
     <span class="doc-meta__author">
       <svg
@@ -101,7 +132,7 @@ const isHeroPage = !!frontmatter.value?.hero;
           clip-rule="evenodd"
         />
       </svg>
-      Created by Techfides
+      {{ AUTHOR_LABEL }}
     </span>
   </div>
 </template>

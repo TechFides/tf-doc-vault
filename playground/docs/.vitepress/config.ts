@@ -19,10 +19,14 @@ const srcRoot = path.resolve(here, "../../../src");
 export default makeConfig({
   configDir: import.meta.dirname,
   project: "playground",
-  mermaid: false,
   strings: {
     title: "tf-doc-vault — playground",
     description: "Local theme dev sandbox",
+    lang: "en-US",
+    searchLabel: "On this page",
+    footerPrev: "Previous",
+    footerNext: "Next",
+    lastUpdatedText: "Last updated",
   },
   override: {
     base: "/",

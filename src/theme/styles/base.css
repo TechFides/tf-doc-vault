@@ -63,8 +63,11 @@
   --vp-font-family-base: "Open Sans", "Inter", -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
 
-  /* Layout — David's container max + sidebar from CSO spec (260–300 range) */
-  --vp-layout-max-width: 1230px;
+  /* Layout — chrome (navbar, sidebar, outline) fills viewport; only the
+     reading column is capped (see .VPDoc .content rules below). David's
+     1230px ceiling applies to the content max, not the whole layout.
+     Force 100% so VitePress' internal default doesn't cap on wide screens. */
+  --vp-layout-max-width: 100%;
   --vp-sidebar-width: 280px;
 
   /* Hide language switcher — locales are used for versioning only */
@@ -73,32 +76,74 @@
 
 /* ── Dark mode ──────────────────────────────────────────────────
  *
- * Per wireframe: page background is a deep, near-black surface
- * (subtle cool tint to stay brand-aligned). Navy #092646 is reserved
- * for premium accents (hero, footer) — by CSO spec, those keep navy
- * and now pop against the darker base.
+ * Per wireframe: navbar (top strip) stays navy as brand chrome.
+ * Everything below navbar (sidebar + content + outline aside) is
+ * one consistent darker surface.
  */
 .dark {
-  --vp-c-bg: #0e1116;                     /* page background */
-  --vp-c-bg-alt: #080a0d;                 /* sidebar — slightly darker */
-  --vp-c-bg-soft: #171a21;                /* cards, panels */
-  --vp-c-bg-mute: #22262e;                /* interactive hover */
-  --vp-c-bg-elv: #171a21;                 /* popovers, modals */
+  --vp-c-bg: #04132a;                /* DARK — content area */
+  --vp-c-bg-alt: var(--tf-nav-navy); /* #082850 — chrome (navbar + sidebar) */
+  --vp-c-bg-soft: #0a2d52;           /* raised cards / panels stand out */
+  --vp-c-bg-mute: #0f3870;           /* hover */
+  --vp-c-bg-elv: #0a2d52;            /* popovers, modals */
 
-  /* Text on dark — white default, lighter muted for readability */
+  /* Sidebar uses its own var; bind it to the chrome navy */
+  --vp-sidebar-bg-color: var(--tf-nav-navy);
+
+  /* Text on dark */
   --vp-c-text-1: #ffffff;
   --vp-c-text-2: rgba(255, 255, 255, 0.72);
-  --vp-c-text-3: var(--tf-text-disabled); /* David #acb2b7 holds */
+  --vp-c-text-3: var(--tf-text-disabled);
 
-  /* Borders on dark — subtle white */
+  /* Borders / gutters on dark — subtle white, NOT the light-mode #e9e9e9 */
   --vp-c-divider: rgba(255, 255, 255, 0.08);
   --vp-c-border: rgba(255, 255, 255, 0.08);
+  --vp-c-gutter: rgba(255, 255, 255, 0.08);
 
   /* Brand on dark — secondary blue brighter for hover/accent */
-  --vp-c-brand-2: var(--tf-secondary);    /* #00a0e3 — CSO: hover na tmavém */
+  --vp-c-brand-2: var(--tf-secondary);
 
-  /* Code block bg even darker than page for clear separation */
-  --vp-code-block-bg: #070a0d;
+  /* Code block bg even darker than the page surface */
+  --vp-code-block-bg: #020a18;
+}
+
+/* Navbar — split background per wireframe:
+   - right portion (above content): dark, merges with content
+   - left "title" portion (above sidebar): navy, merges with sidebar
+   No more visible 1px seam between the navbar bottom and sidebar top. */
+.dark .VPNav,
+.dark .VPNavBar,
+.dark .VPNavBar > .wrapper,
+.dark .VPNavBar > .wrapper > .container,
+.dark .VPNavBar > .wrapper > .container > .content,
+.dark .VPNavBar > .wrapper > .container > .content > .content-body {
+  background-color: var(--vp-c-bg) !important;
+}
+
+/* Title section is navy ONLY when the page has a sidebar — otherwise
+   (404, hero pages) it'd hover as a navy "card" inside the dark navbar. */
+.dark .VPNavBar.has-sidebar > .wrapper > .container > .title {
+  background-color: var(--tf-nav-navy) !important;
+}
+
+/* Remove the navbar bottom hairline in dark mode — light line read like
+   a glitch against the dark content area. */
+.dark .VPNavBar,
+.dark .VPNavBar.has-sidebar > .wrapper > .container > .title {
+  border-bottom-color: transparent !important;
+}
+
+/* Page surface (everything except the explicitly-navy chrome) sits on
+   the dark content bg. Without this, .Layout/.VPContent pick up an
+   alt-bg on wide viewports and show a navy strip on the right edge. */
+.dark html,
+.dark body,
+.dark .Layout,
+.dark .VPContent,
+.dark .VPDoc,
+.dark .VPDocAside,
+.dark .VPDocAsideOutline {
+  background-color: var(--vp-c-bg);
 }
 
 /* ── Sharp edges (David's DS: border-radius 0 globally, avatars excepted) ─ */

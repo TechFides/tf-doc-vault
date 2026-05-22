@@ -231,6 +231,13 @@ export function makeConfig(
     ...Object.fromEntries(versions.slice(1).map((v) => [v, localeFor(v)])),
   };
 
+  // If the consumer overrides `base` (e.g. site served at `/` instead of
+  // `/docs/`), the logo link must follow — otherwise clicking the logo
+  // sends the user to a 404 because the original computed base no longer
+  // exists.
+  const effectiveBase =
+    typeof opts.override?.base === "string" ? opts.override.base : base;
+
   const baseConfig: UserConfig = {
     base,
     title: strings.title,
@@ -243,7 +250,7 @@ export function makeConfig(
         logo: { src: logoUrl, alt: "TechFides" },
       }),
       siteTitle: "TechFides",
-      logoLink: base,
+      logoLink: effectiveBase,
       nav:
         versions.length > 1
           ? [

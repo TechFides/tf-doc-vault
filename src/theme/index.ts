@@ -8,6 +8,7 @@ import WidthToggle from "./components/WidthToggle.vue";
 import BrandHero from "./components/BrandHero.vue";
 import FeatureCards from "./components/FeatureCards.vue";
 import BrandFooter from "./components/BrandFooter.vue";
+import NotFound from "./components/NotFound.vue";
 import "./styles/print.css";
 import "./styles/base.css";
 
@@ -30,6 +31,7 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
           h("div", { class: "doc-meta-wrapper" }, [h(DocMeta)]),
         "layout-bottom": (): VNode =>
           h(Fragment, null, [h(ImageLightbox), h(BrandFooter)]),
+        "not-found": (): VNode => h(NotFound),
       };
       if (widthToggle) {
         slots["nav-bar-content-after"] = (): VNode => h(WidthToggle);
@@ -44,5 +46,5 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
   };
 }
 
-export { DocMeta, ImageLightbox, PrintLayout, WidthToggle, BrandHero, FeatureCards, BrandFooter };
+export { DocMeta, ImageLightbox, PrintLayout, WidthToggle, BrandHero, FeatureCards, BrandFooter, NotFound };
 export { useScrollSpy } from "./composables/useScrollSpy.js";
