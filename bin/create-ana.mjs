@@ -203,6 +203,7 @@ replacePlaceholders(targetDir, {
   __GCP_PROJECT__: gcpProject,
   __SERVER_TYPE__: serverType,
   __VITEPRESS_COMMON_DEP__: vitepressCommonDep,
+  __DATE__: new Date().toISOString().slice(0, 10),
   // Basic auth defaultně prázdné; uživatel je vyplní v .gitlab-ci.yml
   // až podle reálné potřeby (jen pro nginx-auth runtime).
   __BASIC_AUTH_USER__: "",

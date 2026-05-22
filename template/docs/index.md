@@ -1,5 +1,7 @@
 ---
 title: __PROJECT__ — dokumentační portál
+status: published
+updated_at: __DATE__
 aside: false
 hero:
   title: __PROJECT__
