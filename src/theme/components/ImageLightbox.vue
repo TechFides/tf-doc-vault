@@ -41,6 +41,30 @@ function unlockScroll() {
   document.body.style.overflow = "";
 }
 
+/**
+ * Mermaid SVGs in dark mode get their brand styling from `.dark .mermaid`
+ * CSS overrides on the live DOM. When serialized to a data URL for the
+ * lightbox, that parent scope is gone — the SVG would render with
+ * mermaid's raw default-dark defaults. Inline the relevant computed
+ * styles directly on each element so the lightbox version looks the same
+ * as the one on the page.
+ */
+function inlineComputedStyles(root: SVGSVGElement, isDark: boolean): void {
+  if (!isDark) return;
+  const props = ["fill", "stroke", "stroke-width", "color", "background-color"];
+  const all = [root, ...Array.from(root.querySelectorAll<SVGElement>("*"))];
+  for (const el of all) {
+    const cs = getComputedStyle(el);
+    const parts: string[] = [];
+    for (const p of props) {
+      const v = cs.getPropertyValue(p);
+      if (v) parts.push(`${p}:${v}`);
+    }
+    const existing = el.getAttribute("style") || "";
+    el.setAttribute("style", `${existing};${parts.join(";")}`);
+  }
+}
+
 function svgToDataUrl(svgEl: SVGSVGElement): string {
   // Ensure the SVG has explicit dimensions so the img renders correctly
   const clone = svgEl.cloneNode(true) as SVGSVGElement;
@@ -49,6 +73,55 @@ function svgToDataUrl(svgEl: SVGSVGElement): string {
     clone.setAttribute("width", String(bbox.width));
   if (!clone.getAttribute("height"))
     clone.setAttribute("height", String(bbox.height));
+
+  // Inline brand styles for Mermaid so the lightbox renders the styled
+  // version, not the bare mermaid SVG defaults. Detection: .dark class
+  // on <html>. We copy from the LIVE element (svgEl) into the clone.
+  const isDark = document.documentElement.classList.contains("dark");
+  if (isDark) {
+    const liveEls = [
+      svgEl,
+      ...Array.from(svgEl.querySelectorAll<SVGElement>("*")),
+    ];
+    const cloneEls = [
+      clone,
+      ...Array.from(clone.querySelectorAll<SVGElement>("*")),
+    ];
+    // Include HTML descendants inside foreignObject (edge labels etc.)
+    const liveHtml = Array.from(
+      svgEl.querySelectorAll<HTMLElement>("foreignObject *"),
+    );
+    const cloneHtml = Array.from(
+      clone.querySelectorAll<HTMLElement>("foreignObject *"),
+    );
+    const allLive = [...liveEls, ...liveHtml];
+    const allClone = [...cloneEls, ...cloneHtml];
+    const props = [
+      "fill",
+      "stroke",
+      "stroke-width",
+      "color",
+      "background-color",
+    ];
+    for (let i = 0; i < allLive.length && i < allClone.length; i++) {
+      const cs = getComputedStyle(allLive[i] as Element);
+      const target = allClone[i];
+      if (!target) continue;
+      const parts: string[] = [];
+      for (const p of props) {
+        const v = cs.getPropertyValue(p);
+        if (v) parts.push(`${p}:${v}`);
+      }
+      const existing = target.getAttribute("style") || "";
+      target.setAttribute("style", `${existing};${parts.join(";")}`);
+    }
+    // Backdrop so transparent areas look like the dark page surface
+    clone.setAttribute(
+      "style",
+      `${clone.getAttribute("style") || ""};background-color:#04132a;`,
+    );
+  }
+
   const serialized = new XMLSerializer().serializeToString(clone);
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(serialized);
 }

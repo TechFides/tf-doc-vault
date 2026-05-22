@@ -105,7 +105,9 @@ const isHeroPage = !!frontmatter.value?.hero;
 
 <template>
   <div
-    v-if="isMounted && !isHeroPage && (frontmatter.status || frontmatter.updated_at)"
+    v-if="
+      isMounted && !isHeroPage && (frontmatter.status || frontmatter.updated_at)
+    "
     class="doc-meta"
   >
     <span
@@ -150,9 +152,9 @@ const isHeroPage = !!frontmatter.value?.hero;
 .doc-meta__badge {
   display: inline-block;
   padding: 2px 10px;
-  border-radius: 0;          /* David: sharp edges */
-  font-weight: 700;          /* David: label weight */
-  letter-spacing: 0;         /* David: letter-spacing = 0 always */
+  border-radius: 0; /* David: sharp edges */
+  font-weight: 700; /* David: label weight */
+  letter-spacing: 0; /* David: letter-spacing = 0 always */
 }
 
 .doc-meta__badge[data-status="published"] {

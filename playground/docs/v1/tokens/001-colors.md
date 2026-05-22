@@ -13,29 +13,29 @@ Source priority:
 
 ## Brand palette (CSO spec)
 
-| Token                    | Hex       | Role                                    |
-| ------------------------ | --------- | --------------------------------------- |
-| `--tf-primary`           | `#0074c8` | Active items, CTAs, links, focus        |
-| `--tf-secondary`         | `#00a0e3` | Icons, decoration, hover on dark        |
-| `--tf-navy`              | `#092646` | Dark mode, hero, footer                 |
-| `--tf-nav-navy`          | `#082850` | Text, sidebar in dark mode              |
-| `--tf-surface`           | `#f5f7fa` | Section background, tables, cards       |
+| Token            | Hex       | Role                              |
+| ---------------- | --------- | --------------------------------- |
+| `--tf-primary`   | `#0074c8` | Active items, CTAs, links, focus  |
+| `--tf-secondary` | `#00a0e3` | Icons, decoration, hover on dark  |
+| `--tf-navy`      | `#092646` | Dark mode, hero, footer           |
+| `--tf-nav-navy`  | `#082850` | Text, sidebar in dark mode        |
+| `--tf-surface`   | `#f5f7fa` | Section background, tables, cards |
 
 ## Interaction states (David's DS)
 
-| Token                    | Hex       | Use                              |
-| ------------------------ | --------- | -------------------------------- |
-| `--tf-primary-hover`     | `#0f75c5` | CTA hover                        |
-| `--tf-primary-active`    | `#092646` | Active / pressed link            |
+| Token                 | Hex       | Use                   |
+| --------------------- | --------- | --------------------- |
+| `--tf-primary-hover`  | `#0f75c5` | CTA hover             |
+| `--tf-primary-active` | `#092646` | Active / pressed link |
 
 ## Status (David's DS)
 
-| Token            | Hex       |
-| ---------------- | --------- |
-| `--tf-success`   | `#00dd0a` |
-| `--tf-warning`   | `#e08800` |
-| `--tf-danger`    | `#c8232c` |
-| `--tf-info`      | `#0074c8` |
+| Token          | Hex       |
+| -------------- | --------- |
+| `--tf-success` | `#00dd0a` |
+| `--tf-warning` | `#e08800` |
+| `--tf-danger`  | `#c8232c` |
+| `--tf-info`    | `#0074c8` |
 
 ## WCAG note
 

@@ -50,9 +50,7 @@ const homeLink = computed(() => (theme.value.logoLink as string) || "/");
       <p class="tf-not-found__code">{{ labels.code }}</p>
       <h1 class="tf-not-found__heading">{{ labels.heading }}</h1>
       <p class="tf-not-found__message">{{ labels.message }}</p>
-      <a class="tf-not-found__link" :href="homeLink">
-        ← {{ labels.link }}
-      </a>
+      <a class="tf-not-found__link" :href="homeLink"> ← {{ labels.link }} </a>
     </div>
   </div>
 </template>

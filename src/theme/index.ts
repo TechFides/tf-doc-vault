@@ -46,5 +46,14 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
   };
 }
 
-export { DocMeta, ImageLightbox, PrintLayout, WidthToggle, BrandHero, FeatureCards, BrandFooter, NotFound };
+export {
+  DocMeta,
+  ImageLightbox,
+  PrintLayout,
+  WidthToggle,
+  BrandHero,
+  FeatureCards,
+  BrandFooter,
+  NotFound,
+};
 export { useScrollSpy } from "./composables/useScrollSpy.js";

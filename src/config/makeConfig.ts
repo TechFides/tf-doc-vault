@@ -283,6 +283,41 @@ export function makeConfig(
       // ignore all localhost links
       /^https?:\/\/localhost/,
     ],
+    // Mermaid theme — uses 'base' so themeVariables drive node/edge colors.
+    // vitepress-plugin-mermaid switches to its built-in 'dark' theme when
+    // the .dark class lands on <html>, so values below take effect in light
+    // mode; dark mode overrides live in theme/styles/base.css (.dark .vp-doc
+    // .mermaid …) so the brand palette holds in both modes.
+    mermaid: {
+      theme: "base",
+      themeVariables: {
+        // Default node
+        primaryColor: "#f5f7fa", // tf-surface
+        primaryTextColor: "#333333", // body charcoal
+        primaryBorderColor: "#0074c8", // tf-primary
+        // Secondary node (alt fill)
+        secondaryColor: "#ffffff",
+        secondaryTextColor: "#333333",
+        secondaryBorderColor: "#7e8890",
+        // Tertiary node
+        tertiaryColor: "#eeeeee",
+        tertiaryTextColor: "#333333",
+        tertiaryBorderColor: "#acb2b7",
+        // Edges + labels
+        lineColor: "#7e8890",
+        textColor: "#333333",
+        // Notes
+        noteBkgColor: "#fef3c7",
+        noteTextColor: "#92400e",
+        noteBorderColor: "#fde68a",
+        // Special edge colors
+        edgeLabelBackground: "#ffffff",
+      },
+      flowchart: {
+        curve: "basis",
+        useMaxWidth: true,
+      },
+    },
     ...opts.override,
   };
 

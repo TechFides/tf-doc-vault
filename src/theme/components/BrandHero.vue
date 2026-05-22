@@ -7,7 +7,9 @@ const { frontmatter } = useData();
 <template>
   <div v-if="frontmatter.hero" class="brand-hero">
     <div class="brand-hero__inner">
-      <h1 class="brand-hero__title">{{ frontmatter.hero.title ?? frontmatter.title }}</h1>
+      <h1 class="brand-hero__title">
+        {{ frontmatter.hero.title ?? frontmatter.title }}
+      </h1>
       <p
         v-if="frontmatter.hero.subtitle"
         class="brand-hero__subtitle"

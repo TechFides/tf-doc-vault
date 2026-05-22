@@ -11,27 +11,27 @@
  */
 :root {
   /* Brand — from CSO spec 3.2 (5 official colors) */
-  --tf-primary: #0074c8;        /* Aktivní položky, CTA, odkazy, fokus */
-  --tf-secondary: #00a0e3;      /* Ikony, dekorace, hover na tmavém */
-  --tf-navy: #092646;           /* Tmavý režim, hero blok, footer */
-  --tf-nav-navy: #082850;       /* Text, sidebar v dark mode */
-  --tf-surface: #f5f7fa;        /* Sekční pozadí, tabulky, karty */
+  --tf-primary: #0074c8; /* Aktivní položky, CTA, odkazy, fokus */
+  --tf-secondary: #00a0e3; /* Ikony, dekorace, hover na tmavém */
+  --tf-navy: #092646; /* Tmavý režim, hero blok, footer */
+  --tf-nav-navy: #082850; /* Text, sidebar v dark mode */
+  --tf-surface: #f5f7fa; /* Sekční pozadí, tabulky, karty */
 
   /* Interaction states — from David's DS (gaps in CSO spec) */
-  --tf-primary-hover: #0f75c5;  /* Hover na CTA (David: Primary Blue Dark) */
+  --tf-primary-hover: #0f75c5; /* Hover na CTA (David: Primary Blue Dark) */
   --tf-primary-active: #092646; /* Active/pressed link state (David) */
-  --tf-primary-soft: rgba(0, 116, 200, 0.10); /* Focus ring, subtle highlight */
+  --tf-primary-soft: rgba(0, 116, 200, 0.1); /* Focus ring, subtle highlight */
 
   /* Text scale — David's neutrals, body uses Charcoal for WCAG */
-  --tf-text-default: #333333;   /* Body text (Charcoal — WCAG 4.5:1) */
-  --tf-text-muted: #7e8890;     /* Sekundární text, popisky (David Slate) */
-  --tf-text-disabled: #acb2b7;  /* Disabled, placeholder (David Medium) */
+  --tf-text-default: #333333; /* Body text (Charcoal — WCAG 4.5:1) */
+  --tf-text-muted: #7e8890; /* Sekundární text, popisky (David Slate) */
+  --tf-text-disabled: #acb2b7; /* Disabled, placeholder (David Medium) */
 
   /* Surfaces & borders — David's neutrals */
   --tf-bg-page: #ffffff;
-  --tf-bg-subtle: #eeeeee;      /* Alternujúce sekcie, code bg (David) */
+  --tf-bg-subtle: #eeeeee; /* Alternujúce sekcie, code bg (David) */
   --tf-border-default: #e9e9e9; /* Hairline borders, dividers (David) */
-  --tf-border-strong: #7e8890;  /* Secondary button border (David) */
+  --tf-border-strong: #7e8890; /* Secondary button border (David) */
 
   /* Semantic feedback — David's DS */
   --tf-success: #00dd0a;
@@ -57,17 +57,18 @@
   --vp-c-border: var(--tf-border-default);
   --vp-c-gutter: var(--tf-border-default);
 
-  --vp-code-block-bg: var(--tf-bg-subtle);   /* David subtle bg for code */
+  --vp-code-block-bg: var(--tf-bg-subtle); /* David subtle bg for code */
 
   /* Typography — CSO spec wins (Open Sans → Inter → system fallback) */
-  --vp-font-family-base: "Open Sans", "Inter", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
+  --vp-font-family-base:
+    "Open Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
 
-  /* Layout — chrome (navbar, sidebar, outline) fills viewport; only the
-     reading column is capped (see .VPDoc .content rules below). David's
-     1230px ceiling applies to the content max, not the whole layout.
-     Force 100% so VitePress' internal default doesn't cap on wide screens. */
-  --vp-layout-max-width: 100%;
+  /* Layout — cap so sidebar + content + outline stay centered on wide
+     viewports (otherwise the sidebar sticks to the far left edge).
+     Anything outside this cap shows the page bg, which in dark mode is
+     the same dark surface as the content — no visible strip on the sides. */
+  --vp-layout-max-width: 1440px;
   --vp-sidebar-width: 280px;
 
   /* Hide language switcher — locales are used for versioning only */
@@ -81,11 +82,11 @@
  * one consistent darker surface.
  */
 .dark {
-  --vp-c-bg: #04132a;                /* DARK — content area */
+  --vp-c-bg: #04132a; /* DARK — content area */
   --vp-c-bg-alt: var(--tf-nav-navy); /* #082850 — chrome (navbar + sidebar) */
-  --vp-c-bg-soft: #0a2d52;           /* raised cards / panels stand out */
-  --vp-c-bg-mute: #0f3870;           /* hover */
-  --vp-c-bg-elv: #0a2d52;            /* popovers, modals */
+  --vp-c-bg-soft: #0a2d52; /* raised cards / panels stand out */
+  --vp-c-bg-mute: #0f3870; /* hover */
+  --vp-c-bg-elv: #0a2d52; /* popovers, modals */
 
   /* Sidebar uses its own var; bind it to the chrome navy */
   --vp-sidebar-bg-color: var(--tf-nav-navy);
@@ -276,7 +277,7 @@ html.layout-max .VPContent {
 
 .vp-doc table th {
   background-color: var(--tf-surface);
-  font-weight: 700;            /* David: labels are weight 700 */
+  font-weight: 700; /* David: labels are weight 700 */
 }
 
 .dark .vp-doc table th {
@@ -286,12 +287,137 @@ html.layout-max .VPContent {
 /* ── Sidebar — active item 2px emphasis border (David's DS) ─ */
 .VPSidebarItem.is-active > .item .link .text {
   color: var(--tf-primary) !important;
-  font-weight: 700;            /* David: emphasis = bold */
+  font-weight: 700; /* David: emphasis = bold */
 }
 
 .VPSidebarItem.is-active > .item {
   border-left: 2px solid var(--tf-primary);
   padding-left: calc(var(--vp-sidebar-item-offset, 0px) + 14px);
+}
+
+/* ── Mermaid — dark-mode brand overrides ─────────────────────────
+ *
+ * vitepress-plugin-mermaid hard-forces theme="dark" whenever the
+ * .dark class lands on <html>, which ignores our `themeVariables`
+ * from makeConfig (those only stick in light mode). Re-paint the
+ * SVG with brand colors here.
+ */
+.dark .mermaid svg {
+  background-color: transparent;
+}
+
+/* Flowchart + class diagram node shapes */
+.dark .mermaid .node rect,
+.dark .mermaid .node polygon,
+.dark .mermaid .node circle,
+.dark .mermaid .node ellipse,
+.dark .mermaid .node path,
+.dark .mermaid .cluster rect {
+  fill: var(--vp-c-bg-soft) !important;
+  stroke: var(--tf-primary) !important;
+  stroke-width: 1px !important;
+}
+
+.dark .mermaid .node .label,
+.dark .mermaid .node .nodeLabel,
+.dark .mermaid .node text,
+.dark .mermaid .cluster .nodeLabel,
+.dark .mermaid .cluster text {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+.dark .mermaid .nodeLabel p,
+.dark .mermaid .edgeLabel p {
+  color: #ffffff !important;
+  background-color: transparent !important;
+}
+
+/* Edge label foreignObject wraps a span.edgeLabel which has its own white
+   default — strip it so the labelBkg shows through. */
+.dark .mermaid span.edgeLabel {
+  background-color: transparent !important;
+  color: #ffffff !important;
+}
+
+/* Edges + arrows */
+.dark .mermaid .edgePath .path,
+.dark .mermaid .flowchart-link,
+.dark .mermaid .messageLine0,
+.dark .mermaid .messageLine1,
+.dark .mermaid line,
+.dark .mermaid .relation {
+  stroke: var(--tf-text-muted) !important;
+}
+
+.dark .mermaid .arrowheadPath,
+.dark .mermaid .marker,
+.dark .mermaid #arrowhead path {
+  fill: var(--tf-text-muted) !important;
+  stroke: var(--tf-text-muted) !important;
+}
+
+/* Edge labels (Yes/No, etc.) */
+.dark .mermaid .edgeLabel,
+.dark .mermaid .edgeLabel rect {
+  background-color: var(--vp-c-bg-soft) !important;
+  color: #ffffff !important;
+  fill: var(--vp-c-bg-soft) !important;
+}
+
+.dark .mermaid .edgeLabel foreignObject div {
+  background-color: var(--vp-c-bg-soft) !important;
+  color: #ffffff !important;
+}
+
+/* Sequence diagram */
+.dark .mermaid .actor {
+  fill: var(--vp-c-bg-soft) !important;
+  stroke: var(--tf-primary) !important;
+}
+
+.dark .mermaid text.actor > tspan {
+  fill: #ffffff !important;
+}
+
+.dark .mermaid .actor-line,
+.dark .mermaid line.actor-line {
+  stroke: var(--tf-text-muted) !important;
+}
+
+.dark .mermaid .messageText,
+.dark .mermaid .labelText,
+.dark .mermaid .loopText,
+.dark .mermaid .noteText {
+  fill: #ffffff !important;
+  stroke: none !important;
+}
+
+.dark .mermaid .note {
+  fill: var(--vp-c-bg-mute) !important;
+  stroke: var(--tf-secondary) !important;
+}
+
+/* Class diagram */
+.dark .mermaid .classGroup rect,
+.dark .mermaid .classGroup path {
+  fill: var(--vp-c-bg-soft) !important;
+  stroke: var(--tf-primary) !important;
+}
+
+.dark .mermaid .classGroup .classTitle,
+.dark .mermaid .classLabel .label {
+  fill: #ffffff !important;
+}
+
+.dark .mermaid .classGroup text,
+.dark .mermaid g.classGroup text {
+  fill: #ffffff !important;
+}
+
+/* Section dividers inside class diagrams */
+.dark .mermaid .classGroup line {
+  stroke: var(--tf-text-muted) !important;
 }
 
 /* ── Links — David's spec: weight 400, primary blue, hover blue dark ─ */
@@ -302,9 +428,9 @@ html.layout-max .VPContent {
 
 .vp-doc a:hover {
   color: var(--tf-primary-hover);
-  text-decoration: underline;  /* David spec for link hover */
+  text-decoration: underline; /* David spec for link hover */
 }
 
 .vp-doc a:active {
-  color: var(--tf-primary-active);  /* David: deep navy active */
+  color: var(--tf-primary-active); /* David: deep navy active */
 }

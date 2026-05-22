@@ -13,12 +13,12 @@ site's `lang` setting (Czech by default, English when `lang: en-*`).
 
 ## Status variants
 
-| status      | English label | Czech label  |
-| ----------- | ------------- | ------------ |
-| `published` | Published     | Publikováno  |
-| `draft`     | Draft         | Koncept      |
-| `review`    | In review     | K revizi     |
-| `archived`  | Archived      | Archivováno  |
+| status      | English label | Czech label |
+| ----------- | ------------- | ----------- |
+| `published` | Published     | Publikováno |
+| `draft`     | Draft         | Koncept     |
+| `review`    | In review     | K revizi    |
+| `archived`  | Archived      | Archivováno |
 
 ## Source
 

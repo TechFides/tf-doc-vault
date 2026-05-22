@@ -1,7 +1,12 @@
 <template>
   <footer class="brand-footer">
     <div class="brand-footer__inner">
-      <a href="https://techfides.cz" target="_blank" rel="noopener" class="brand-footer__link">
+      <a
+        href="https://techfides.cz"
+        target="_blank"
+        rel="noopener"
+        class="brand-footer__link"
+      >
         techfides.cz
       </a>
       <span class="brand-footer__sep" aria-hidden="true">•</span>

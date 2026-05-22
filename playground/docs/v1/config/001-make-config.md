@@ -23,12 +23,12 @@ export default makeConfig({
 
 ## Common options
 
-| Option        | Type                  | Notes                                  |
-| ------------- | --------------------- | -------------------------------------- |
-| `configDir`   | `string` (required)   | `import.meta.dirname` of `config.ts`   |
-| `project`     | `string`              | Shortname for diagnostics              |
-| `strings`     | `Partial<Strings>`    | Override title, description, lang …    |
-| `analytics`   | `UmamiAnalytics`      | Umami tracker config                   |
-| `editLink`    | `EditLink`            | GitLab / GitHub edit URL pattern       |
-| `mermaid`     | `boolean`             | Default `true`; `false` skips wrapper  |
-| `override`    | `Partial<UserConfig>` | Escape hatch for advanced cases        |
+| Option      | Type                  | Notes                                 |
+| ----------- | --------------------- | ------------------------------------- |
+| `configDir` | `string` (required)   | `import.meta.dirname` of `config.ts`  |
+| `project`   | `string`              | Shortname for diagnostics             |
+| `strings`   | `Partial<Strings>`    | Override title, description, lang …   |
+| `analytics` | `UmamiAnalytics`      | Umami tracker config                  |
+| `editLink`  | `EditLink`            | GitLab / GitHub edit URL pattern      |
+| `mermaid`   | `boolean`             | Default `true`; `false` skips wrapper |
+| `override`  | `Partial<UserConfig>` | Escape hatch for advanced cases       |

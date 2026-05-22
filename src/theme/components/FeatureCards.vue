@@ -22,7 +22,10 @@ function getIcon(name: string): string {
       :href="card.link"
       class="feature-card"
     >
-      <div class="feature-card__icon" v-html="getIcon(card.icon ?? 'business')" />
+      <div
+        class="feature-card__icon"
+        v-html="getIcon(card.icon ?? 'business')"
+      />
       <h3 class="feature-card__title">{{ card.title }}</h3>
       <p class="feature-card__desc">{{ card.description }}</p>
       <span class="feature-card__cta">{{ card.linkText ?? "Explore" }}</span>
@@ -56,7 +59,7 @@ function getIcon(name: string): string {
   flex-direction: column;
   padding: 24px;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 0;                 /* David: sharp edges global */
+  border-radius: 0; /* David: sharp edges global */
   background: var(--vp-c-bg);
   text-decoration: none;
   color: inherit;
@@ -73,8 +76,8 @@ function getIcon(name: string): string {
   width: 40px;
   height: 40px;
   padding: 8px;
-  border-radius: 0;                 /* David: sharp edges */
-  background: var(--tf-surface);    /* CSO spec: #f5f7fa pro sekční pozadí */
+  border-radius: 0; /* David: sharp edges */
+  background: var(--tf-surface); /* CSO spec: #f5f7fa pro sekční pozadí */
   color: var(--tf-primary);
   margin-bottom: 16px;
   flex-shrink: 0;
@@ -112,11 +115,11 @@ function getIcon(name: string): string {
   display: inline-block;
   margin-top: 24px;
   padding: 8px 24px;
-  border-radius: 0;                 /* David: sharp edges */
+  border-radius: 0; /* David: sharp edges */
   background: var(--tf-primary);
   color: #fff;
   font-size: 14px;
-  font-weight: 700;                 /* David: button text = label weight 700 */
+  font-weight: 700; /* David: button text = label weight 700 */
   text-align: center;
   align-self: flex-start;
   transition: background 0.15s ease;
