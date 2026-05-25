@@ -3,6 +3,15 @@ import { makeConfig } from "@techfides/tf-doc-vault/config";
 export default makeConfig({
   configDir: import.meta.dirname,
   project: "__PROJECT__",
+  // Volitelné: branding overrides (siteTitle, logo, navbar links, footer)
+  // branding: {
+  //   siteTitle: "__PROJECT__",
+  //   footer: {
+  //     websiteUrl: "https://techfides.cz",
+  //     email: "info@techfides.cz",
+  //   },
+  // },
+  //
   // Volitelné: Umami analytics
   // analytics: {
   //   provider: "umami",

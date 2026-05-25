@@ -6,8 +6,7 @@ updated_at: 2026-05-22
 
 # Spacing
 
-Strict **8-point grid** per the CSO spec. David's DS uses a wider
-4-point base — for this project, the CSO spec wins.
+Strict **8-point grid**.
 
 ## Scale
 

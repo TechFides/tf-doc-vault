@@ -6,17 +6,8 @@ import { withMermaid } from "vitepress-plugin-mermaid";
 import { generateNav, generateSidebar, getVersions } from "../sidebar/index.js";
 import defaultStrings from "./strings.cs.json" with { type: "json" };
 
-/**
- * Read the bundled favicon and embed it as a data URL `<link rel="icon">` so
- * each consumer repo gets the icon automatically without copying static files.
- * Resolved at build time relative to this compiled file (dist/config/makeConfig.js).
- */
-function bundledFaviconLink(): HeadConfig | null {
+function bundledFaviconLink(faviconPath: string): HeadConfig | null {
   try {
-    const faviconPath = path.resolve(
-      import.meta.dirname,
-      "../theme/assets/favicon.ico",
-    );
     const buf = fs.readFileSync(faviconPath);
     const dataUrl = `data:image/x-icon;base64,${buf.toString("base64")}`;
     return ["link", { rel: "icon", type: "image/x-icon", href: dataUrl }];
@@ -26,15 +17,10 @@ function bundledFaviconLink(): HeadConfig | null {
 }
 
 /**
- * Read the bundled TF symbol SVG and return it as a data URL for themeConfig.logo.
- * Resolved at build time relative to this compiled file (dist/config/makeConfig.js).
+ * Read the bundled logo SVG and return it as a data URL for themeConfig.logo.
  */
-function bundledLogoUrl(): string | null {
+function bundledLogoUrl(svgPath: string): string | null {
   try {
-    const svgPath = path.resolve(
-      import.meta.dirname,
-      "../theme/assets/logo-symbol.svg",
-    );
     const svg = fs.readFileSync(svgPath, "utf8");
     return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
   } catch {
@@ -50,6 +36,19 @@ export interface Strings {
   footerPrev: string;
   footerNext: string;
   lastUpdatedText: string;
+  statusPublished: string;
+  statusDraft: string;
+  statusReview: string;
+  statusArchived: string;
+  updatedLabel: string;
+  authorLabel: string;
+  notFoundCode: string;
+  notFoundHeading: string;
+  notFoundMessage: string;
+  notFoundLink: string;
+  lightboxClose: string;
+  featureCtaText: string;
+  dateLocale: string;
 }
 
 export interface UmamiAnalytics {
@@ -70,71 +69,92 @@ export interface EditLink {
   host?: string;
 }
 
+export interface BrandingFooter {
+  /** Public site URL shown as the first link. */
+  websiteUrl?: string;
+  /** Display label for the website link. Defaults to the host name of websiteUrl. */
+  websiteLabel?: string;
+  /** Contact email shown as the second link. */
+  email?: string;
+  /** Postal address shown as plain text after the email. */
+  address?: string;
+}
+
+export interface BrandingNavLink {
+  text: string;
+  link: string;
+}
+
+export interface Branding {
+  /**
+   * Override the navbar site title. Defaults to the resolved `strings.title`.
+   * Set to an empty string to hide.
+   */
+  siteTitle?: string;
+  /**
+   * Override the logo. Either an absolute URL/data URL, an object accepted by
+   * VitePress' `themeConfig.logo`, or `false` to disable the bundled default.
+   */
+  logo?: string | { src: string; alt?: string } | false;
+  /**
+   * Extra nav links appended to the right end of the navbar (e.g. company
+   * website). Empty array disables the default consumer-supplied link.
+   */
+  navLinks?: BrandingNavLink[];
+  /** Footer content. Pass `false` to hide BrandFooter. */
+  footer?: BrandingFooter | false;
+  /**
+   * Disable the bundled Google Fonts (Open Sans) `<link>` tags.
+   * Useful for GDPR-conscious sites or self-hosted typography.
+   */
+  disableGoogleFonts?: boolean;
+}
+
 export interface MakeConfigOptions {
-  /**
-   * Path to the `.vitepress/` directory. In a consumer config.ts:
-   *   `configDir: import.meta.dirname`
-   * The `docs/` root is one level up.
-   */
   configDir: string;
-
-  /** Project shortname (used only for diagnostics today; reserved for future use). */
   project?: string;
-
-  /** Override base strings (title, description, lang, …). */
   strings?: Partial<Strings>;
-
-  /** Optional Umami analytics tracker. */
+  /** Branding overrides — title, logo, navbar links, footer. */
+  branding?: Branding;
   analytics?: UmamiAnalytics;
-
-  /** Optional GitLab/GitHub edit link in docs footer. */
   editLink?: EditLink;
-
-  /** Extra `<head>` tags appended after analytics. */
   head?: HeadConfig[];
-
-  /**
-   * Override / extend final UserConfig. Merged shallowly on top of the generated config.
-   * Use sparingly — most use-cases should be covered by typed options above.
-   */
   override?: Partial<UserConfig>;
-
-  /**
-   * Whether to wrap the config with `withMermaid()`. Default `true`. Disable
-   * for environments where Mermaid sub-deps (dayjs, cytoscape, …) cause
-   * Vite optimizeDeps friction — typically a local playground.
-   */
   mermaid?: boolean;
 }
 
 const UMAMI_DEFAULT_SRC = "https://cloud.umami.is/script.js";
 
+const ASSETS_DIR = path.resolve(import.meta.dirname, "../theme/assets");
+const DEFAULT_FAVICON = path.join(ASSETS_DIR, "favicon.ico");
+const DEFAULT_LOGO_SVG = path.join(ASSETS_DIR, "logo-symbol.svg");
+
 function buildHead(opts: MakeConfigOptions): HeadConfig[] {
   const head: HeadConfig[] = [];
 
-  const favicon = bundledFaviconLink();
+  const favicon = bundledFaviconLink(DEFAULT_FAVICON);
   if (favicon) head.push(favicon);
 
-  // Open Sans via Google Fonts — brand typography
-  head.push(
-    ["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
-    [
-      "link",
-      {
-        rel: "preconnect",
-        href: "https://fonts.gstatic.com",
-        crossorigin: "",
-      },
-    ],
-    [
-      "link",
-      {
-        rel: "stylesheet",
-        // David's DS: body 400, headings 500, labels/buttons 700
-        href: "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&display=swap",
-      },
-    ],
-  );
+  if (!opts.branding?.disableGoogleFonts) {
+    head.push(
+      ["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
+      [
+        "link",
+        {
+          rel: "preconnect",
+          href: "https://fonts.gstatic.com",
+          crossorigin: "",
+        },
+      ],
+      [
+        "link",
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&display=swap",
+        },
+      ],
+    );
+  }
 
   if (opts.analytics?.provider === "umami") {
     const { websiteId, domain, scriptSrc = UMAMI_DEFAULT_SRC } = opts.analytics;
@@ -161,7 +181,6 @@ function buildEditLink(editLink: EditLink): { pattern: string; text: string } {
     text = "Upravit online",
     host = "https://gitlab.com",
   } = editLink;
-  // GitLab uses `/-/edit/<branch>/...`; GitHub uses `/edit/<branch>/...`.
   const isGitLab = host.includes("gitlab");
   const editPath = isGitLab ? `/-/edit/${branch}` : `/edit/${branch}`;
   return {
@@ -170,10 +189,28 @@ function buildEditLink(editLink: EditLink): { pattern: string; text: string } {
   };
 }
 
-/**
- * Build a VitePress UserConfig wrapped in `withMermaid`, derived from the docs/
- * directory layout (`docs/<version>/<section>/<group>/`).
- */
+function resolveLogo(
+  branding: Branding | undefined,
+): { src: string; alt?: string } | undefined {
+  if (branding?.logo === false) {
+    return undefined;
+  }
+  if (typeof branding?.logo === "string") {
+    return { src: branding.logo };
+  }
+  if (branding?.logo && typeof branding.logo === "object") {
+    return branding.logo;
+  }
+  const bundled = bundledLogoUrl(DEFAULT_LOGO_SVG);
+  return bundled ? { src: bundled } : undefined;
+}
+
+function resolveFooter(branding: Branding | undefined): BrandingFooter | null {
+  if (branding?.footer === false) return null;
+  if (branding?.footer) return branding.footer;
+  return null;
+}
+
 export function makeConfig(
   opts: MakeConfigOptions,
 ): ReturnType<typeof withMermaid> | UserConfig {
@@ -186,7 +223,10 @@ export function makeConfig(
   const strings: Strings = { ...defaultStrings, ...opts.strings };
 
   const head = buildHead(opts);
-  const logoUrl = bundledLogoUrl();
+  const logo = resolveLogo(opts.branding);
+  const footer = resolveFooter(opts.branding);
+  const navLinks = opts.branding?.navLinks ?? [];
+  const siteTitle = opts.branding?.siteTitle ?? strings.title;
 
   const versionDropdown = (
     label: string,
@@ -220,7 +260,7 @@ export function makeConfig(
         nav: [
           ...(showSections ? sectionNav : []),
           ...(versions.length > 1 ? [versionDropdown(v)] : []),
-          { text: "techfides.cz", link: "https://techfides.cz" },
+          ...navLinks,
         ],
       },
     };
@@ -231,12 +271,23 @@ export function makeConfig(
     ...Object.fromEntries(versions.slice(1).map((v) => [v, localeFor(v)])),
   };
 
-  // If the consumer overrides `base` (e.g. site served at `/` instead of
-  // `/docs/`), the logo link must follow — otherwise clicking the logo
-  // sends the user to a 404 because the original computed base no longer
-  // exists.
+  /* If the consumer overrides `base` (e.g. site served at `/` instead of
+     `/docs/`), the logo link must follow — otherwise clicking the logo
+     sends the user to a 404. */
   const effectiveBase =
     typeof opts.override?.base === "string" ? opts.override.base : base;
+
+  const topLevelNav =
+    versions.length > 1
+      ? [
+          {
+            text: "Verze",
+            activeMatch: `^${base}(v\\d+)/`.replace(/\/+/g, "/"),
+            items: versions.map((ver) => ({ text: ver, link: `/${ver}/` })),
+          },
+          ...navLinks,
+        ]
+      : [...navLinks];
 
   const baseConfig: UserConfig = {
     base,
@@ -246,22 +297,10 @@ export function makeConfig(
     head,
     locales,
     themeConfig: {
-      ...(logoUrl && {
-        logo: { src: logoUrl, alt: "TechFides" },
-      }),
-      siteTitle: "TechFides",
+      ...(logo && { logo }),
+      siteTitle,
       logoLink: effectiveBase,
-      nav:
-        versions.length > 1
-          ? [
-              {
-                text: "Verze",
-                activeMatch: `^${base}(v\\d+)/`.replace(/\/+/g, "/"),
-                items: versions.map((ver) => ({ text: ver, link: `/${ver}/` })),
-              },
-              { text: "techfides.cz", link: "https://techfides.cz" },
-            ]
-          : [{ text: "techfides.cz", link: "https://techfides.cz" }],
+      nav: topLevelNav,
       sidebar: generateSidebar(docsRoot),
       search: { provider: "local" },
       outline: {
@@ -270,47 +309,36 @@ export function makeConfig(
       docFooter: { prev: strings.footerPrev, next: strings.footerNext },
       lastUpdated: { text: strings.lastUpdatedText },
       ...(opts.editLink && { editLink: buildEditLink(opts.editLink) }),
+      // Custom theme data — consumed by DocMeta, NotFound, ImageLightbox,
+      // BrandFooter via useData().theme.value.tfDocVault.
+      tfDocVault: {
+        strings,
+        footer,
+      },
     },
-    // The shared theme imports .vue / .css files from inside the package; without
-    // noExternal vitepress' SSR build hands the raw .css off to Node's ESM loader,
-    // which rejects it with ERR_UNKNOWN_FILE_EXTENSION.
     vite: {
       ssr: {
         noExternal: ["@techfides/tf-doc-vault"],
       },
     },
-    ignoreDeadLinks: [
-      // ignore all localhost links
-      /^https?:\/\/localhost/,
-    ],
-    // Mermaid theme — uses 'base' so themeVariables drive node/edge colors.
-    // vitepress-plugin-mermaid switches to its built-in 'dark' theme when
-    // the .dark class lands on <html>, so values below take effect in light
-    // mode; dark mode overrides live in theme/styles/base.css (.dark .vp-doc
-    // .mermaid …) so the brand palette holds in both modes.
+    ignoreDeadLinks: [/^https?:\/\/localhost/],
     mermaid: {
       theme: "base",
       themeVariables: {
-        // Default node
-        primaryColor: "#f5f7fa", // tf-surface
-        primaryTextColor: "#333333", // body charcoal
-        primaryBorderColor: "#0074c8", // tf-primary
-        // Secondary node (alt fill)
+        primaryColor: "#f5f7fa",
+        primaryTextColor: "#333333",
+        primaryBorderColor: "#0074c8",
         secondaryColor: "#ffffff",
         secondaryTextColor: "#333333",
         secondaryBorderColor: "#7e8890",
-        // Tertiary node
         tertiaryColor: "#eeeeee",
         tertiaryTextColor: "#333333",
         tertiaryBorderColor: "#acb2b7",
-        // Edges + labels
         lineColor: "#7e8890",
         textColor: "#333333",
-        // Notes
         noteBkgColor: "#fef3c7",
         noteTextColor: "#92400e",
         noteBorderColor: "#fde68a",
-        // Special edge colors
         edgeLabelBackground: "#ffffff",
       },
       flowchart: {

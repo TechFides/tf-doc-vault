@@ -68,8 +68,9 @@ classDiagram
     }
 
     class BrandFooter {
-        +techfides.cz
-        +info@techfides.cz
+        +websiteUrl
+        +email
+        +address
     }
 
     Theme --> DocMeta : mounts in doc-before

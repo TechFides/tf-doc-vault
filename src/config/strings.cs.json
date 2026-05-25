@@ -5,5 +5,18 @@
   "searchLabel": "Na této stránce",
   "footerPrev": "Předchozí",
   "footerNext": "Následující",
-  "lastUpdatedText": "Poslední aktualizace"
+  "lastUpdatedText": "Poslední aktualizace",
+  "statusPublished": "Publikováno",
+  "statusDraft": "Koncept",
+  "statusReview": "K revizi",
+  "statusArchived": "Archivováno",
+  "updatedLabel": "Aktualizováno",
+  "authorLabel": "Vytvořeno v TechFides",
+  "notFoundCode": "404",
+  "notFoundHeading": "Stránka nenalezena",
+  "notFoundMessage": "Stránka, kterou hledáš, neexistuje, nebo byla přesunuta jinam.",
+  "notFoundLink": "Zpět na úvod",
+  "lightboxClose": "Zavřít",
+  "featureCtaText": "Otevřít",
+  "dateLocale": "cs-CZ"
 }

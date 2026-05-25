@@ -13,15 +13,14 @@ import "./styles/print.css";
 import "./styles/base.css";
 
 export interface CreateThemeOptions {
-  /**
-   * Show the WidthToggle button in the navbar (cycles content width:
-   * default → wide → max). Default: false.
-   */
+  /** Show the WidthToggle button in the navbar. Default: false. */
   widthToggle?: boolean;
+  /** Mount BrandFooter at the bottom of every page. Default: true. */
+  brandFooter?: boolean;
 }
 
 export function createTheme(options: CreateThemeOptions = {}): Theme {
-  const { widthToggle = false } = options;
+  const { widthToggle = false, brandFooter = true } = options;
 
   return {
     extends: DefaultTheme,
@@ -30,7 +29,13 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
         "doc-before": (): VNode =>
           h("div", { class: "doc-meta-wrapper" }, [h(DocMeta)]),
         "layout-bottom": (): VNode =>
-          h(Fragment, null, [h(ImageLightbox), h(BrandFooter)]),
+          h(
+            Fragment,
+            null,
+            brandFooter
+              ? [h(ImageLightbox), h(BrandFooter)]
+              : [h(ImageLightbox)],
+          ),
         "not-found": (): VNode => h(NotFound),
       };
       if (widthToggle) {
@@ -57,3 +62,5 @@ export {
   NotFound,
 };
 export { useScrollSpy } from "./composables/useScrollSpy.js";
+export { useStrings } from "./composables/useStrings.js";
+export * as icons from "./icons/index.js";

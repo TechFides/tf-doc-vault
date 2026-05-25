@@ -9,20 +9,20 @@ hero:
     Byznys, funkční a technická specifikace projektu <strong>__PROJECT__</strong>.
 features:
   - icon: business
-    title: Byznys specifikace
+    title: Business specifikace
     description: Proč to děláme, kdo to potřebuje, jaké procesy podporujeme.
     link: /v1/byznys-specifikace/
-    linkText: Explore
+    linkText: Otevřít
   - icon: functional
     title: Funkční specifikace
     description: Co systém umí — uživatelské role, scénáře, vstupy a výstupy.
     link: /v1/funkcni-specifikace/
-    linkText: Explore
+    linkText: Otevřít
   - icon: technical
     title: Technická specifikace
     description: Architektura, integrace, deployment.
     link: /v1/technicka-specifikace/
-    linkText: Explore
+    linkText: Otevřít
 ---
 
 <BrandHero/>

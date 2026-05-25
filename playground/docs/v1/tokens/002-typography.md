@@ -6,8 +6,6 @@ updated_at: 2026-05-22
 
 # Typography
 
-Font family follows the CSO spec; weights and scale are David's DS.
-
 ## Family
 
 ```css

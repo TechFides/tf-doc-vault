@@ -1,21 +1,60 @@
+<script setup lang="ts">
+import { useData } from "vitepress";
+import { computed } from "vue";
+import type { BrandingFooter } from "../../config/makeConfig.js";
+
+interface ThemeWithFooter {
+  tfDocVault?: { footer?: BrandingFooter | null };
+}
+
+const { theme } = useData();
+
+const footer = computed<BrandingFooter | null>(
+  () => (theme.value as ThemeWithFooter).tfDocVault?.footer ?? null,
+);
+
+function hostName(url: string): string {
+  try {
+    return new URL(url).host;
+  } catch {
+    return url;
+  }
+}
+</script>
+
 <template>
-  <footer class="brand-footer">
+  <footer v-if="footer" class="brand-footer">
     <div class="brand-footer__inner">
       <a
-        href="https://techfides.cz"
+        v-if="footer.websiteUrl"
+        :href="footer.websiteUrl"
         target="_blank"
         rel="noopener"
         class="brand-footer__link"
       >
-        techfides.cz
+        {{ footer.websiteLabel ?? hostName(footer.websiteUrl) }}
       </a>
-      <span class="brand-footer__sep" aria-hidden="true">•</span>
-      <a href="mailto:info@techfides.cz" class="brand-footer__link">
-        info@techfides.cz
+      <span
+        v-if="footer.websiteUrl && footer.email"
+        class="brand-footer__sep"
+        aria-hidden="true"
+        >•</span
+      >
+      <a
+        v-if="footer.email"
+        :href="`mailto:${footer.email}`"
+        class="brand-footer__link"
+      >
+        {{ footer.email }}
       </a>
-      <span class="brand-footer__sep" aria-hidden="true">•</span>
-      <span class="brand-footer__address">
-        Titanium Business Complex, Nové sady 25, 602 00 Brno-střed
+      <span
+        v-if="(footer.websiteUrl || footer.email) && footer.address"
+        class="brand-footer__sep"
+        aria-hidden="true"
+        >•</span
+      >
+      <span v-if="footer.address" class="brand-footer__address">
+        {{ footer.address }}
       </span>
     </div>
   </footer>
@@ -40,13 +79,13 @@
 }
 
 .brand-footer__link {
-  color: var(--tf-primary);
+  color: var(--brand-primary);
   text-decoration: none;
 }
 
 .brand-footer__link:hover {
   text-decoration: underline;
-  color: var(--tf-primary-hover);
+  color: var(--brand-primary-hover);
 }
 
 .brand-footer__sep {
@@ -58,14 +97,15 @@
 }
 
 .dark .brand-footer__link {
-  color: var(--tf-secondary);
+  color: var(--brand-secondary);
 }
 
 .dark .brand-footer__link:hover {
-  color: #33b5e8;
+  color: var(--brand-secondary);
+  opacity: 0.85;
 }
 
-/* Mobile: stack vertically with 16px gap */
+/* breakpoints — see --bp-md in base.css */
 @media (max-width: 639px) {
   .brand-footer__inner {
     flex-direction: column;

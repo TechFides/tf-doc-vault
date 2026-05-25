@@ -1,47 +1,22 @@
 <script setup lang="ts">
 import { useData } from "vitepress";
-import { computed, onMounted, ref } from "vue";
+import { computed } from "vue";
+import IconCheck from "../icons/IconCheck.vue";
+import { useStrings } from "../composables/useStrings.js";
 
-const { frontmatter, site } = useData();
-const isMounted = ref(false);
+const { frontmatter } = useData();
+const strings = useStrings();
 
-onMounted(() => {
-  isMounted.value = true;
-});
+const statusLabels = computed<Record<string, string>>(() => ({
+  published: strings.value.statusPublished,
+  draft: strings.value.statusDraft,
+  review: strings.value.statusReview,
+  archived: strings.value.statusArchived,
+}));
 
-const isEnglish = computed(() => /^en/i.test(site.value.lang || ""));
-
-const STATUS_LABEL_CS: Record<string, string> = {
-  published: "Publikováno",
-  draft: "Koncept",
-  review: "K revizi",
-  archived: "Archivováno",
-};
-
-const STATUS_LABEL_EN: Record<string, string> = {
-  published: "Published",
-  draft: "Draft",
-  review: "In review",
-  archived: "Archived",
-};
-
-const STATUS_LABEL = computed(() =>
-  isEnglish.value ? STATUS_LABEL_EN : STATUS_LABEL_CS,
-);
-
-const UPDATED_LABEL = computed(() =>
-  isEnglish.value ? "Updated" : "Aktualizováno",
-);
-
-const AUTHOR_LABEL = computed(() =>
-  isEnglish.value ? "Created by Techfides" : "Created by Techfides",
-);
-
-const dateFormatLocale = computed(() => (isEnglish.value ? "en-US" : "cs-CZ"));
-
-const DATE_FORMAT = computed(
+const dateFormat = computed(
   () =>
-    new Intl.DateTimeFormat(dateFormatLocale.value, {
+    new Intl.DateTimeFormat(strings.value.dateLocale, {
       timeZone: "Europe/Prague",
       day: "numeric",
       month: "long",
@@ -49,9 +24,9 @@ const DATE_FORMAT = computed(
     }),
 );
 
-const DATETIME_FORMAT = computed(
+const dateTimeFormat = computed(
   () =>
-    new Intl.DateTimeFormat(dateFormatLocale.value, {
+    new Intl.DateTimeFormat(strings.value.dateLocale, {
       timeZone: "Europe/Prague",
       day: "numeric",
       month: "long",
@@ -73,7 +48,7 @@ function formatDate(value: unknown): string {
       number,
       number,
     ];
-    return DATE_FORMAT.value.format(new Date(year, month - 1, day));
+    return dateFormat.value.format(new Date(year, month - 1, day));
   }
 
   const localDatetime = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/.exec(raw);
@@ -86,57 +61,46 @@ function formatDate(value: unknown): string {
       number,
     ];
     const [hour, minute] = timePart.split(":").map(Number) as [number, number];
-    return DATETIME_FORMAT.value.format(
+    return dateTimeFormat.value.format(
       new Date(year, month - 1, day, hour, minute),
     );
   }
 
   const parsed = new Date(raw);
   if (!Number.isNaN(parsed.getTime())) {
-    return DATETIME_FORMAT.value.format(parsed);
+    return dateTimeFormat.value.format(parsed);
   }
 
   return raw;
 }
 
-// Skip DocMeta on pages that have a BrandHero (homepage-style pages).
-const isHeroPage = !!frontmatter.value?.hero;
+const isHeroPage = computed(() => !!frontmatter.value?.hero);
+const visible = computed(
+  () =>
+    !isHeroPage.value &&
+    (frontmatter.value?.status || frontmatter.value?.updated_at),
+);
 </script>
 
 <template>
-  <div
-    v-if="
-      isMounted && !isHeroPage && (frontmatter.status || frontmatter.updated_at)
-    "
-    class="doc-meta"
-  >
-    <span
-      v-if="frontmatter.status"
-      class="doc-meta__badge"
-      :data-status="frontmatter.status"
-    >
-      {{ STATUS_LABEL[frontmatter.status] ?? frontmatter.status }}
-    </span>
-    <span v-if="frontmatter.updated_at" class="doc-meta__date">
-      {{ UPDATED_LABEL }}: {{ formatDate(frontmatter.updated_at) }}
-    </span>
-    <span class="doc-meta__author">
-      <svg
-        class="doc-meta__check"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-        aria-hidden="true"
+  <ClientOnly>
+    <div v-if="visible" class="doc-meta">
+      <span
+        v-if="frontmatter.status"
+        class="doc-meta__badge"
+        :data-status="frontmatter.status"
       >
-        <path
-          fill-rule="evenodd"
-          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-          clip-rule="evenodd"
-        />
-      </svg>
-      {{ AUTHOR_LABEL }}
-    </span>
-  </div>
+        {{ statusLabels[frontmatter.status] ?? frontmatter.status }}
+      </span>
+      <span v-if="frontmatter.updated_at" class="doc-meta__date">
+        {{ strings.updatedLabel }}: {{ formatDate(frontmatter.updated_at) }}
+      </span>
+      <span v-if="strings.authorLabel" class="doc-meta__author">
+        <IconCheck class="doc-meta__check" />
+        {{ strings.authorLabel }}
+      </span>
+    </div>
+  </ClientOnly>
 </template>
 
 <style scoped>
@@ -152,9 +116,9 @@ const isHeroPage = !!frontmatter.value?.hero;
 .doc-meta__badge {
   display: inline-block;
   padding: 2px 10px;
-  border-radius: 0; /* David: sharp edges */
-  font-weight: 700; /* David: label weight */
-  letter-spacing: 0; /* David: letter-spacing = 0 always */
+  border-radius: 0;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 .doc-meta__badge[data-status="published"] {
@@ -189,7 +153,7 @@ const isHeroPage = !!frontmatter.value?.hero;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--tf-primary);
+  color: var(--brand-primary);
   font-weight: 500;
 }
 
@@ -224,6 +188,6 @@ const isHeroPage = !!frontmatter.value?.hero;
 }
 
 .dark .doc-meta__author {
-  color: var(--tf-secondary);
+  color: var(--brand-secondary);
 }
 </style>
