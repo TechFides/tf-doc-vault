@@ -115,9 +115,13 @@ function svgToDataUrl(svgEl: SVGSVGElement): string {
       const existing = target.getAttribute("style") || "";
       target.setAttribute("style", `${existing};${parts.join(";")}`);
     }
+    const bg =
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--vp-c-bg")
+        .trim() || "#04132a";
     clone.setAttribute(
       "style",
-      `${clone.getAttribute("style") || ""};background-color:var(--vp-c-bg,#04132a);`,
+      `${clone.getAttribute("style") || ""};background-color:${bg};`,
     );
   }
 

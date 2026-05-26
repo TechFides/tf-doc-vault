@@ -104,10 +104,12 @@ export interface Branding {
   /** Footer content. Pass `false` to hide BrandFooter. */
   footer?: BrandingFooter | false;
   /**
-   * Disable the bundled Google Fonts (Open Sans) `<link>` tags.
-   * Useful for GDPR-conscious sites or self-hosted typography.
+   * How to load Open Sans.
+   * - `"google"` (default): bundled `<link>` tags to fonts.googleapis.com.
+   * - `"none"`: skip injection — consumer is responsible (e.g. self-hosted
+   *   `@fontsource/open-sans` imported from their own config).
    */
-  disableGoogleFonts?: boolean;
+  fonts?: "google" | "none";
 }
 
 export interface MakeConfigOptions {
@@ -135,7 +137,7 @@ function buildHead(opts: MakeConfigOptions): HeadConfig[] {
   const favicon = bundledFaviconLink(DEFAULT_FAVICON);
   if (favicon) head.push(favicon);
 
-  if (!opts.branding?.disableGoogleFonts) {
+  if ((opts.branding?.fonts ?? "google") === "google") {
     head.push(
       ["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
       [
@@ -322,6 +324,12 @@ export function makeConfig(
       },
     },
     ignoreDeadLinks: [/^https?:\/\/localhost/],
+    /* Mermaid: `themeVariables` below applies only in light mode.
+       vitepress-plugin-mermaid forces theme="dark" when <html> has
+       .dark, ignoring our themeVariables — the dark-mode brand colors
+       live as CSS overrides in `theme/styles/base.css` (search for
+       `.dark .mermaid`). When changing brand colors, both places need
+       to be updated. */
     mermaid: {
       theme: "base",
       themeVariables: {

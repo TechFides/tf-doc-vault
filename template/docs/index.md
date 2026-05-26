@@ -5,8 +5,6 @@ updated_at: __DATE__
 aside: false
 hero:
   title: __PROJECT__
-  subtitle: >
-    Byznys, funkční a technická specifikace projektu <strong>__PROJECT__</strong>.
 features:
   - icon: business
     title: Business specifikace
@@ -25,6 +23,10 @@ features:
     linkText: Otevřít
 ---
 
-<BrandHero/>
+<BrandHero>
+  <template #subtitle>
+    Byznys, funkční a technická specifikace projektu **__PROJECT__**.
+  </template>
+</BrandHero>
 
 <FeatureCards/>

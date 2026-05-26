@@ -1,28 +1,23 @@
 :root {
-  /* Brand palette */
   --brand-primary: #0074c8;
   --brand-secondary: #00a0e3;
   --brand-navy: #092646;
   --brand-nav-navy: #082850;
   --brand-surface: #f5f7fa;
 
-  /* Interaction states */
   --brand-primary-hover: #0f75c5;
   --brand-primary-active: #092646;
   --brand-primary-soft: rgba(0, 116, 200, 0.1);
 
-  /* Text scale */
   --brand-text-default: #333333;
   --brand-text-muted: #7e8890;
   --brand-text-disabled: #acb2b7;
 
-  /* Surfaces & borders */
   --brand-bg-page: #ffffff;
   --brand-bg-subtle: #eeeeee;
   --brand-border-default: #e9e9e9;
   --brand-border-strong: #7e8890;
 
-  /* Semantic feedback */
   --brand-success: #00dd0a;
   --brand-success-bg: rgba(0, 221, 10, 0.08);
   --brand-warning: #e08800;
@@ -32,7 +27,6 @@
   --brand-info: #0074c8;
   --brand-info-bg: rgba(0, 116, 200, 0.08);
 
-  /* Layout — shared, used by hero/footer/feature cards */
   --layout-max-width-narrow: 800px;
   --layout-max-width-content: 1440px;
   --layout-max-width-wide: 1800px;
@@ -40,17 +34,14 @@
   --layout-side-padding-md: 48px;
   --layout-side-padding-lg: 64px;
 
-  /* Breakpoints — kept here as a single source of truth.
-     CSS can't reference custom properties from @media queries, so
-     these values must be duplicated in component @media rules. When
-     changing a breakpoint, update both the value here and every
-     @media rule that uses it. */
+  /* CSS can't reference custom properties from @media queries, so
+     these breakpoint values must be duplicated in component @media
+     rules. When changing one, update every @media that uses it. */
   --bp-sm: 480px;
   --bp-md: 640px;
   --bp-lg: 768px;
   --bp-xl: 960px;
 
-  /* VitePress overrides */
   --vp-c-brand-1: var(--brand-primary);
   --vp-c-brand-2: var(--brand-primary-hover);
   --vp-c-brand-3: var(--brand-primary-active);
@@ -73,7 +64,9 @@
   --vp-layout-max-width: var(--layout-max-width-content);
   --vp-sidebar-width: 280px;
 
-  /* Locales drive versioning, not language — hide the switcher. */
+  /* VitePress `locales` config is used here for versions (v1, v2), not
+     languages — hide the language switcher VitePress would otherwise
+     render. */
   --vp-nav-translations-display: none;
 }
 
@@ -99,6 +92,12 @@
   --vp-code-block-bg: #020a18;
 }
 
+/* Dark-mode navbar chrome — targets VitePress' internal DOM:
+   `.VPNavBar > .wrapper > .container > ...`. These selectors are not
+   public VitePress API; a minor upgrade can rename them and break this
+   block silently. Verified against VitePress 1.6.x — see
+   `tests/smoke/playground-dark-mode.spec.ts` which asserts the
+   computed navbar background in dark mode against the playground. */
 .dark .VPNav,
 .dark .VPNavBar,
 .dark .VPNavBar > .wrapper,

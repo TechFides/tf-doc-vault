@@ -10,13 +10,12 @@ const { frontmatter } = useData();
       <h1 class="brand-hero__title">
         {{ frontmatter.hero.title ?? frontmatter.title }}
       </h1>
-      <!-- v-html is safe here: frontmatter is authored markdown (trusted source),
-           not user-submitted content. Allows <strong>, <em> in subtitle. -->
       <p
-        v-if="frontmatter.hero.subtitle"
+        v-if="$slots.subtitle || frontmatter.hero.subtitle"
         class="brand-hero__subtitle"
-        v-html="frontmatter.hero.subtitle"
-      />
+      >
+        <slot name="subtitle">{{ frontmatter.hero.subtitle }}</slot>
+      </p>
     </div>
   </div>
 </template>
