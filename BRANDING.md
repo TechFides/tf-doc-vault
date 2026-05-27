@@ -260,6 +260,13 @@ knobs:
   project by default. There is no `--brand-preset` flag yet. After
   scaffolding, edit `docs/.vitepress/config.ts` to add your `branding:
 {...}` block manually.
+- **Navbar logo fill is baked at build** — the navbar logo renders as
+  an `<img>` whose fill is inlined into a data URL at build time
+  (mirroring `--brand-primary`). An `<img>` cannot inherit
+  `currentColor`, so overriding `--brand-primary` in `custom.css`
+  recolors everything _except_ the navbar logo, which stays the bundled
+  blue. To recolor it, override the logo as a whole via `branding.logo`
+  (pointing at your own asset) rather than the CSS token.
 
 If you need any of these closed before they happen organically, open
 an issue with your use case.

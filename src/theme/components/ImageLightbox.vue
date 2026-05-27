@@ -14,7 +14,6 @@
           class="lightbox-close"
           :aria-label="t('lightbox.close')"
           @click.stop="close"
-          @keydown.tab.prevent
         >
           ✕
         </button>
