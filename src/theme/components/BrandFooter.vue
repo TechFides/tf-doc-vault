@@ -4,13 +4,13 @@ import { computed } from "vue";
 import type { BrandingFooter } from "../../config/makeConfig.js";
 
 interface ThemeWithFooter {
-  tfDocVault?: { footer?: BrandingFooter | null };
+  docVault?: { footer?: BrandingFooter | null };
 }
 
 const { theme } = useData();
 
 const footer = computed<BrandingFooter | null>(
-  () => (theme.value as ThemeWithFooter).tfDocVault?.footer ?? null,
+  () => (theme.value as ThemeWithFooter).docVault?.footer ?? null,
 );
 
 function hostName(url: string): string {
@@ -105,7 +105,6 @@ function hostName(url: string): string {
   opacity: 0.85;
 }
 
-/* breakpoints — see --bp-md in base.css */
 @media (max-width: 639px) {
   .brand-footer__inner {
     flex-direction: column;

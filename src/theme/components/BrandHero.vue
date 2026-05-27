@@ -10,11 +10,8 @@ const { frontmatter } = useData();
       <h1 class="brand-hero__title">
         {{ frontmatter.hero.title ?? frontmatter.title }}
       </h1>
-      <p
-        v-if="$slots.subtitle || frontmatter.hero.subtitle"
-        class="brand-hero__subtitle"
-      >
-        <slot name="subtitle">{{ frontmatter.hero.subtitle }}</slot>
+      <p v-if="$slots.subtitle" class="brand-hero__subtitle">
+        <slot name="subtitle" />
       </p>
     </div>
   </div>
@@ -54,7 +51,6 @@ const { frontmatter } = useData();
   margin: 0;
 }
 
-/* breakpoints — see --bp-md / --bp-xl in base.css */
 @media (min-width: 640px) {
   .brand-hero {
     margin-left: -48px;

@@ -4,6 +4,7 @@ import type { HeadConfig, UserConfig } from "vitepress";
 import { defineConfig } from "vitepress";
 import { withMermaid } from "vitepress-plugin-mermaid";
 import { generateNav, generateSidebar, getVersions } from "../sidebar/index.js";
+import { LOGO_SHAPES, LOGO_VIEW_BOX } from "../theme/icons/logoSymbol.js";
 import defaultStrings from "./strings.cs.json" with { type: "json" };
 
 function bundledFaviconLink(faviconPath: string): HeadConfig | null {
@@ -16,16 +17,16 @@ function bundledFaviconLink(faviconPath: string): HeadConfig | null {
   }
 }
 
-/**
- * Read the bundled logo SVG and return it as a data URL for themeConfig.logo.
- */
-function bundledLogoUrl(svgPath: string): string | null {
-  try {
-    const svg = fs.readFileSync(svgPath, "utf8");
-    return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
-  } catch {
-    return null;
-  }
+// Mirrors --brand-primary in theme/styles/base.css. The navbar logo renders as
+// an <img>, which cannot inherit currentColor, so the data URL bakes a fill.
+const LOGO_FILL = "#0074c8";
+
+/** Build the bundled logo as a data URL for themeConfig.logo. */
+function bundledLogoUrl(): string {
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${LOGO_VIEW_BOX}" ` +
+    `fill="${LOGO_FILL}">${LOGO_SHAPES}</svg>`;
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }
 
 export interface Strings {
@@ -104,6 +105,11 @@ export interface Branding {
   /** Footer content. Pass `false` to hide BrandFooter. */
   footer?: BrandingFooter | false;
   /**
+   * Favicon. A URL/path (e.g. `/favicon.svg`) overrides the bundled default;
+   * `false` injects no favicon at all. Omit to keep the bundled default.
+   */
+  favicon?: string | false;
+  /**
    * How to load Open Sans.
    * - `"google"` (default): bundled `<link>` tags to fonts.googleapis.com.
    * - `"none"`: skip injection — consumer is responsible (e.g. self-hosted
@@ -129,13 +135,17 @@ const UMAMI_DEFAULT_SRC = "https://cloud.umami.is/script.js";
 
 const ASSETS_DIR = path.resolve(import.meta.dirname, "../theme/assets");
 const DEFAULT_FAVICON = path.join(ASSETS_DIR, "favicon.ico");
-const DEFAULT_LOGO_SVG = path.join(ASSETS_DIR, "logo-symbol.svg");
 
 function buildHead(opts: MakeConfigOptions): HeadConfig[] {
   const head: HeadConfig[] = [];
 
-  const favicon = bundledFaviconLink(DEFAULT_FAVICON);
-  if (favicon) head.push(favicon);
+  const { favicon } = opts.branding ?? {};
+  if (typeof favicon === "string") {
+    head.push(["link", { rel: "icon", href: favicon }]);
+  } else if (favicon !== false) {
+    const bundled = bundledFaviconLink(DEFAULT_FAVICON);
+    if (bundled) head.push(bundled);
+  }
 
   if ((opts.branding?.fonts ?? "google") === "google") {
     head.push(
@@ -203,8 +213,7 @@ function resolveLogo(
   if (branding?.logo && typeof branding.logo === "object") {
     return branding.logo;
   }
-  const bundled = bundledLogoUrl(DEFAULT_LOGO_SVG);
-  return bundled ? { src: bundled } : undefined;
+  return { src: bundledLogoUrl() };
 }
 
 function resolveFooter(branding: Branding | undefined): BrandingFooter | null {
@@ -312,8 +321,8 @@ export function makeConfig(
       lastUpdated: { text: strings.lastUpdatedText },
       ...(opts.editLink && { editLink: buildEditLink(opts.editLink) }),
       // Custom theme data — consumed by DocMeta, NotFound, ImageLightbox,
-      // BrandFooter via useData().theme.value.tfDocVault.
-      tfDocVault: {
+      // BrandFooter via useData().theme.value.docVault.
+      docVault: {
         strings,
         footer,
       },
@@ -324,31 +333,13 @@ export function makeConfig(
       },
     },
     ignoreDeadLinks: [/^https?:\/\/localhost/],
-    /* Mermaid: `themeVariables` below applies only in light mode.
-       vitepress-plugin-mermaid forces theme="dark" when <html> has
-       .dark, ignoring our themeVariables — the dark-mode brand colors
-       live as CSS overrides in `theme/styles/base.css` (search for
-       `.dark .mermaid`). When changing brand colors, both places need
-       to be updated. */
+    /* Mermaid diagram colors are driven entirely by CSS (`.mermaid` and
+       `.dark .mermaid` in theme/styles/base.css) off the --brand-* tokens, so
+       overriding a brand token recolors diagrams in both light and dark mode.
+       We deliberately don't set `themeVariables`: vitepress-plugin-mermaid
+       forces theme="dark" when <html>.dark and would ignore them anyway. */
     mermaid: {
       theme: "base",
-      themeVariables: {
-        primaryColor: "#f5f7fa",
-        primaryTextColor: "#333333",
-        primaryBorderColor: "#0074c8",
-        secondaryColor: "#ffffff",
-        secondaryTextColor: "#333333",
-        secondaryBorderColor: "#7e8890",
-        tertiaryColor: "#eeeeee",
-        tertiaryTextColor: "#333333",
-        tertiaryBorderColor: "#acb2b7",
-        lineColor: "#7e8890",
-        textColor: "#333333",
-        noteBkgColor: "#fef3c7",
-        noteTextColor: "#92400e",
-        noteBorderColor: "#fde68a",
-        edgeLabelBackground: "#ffffff",
-      },
       flowchart: {
         curve: "basis",
         useMaxWidth: true,

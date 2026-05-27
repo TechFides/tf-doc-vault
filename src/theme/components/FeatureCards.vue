@@ -23,6 +23,10 @@ const icons: Record<string, Component> = {
   technical: IconTechnical,
 };
 
+function resolveIcon(name?: string): Component {
+  return (name && icons[name]) || IconBusiness;
+}
+
 const features = computed<FeatureCard[]>(
   () => frontmatter.value?.features ?? [],
 );
@@ -36,10 +40,7 @@ const features = computed<FeatureCard[]>(
       :href="card.link"
       class="feature-card"
     >
-      <component
-        :is="icons[card.icon ?? 'business'] ?? IconBusiness"
-        class="feature-card__icon"
-      />
+      <component :is="resolveIcon(card.icon)" class="feature-card__icon" />
       <h3 class="feature-card__title">{{ card.title }}</h3>
       <p class="feature-card__desc">{{ card.description }}</p>
       <span class="feature-card__cta">
@@ -57,7 +58,6 @@ const features = computed<FeatureCard[]>(
   margin: 32px 0;
 }
 
-/* breakpoints — see --bp-sm in base.css */
 @media (min-width: 480px) {
   .feature-cards {
     grid-template-columns: repeat(2, 1fr);

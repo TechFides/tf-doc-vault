@@ -8,16 +8,22 @@ updated_at: 2026-05-22
 
 ## Family
 
+The one typography token the theme exposes is the font family:
+
 ```css
 --vp-font-family-base:
   "Open Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
   sans-serif;
 ```
 
-Loaded from Google Fonts with three weights: **400** (body),
+Open Sans is loaded by default (`branding.fonts: "google"`); switch to
+`"none"` and self-host to swap it. Three weights are used: **400** (body),
 **500** (headings), **700** (labels, buttons).
 
 ## Scale
+
+The theme applies this scale automatically to `.vp-doc` headings and body
+text — there are no per-size tokens to set, you just write Markdown:
 
 | Element | Size  | Weight | Line-height |
 | ------- | ----- | ------ | ----------- |

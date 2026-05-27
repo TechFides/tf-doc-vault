@@ -6,20 +6,23 @@ updated_at: 2026-05-22
 
 # Spacing
 
-Strict **8-point grid**.
+Layout follows an **8-point grid** — paddings, gaps and margins are
+multiples of 8px (with an occasional 4px half-step for tight inline gaps
+like a badge next to its icon).
 
-## Scale
+## Layout tokens
 
-| Token         | Value | Use                             |
-| ------------- | ----- | ------------------------------- |
-| _(half-step)_ | 4 px  | Inline gap (badge + icon)       |
-| `space-2`     | 8 px  | Form field gap inside a label   |
-| `space-4`     | 16 px | Card padding (mobile), gaps     |
-| `space-6`     | 24 px | Card padding (desktop), gutters |
-| `space-8`     | 32 px | Section gaps inside a page      |
-| `space-10`    | 40 px | Major section breaks            |
-| `space-12`    | 48 px | Hero / footer padding (mobile)  |
-| `space-16`    | 64 px | Hero / footer padding (desktop) |
+These are the spacing-related CSS custom properties the theme actually
+exposes (in `base.css`). Override them in your `custom.css`:
+
+| Token                        | Value  | Use                                 |
+| ---------------------------- | ------ | ----------------------------------- |
+| `--layout-side-padding-sm`   | 24 px  | Hero / footer side padding (small)  |
+| `--layout-side-padding-md`   | 48 px  | Hero / footer side padding (medium) |
+| `--layout-side-padding-lg`   | 64 px  | Hero / footer side padding (large)  |
+| `--layout-max-width-narrow`  | 800 px | Hero inner width                    |
+| `--layout-max-width-content` | 1440px | Default content max width           |
+| `--layout-max-width-wide`    | 1800px | `html.layout-wide` mode             |
 
 ## Whitespace rule
 

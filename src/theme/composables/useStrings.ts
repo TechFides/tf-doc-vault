@@ -3,7 +3,7 @@ import { computed, type ComputedRef } from "vue";
 import type { Strings } from "../../config/makeConfig.js";
 
 interface ThemeWithStrings {
-  tfDocVault?: { strings?: Partial<Strings> };
+  docVault?: { strings?: Partial<Strings> };
 }
 
 const FALLBACKS: Record<keyof Strings, string> = {
@@ -33,7 +33,7 @@ export function useStrings(): ComputedRef<Strings> {
   const { theme } = useData();
   return computed(() => {
     const overrides =
-      (theme.value as ThemeWithStrings).tfDocVault?.strings ?? {};
+      (theme.value as ThemeWithStrings).docVault?.strings ?? {};
     return { ...FALLBACKS, ...overrides } as Strings;
   });
 }

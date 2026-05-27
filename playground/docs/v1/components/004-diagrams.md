@@ -7,7 +7,7 @@ updated_at: 2026-05-22
 # Diagrams
 
 Three different Mermaid diagram types, all picking up the brand
-palette via `themeVariables` in `makeConfig()`.
+palette from the `--brand-*` CSS tokens (light and dark mode).
 
 ## Flowchart — process with decisions
 

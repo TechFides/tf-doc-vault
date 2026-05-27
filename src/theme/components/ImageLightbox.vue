@@ -28,7 +28,9 @@
 import { ref, nextTick, onMounted, onUnmounted } from "vue";
 import { useStrings } from "../composables/useStrings.js";
 
-const strings = useStrings().value;
+// Keep the computed ref (no `.value` here) — the template auto-unwraps it so
+// the aria-label stays reactive when the consumer switches language.
+const strings = useStrings();
 
 const src = ref<string | null>(null);
 const alt = ref<string>("");

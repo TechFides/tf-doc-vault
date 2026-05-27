@@ -14,10 +14,13 @@ const statusLabels = computed<Record<string, string>>(() => ({
   archived: strings.value.statusArchived,
 }));
 
+// Format in UTC and build dates with Date.UTC so the rendered string is
+// identical on the server and the client — authored wall-clock values show
+// verbatim, with no timezone shift and no SSR/hydration mismatch.
 const dateFormat = computed(
   () =>
     new Intl.DateTimeFormat(strings.value.dateLocale, {
-      timeZone: "Europe/Prague",
+      timeZone: "UTC",
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -27,7 +30,7 @@ const dateFormat = computed(
 const dateTimeFormat = computed(
   () =>
     new Intl.DateTimeFormat(strings.value.dateLocale, {
-      timeZone: "Europe/Prague",
+      timeZone: "UTC",
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -48,7 +51,7 @@ function formatDate(value: unknown): string {
       number,
       number,
     ];
-    return dateFormat.value.format(new Date(year, month - 1, day));
+    return dateFormat.value.format(new Date(Date.UTC(year, month - 1, day)));
   }
 
   const localDatetime = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/.exec(raw);
@@ -62,7 +65,7 @@ function formatDate(value: unknown): string {
     ];
     const [hour, minute] = timePart.split(":").map(Number) as [number, number];
     return dateTimeFormat.value.format(
-      new Date(year, month - 1, day, hour, minute),
+      new Date(Date.UTC(year, month - 1, day, hour, minute)),
     );
   }
 
@@ -83,24 +86,22 @@ const visible = computed(
 </script>
 
 <template>
-  <ClientOnly>
-    <div v-if="visible" class="doc-meta">
-      <span
-        v-if="frontmatter.status"
-        class="doc-meta__badge"
-        :data-status="frontmatter.status"
-      >
-        {{ statusLabels[frontmatter.status] ?? frontmatter.status }}
-      </span>
-      <span v-if="frontmatter.updated_at" class="doc-meta__date">
-        {{ strings.updatedLabel }}: {{ formatDate(frontmatter.updated_at) }}
-      </span>
-      <span v-if="strings.authorLabel" class="doc-meta__author">
-        <IconCheck class="doc-meta__check" />
-        {{ strings.authorLabel }}
-      </span>
-    </div>
-  </ClientOnly>
+  <div v-if="visible" class="doc-meta">
+    <span
+      v-if="frontmatter.status"
+      class="doc-meta__badge"
+      :data-status="frontmatter.status"
+    >
+      {{ statusLabels[frontmatter.status] ?? frontmatter.status }}
+    </span>
+    <span v-if="frontmatter.updated_at" class="doc-meta__date">
+      {{ strings.updatedLabel }}: {{ formatDate(frontmatter.updated_at) }}
+    </span>
+    <span v-if="strings.authorLabel" class="doc-meta__author">
+      <IconCheck class="doc-meta__check" />
+      {{ strings.authorLabel }}
+    </span>
+  </div>
 </template>
 
 <style scoped>
@@ -122,27 +123,27 @@ const visible = computed(
 }
 
 .doc-meta__badge[data-status="published"] {
-  background: #d1fae5;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+  background: var(--brand-badge-published-bg);
+  color: var(--brand-badge-published-text);
+  border: 1px solid var(--brand-badge-published-border);
 }
 
 .doc-meta__badge[data-status="draft"] {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fde68a;
+  background: var(--brand-badge-draft-bg);
+  color: var(--brand-badge-draft-text);
+  border: 1px solid var(--brand-badge-draft-border);
 }
 
 .doc-meta__badge[data-status="review"] {
-  background: #dbeafe;
-  color: #1e40af;
-  border: 1px solid #bfdbfe;
+  background: var(--brand-badge-review-bg);
+  color: var(--brand-badge-review-text);
+  border: 1px solid var(--brand-badge-review-border);
 }
 
 .doc-meta__badge[data-status="archived"] {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  background: var(--brand-badge-archived-bg);
+  color: var(--brand-badge-archived-text);
+  border: 1px solid var(--brand-badge-archived-border);
 }
 
 .doc-meta__date {
@@ -161,30 +162,6 @@ const visible = computed(
   width: 16px;
   height: 16px;
   flex-shrink: 0;
-}
-
-.dark .doc-meta__badge[data-status="published"] {
-  background: #052e16;
-  color: #4ade80;
-  border-color: #166534;
-}
-
-.dark .doc-meta__badge[data-status="draft"] {
-  background: #2d1a00;
-  color: #fbbf24;
-  border-color: #92400e;
-}
-
-.dark .doc-meta__badge[data-status="review"] {
-  background: #0f1e40;
-  color: #60a5fa;
-  border-color: #1e40af;
-}
-
-.dark .doc-meta__badge[data-status="archived"] {
-  background: #1f2937;
-  color: #9ca3af;
-  border-color: #374151;
 }
 
 .dark .doc-meta__author {

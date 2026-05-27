@@ -27,20 +27,25 @@
   --brand-info: #0074c8;
   --brand-info-bg: rgba(0, 116, 200, 0.08);
 
+  --brand-badge-published-bg: #d1fae5;
+  --brand-badge-published-text: #166534;
+  --brand-badge-published-border: #bbf7d0;
+  --brand-badge-draft-bg: #fef3c7;
+  --brand-badge-draft-text: #92400e;
+  --brand-badge-draft-border: #fde68a;
+  --brand-badge-review-bg: #dbeafe;
+  --brand-badge-review-text: #1e40af;
+  --brand-badge-review-border: #bfdbfe;
+  --brand-badge-archived-bg: #f3f4f6;
+  --brand-badge-archived-text: #374151;
+  --brand-badge-archived-border: #e5e7eb;
+
   --layout-max-width-narrow: 800px;
   --layout-max-width-content: 1440px;
   --layout-max-width-wide: 1800px;
   --layout-side-padding-sm: 24px;
   --layout-side-padding-md: 48px;
   --layout-side-padding-lg: 64px;
-
-  /* CSS can't reference custom properties from @media queries, so
-     these breakpoint values must be duplicated in component @media
-     rules. When changing one, update every @media that uses it. */
-  --bp-sm: 480px;
-  --bp-md: 640px;
-  --bp-lg: 768px;
-  --bp-xl: 960px;
 
   --vp-c-brand-1: var(--brand-primary);
   --vp-c-brand-2: var(--brand-primary-hover);
@@ -90,6 +95,19 @@
   --vp-c-brand-2: var(--brand-secondary);
 
   --vp-code-block-bg: #020a18;
+
+  --brand-badge-published-bg: #052e16;
+  --brand-badge-published-text: #4ade80;
+  --brand-badge-published-border: #166534;
+  --brand-badge-draft-bg: #2d1a00;
+  --brand-badge-draft-text: #fbbf24;
+  --brand-badge-draft-border: #92400e;
+  --brand-badge-review-bg: #0f1e40;
+  --brand-badge-review-text: #60a5fa;
+  --brand-badge-review-border: #1e40af;
+  --brand-badge-archived-bg: #1f2937;
+  --brand-badge-archived-text: #9ca3af;
+  --brand-badge-archived-border: #374151;
 }
 
 /* Dark-mode navbar chrome — targets VitePress' internal DOM:
@@ -152,7 +170,8 @@ html {
 }
 
 .vp-doc img,
-.vp-doc svg {
+.vp-doc .mermaid svg,
+.vp-doc [data-zoomable] {
   cursor: zoom-in;
 }
 
@@ -260,8 +279,114 @@ html.layout-max .VPContent {
   padding-left: calc(var(--vp-sidebar-item-offset, 0px) + 14px);
 }
 
-/* vitepress-plugin-mermaid forces theme="dark" when .dark is on <html>,
-   ignoring our themeVariables. Re-paint with brand colors here. */
+/* Mermaid is themed entirely here off the --brand-* tokens (no JS
+   themeVariables), so overriding a brand token recolors diagrams in both
+   light and dark mode. Light mode rules first; dark mode needs the extra
+   `.dark` prefix to win because vitepress-plugin-mermaid hard-forces
+   theme="dark" on <html>.dark and ignores anything we pass in config. */
+.mermaid .node rect,
+.mermaid .node polygon,
+.mermaid .node circle,
+.mermaid .node ellipse,
+.mermaid .node path,
+.mermaid .cluster rect {
+  fill: var(--brand-surface) !important;
+  stroke: var(--brand-primary) !important;
+  stroke-width: 1px !important;
+}
+
+.mermaid .node .label,
+.mermaid .node .nodeLabel,
+.mermaid .node text,
+.mermaid .cluster .nodeLabel,
+.mermaid .cluster text {
+  color: var(--brand-text-default) !important;
+  fill: var(--brand-text-default) !important;
+}
+
+.mermaid .nodeLabel p,
+.mermaid .edgeLabel p {
+  color: var(--brand-text-default) !important;
+  background-color: transparent !important;
+}
+
+.mermaid span.edgeLabel {
+  background-color: var(--brand-bg-page) !important;
+  color: var(--brand-text-default) !important;
+}
+
+.mermaid .edgePath .path,
+.mermaid .flowchart-link,
+.mermaid .messageLine0,
+.mermaid .messageLine1,
+.mermaid line,
+.mermaid .relation {
+  stroke: var(--brand-text-muted) !important;
+}
+
+.mermaid .arrowheadPath,
+.mermaid .marker,
+.mermaid #arrowhead path {
+  fill: var(--brand-text-muted) !important;
+  stroke: var(--brand-text-muted) !important;
+}
+
+.mermaid .edgeLabel,
+.mermaid .edgeLabel rect {
+  background-color: var(--brand-bg-page) !important;
+  color: var(--brand-text-default) !important;
+  fill: var(--brand-bg-page) !important;
+}
+
+.mermaid .edgeLabel foreignObject div {
+  background-color: var(--brand-bg-page) !important;
+  color: var(--brand-text-default) !important;
+}
+
+.mermaid .actor {
+  fill: var(--brand-surface) !important;
+  stroke: var(--brand-primary) !important;
+}
+
+.mermaid text.actor > tspan {
+  fill: var(--brand-text-default) !important;
+}
+
+.mermaid .actor-line,
+.mermaid line.actor-line {
+  stroke: var(--brand-text-muted) !important;
+}
+
+.mermaid .messageText,
+.mermaid .labelText,
+.mermaid .loopText,
+.mermaid .noteText {
+  fill: var(--brand-text-default) !important;
+  stroke: none !important;
+}
+
+.mermaid .note {
+  fill: var(--brand-warning-bg) !important;
+  stroke: var(--brand-warning) !important;
+}
+
+.mermaid .classGroup rect,
+.mermaid .classGroup path {
+  fill: var(--brand-surface) !important;
+  stroke: var(--brand-primary) !important;
+}
+
+.mermaid .classGroup .classTitle,
+.mermaid .classLabel .label,
+.mermaid .classGroup text,
+.mermaid g.classGroup text {
+  fill: var(--brand-text-default) !important;
+}
+
+.mermaid .classGroup line {
+  stroke: var(--brand-text-muted) !important;
+}
+
 .dark .mermaid svg {
   background-color: transparent;
 }

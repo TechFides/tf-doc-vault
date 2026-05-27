@@ -1,5 +1,5 @@
 import DefaultTheme from "vitepress/theme";
-import type { Theme } from "vitepress";
+import { useData, type Theme } from "vitepress";
 import { h, Fragment, type VNode } from "vue";
 import DocMeta from "./components/DocMeta.vue";
 import PrintLayout from "./components/PrintLayout.vue";
@@ -15,7 +15,11 @@ import "./styles/base.css";
 export interface CreateThemeOptions {
   /** Show the WidthToggle button in the navbar. Default: false. */
   widthToggle?: boolean;
-  /** Mount BrandFooter at the bottom of every page. Default: true. */
+  /**
+   * Allow mounting BrandFooter. Default: true. The footer only renders when
+   * `branding.footer` is configured in makeConfig, so leaving this on is
+   * harmless — set it to `false` to force the footer off regardless.
+   */
   brandFooter?: boolean;
 }
 
@@ -25,6 +29,15 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
   return {
     extends: DefaultTheme,
     Layout(): VNode {
+      // Only mount BrandFooter when a footer is actually configured, so a fresh
+      // scaffold with no `branding.footer` doesn't leave an empty node on every
+      // page.
+      const { theme } = useData();
+      const footerConfigured = !!(
+        theme.value as { docVault?: { footer?: unknown } }
+      ).docVault?.footer;
+      const showFooter = brandFooter && footerConfigured;
+
       const slots: Record<string, () => VNode> = {
         "doc-before": (): VNode =>
           h("div", { class: "doc-meta-wrapper" }, [h(DocMeta)]),
@@ -32,9 +45,7 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
           h(
             Fragment,
             null,
-            brandFooter
-              ? [h(ImageLightbox), h(BrandFooter)]
-              : [h(ImageLightbox)],
+            showFooter ? [h(ImageLightbox), h(BrandFooter)] : [h(ImageLightbox)],
           ),
         "not-found": (): VNode => h(NotFound),
       };

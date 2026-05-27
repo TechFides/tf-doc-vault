@@ -56,6 +56,7 @@ Full type is exported from `@techfides/tf-doc-vault/config` as `Branding`:
 | `logo`      | `string \| { src; alt? } \| false` | bundled TechFides SVG mark | Navbar logo. `false` hides it. String is shorthand for `{ src }`.    |
 | `navLinks`  | `{ text: string; link: string }[]` | `[]`                       | Extra nav items at the right end of the navbar.                      |
 | `footer`    | `BrandingFooter \| false`          | nothing rendered           | Bottom-of-page footer (website link, email, address). `false` hides. |
+| `favicon`   | `string \| false`                  | bundled `favicon.ico`      | URL/path to a favicon. `false` injects none. Omit for the default.   |
 | `fonts`     | `"google" \| "none"`               | `"google"`                 | `"google"` injects Open Sans `<link>` tags. `"none"` skips them.     |
 
 `BrandingFooter`:
@@ -76,9 +77,9 @@ TechFides defaults that leak through**. Same for `navLinks`.
 
 ## CSS tokens
 
-Brand color, layout, and breakpoint tokens are defined as CSS custom
-properties in `src/theme/styles/base.css` and cascaded through every
-component. Override them in `docs/.vitepress/theme/custom.css`.
+Brand color and layout tokens are defined as CSS custom properties in
+`src/theme/styles/base.css` and cascaded through every component. Override
+them in `docs/.vitepress/theme/custom.css`.
 
 ### Color tokens
 
@@ -100,19 +101,22 @@ component. Override them in `docs/.vitepress/theme/custom.css`.
 | `--brand-border-default` | `#e9e9e9`   | Dividers, table borders                              |
 | `--brand-border-strong`  | `#7e8890`   | Stronger borders                                     |
 | `--brand-success`/`-bg`  | `#00dd0a`   | Status/feedback (not used by core components yet)    |
-| `--brand-warning`/`-bg`  | `#e08800`   | "                                                    |
+| `--brand-warning`/`-bg`  | `#e08800`   | Also drives Mermaid note styling                     |
 | `--brand-danger`/`-bg`   | `#c8232c`   | "                                                    |
 | `--brand-info`/`-bg`     | `#0074c8`   | "                                                    |
 
-### Layout & breakpoint tokens
+`DocMeta` status badges read `--brand-badge-{published,draft,review,archived}-{bg,text,border}`
+(separate light/dark values in `base.css`) — override those to recolor the
+status pills.
 
-| Token                            | Default             | Notes                                                                       |
-| -------------------------------- | ------------------- | --------------------------------------------------------------------------- |
-| `--layout-max-width-narrow`      | `800px`             | Hero inner width                                                            |
-| `--layout-max-width-content`     | `1440px`            | Default content max width                                                   |
-| `--layout-max-width-wide`        | `1800px`            | `html.layout-wide` mode                                                     |
-| `--layout-side-padding-sm/md/lg` | `24/48/64px`        | Hero / footer side padding                                                  |
-| `--bp-sm/md/lg/xl`               | `480/640/768/960px` | Breakpoints (also duplicated in `@media` rules — see comment in `base.css`) |
+### Layout tokens
+
+| Token                            | Default      | Notes                      |
+| -------------------------------- | ------------ | -------------------------- |
+| `--layout-max-width-narrow`      | `800px`      | Hero inner width           |
+| `--layout-max-width-content`     | `1440px`     | Default content max width  |
+| `--layout-max-width-wide`        | `1800px`     | `html.layout-wide` mode    |
+| `--layout-side-padding-sm/md/lg` | `24/48/64px` | Hero / footer side padding |
 
 ### Font family
 
@@ -145,25 +149,18 @@ read from the package at build time.
 
 ## Favicon
 
-There is no `branding.favicon` option yet — favicons go through the
-`head` array on `makeConfig()`:
+Set `branding.favicon` to a URL/path served from your site root. It
+replaces the bundled default (no duplicate icon):
 
 ```ts
 makeConfig({
   // ...
-  head: [
-    ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
-  ],
+  branding: { favicon: "/favicon.svg" },
 });
 ```
 
-> **Caveat**: the package always tries to load its own bundled
-> `favicon.ico` and inject it as a data URL into `<head>`. Your `head`
-> entry sits alongside it. Most browsers pick the first declared icon —
-> in practice the package's data-URL favicon ends up earlier in `<head>`
-> than your `head[]` entries, so you may need to override visually
-> distinct content. If this matters for your project, file an issue
-> (or send a PR adding `branding.favicon?: string | false`).
+Pass `favicon: false` to inject no favicon at all. Omit the option to keep
+the package's bundled `favicon.ico`.
 
 ---
 
@@ -231,15 +228,6 @@ Items below are **not** cleanly rebrandable today without patching the
 package itself. They are tracked but not yet exposed as `branding`
 knobs:
 
-- **Mermaid diagram colors** — light-mode palette is hardcoded as hex
-  values in `themeVariables` inside `makeConfig.ts`. Dark-mode appearance
-  is enforced by CSS rules in `base.css` under `.dark .mermaid` with
-  `!important`, mixing `var(--brand-*)` and hardcoded `#ffffff` for
-  text. Overriding `--brand-primary` will recolor nodes/edges in dark
-  mode but not light mode (the latter ignores our CSS for diagrams).
-- **DocMeta status badges** — published/draft/review/archived badge
-  colors are hex values inline in `src/theme/components/DocMeta.vue`,
-  not CSS variables. Overriding requires patching the component.
 - **NotFound logo** — the 404 page renders `LogoSymbol`, the
   TechFides mark, directly. There is no slot or prop. To replace it,
   re-implement `NotFound` in your own theme and substitute it via
@@ -315,5 +303,5 @@ Place `logo.svg` and `favicon.svg` under `docs/public/`. Run
 - Navbar shows Acme logo + title
 - Buttons, links, sidebar active items use the orange brand color
 - Footer shows `acme.example` and the contact email — no `techfides.cz`
-- Mermaid diagrams in dark mode use the orange nodes (light mode keeps
-  the package's default palette — see [Known limitations](#known-limitations))
+- Mermaid diagrams use the orange brand color in both light and dark mode
+  (they read the `--brand-*` tokens)

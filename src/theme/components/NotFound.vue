@@ -4,10 +4,14 @@ import { computed } from "vue";
 import LogoSymbol from "../icons/LogoSymbol.vue";
 import { useStrings } from "../composables/useStrings.js";
 
-const { theme } = useData();
+const { theme, site } = useData();
 const strings = useStrings();
 
-const homeLink = computed(() => (theme.value.logoLink as string) || "/");
+// logoLink is normally set by makeConfig (= effectiveBase); fall back to the
+// site base, never a bare "/" which would escape a site served under a subpath.
+const homeLink = computed(
+  () => (theme.value.logoLink as string) || site.value.base,
+);
 </script>
 
 <template>

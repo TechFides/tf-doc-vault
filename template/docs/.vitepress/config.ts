@@ -7,8 +7,8 @@ export default makeConfig({
   // branding: {
   //   siteTitle: "__PROJECT__",
   //   footer: {
-  //     websiteUrl: "https://techfides.cz",
-  //     email: "info@techfides.cz",
+  //     websiteUrl: "https://example.com",
+  //     email: "info@example.com",
   //   },
   // },
   //

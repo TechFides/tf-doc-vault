@@ -48,10 +48,10 @@ test("dark-mode navbar chrome paints over VitePress internals", async ({
     .first()
     .evaluate((el) => getComputedStyle(el).backgroundColor);
 
-  function toRgb(s: string): string {
-    const m = /^#([0-9a-f]{6})$/i.exec(s);
-    if (!m || !m[1]) return s;
-    const hex = m[1];
+  function toRgb(hexColor: string): string {
+    const match = /^#([0-9a-f]{6})$/i.exec(hexColor);
+    if (!match || !match[1]) return hexColor;
+    const hex = match[1];
     const r = parseInt(hex.slice(0, 2), 16);
     const g = parseInt(hex.slice(2, 4), 16);
     const b = parseInt(hex.slice(4, 6), 16);
