@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.2.0
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.1.7...v0.2.0)
+
+### 🚀 Enhancements
+
+- Local dev playground for theme + config ([4b9cd3f](https://github.com/TechFides/tf-doc-vault/commit/4b9cd3f))
+- TechFides branding, brand-themed mermaid, branded 404, dev playground ([#48](https://github.com/TechFides/tf-doc-vault/pull/48))
+
+### 📖 Documentation
+
+- Add AGENTS.md and AI agent specific documentation ([3905f6b](https://github.com/TechFides/tf-doc-vault/commit/3905f6b))
+
+### 🏡 Chore
+
+- Add VaclavMiculka to CODEOWNERS ([c00e38c](https://github.com/TechFides/tf-doc-vault/commit/c00e38c))
+
+### ❤️ Contributors
+
+- Jan Max Pavlica ([@janmax-pavlica](https://github.com/janmax-pavlica))
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.1.7
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.1.6...v0.1.7)
