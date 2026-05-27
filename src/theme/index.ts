@@ -46,7 +46,9 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
           h(
             Fragment,
             null,
-            showFooter ? [h(ImageLightbox), h(BrandFooter)] : [h(ImageLightbox)],
+            showFooter
+              ? [h(ImageLightbox), h(BrandFooter)]
+              : [h(ImageLightbox)],
           ),
         "not-found": (): VNode => h(NotFound),
       };
