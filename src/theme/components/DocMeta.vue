@@ -1,54 +1,47 @@
 <script setup lang="ts">
 import { useData } from "vitepress";
-import { onMounted, ref } from "vue";
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
+import IconCheck from "../icons/IconCheck.vue";
 
-const { frontmatter } = useData();
-const isMounted = ref(false);
+const { frontmatter, lang } = useData();
+const { t, te } = useI18n();
 
-onMounted(() => {
-  isMounted.value = true;
-});
+function statusLabel(status: string): string {
+  const key = `docMeta.status.${status}`;
+  return te(key) ? t(key) : status;
+}
 
-const STATUS_LABEL: Record<string, string> = {
-  published: "Publikováno",
-  draft: "Koncept",
-  review: "K revizi",
-  archived: "Archivováno",
-};
+// Format in UTC and build dates with Date.UTC so the rendered string is
+// identical on the server and the client — authored wall-clock values show
+// verbatim, with no timezone shift and no SSR/hydration mismatch.
+const dateFormat = computed(
+  () =>
+    new Intl.DateTimeFormat(lang.value, {
+      timeZone: "UTC",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }),
+);
 
-const DATE_FORMAT = new Intl.DateTimeFormat("cs-CZ", {
-  timeZone: "Europe/Prague",
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
+const dateTimeFormat = computed(
+  () =>
+    new Intl.DateTimeFormat(lang.value, {
+      timeZone: "UTC",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+);
 
-const DATETIME_FORMAT = new Intl.DateTimeFormat("cs-CZ", {
-  timeZone: "Europe/Prague",
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
-/**
- * Parse and format a frontmatter date/datetime value.
- *
- * Accepts:
- *   "2026-04-02"           → date only   → "2. dubna 2026"
- *   "2026-04-02 16:13"     → datetime    → "2. dubna 2026 v 16:13"
- *   "2026-04-02T16:13:00Z" → ISO 8601    → "2. dubna 2026 v 18:13"  (UTC→Prague)
- *
- * Date-only strings are treated as Prague local midnight to avoid
- * UTC parsing shifting the date by one day.
- */
 function formatDate(value: unknown): string {
   if (typeof value !== "string" && typeof value !== "number")
     return String(value);
   const raw = String(value).trim();
 
-  // Date-only: YYYY-MM-DD — parse as Prague local date to avoid UTC shift.
   const dateOnly = /^\d{4}-\d{2}-\d{2}$/.exec(raw);
   if (dateOnly) {
     const [year, month, day] = raw.split("-").map(Number) as [
@@ -56,16 +49,12 @@ function formatDate(value: unknown): string {
       number,
       number,
     ];
-    // new Date(y, m, d) creates a local-time Date — DST is irrelevant for date-only display.
-    return DATE_FORMAT.format(new Date(year, month - 1, day));
+    return dateFormat.value.format(new Date(Date.UTC(year, month - 1, day)));
   }
 
-  // Datetime without timezone ("2026-04-02 16:13" or "2026-04-02 16:13:00"):
-  // Treat as Prague local time by replacing space with T and appending no Z.
   const localDatetime = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/.exec(raw);
   if (localDatetime) {
     const normalized = raw.replace(" ", "T");
-    // Parse as local time; Intl will re-express it in Europe/Prague.
     const [datePart, timePart] = normalized.split("T") as [string, string];
     const [year, month, day] = datePart.split("-").map(Number) as [
       number,
@@ -73,33 +62,46 @@ function formatDate(value: unknown): string {
       number,
     ];
     const [hour, minute] = timePart.split(":").map(Number) as [number, number];
-    return DATETIME_FORMAT.format(new Date(year, month - 1, day, hour, minute));
+    return dateTimeFormat.value.format(
+      new Date(Date.UTC(year, month - 1, day, hour, minute)),
+    );
   }
 
-  // ISO 8601 with explicit offset or Z — parse directly, Intl converts to Prague.
   const parsed = new Date(raw);
   if (!Number.isNaN(parsed.getTime())) {
-    return DATETIME_FORMAT.format(parsed);
+    return dateTimeFormat.value.format(parsed);
   }
 
   return raw;
 }
+
+const authorLabel = computed(() =>
+  te("docMeta.author") ? t("docMeta.author") : "",
+);
+
+const isHeroPage = computed(() => !!frontmatter.value?.hero);
+const visible = computed(
+  () =>
+    !isHeroPage.value &&
+    (frontmatter.value?.status || frontmatter.value?.updated_at),
+);
 </script>
 
 <template>
-  <div
-    v-if="isMounted && (frontmatter.status || frontmatter.updated_at)"
-    class="doc-meta"
-  >
+  <div v-if="visible" class="doc-meta">
     <span
       v-if="frontmatter.status"
       class="doc-meta__badge"
       :data-status="frontmatter.status"
     >
-      {{ STATUS_LABEL[frontmatter.status] ?? frontmatter.status }}
+      {{ statusLabel(frontmatter.status) }}
     </span>
     <span v-if="frontmatter.updated_at" class="doc-meta__date">
-      Aktualizováno: {{ formatDate(frontmatter.updated_at) }}
+      {{ t("docMeta.updated") }}: {{ formatDate(frontmatter.updated_at) }}
+    </span>
+    <span v-if="authorLabel" class="doc-meta__author">
+      <IconCheck class="doc-meta__check" />
+      {{ authorLabel }}
     </span>
   </div>
 </template>
@@ -108,68 +110,63 @@ function formatDate(value: unknown): string {
 .doc-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   margin-bottom: 24px;
   font-size: 13px;
+  flex-wrap: wrap;
 }
 
 .doc-meta__badge {
   display: inline-block;
   padding: 2px 10px;
-  border-radius: 12px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  border-radius: 0;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 .doc-meta__badge[data-status="published"] {
-  background: #d1fae5;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+  background: var(--brand-badge-published-bg);
+  color: var(--brand-badge-published-text);
+  border: 1px solid var(--brand-badge-published-border);
 }
 
 .doc-meta__badge[data-status="draft"] {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fde68a;
+  background: var(--brand-badge-draft-bg);
+  color: var(--brand-badge-draft-text);
+  border: 1px solid var(--brand-badge-draft-border);
 }
 
 .doc-meta__badge[data-status="review"] {
-  background: #dbeafe;
-  color: #1e40af;
-  border: 1px solid #bfdbfe;
+  background: var(--brand-badge-review-bg);
+  color: var(--brand-badge-review-text);
+  border: 1px solid var(--brand-badge-review-border);
 }
 
 .doc-meta__badge[data-status="archived"] {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  background: var(--brand-badge-archived-bg);
+  color: var(--brand-badge-archived-text);
+  border: 1px solid var(--brand-badge-archived-border);
 }
 
 .doc-meta__date {
   color: var(--vp-c-text-2);
 }
 
-.dark .doc-meta__badge[data-status="published"] {
-  background: #052e16;
-  color: #4ade80;
-  border-color: #166534;
+.doc-meta__author {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--brand-primary);
+  font-weight: 500;
 }
 
-.dark .doc-meta__badge[data-status="draft"] {
-  background: #2d1a00;
-  color: #fbbf24;
-  border-color: #92400e;
+.doc-meta__check {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
-.dark .doc-meta__badge[data-status="review"] {
-  background: #0f1e40;
-  color: #60a5fa;
-  border-color: #1e40af;
-}
-
-.dark .doc-meta__badge[data-status="archived"] {
-  background: #1f2937;
-  color: #9ca3af;
-  border-color: #374151;
+.dark .doc-meta__author {
+  color: var(--brand-secondary);
 }
 </style>

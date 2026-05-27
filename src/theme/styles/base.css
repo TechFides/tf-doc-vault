@@ -1,20 +1,166 @@
-/* Reserve space for scrollbar — prevents layout shift when lightbox opens */
+:root {
+  --brand-primary: #0074c8;
+  --brand-secondary: #00a0e3;
+  --brand-navy: #092646;
+  --brand-nav-navy: #082850;
+  --brand-surface: #f5f7fa;
+
+  --brand-primary-hover: #0f75c5;
+  --brand-primary-active: #092646;
+  --brand-primary-soft: rgba(0, 116, 200, 0.1);
+
+  --brand-text-default: #333333;
+  --brand-text-muted: #7e8890;
+  --brand-text-disabled: #acb2b7;
+
+  --brand-bg-page: #ffffff;
+  --brand-bg-subtle: #eeeeee;
+  --brand-border-default: #e9e9e9;
+  --brand-border-strong: #7e8890;
+
+  --brand-success: #00dd0a;
+  --brand-success-bg: rgba(0, 221, 10, 0.08);
+  --brand-warning: #e08800;
+  --brand-warning-bg: rgba(224, 136, 0, 0.08);
+  --brand-danger: #c8232c;
+  --brand-danger-bg: rgba(200, 35, 44, 0.08);
+  --brand-info: #0074c8;
+  --brand-info-bg: rgba(0, 116, 200, 0.08);
+
+  --brand-badge-published-bg: #d1fae5;
+  --brand-badge-published-text: #166534;
+  --brand-badge-published-border: #bbf7d0;
+  --brand-badge-draft-bg: #fef3c7;
+  --brand-badge-draft-text: #92400e;
+  --brand-badge-draft-border: #fde68a;
+  --brand-badge-review-bg: #dbeafe;
+  --brand-badge-review-text: #1e40af;
+  --brand-badge-review-border: #bfdbfe;
+  --brand-badge-archived-bg: #f3f4f6;
+  --brand-badge-archived-text: #374151;
+  --brand-badge-archived-border: #e5e7eb;
+
+  --layout-max-width-narrow: 800px;
+  --layout-max-width-content: 1440px;
+  --layout-max-width-wide: 1800px;
+  --layout-side-padding-sm: 24px;
+  --layout-side-padding-md: 48px;
+  --layout-side-padding-lg: 64px;
+
+  --vp-c-brand-1: var(--brand-primary);
+  --vp-c-brand-2: var(--brand-primary-hover);
+  --vp-c-brand-3: var(--brand-primary-active);
+  --vp-c-brand-soft: var(--brand-primary-soft);
+
+  --vp-c-text-1: var(--brand-text-default);
+  --vp-c-text-2: var(--brand-text-muted);
+  --vp-c-text-3: var(--brand-text-disabled);
+
+  --vp-c-divider: var(--brand-border-default);
+  --vp-c-border: var(--brand-border-default);
+  --vp-c-gutter: var(--brand-border-default);
+
+  --vp-code-block-bg: var(--brand-bg-subtle);
+
+  --vp-font-family-base:
+    "Open Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+
+  --vp-layout-max-width: var(--layout-max-width-content);
+  --vp-sidebar-width: 280px;
+
+  /* VitePress `locales` config is used here for versions (v1, v2), not
+     languages — hide the language switcher VitePress would otherwise
+     render. */
+  --vp-nav-translations-display: none;
+}
+
+.dark {
+  --vp-c-bg: #04132a;
+  --vp-c-bg-alt: var(--brand-nav-navy);
+  --vp-c-bg-soft: #0a2d52;
+  --vp-c-bg-mute: #0f3870;
+  --vp-c-bg-elv: #0a2d52;
+
+  --vp-sidebar-bg-color: var(--brand-nav-navy);
+
+  --vp-c-text-1: #ffffff;
+  --vp-c-text-2: rgba(255, 255, 255, 0.72);
+  --vp-c-text-3: var(--brand-text-disabled);
+
+  --vp-c-divider: rgba(255, 255, 255, 0.08);
+  --vp-c-border: rgba(255, 255, 255, 0.08);
+  --vp-c-gutter: rgba(255, 255, 255, 0.08);
+
+  --vp-c-brand-2: var(--brand-secondary);
+
+  --vp-code-block-bg: #020a18;
+
+  --brand-badge-published-bg: #052e16;
+  --brand-badge-published-text: #4ade80;
+  --brand-badge-published-border: #166534;
+  --brand-badge-draft-bg: #2d1a00;
+  --brand-badge-draft-text: #fbbf24;
+  --brand-badge-draft-border: #92400e;
+  --brand-badge-review-bg: #0f1e40;
+  --brand-badge-review-text: #60a5fa;
+  --brand-badge-review-border: #1e40af;
+  --brand-badge-archived-bg: #1f2937;
+  --brand-badge-archived-text: #9ca3af;
+  --brand-badge-archived-border: #374151;
+}
+
+/* Dark-mode navbar chrome — targets VitePress' internal DOM:
+   `.VPNavBar > .wrapper > .container > ...`. These selectors are not
+   public VitePress API; a minor upgrade can rename them and break this
+   block silently. Verified against VitePress 1.6.x — see
+   `tests/smoke/playground-dark-mode.spec.ts` which asserts the
+   computed navbar background in dark mode against the playground. */
+.dark .VPNav,
+.dark .VPNavBar,
+.dark .VPNavBar > .wrapper,
+.dark .VPNavBar > .wrapper > .container,
+.dark .VPNavBar > .wrapper > .container > .content,
+.dark .VPNavBar > .wrapper > .container > .content > .content-body {
+  background-color: var(--vp-c-bg) !important;
+}
+
+.dark .VPNavBar.has-sidebar > .wrapper > .container > .title {
+  background-color: var(--brand-nav-navy) !important;
+}
+
+.dark .VPNavBar,
+.dark .VPNavBar.has-sidebar > .wrapper > .container > .title {
+  border-bottom-color: transparent !important;
+}
+
+.dark html,
+.dark body,
+.dark .Layout,
+.dark .VPContent,
+.dark .VPDoc,
+.dark .VPDocAside,
+.dark .VPDocAsideOutline {
+  background-color: var(--vp-c-bg);
+}
+
+.VPNavBarSearchButton,
+.vp-doc div[class*="language-"],
+.vp-doc div[class*="language-"] pre,
+.vp-doc div[class*="language-"] code,
+.vp-doc :not(pre) > code,
+.VPButton,
+.VPLocalSearchBox,
+.VPLocalSearchBox input,
+.VPSidebarItem .item,
+.VPMenu,
+.custom-block {
+  border-radius: 0 !important;
+}
+
+/* scrollbar-gutter prevents layout shift on lightbox open */
 html {
   scrollbar-gutter: stable;
-}
-
-/* Images and Mermaid diagrams in docs — lightbox cursor */
-.vp-doc img,
-.vp-doc svg {
-  cursor: zoom-in;
-}
-
-:root {
-  /* Hide language switcher (translations) — locales are used for versioning only */
-  --vp-nav-translations-display: none;
-
-  /* Sidebar 30% wider than the default 272 px */
-  --vp-sidebar-width: 354px;
 }
 
 .VPNavBarTranslations,
@@ -23,30 +169,29 @@ html {
   display: none !important;
 }
 
-/* ── Layout width toggle ─────────────────────────────────────── */
-/*
- * VPDoc.vue uses <style scoped>, so every selector gets an attribute hash
- * [data-v-xxxxx] giving it specificity 0,4,0. Our overrides need
- * !important to win.
- */
+.vp-doc img,
+.vp-doc .mermaid svg,
+.vp-doc [data-zoomable] {
+  cursor: zoom-in;
+}
 
-/* Default content column width +20% over VitePress defaults */
+/* VPDoc.vue is <style scoped> (specificity 0,4,0) — overrides need !important */
 .VPDoc.has-aside .content-container {
   max-width: 826px !important;
 }
 
 .VPDoc:not(.has-sidebar) .content {
-  max-width: 902px !important;
+  max-width: 860px !important;
 }
 
 @media (min-width: 1440px) {
   .VPDoc:not(.has-sidebar) .content {
-    max-width: 941px !important;
+    max-width: 900px !important;
   }
 }
 
 html.layout-wide {
-  --vp-layout-max-width: 1800px;
+  --vp-layout-max-width: var(--layout-max-width-wide);
 }
 
 html.layout-wide .VPDoc .content-container {
@@ -76,4 +221,292 @@ html.layout-max .VPDoc .container {
 
 html.layout-max .VPContent {
   max-width: 100% !important;
+}
+
+.vp-doc h1 {
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1.25;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.vp-doc h2 {
+  font-size: 24px;
+  font-weight: 500;
+  margin-top: 32px;
+  margin-bottom: 8px;
+  padding-top: 16px;
+}
+
+.vp-doc h3 {
+  font-size: 20px;
+  font-weight: 500;
+  margin-top: 32px;
+  margin-bottom: 8px;
+}
+
+.vp-doc p {
+  margin-top: 0;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.vp-doc table tr:nth-child(even) {
+  background-color: var(--brand-surface);
+}
+
+.dark .vp-doc table tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.vp-doc table th {
+  background-color: var(--brand-surface);
+  font-weight: 700;
+}
+
+.dark .vp-doc table th {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.VPSidebarItem.is-active > .item .link .text {
+  color: var(--brand-primary) !important;
+  font-weight: 700;
+}
+
+.VPSidebarItem.is-active > .item {
+  border-left: 2px solid var(--brand-primary);
+  padding-left: calc(var(--vp-sidebar-item-offset, 0px) + 14px);
+}
+
+/* Mermaid is themed entirely here off the --brand-* tokens (no JS
+   themeVariables), so overriding a brand token recolors diagrams in both
+   light and dark mode. Light mode rules first; dark mode needs the extra
+   `.dark` prefix to win because vitepress-plugin-mermaid hard-forces
+   theme="dark" on <html>.dark and ignores anything we pass in config. */
+.mermaid .node rect,
+.mermaid .node polygon,
+.mermaid .node circle,
+.mermaid .node ellipse,
+.mermaid .node path,
+.mermaid .cluster rect {
+  fill: var(--brand-surface) !important;
+  stroke: var(--brand-primary) !important;
+  stroke-width: 1px !important;
+}
+
+.mermaid .node .label,
+.mermaid .node .nodeLabel,
+.mermaid .node text,
+.mermaid .cluster .nodeLabel,
+.mermaid .cluster text {
+  color: var(--brand-text-default) !important;
+  fill: var(--brand-text-default) !important;
+}
+
+.mermaid .nodeLabel p,
+.mermaid .edgeLabel p {
+  color: var(--brand-text-default) !important;
+  background-color: transparent !important;
+}
+
+.mermaid span.edgeLabel {
+  background-color: var(--brand-bg-page) !important;
+  color: var(--brand-text-default) !important;
+}
+
+.mermaid .edgePath .path,
+.mermaid .flowchart-link,
+.mermaid .messageLine0,
+.mermaid .messageLine1,
+.mermaid line,
+.mermaid .relation {
+  stroke: var(--brand-text-muted) !important;
+}
+
+.mermaid .arrowheadPath,
+.mermaid .marker,
+.mermaid #arrowhead path {
+  fill: var(--brand-text-muted) !important;
+  stroke: var(--brand-text-muted) !important;
+}
+
+.mermaid .edgeLabel,
+.mermaid .edgeLabel rect {
+  background-color: var(--brand-bg-page) !important;
+  color: var(--brand-text-default) !important;
+  fill: var(--brand-bg-page) !important;
+}
+
+.mermaid .edgeLabel foreignObject div {
+  background-color: var(--brand-bg-page) !important;
+  color: var(--brand-text-default) !important;
+}
+
+.mermaid .actor {
+  fill: var(--brand-surface) !important;
+  stroke: var(--brand-primary) !important;
+}
+
+.mermaid text.actor > tspan {
+  fill: var(--brand-text-default) !important;
+}
+
+.mermaid .actor-line,
+.mermaid line.actor-line {
+  stroke: var(--brand-text-muted) !important;
+}
+
+.mermaid .messageText,
+.mermaid .labelText,
+.mermaid .loopText,
+.mermaid .noteText {
+  fill: var(--brand-text-default) !important;
+  stroke: none !important;
+}
+
+.mermaid .note {
+  fill: var(--brand-warning-bg) !important;
+  stroke: var(--brand-warning) !important;
+}
+
+.mermaid .classGroup rect,
+.mermaid .classGroup path {
+  fill: var(--brand-surface) !important;
+  stroke: var(--brand-primary) !important;
+}
+
+.mermaid .classGroup .classTitle,
+.mermaid .classLabel .label,
+.mermaid .classGroup text,
+.mermaid g.classGroup text {
+  fill: var(--brand-text-default) !important;
+}
+
+.mermaid .classGroup line {
+  stroke: var(--brand-text-muted) !important;
+}
+
+.dark .mermaid svg {
+  background-color: transparent;
+}
+
+.dark .mermaid .node rect,
+.dark .mermaid .node polygon,
+.dark .mermaid .node circle,
+.dark .mermaid .node ellipse,
+.dark .mermaid .node path,
+.dark .mermaid .cluster rect {
+  fill: var(--vp-c-bg-soft) !important;
+  stroke: var(--brand-primary) !important;
+  stroke-width: 1px !important;
+}
+
+.dark .mermaid .node .label,
+.dark .mermaid .node .nodeLabel,
+.dark .mermaid .node text,
+.dark .mermaid .cluster .nodeLabel,
+.dark .mermaid .cluster text {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+.dark .mermaid .nodeLabel p,
+.dark .mermaid .edgeLabel p {
+  color: #ffffff !important;
+  background-color: transparent !important;
+}
+
+.dark .mermaid span.edgeLabel {
+  background-color: transparent !important;
+  color: #ffffff !important;
+}
+
+.dark .mermaid .edgePath .path,
+.dark .mermaid .flowchart-link,
+.dark .mermaid .messageLine0,
+.dark .mermaid .messageLine1,
+.dark .mermaid line,
+.dark .mermaid .relation {
+  stroke: var(--brand-text-muted) !important;
+}
+
+.dark .mermaid .arrowheadPath,
+.dark .mermaid .marker,
+.dark .mermaid #arrowhead path {
+  fill: var(--brand-text-muted) !important;
+  stroke: var(--brand-text-muted) !important;
+}
+
+.dark .mermaid .edgeLabel,
+.dark .mermaid .edgeLabel rect {
+  background-color: var(--vp-c-bg-soft) !important;
+  color: #ffffff !important;
+  fill: var(--vp-c-bg-soft) !important;
+}
+
+.dark .mermaid .edgeLabel foreignObject div {
+  background-color: var(--vp-c-bg-soft) !important;
+  color: #ffffff !important;
+}
+
+.dark .mermaid .actor {
+  fill: var(--vp-c-bg-soft) !important;
+  stroke: var(--brand-primary) !important;
+}
+
+.dark .mermaid text.actor > tspan {
+  fill: #ffffff !important;
+}
+
+.dark .mermaid .actor-line,
+.dark .mermaid line.actor-line {
+  stroke: var(--brand-text-muted) !important;
+}
+
+.dark .mermaid .messageText,
+.dark .mermaid .labelText,
+.dark .mermaid .loopText,
+.dark .mermaid .noteText {
+  fill: #ffffff !important;
+  stroke: none !important;
+}
+
+.dark .mermaid .note {
+  fill: var(--vp-c-bg-mute) !important;
+  stroke: var(--brand-secondary) !important;
+}
+
+.dark .mermaid .classGroup rect,
+.dark .mermaid .classGroup path {
+  fill: var(--vp-c-bg-soft) !important;
+  stroke: var(--brand-primary) !important;
+}
+
+.dark .mermaid .classGroup .classTitle,
+.dark .mermaid .classLabel .label {
+  fill: #ffffff !important;
+}
+
+.dark .mermaid .classGroup text,
+.dark .mermaid g.classGroup text {
+  fill: #ffffff !important;
+}
+
+.dark .mermaid .classGroup line {
+  stroke: var(--brand-text-muted) !important;
+}
+
+.vp-doc a {
+  color: var(--brand-primary);
+  text-decoration: none;
+}
+
+.vp-doc a:hover {
+  color: var(--brand-primary-hover);
+  text-decoration: underline;
+}
+
+.vp-doc a:active {
+  color: var(--brand-primary-active);
 }

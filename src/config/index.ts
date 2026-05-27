@@ -4,5 +4,7 @@ export type {
   Strings,
   UmamiAnalytics,
   EditLink,
+  Branding,
 } from "./makeConfig.js";
 export { default as defaultStrings } from "./strings.cs.json" with { type: "json" };
+export { default as enStrings } from "./strings.en.json" with { type: "json" };

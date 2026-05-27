@@ -4,19 +4,11 @@ import type { HeadConfig, UserConfig } from "vitepress";
 import { defineConfig } from "vitepress";
 import { withMermaid } from "vitepress-plugin-mermaid";
 import { generateNav, generateSidebar, getVersions } from "../sidebar/index.js";
+import { LOGO_SHAPES, LOGO_VIEW_BOX } from "../theme/icons/logoSymbol.js";
 import defaultStrings from "./strings.cs.json" with { type: "json" };
 
-/**
- * Read the bundled favicon and embed it as a data URL `<link rel="icon">` so
- * each consumer repo gets the icon automatically without copying static files.
- * Resolved at build time relative to this compiled file (dist/config/makeConfig.js).
- */
-function bundledFaviconLink(): HeadConfig | null {
+function bundledFaviconLink(faviconPath: string): HeadConfig | null {
   try {
-    const faviconPath = path.resolve(
-      import.meta.dirname,
-      "../theme/assets/favicon.ico",
-    );
     const buf = fs.readFileSync(faviconPath);
     const dataUrl = `data:image/x-icon;base64,${buf.toString("base64")}`;
     return ["link", { rel: "icon", type: "image/x-icon", href: dataUrl }];
@@ -25,6 +17,23 @@ function bundledFaviconLink(): HeadConfig | null {
   }
 }
 
+// Mirrors --brand-primary in theme/styles/base.css. The navbar logo renders as
+// an <img>, which cannot inherit currentColor, so the data URL bakes a fill.
+const LOGO_FILL = "#0074c8";
+
+/** Build the bundled logo as a data URL for themeConfig.logo. */
+function bundledLogoUrl(): string {
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${LOGO_VIEW_BOX}" ` +
+    `fill="${LOGO_FILL}">${LOGO_SHAPES}</svg>`;
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+}
+
+/**
+ * Site-level copy consumed directly by VitePress config. Built-in component
+ * labels (status badges, 404, lightbox, feature CTA) live in the theme's
+ * vue-i18n catalogs — override those via `i18n.global.mergeLocaleMessage`.
+ */
 export interface Strings {
   title: string;
   description: string;
@@ -53,50 +62,103 @@ export interface EditLink {
   host?: string;
 }
 
+export interface BrandingFooter {
+  /** Public site URL shown as the first link. */
+  websiteUrl?: string;
+  /** Display label for the website link. Defaults to the host name of websiteUrl. */
+  websiteLabel?: string;
+  /** Contact email shown as the second link. */
+  email?: string;
+  /** Postal address shown as plain text after the email. */
+  address?: string;
+}
+
+export interface BrandingNavLink {
+  text: string;
+  link: string;
+}
+
+export interface Branding {
+  /**
+   * Override the navbar site title. Defaults to the resolved `strings.title`.
+   * Set to an empty string to hide.
+   */
+  siteTitle?: string;
+  /**
+   * Override the logo. Either an absolute URL/data URL, an object accepted by
+   * VitePress' `themeConfig.logo`, or `false` to disable the bundled default.
+   */
+  logo?: string | { src: string; alt?: string } | false;
+  /**
+   * Extra nav links appended to the right end of the navbar (e.g. company
+   * website). Empty array disables the default consumer-supplied link.
+   */
+  navLinks?: BrandingNavLink[];
+  /** Footer content. Pass `false` to hide BrandFooter. */
+  footer?: BrandingFooter | false;
+  /**
+   * Favicon. A URL/path (e.g. `/favicon.svg`) overrides the bundled default;
+   * `false` injects no favicon at all. Omit to keep the bundled default.
+   */
+  favicon?: string | false;
+  /**
+   * How to load Open Sans.
+   * - `"google"` (default): bundled `<link>` tags to fonts.googleapis.com.
+   * - `"none"`: skip injection — consumer is responsible (e.g. self-hosted
+   *   `@fontsource/open-sans` imported from their own config).
+   */
+  fonts?: "google" | "none";
+}
+
 export interface MakeConfigOptions {
-  /**
-   * Path to the `.vitepress/` directory. In a consumer config.ts:
-   *   `configDir: import.meta.dirname`
-   * The `docs/` root is one level up.
-   */
   configDir: string;
-
-  /** Project shortname (used only for diagnostics today; reserved for future use). */
   project?: string;
-
-  /** Override base strings (title, description, lang, …). */
   strings?: Partial<Strings>;
-
-  /** Optional Umami analytics tracker. */
+  /** Branding overrides — title, logo, navbar links, footer. */
+  branding?: Branding;
   analytics?: UmamiAnalytics;
-
-  /** Optional GitLab/GitHub edit link in docs footer. */
   editLink?: EditLink;
-
-  /** Extra `<head>` tags appended after analytics. */
   head?: HeadConfig[];
-
-  /**
-   * Override / extend final UserConfig. Merged shallowly on top of the generated config.
-   * Use sparingly — most use-cases should be covered by typed options above.
-   */
   override?: Partial<UserConfig>;
-
-  /**
-   * Whether to wrap the config with `withMermaid()`. Default `true`. Disable
-   * for environments where Mermaid sub-deps (dayjs, cytoscape, …) cause
-   * Vite optimizeDeps friction — typically a local playground.
-   */
   mermaid?: boolean;
 }
 
 const UMAMI_DEFAULT_SRC = "https://cloud.umami.is/script.js";
 
+const ASSETS_DIR = path.resolve(import.meta.dirname, "../theme/assets");
+const DEFAULT_FAVICON = path.join(ASSETS_DIR, "favicon.ico");
+
 function buildHead(opts: MakeConfigOptions): HeadConfig[] {
   const head: HeadConfig[] = [];
 
-  const favicon = bundledFaviconLink();
-  if (favicon) head.push(favicon);
+  const { favicon } = opts.branding ?? {};
+  if (typeof favicon === "string") {
+    head.push(["link", { rel: "icon", href: favicon }]);
+  } else if (favicon !== false) {
+    const bundled = bundledFaviconLink(DEFAULT_FAVICON);
+    if (bundled) head.push(bundled);
+  }
+
+  if ((opts.branding?.fonts ?? "google") === "google") {
+    head.push(
+      ["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
+      [
+        "link",
+        {
+          rel: "preconnect",
+          href: "https://fonts.gstatic.com",
+          crossorigin: "",
+        },
+      ],
+      [
+        "link",
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&display=swap",
+        },
+      ],
+    );
+  }
 
   if (opts.analytics?.provider === "umami") {
     const { websiteId, domain, scriptSrc = UMAMI_DEFAULT_SRC } = opts.analytics;
@@ -123,7 +185,6 @@ function buildEditLink(editLink: EditLink): { pattern: string; text: string } {
     text = "Upravit online",
     host = "https://gitlab.com",
   } = editLink;
-  // GitLab uses `/-/edit/<branch>/...`; GitHub uses `/edit/<branch>/...`.
   const isGitLab = host.includes("gitlab");
   const editPath = isGitLab ? `/-/edit/${branch}` : `/edit/${branch}`;
   return {
@@ -132,10 +193,27 @@ function buildEditLink(editLink: EditLink): { pattern: string; text: string } {
   };
 }
 
-/**
- * Build a VitePress UserConfig wrapped in `withMermaid`, derived from the docs/
- * directory layout (`docs/<version>/<section>/<group>/`).
- */
+function resolveLogo(
+  branding: Branding | undefined,
+): { src: string; alt?: string } | undefined {
+  if (branding?.logo === false) {
+    return undefined;
+  }
+  if (typeof branding?.logo === "string") {
+    return { src: branding.logo };
+  }
+  if (branding?.logo && typeof branding.logo === "object") {
+    return branding.logo;
+  }
+  return { src: bundledLogoUrl() };
+}
+
+function resolveFooter(branding: Branding | undefined): BrandingFooter | null {
+  if (branding?.footer === false) return null;
+  if (branding?.footer) return branding.footer;
+  return null;
+}
+
 export function makeConfig(
   opts: MakeConfigOptions,
 ): ReturnType<typeof withMermaid> | UserConfig {
@@ -148,6 +226,10 @@ export function makeConfig(
   const strings: Strings = { ...defaultStrings, ...opts.strings };
 
   const head = buildHead(opts);
+  const logo = resolveLogo(opts.branding);
+  const footer = resolveFooter(opts.branding);
+  const navLinks = opts.branding?.navLinks ?? [];
+  const siteTitle = opts.branding?.siteTitle ?? strings.title;
 
   const versionDropdown = (
     label: string,
@@ -181,6 +263,7 @@ export function makeConfig(
         nav: [
           ...(showSections ? sectionNav : []),
           ...(versions.length > 1 ? [versionDropdown(v)] : []),
+          ...navLinks,
         ],
       },
     };
@@ -191,6 +274,24 @@ export function makeConfig(
     ...Object.fromEntries(versions.slice(1).map((v) => [v, localeFor(v)])),
   };
 
+  /* If the consumer overrides `base` (e.g. site served at `/` instead of
+     `/docs/`), the logo link must follow — otherwise clicking the logo
+     sends the user to a 404. */
+  const effectiveBase =
+    typeof opts.override?.base === "string" ? opts.override.base : base;
+
+  const topLevelNav =
+    versions.length > 1
+      ? [
+          {
+            text: "Verze",
+            activeMatch: `^${base}(v\\d+)/`.replace(/\/+/g, "/"),
+            items: versions.map((ver) => ({ text: ver, link: `/${ver}/` })),
+          },
+          ...navLinks,
+        ]
+      : [...navLinks];
+
   const baseConfig: UserConfig = {
     base,
     title: strings.title,
@@ -199,17 +300,10 @@ export function makeConfig(
     head,
     locales,
     themeConfig: {
-      logoLink: base,
-      nav:
-        versions.length > 1
-          ? [
-              {
-                text: "Verze",
-                activeMatch: `^${base}(v\\d+)/`.replace(/\/+/g, "/"),
-                items: versions.map((ver) => ({ text: ver, link: `/${ver}/` })),
-              },
-            ]
-          : [],
+      ...(logo && { logo }),
+      siteTitle,
+      logoLink: effectiveBase,
+      nav: topLevelNav,
       sidebar: generateSidebar(docsRoot),
       search: { provider: "local" },
       outline: {
@@ -218,19 +312,30 @@ export function makeConfig(
       docFooter: { prev: strings.footerPrev, next: strings.footerNext },
       lastUpdated: { text: strings.lastUpdatedText },
       ...(opts.editLink && { editLink: buildEditLink(opts.editLink) }),
+      // Custom theme data — BrandFooter reads this via
+      // useData().theme.value.docVault. Component copy lives in vue-i18n.
+      docVault: {
+        footer,
+      },
     },
-    // The shared theme imports .vue / .css files from inside the package; without
-    // noExternal vitepress' SSR build hands the raw .css off to Node's ESM loader,
-    // which rejects it with ERR_UNKNOWN_FILE_EXTENSION.
     vite: {
       ssr: {
         noExternal: ["@techfides/tf-doc-vault"],
       },
     },
-    ignoreDeadLinks: [
-      // ignore all localhost links
-      /^https?:\/\/localhost/,
-    ],
+    ignoreDeadLinks: [/^https?:\/\/localhost/],
+    /* Mermaid diagram colors are driven entirely by CSS (`.mermaid` and
+       `.dark .mermaid` in theme/styles/base.css) off the --brand-* tokens, so
+       overriding a brand token recolors diagrams in both light and dark mode.
+       We deliberately don't set `themeVariables`: vitepress-plugin-mermaid
+       forces theme="dark" when <html>.dark and would ignore them anyway. */
+    mermaid: {
+      theme: "base",
+      flowchart: {
+        curve: "basis",
+        useMaxWidth: true,
+      },
+    },
     ...opts.override,
   };
 

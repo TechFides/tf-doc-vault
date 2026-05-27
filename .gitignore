@@ -12,8 +12,11 @@ dist/
 /test-results/
 /coverage/
 
-/.claude/worktrees
+# IDE
 .idea
+
+# Claude Code worktrees (created on demand)
+/.claude/worktrees
 
 # Playground — only ignore VitePress generated artifacts, not config sources
 /playground/docs/.vitepress/cache/

@@ -119,6 +119,8 @@ export default createTheme({ widthToggle: true });
 
 `pnpm.onlyBuiltDependencies` is required — pnpm 10 otherwise refuses to run the `prepare` hook for git dependencies and `dist/` won't be built.
 
+To rebrand (colors, logo, fonts, footer) for a non-TechFides project, see [BRANDING.md](./BRANDING.md).
+
 ---
 
 ## Use cases

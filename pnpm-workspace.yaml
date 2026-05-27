@@ -1,2 +1,18 @@
 allowBuilds:
   esbuild: true
+
+# Hoist Mermaid + transitive deps so Vite can pre-bundle them for the
+# playground. Without this, pnpm's nested layout hides dayjs / cytoscape /
+# @braintree/sanitize-url etc., and dev fails at runtime with
+#   "dayjs.min.js does not provide an export named 'default'".
+publicHoistPattern:
+  - "*mermaid*"
+  - dayjs
+  - debug
+  - "@braintree/*"
+  - cytoscape*
+  - "@types/d3*"
+  - d3-*
+  - khroma
+  - marked
+  - stylis
