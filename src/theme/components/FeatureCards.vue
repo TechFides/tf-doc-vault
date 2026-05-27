@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useData } from "vitepress";
 import { computed, type Component } from "vue";
+import { useI18n } from "vue-i18n";
 import IconBusiness from "../icons/IconBusiness.vue";
 import IconFunctional from "../icons/IconFunctional.vue";
 import IconTechnical from "../icons/IconTechnical.vue";
-import { useStrings } from "../composables/useStrings.js";
 
 interface FeatureCard {
   icon?: string;
@@ -15,7 +15,7 @@ interface FeatureCard {
 }
 
 const { frontmatter } = useData();
-const strings = useStrings();
+const { t } = useI18n();
 
 const icons: Record<string, Component> = {
   business: IconBusiness,
@@ -44,7 +44,7 @@ const features = computed<FeatureCard[]>(
       <h3 class="feature-card__title">{{ card.title }}</h3>
       <p class="feature-card__desc">{{ card.description }}</p>
       <span class="feature-card__cta">
-        {{ card.linkText ?? strings.featureCtaText }}
+        {{ card.linkText ?? t("feature.cta") }}
       </span>
     </a>
   </div>

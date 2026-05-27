@@ -1,0 +1,24 @@
+{
+  "docMeta": {
+    "updated": "Updated",
+    "author": "Created by TechFides",
+    "status": {
+      "published": "Published",
+      "draft": "Draft",
+      "review": "In review",
+      "archived": "Archived"
+    }
+  },
+  "notFound": {
+    "code": "404",
+    "heading": "Page not found",
+    "message": "The page you're looking for doesn't exist or was moved.",
+    "link": "Back to home"
+  },
+  "lightbox": {
+    "close": "Close"
+  },
+  "feature": {
+    "cta": "Open"
+  }
+}

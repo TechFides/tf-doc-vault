@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { useData } from "vitepress";
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import LogoSymbol from "../icons/LogoSymbol.vue";
-import { useStrings } from "../composables/useStrings.js";
 
 const { theme, site } = useData();
-const strings = useStrings();
+const { t } = useI18n();
 
 // logoLink is normally set by makeConfig (= effectiveBase); fall back to the
 // site base, never a bare "/" which would escape a site served under a subpath.
@@ -18,11 +18,11 @@ const homeLink = computed(
   <div class="not-found">
     <div class="not-found__inner">
       <LogoSymbol class="not-found__mark" />
-      <p class="not-found__code">{{ strings.notFoundCode }}</p>
-      <h1 class="not-found__heading">{{ strings.notFoundHeading }}</h1>
-      <p class="not-found__message">{{ strings.notFoundMessage }}</p>
+      <p class="not-found__code">{{ t("notFound.code") }}</p>
+      <h1 class="not-found__heading">{{ t("notFound.heading") }}</h1>
+      <p class="not-found__message">{{ t("notFound.message") }}</p>
       <a class="not-found__link" :href="homeLink">
-        ← {{ strings.notFoundLink }}
+        ← {{ t("notFound.link") }}
       </a>
     </div>
   </div>

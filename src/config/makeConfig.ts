@@ -29,6 +29,11 @@ function bundledLogoUrl(): string {
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }
 
+/**
+ * Site-level copy consumed directly by VitePress config. Built-in component
+ * labels (status badges, 404, lightbox, feature CTA) live in the theme's
+ * vue-i18n catalogs — override those via `i18n.global.mergeLocaleMessage`.
+ */
 export interface Strings {
   title: string;
   description: string;
@@ -37,19 +42,6 @@ export interface Strings {
   footerPrev: string;
   footerNext: string;
   lastUpdatedText: string;
-  statusPublished: string;
-  statusDraft: string;
-  statusReview: string;
-  statusArchived: string;
-  updatedLabel: string;
-  authorLabel: string;
-  notFoundCode: string;
-  notFoundHeading: string;
-  notFoundMessage: string;
-  notFoundLink: string;
-  lightboxClose: string;
-  featureCtaText: string;
-  dateLocale: string;
 }
 
 export interface UmamiAnalytics {
@@ -320,10 +312,9 @@ export function makeConfig(
       docFooter: { prev: strings.footerPrev, next: strings.footerNext },
       lastUpdated: { text: strings.lastUpdatedText },
       ...(opts.editLink && { editLink: buildEditLink(opts.editLink) }),
-      // Custom theme data — consumed by DocMeta, NotFound, ImageLightbox,
-      // BrandFooter via useData().theme.value.docVault.
+      // Custom theme data — BrandFooter reads this via
+      // useData().theme.value.docVault. Component copy lives in vue-i18n.
       docVault: {
-        strings,
         footer,
       },
     },

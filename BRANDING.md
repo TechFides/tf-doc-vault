@@ -222,6 +222,30 @@ default would render it.
 
 ---
 
+## Component copy (i18n)
+
+Built-in component strings — DocMeta status badges, the 404 page, the
+lightbox close label, the feature-card CTA — live in the theme's
+[vue-i18n](https://vue-i18n.intlify.dev/) catalogs (`cs` default, `en`
+fallback). The active locale follows `site.lang` (`en-*` → English, else
+Czech). Override any string from your theme entry:
+
+```ts
+// docs/.vitepress/theme/index.ts
+import { createTheme, i18n } from "@techfides/tf-doc-vault/theme";
+
+i18n.global.mergeLocaleMessage("cs", {
+  docMeta: { author: "Vytvořeno klientem X" },
+});
+
+export default createTheme();
+```
+
+Keys: `docMeta.{updated,author}`, `docMeta.status.{published,draft,review,archived}`,
+`notFound.{code,heading,message,link}`, `lightbox.close`, `feature.cta`.
+
+---
+
 ## Known limitations
 
 Items below are **not** cleanly rebrandable today without patching the

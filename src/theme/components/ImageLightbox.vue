@@ -12,7 +12,7 @@
         <button
           ref="closeBtn"
           class="lightbox-close"
-          :aria-label="strings.lightboxClose"
+          :aria-label="t('lightbox.close')"
           @click.stop="close"
           @keydown.tab.prevent
         >
@@ -26,11 +26,9 @@
 
 <script setup lang="ts">
 import { ref, nextTick, onMounted, onUnmounted } from "vue";
-import { useStrings } from "../composables/useStrings.js";
+import { useI18n } from "vue-i18n";
 
-// Keep the computed ref (no `.value` here) — the template auto-unwraps it so
-// the aria-label stays reactive when the consumer switches language.
-const strings = useStrings();
+const { t } = useI18n();
 
 const src = ref<string | null>(null);
 const alt = ref<string>("");

@@ -1,0 +1,24 @@
+{
+  "docMeta": {
+    "updated": "Aktualizováno",
+    "author": "Vytvořeno v TechFides",
+    "status": {
+      "published": "Publikováno",
+      "draft": "Koncept",
+      "review": "K revizi",
+      "archived": "Archivováno"
+    }
+  },
+  "notFound": {
+    "code": "404",
+    "heading": "Stránka nenalezena",
+    "message": "Stránka, kterou hledáš, neexistuje, nebo byla přesunuta jinam.",
+    "link": "Zpět na úvod"
+  },
+  "lightbox": {
+    "close": "Zavřít"
+  },
+  "feature": {
+    "cta": "Otevřít"
+  }
+}

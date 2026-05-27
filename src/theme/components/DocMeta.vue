@@ -1,25 +1,23 @@
 <script setup lang="ts">
 import { useData } from "vitepress";
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import IconCheck from "../icons/IconCheck.vue";
-import { useStrings } from "../composables/useStrings.js";
 
-const { frontmatter } = useData();
-const strings = useStrings();
+const { frontmatter, lang } = useData();
+const { t, te } = useI18n();
 
-const statusLabels = computed<Record<string, string>>(() => ({
-  published: strings.value.statusPublished,
-  draft: strings.value.statusDraft,
-  review: strings.value.statusReview,
-  archived: strings.value.statusArchived,
-}));
+function statusLabel(status: string): string {
+  const key = `docMeta.status.${status}`;
+  return te(key) ? t(key) : status;
+}
 
 // Format in UTC and build dates with Date.UTC so the rendered string is
 // identical on the server and the client — authored wall-clock values show
 // verbatim, with no timezone shift and no SSR/hydration mismatch.
 const dateFormat = computed(
   () =>
-    new Intl.DateTimeFormat(strings.value.dateLocale, {
+    new Intl.DateTimeFormat(lang.value, {
       timeZone: "UTC",
       day: "numeric",
       month: "long",
@@ -29,7 +27,7 @@ const dateFormat = computed(
 
 const dateTimeFormat = computed(
   () =>
-    new Intl.DateTimeFormat(strings.value.dateLocale, {
+    new Intl.DateTimeFormat(lang.value, {
       timeZone: "UTC",
       day: "numeric",
       month: "long",
@@ -77,6 +75,10 @@ function formatDate(value: unknown): string {
   return raw;
 }
 
+const authorLabel = computed(() =>
+  te("docMeta.author") ? t("docMeta.author") : "",
+);
+
 const isHeroPage = computed(() => !!frontmatter.value?.hero);
 const visible = computed(
   () =>
@@ -92,14 +94,14 @@ const visible = computed(
       class="doc-meta__badge"
       :data-status="frontmatter.status"
     >
-      {{ statusLabels[frontmatter.status] ?? frontmatter.status }}
+      {{ statusLabel(frontmatter.status) }}
     </span>
     <span v-if="frontmatter.updated_at" class="doc-meta__date">
-      {{ strings.updatedLabel }}: {{ formatDate(frontmatter.updated_at) }}
+      {{ t("docMeta.updated") }}: {{ formatDate(frontmatter.updated_at) }}
     </span>
-    <span v-if="strings.authorLabel" class="doc-meta__author">
+    <span v-if="authorLabel" class="doc-meta__author">
       <IconCheck class="doc-meta__check" />
-      {{ strings.authorLabel }}
+      {{ authorLabel }}
     </span>
   </div>
 </template>

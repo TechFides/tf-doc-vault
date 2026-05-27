@@ -5,18 +5,5 @@
   "searchLabel": "On this page",
   "footerPrev": "Previous",
   "footerNext": "Next",
-  "lastUpdatedText": "Last updated",
-  "statusPublished": "Published",
-  "statusDraft": "Draft",
-  "statusReview": "In review",
-  "statusArchived": "Archived",
-  "updatedLabel": "Updated",
-  "authorLabel": "Created by TechFides",
-  "notFoundCode": "404",
-  "notFoundHeading": "Page not found",
-  "notFoundMessage": "The page you're looking for doesn't exist or was moved.",
-  "notFoundLink": "Back to home",
-  "lightboxClose": "Close",
-  "featureCtaText": "Open",
-  "dateLocale": "en-US"
+  "lastUpdatedText": "Last updated"
 }

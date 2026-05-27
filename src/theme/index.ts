@@ -9,6 +9,7 @@ import BrandHero from "./components/BrandHero.vue";
 import FeatureCards from "./components/FeatureCards.vue";
 import BrandFooter from "./components/BrandFooter.vue";
 import NotFound from "./components/NotFound.vue";
+import { i18n, resolveLocale } from "./i18n/index.js";
 import "./styles/print.css";
 import "./styles/base.css";
 
@@ -54,7 +55,9 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
       }
       return h(DefaultTheme.Layout, null, slots);
     },
-    enhanceApp({ app }): void {
+    enhanceApp({ app, siteData }): void {
+      app.use(i18n);
+      i18n.global.locale.value = resolveLocale(siteData.value.lang);
       app.component("PrintLayout", PrintLayout);
       app.component("BrandHero", BrandHero);
       app.component("FeatureCards", FeatureCards);
@@ -73,5 +76,5 @@ export {
   NotFound,
 };
 export { useScrollSpy } from "./composables/useScrollSpy.js";
-export { useStrings } from "./composables/useStrings.js";
+export { i18n } from "./i18n/index.js";
 export * as icons from "./icons/index.js";
