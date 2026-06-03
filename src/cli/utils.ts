@@ -70,8 +70,11 @@ export function copyDir(
   dest: string,
   opts: CopyDirOptions = {},
 ): CopyDirResult {
-  const { idempotent = false, renameEntry = (n: string): string => n, exclude = [] } =
-    opts;
+  const {
+    idempotent = false,
+    renameEntry = (n: string): string => n,
+    exclude = [],
+  } = opts;
   let copied = 0;
   let skipped = 0;
   fs.mkdirSync(dest, { recursive: true });

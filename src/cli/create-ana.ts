@@ -88,7 +88,8 @@ function resolveDependencyValue(
     case "git":
       return `${gitUrl}#${ref}`;
     case "file": {
-      const target = flags["file-path"] ?? path.relative(targetDir, PACKAGE_DIR);
+      const target =
+        flags["file-path"] ?? path.relative(targetDir, PACKAGE_DIR);
       return `file:${target}`;
     }
     default:
