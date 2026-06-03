@@ -3,13 +3,12 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-// bin/utils.mjs is plain ESM JS — vitest resolves the .mjs extension fine.
 import {
   parseArgs,
   copyDir,
   replacePlaceholders,
   BINARY_EXTENSIONS,
-} from "../../../bin/utils.mjs";
+} from "../../../src/cli/utils.js";
 
 describe("parseArgs", () => {
   test("splits positional from flags", () => {

@@ -124,7 +124,9 @@ function scaffoldAna(tgz: string): string {
   run(
     "node",
     [
-      path.join(REPO_ROOT, "bin/create-ana.mjs"),
+      // create-ana is compiled to dist/cli/ by the `prepare` build that runs
+      // during `pnpm pack` above, so dist/ is present by the time we get here.
+      path.join(REPO_ROOT, "dist/cli/create-ana.js"),
       "ana_test",
       "--gcp-project=ci",
       "--server=nginx",
@@ -302,7 +304,7 @@ e.listen(${port}, () => console.log("listening"));
 `;
 }
 
-// -------------- tiny filesystem helpers (don't depend on bin/utils.mjs) ----
+// -------------- tiny filesystem helpers (don't depend on src/cli/utils.ts) ----
 
 function copyDir(src: string, dest: string): void {
   fs.mkdirSync(dest, { recursive: true });

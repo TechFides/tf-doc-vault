@@ -3,7 +3,7 @@
  * tf-doc-vault — CLI dispatcher for documentation tooling.
  *
  * Subcommands:
- *   create            scaffold a new analysis docs repo (delegates to bin/create-ana.mjs)
+ *   create            scaffold a new analysis docs repo (delegates to create-ana)
  *   init-tech-docs    initialise tech-docs/ in an existing service repo
  *   import-confluence import pages from Confluence into tech-docs/v1/
  *   print             generate docs/print.md (build-print-page.ts)
@@ -18,7 +18,8 @@
  *   gen-wireframes    generate wireframe SVGs
  *   replace-wireframes replace ASCII wireframe code blocks in docs/v1/index.md with SVG image refs
  *
- * `create`, `init-tech-docs` and `import-confluence` are bin scripts in bin/; all others run from dist/scripts/.
+ * `create`, `init-tech-docs` and `import-confluence` are sibling CLI scripts in
+ * dist/cli/; all others run from dist/scripts/.
  */
 
 import { spawnSync } from "node:child_process";
@@ -26,10 +27,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PKG_ROOT = path.resolve(__dirname, "..");
-const SCRIPTS_DIR = path.join(PKG_ROOT, "dist", "scripts");
+const CLI_DIR = __dirname; // dist/cli
+const SCRIPTS_DIR = path.resolve(__dirname, "..", "scripts"); // dist/scripts
 
-const COMMANDS = {
+const COMMANDS: Record<string, string> = {
   print: "build-print-page.js",
   "export-pdf": "export-pdf.js",
   validate: "validate-docs.js",
@@ -42,7 +43,7 @@ const COMMANDS = {
   "replace-wireframes": "replace-wireframes.cjs",
 };
 
-function runScript(scriptName, extraArgs = []) {
+function runScript(scriptName: string, extraArgs: string[] = []): number {
   const scriptPath = path.join(SCRIPTS_DIR, scriptName);
   const result = spawnSync(process.execPath, [scriptPath, ...extraArgs], {
     stdio: "inherit",
@@ -50,7 +51,7 @@ function runScript(scriptName, extraArgs = []) {
   return result.status ?? 1;
 }
 
-function runVitepressBuild() {
+function runVitepressBuild(): number {
   const result = spawnSync("vitepress", ["build", "docs"], {
     stdio: "inherit",
     shell: process.platform === "win32",
@@ -58,7 +59,7 @@ function runVitepressBuild() {
   return result.status ?? 1;
 }
 
-function usage(exitCode = 0) {
+function usage(exitCode = 0): never {
   console.log(`
 tf-doc-vault <command>
 
@@ -93,9 +94,9 @@ Commands:
   process.exit(exitCode);
 }
 
-function runBinScript(scriptFile, extraArgs = []) {
-  const binPath = path.join(PKG_ROOT, "bin", scriptFile);
-  const result = spawnSync(process.execPath, [binPath, ...extraArgs], {
+function runCliScript(scriptFile: string, extraArgs: string[] = []): number {
+  const scriptPath = path.join(CLI_DIR, scriptFile);
+  const result = spawnSync(process.execPath, [scriptPath, ...extraArgs], {
     stdio: "inherit",
   });
   return result.status ?? 1;
@@ -106,29 +107,30 @@ const [, , cmd, ...rest] = process.argv;
 if (!cmd || cmd === "--help" || cmd === "-h") usage(0);
 
 if (cmd === "create") {
-  process.exit(runBinScript("create-ana.mjs", rest));
+  process.exit(runCliScript("create-ana.js", rest));
 }
 
 if (cmd === "init-tech-docs") {
-  process.exit(runBinScript("init-tech-docs.mjs", rest));
+  process.exit(runCliScript("init-tech-docs.js", rest));
 }
 
 if (cmd === "import-confluence") {
-  process.exit(runBinScript("import-confluence.mjs", rest));
+  process.exit(runCliScript("import-confluence.js", rest));
 }
 
 if (cmd === "pdf") {
-  let code = runScript(COMMANDS.print);
+  let code = runScript("build-print-page.js");
   if (code !== 0) process.exit(code);
   code = runVitepressBuild();
   if (code !== 0) process.exit(code);
-  code = runScript(COMMANDS["export-pdf"]);
+  code = runScript("export-pdf.js");
   process.exit(code);
 }
 
-if (!(cmd in COMMANDS)) {
+const script = COMMANDS[cmd];
+if (!script) {
   console.error(`Unknown command: ${cmd}`);
   usage(1);
 }
 
-process.exit(runScript(COMMANDS[cmd], rest));
+process.exit(runScript(script, rest));

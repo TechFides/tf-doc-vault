@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 /**
  * init-tech-docs — scaffold a tech-docs/ directory inside an existing service
  * repo from the bundled template. Replaces __SERVICE_ID__, __PROJECT__,
@@ -12,12 +12,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseArgs, copyDir, replacePlaceholders } from "./utils.mjs";
+import { parseArgs, copyDir, replacePlaceholders } from "./utils.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const TEMPLATE_DIR = path.resolve(__dirname, "..", "template-tech-docs");
+// dist/cli → package root
+const TEMPLATE_DIR = path.resolve(__dirname, "..", "..", "template-tech-docs");
 
-function usage(exitCode = 0) {
+function usage(exitCode = 0): never {
   console.log(`
 init-tech-docs [options]
 
@@ -36,7 +37,7 @@ Example:
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const SCRIPTS_TO_ADD = {
+const SCRIPTS_TO_ADD: Record<string, string> = {
   "docs:dev": "vitepress dev tech-docs/docs",
   "docs:build": "vitepress build tech-docs/docs",
   "docs:validate": "tf-doc-vault validate --root=tech-docs/docs",
@@ -48,13 +49,15 @@ const SCRIPTS_TO_ADD = {
   "docs:import-confluence": "tf-doc-vault import-confluence",
 };
 
-function updatePackageJson(dir) {
+function updatePackageJson(dir: string): void {
   const pkgPath = path.join(dir, "package.json");
   if (!fs.existsSync(pkgPath)) {
     console.warn("  ⚠ package.json nenalezen, scripts nepřidány.");
     return;
   }
-  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as {
+    scripts?: Record<string, string>;
+  };
   const scripts = pkg.scripts ?? {};
   let added = 0;
   for (const [key, value] of Object.entries(SCRIPTS_TO_ADD)) {
@@ -77,7 +80,7 @@ const GITIGNORE_ENTRIES = [
   "tech-docs/docs/.vitepress/cache/",
 ];
 
-function updateGitignore(dir) {
+function updateGitignore(dir: string): void {
   const gitignorePath = path.join(dir, ".gitignore");
   const existing = fs.existsSync(gitignorePath)
     ? fs.readFileSync(gitignorePath, "utf-8")
@@ -106,14 +109,14 @@ if (!serviceId) {
 }
 
 const cwd = process.cwd();
-const project = flags.project ?? path.basename(cwd);
+const project = String(flags.project ?? path.basename(cwd));
 const repo = flags.repo;
 const outputDir = path.join(cwd, "tech-docs");
 
 console.log(`\nInitializuji tech-docs/`);
-console.log(`  service-id : ${serviceId}`);
+console.log(`  service-id : ${String(serviceId)}`);
 console.log(`  project    : ${project}`);
-if (repo) console.log(`  repo       : ${repo}`);
+if (repo) console.log(`  repo       : ${String(repo)}`);
 console.log();
 
 const { copied, skipped } = copyDir(TEMPLATE_DIR, outputDir, {
@@ -127,10 +130,10 @@ console.log(
 );
 
 replacePlaceholders(outputDir, {
-  __SERVICE_ID__: serviceId,
+  __SERVICE_ID__: String(serviceId),
   __PROJECT__: project,
   __DATE__: new Date().toISOString().slice(0, 10),
-  ...(repo ? { __REPO__: repo } : {}),
+  ...(repo ? { __REPO__: String(repo) } : {}),
 });
 
 updatePackageJson(cwd);
@@ -170,7 +173,7 @@ console.log(`
 
   8) Nastartuj aplikaci (pravděpodobně \`npm run dev\`):
       Zkontroluj, že na route /tech-docs/ beží dokumentace
-      
+
       Username: docs
       Password: uloženo v env TECH_DOCS_PASSWORD
 `);

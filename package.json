@@ -32,7 +32,6 @@
   "files": [
     "dist",
     "src",
-    "bin",
     "configs",
     "template",
     "template-tech-docs",
@@ -107,8 +106,8 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "tf-doc-vault": "./bin/tf-doc-vault.mjs",
-    "create-ana": "./bin/create-ana.mjs"
+    "tf-doc-vault": "./dist/cli/tf-doc-vault.js",
+    "create-ana": "./dist/cli/create-ana.js"
   },
   "scripts": {
     "build": "node scripts/build.mjs",
@@ -118,7 +117,7 @@
     "preview:docs": "vitepress preview playground/docs",
     "prepare": "node scripts/build.mjs && husky",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint --config configs/eslint.config.js src bin --ignore-pattern 'src/setup/**'",
+    "lint": "eslint --config configs/eslint.config.js src --ignore-pattern 'src/setup/**'",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "licence-check": "tf-licence-checker --config=licence-checker.config.cjs",

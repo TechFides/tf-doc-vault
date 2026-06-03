@@ -12,7 +12,7 @@ export default defineConfig({
       // `html` is the interactive local + artifact report.
       reporter: ["text", "html", "json-summary", "json"],
       reportOnFailure: true,
-      include: ["bin/**/*.mjs", "src/**/*.ts"],
+      include: ["src/**/*.ts"],
       exclude: ["src/setup/**", "src/**/*.d.ts"],
     },
   },

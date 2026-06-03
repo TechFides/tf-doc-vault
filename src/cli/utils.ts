@@ -1,13 +1,18 @@
-﻿/**
- * Shared utilities for bin/ scaffolding scripts.
+/**
+ * Shared utilities for the CLI scaffolding scripts (src/cli/*).
  */
 
 import fs from "node:fs";
 import path from "node:path";
 
-/** Argument parser shared by all bin scripts. */
-export function parseArgs(argv) {
-  const args = { positional: [], flags: {} };
+export interface ParsedArgs {
+  positional: string[];
+  flags: Record<string, string | boolean>;
+}
+
+/** Argument parser shared by all CLI scripts. */
+export function parseArgs(argv: string[]): ParsedArgs {
+  const args: ParsedArgs = { positional: [], flags: {} };
   for (const a of argv) {
     if (a.startsWith("--")) {
       const eq = a.indexOf("=");
@@ -24,7 +29,7 @@ export function parseArgs(argv) {
 }
 
 // Binary extensions to skip — everything else is treated as text.
-export const BINARY_EXTENSIONS = new Set([
+export const BINARY_EXTENSIONS = new Set<string>([
   ".png",
   ".jpg",
   ".jpeg",
@@ -43,19 +48,30 @@ export const BINARY_EXTENSIONS = new Set([
   ".tgz",
 ]);
 
+export interface CopyDirOptions {
+  /** Skip files that already exist at dest (default: false = overwrite). */
+  idempotent?: boolean;
+  /** Transform each entry name before writing (default: identity). */
+  renameEntry?: (name: string) => string;
+  /** Entry names to skip (only at the top level of each copyDir call). */
+  exclude?: string[];
+}
+
+export interface CopyDirResult {
+  copied: number;
+  skipped: number;
+}
+
 /**
  * Copy a directory tree.
- *
- * @param {string} src
- * @param {string} dest
- * @param {{ idempotent?: boolean, renameEntry?: (name: string) => string, exclude?: string[] }} [opts]
- *   idempotent  — skip files that already exist at dest (default: false = overwrite)
- *   renameEntry — transform each entry name before writing (default: identity)
- *   exclude     — entry names to skip (only at top level of each copyDir call)
- * @returns {{ copied: number, skipped: number }}
  */
-export function copyDir(src, dest, opts = {}) {
-  const { idempotent = false, renameEntry = (n) => n, exclude = [] } = opts;
+export function copyDir(
+  src: string,
+  dest: string,
+  opts: CopyDirOptions = {},
+): CopyDirResult {
+  const { idempotent = false, renameEntry = (n: string): string => n, exclude = [] } =
+    opts;
   let copied = 0;
   let skipped = 0;
   fs.mkdirSync(dest, { recursive: true });
@@ -86,13 +102,16 @@ export function copyDir(src, dest, opts = {}) {
  * `pnpm-workspace.yaml` inside a subdirectory of an existing workspace is
  * silently ignored.
  *
- * @param {string} startDir   Directory to begin the walk from. The walk begins
- *                            at `startDir`'s PARENT (the scaffold target's own
- *                            workspace file is never the answer).
- * @param {string} fileName   Bare filename to look for at each level.
- * @returns {string | null}   Absolute path of the first match, or null.
+ * @param startDir Directory to begin the walk from. The walk begins at
+ *                 `startDir`'s PARENT (the scaffold target's own workspace file
+ *                 is never the answer).
+ * @param fileName Bare filename to look for at each level.
+ * @returns Absolute path of the first match, or null.
  */
-export function findAncestorFile(startDir, fileName) {
+export function findAncestorFile(
+  startDir: string,
+  fileName: string,
+): string | null {
   let current = path.resolve(startDir, "..");
   while (true) {
     const candidate = path.join(current, fileName);
@@ -105,11 +124,11 @@ export function findAncestorFile(startDir, fileName) {
 
 /**
  * Replace all placeholder strings in text files under a directory tree.
- *
- * @param {string} dir
- * @param {Record<string, string>} replacements
  */
-export function replacePlaceholders(dir, replacements) {
+export function replacePlaceholders(
+  dir: string,
+  replacements: Record<string, string>,
+): void {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
@@ -117,7 +136,7 @@ export function replacePlaceholders(dir, replacements) {
       continue;
     }
     if (BINARY_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) continue;
-    let content;
+    let content: string;
     try {
       content = fs.readFileSync(full, "utf-8");
     } catch {

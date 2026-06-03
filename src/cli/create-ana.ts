@@ -17,13 +17,15 @@ import {
   copyDir,
   replacePlaceholders,
   findAncestorFile,
-} from "./utils.mjs";
+  type ParsedArgs,
+} from "./utils.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const TEMPLATE_DIR = path.resolve(__dirname, "..", "template");
-const PACKAGE_DIR = path.resolve(__dirname, "..");
+// dist/cli → package root
+const PACKAGE_DIR = path.resolve(__dirname, "..", "..");
+const TEMPLATE_DIR = path.join(PACKAGE_DIR, "template");
 
-function usage(exitCode = 0) {
+function usage(exitCode = 0): never {
   console.log(`
 create-ana <project-name> [options]
 
@@ -59,16 +61,22 @@ Examples:
   process.exit(exitCode);
 }
 
-function packageVersion() {
+function packageVersion(): string {
   try {
-    const pkgPath = path.resolve(__dirname, "..", "package.json");
-    return JSON.parse(fs.readFileSync(pkgPath, "utf-8")).version;
+    const pkgPath = path.join(PACKAGE_DIR, "package.json");
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as {
+      version?: string;
+    };
+    return pkg.version ?? "0.1.0";
   } catch {
     return "0.1.0";
   }
 }
 
-function resolveDependencyValue(flags, targetDir) {
+function resolveDependencyValue(
+  flags: ParsedArgs["flags"],
+  targetDir: string,
+): string {
   // --dev is a shortcut for --source=file. Explicit --source still wins.
   const source = flags.source ?? (flags.dev ? "file" : "git");
   const version = packageVersion();
@@ -80,12 +88,11 @@ function resolveDependencyValue(flags, targetDir) {
     case "git":
       return `${gitUrl}#${ref}`;
     case "file": {
-      const target =
-        flags["file-path"] ?? path.relative(targetDir, PACKAGE_DIR);
+      const target = flags["file-path"] ?? path.relative(targetDir, PACKAGE_DIR);
       return `file:${target}`;
     }
     default:
-      console.error(`✗ Invalid --source: ${source}. Use git | file.`);
+      console.error(`✗ Invalid --source: ${String(source)}. Use git | file.`);
       process.exit(1);
   }
 }
@@ -95,7 +102,7 @@ function resolveDependencyValue(flags, targetDir) {
  * `npm pack` always strips `.npmrc` and `.gitignore` from published packages,
  * so we ship them as `_npmrc` / `_gitignore` and rename on copy.
  */
-function consumerName(templateName) {
+function consumerName(templateName: string): string {
   if (templateName === "_npmrc") return ".npmrc";
   if (templateName === "_gitignore") return ".gitignore";
   if (templateName === "_pnpm-workspace.yaml") return "pnpm-workspace.yaml";
@@ -112,7 +119,7 @@ function consumerName(templateName) {
  * Read-only with respect to the parent workspace — never patches the
  * ancestor file. The customer applies the diff themselves.
  */
-function warnIfEmbeddedInWorkspace(targetDir) {
+function warnIfEmbeddedInWorkspace(targetDir: string): void {
   const ancestor = findAncestorFile(targetDir, "pnpm-workspace.yaml");
   if (!ancestor) return;
 
@@ -158,9 +165,9 @@ ${rule}
 
 const { positional, flags } = parseArgs(process.argv.slice(2));
 
-if (flags.help || flags.h || positional.length === 0) usage(0);
-
 const projectName = positional[0];
+if (flags.help || flags.h || !projectName) usage(0);
+
 if (!/^[a-z][a-z0-9_-]*$/.test(projectName)) {
   console.error(`✗ Invalid project name: ${projectName}`);
   console.error(
@@ -169,9 +176,10 @@ if (!/^[a-z][a-z0-9_-]*$/.test(projectName)) {
   process.exit(1);
 }
 
-const gcpProject =
-  flags["gcp-project"] ?? `tfsa-${projectName.replace(/_/g, "-")}`;
-const serverType = flags.server ?? "nginx";
+const gcpProject = String(
+  flags["gcp-project"] ?? `tfsa-${projectName.replace(/_/g, "-")}`,
+);
+const serverType = String(flags.server ?? "nginx");
 
 if (!["nginx", "nginx-auth"].includes(serverType)) {
   console.error(`✗ Invalid --server: ${serverType}. Use nginx | nginx-auth.`);
@@ -180,7 +188,7 @@ if (!["nginx", "nginx-auth"].includes(serverType)) {
 
 const targetDir = path.resolve(process.cwd(), projectName);
 const vitepressCommonDep = resolveDependencyValue(flags, targetDir);
-const skipGit = flags["no-git"];
+const skipGit = Boolean(flags["no-git"]);
 
 if (fs.existsSync(targetDir)) {
   console.error(`✗ Cíl už existuje: ${targetDir}`);

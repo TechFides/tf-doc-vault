@@ -256,7 +256,7 @@ knobs:
   TechFides mark, directly. There is no slot or prop. To replace it,
   re-implement `NotFound` in your own theme and substitute it via
   VitePress' `not-found` slot.
-- **`bin/create-ana.mjs` scaffolder** — generates a TechFides-branded
+- **`create-ana` scaffolder** (`src/cli/create-ana.ts`) — generates a TechFides-branded
   project by default. There is no `--brand-preset` flag yet. After
   scaffolding, edit `docs/.vitepress/config.ts` to add your `branding:
 {...}` block manually.

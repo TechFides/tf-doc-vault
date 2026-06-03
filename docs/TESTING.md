@@ -4,11 +4,11 @@ Two tiers. Add new tests in the tier whose boundary you crossed.
 
 ## Tier 1 — Vitest unit tests (`tests/unit/`)
 
-Pure-logic tests for code that does not shell out, spawn processes, or build a site. Layout mirrors `src/` and `bin/`:
+Pure-logic tests for code that does not shell out, spawn processes, or build a site. Layout mirrors `src/`:
 
 - `tests/unit/sidebar/` — sidebar/nav generation against in-memory file trees
 - `tests/unit/scripts/` — doc-tooling helpers (e.g. `normalize-docs`)
-- `tests/unit/bin/` — CLI helpers in `bin/utils.mjs`
+- `tests/unit/cli/` — CLI helpers in `src/cli/utils.ts`
 
 Run:
 
@@ -38,8 +38,8 @@ Config: `playwright.config.ts`. Global setup is in `tests/smoke/global-setup.ts`
 
 ## When to add which
 
-- Touching `src/sidebar`, `src/scripts`, or pure helpers in `bin/`: **unit test** in the matching `tests/unit/<area>/` folder.
-- Touching `bin/*.mjs` user-visible CLI behaviour, `src/setup/**`, or anything that affects how a scaffolded site boots: **smoke test** in `tests/smoke/`.
+- Touching `src/sidebar`, `src/scripts`, or pure helpers in `src/cli/`: **unit test** in the matching `tests/unit/<area>/` folder.
+- Touching `src/cli/*` user-visible CLI behaviour, `src/setup/**`, or anything that affects how a scaffolded site boots: **smoke test** in `tests/smoke/`.
 - Fixing a bug: add a regression test in the tier that would have caught it before fixing the code.
 
 ## External dependencies
