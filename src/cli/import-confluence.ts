@@ -155,7 +155,7 @@ async function downloadImages(
       downloaded.push(att);
     } catch (err) {
       console.warn(
-        `  ⚠ Nelze stáhnout přílohu "${att.title}": ${errorMessage(err)}`,
+        `  ⚠ Could not download attachment "${att.title}": ${errorMessage(err)}`,
       );
     }
   }
@@ -180,13 +180,11 @@ async function writePage(
       if (unknownTypes.length > 0) {
         const unique = [...new Set(unknownTypes)].join(", ");
         console.warn(
-          `  ⚠ "${node.page.title}": vynechány nepodporované ADF uzly: ${unique}`,
+          `  ⚠ "${node.page.title}": skipped unsupported ADF nodes: ${unique}`,
         );
       }
     } else {
-      console.warn(
-        `  ⚠ "${node.page.title}": prázdné nebo nevalidní ADF tělo.`,
-      );
+      console.warn(`  ⚠ "${node.page.title}": empty or invalid ADF body.`);
     }
 
     const downloaded = await downloadImages(node.page.id, ctx);
@@ -197,7 +195,7 @@ async function writePage(
     markdown = resolvedMd;
     if (unresolved.length > 0) {
       console.warn(
-        `  ⚠ "${node.page.title}": ${unresolved.length} obrázek(ů) bez attachmentu.`,
+        `  ⚠ "${node.page.title}": ${unresolved.length} image(s) with no matching attachment.`,
       );
     }
 
@@ -278,20 +276,20 @@ const email = process.env["CONFLUENCE_USER_EMAIL"];
 const token = process.env["CONFLUENCE_API_TOKEN"];
 
 if (!site) {
-  console.error("✗ --site je povinný argument.");
+  console.error("✗ --site is a required argument.");
   process.exit(1);
 }
 if (!rootPageId) {
-  console.error("✗ --root-page-id je povinný argument.");
+  console.error("✗ --root-page-id is a required argument.");
   process.exit(1);
 }
 if (!outputDir) {
-  console.error("✗ --output je povinný argument.");
+  console.error("✗ --output is a required argument.");
   process.exit(1);
 }
 if (!email || !token) {
   console.error(
-    "✗ CONFLUENCE_USER_EMAIL a CONFLUENCE_API_TOKEN musí být nastaveny.",
+    "✗ CONFLUENCE_USER_EMAIL and CONFLUENCE_API_TOKEN must be set.",
   );
   process.exit(1);
 }
@@ -301,7 +299,7 @@ const publicDir = path.resolve(docsRoot, "public", "images");
 const authHeader =
   "Basic " + Buffer.from(`${email}:${token}`).toString("base64");
 
-console.log(`\nImportuji z Confluence`);
+console.log(`\nImporting from Confluence`);
 console.log(`  site         : ${site}`);
 console.log(`  root-page-id : ${rootPageId}`);
 console.log(`  output       : ${outputDir}`);
@@ -312,7 +310,7 @@ const tree = await buildTree(site, rootPageId, authHeader, errors);
 
 if (!tree) {
   console.error(
-    `✗ Nepodařilo se načíst kořenovou stránku ${rootPageId}.${errors[0] ? ` (${errors[0].error})` : ""}`,
+    `✗ Failed to fetch the root page ${rootPageId}.${errors[0] ? ` (${errors[0].error})` : ""}`,
   );
   process.exit(1);
 }
@@ -331,13 +329,13 @@ await writePage(
   errors,
 );
 
-console.log(
-  `\n✓ Hotovo. Importováno ${countNodes(tree)} stránek do ${outputDir}`,
-);
+console.log(`\n✓ Done. Imported ${countNodes(tree)} page(s) into ${outputDir}`);
 if (errors.length > 0) {
-  console.warn(`⚠ ${errors.length} stránek se nepodařilo zpracovat:`);
+  console.warn(`⚠ ${errors.length} page(s) could not be processed:`);
   for (const e of errors) {
     console.warn(`  - ${e.title ?? e.pageId}: ${e.error}`);
   }
 }
-console.log(`  Zkontroluj soubory a nastav status: published kde je vhodné.`);
+console.log(
+  `  Review the files and set "status: published" where appropriate.`,
+);

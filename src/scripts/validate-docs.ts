@@ -84,20 +84,20 @@ function checkFrontmatter(files: string[]): Issue[] {
     const rel = slugOf(file);
 
     if (!fm) {
-      issues.push({ file: rel, message: "chybí frontmatter blok (---)" });
+      issues.push({ file: rel, message: "missing frontmatter block (---)" });
       continue;
     }
 
     for (const field of REQUIRED_FIELDS) {
       if (!fm[field]) {
-        issues.push({ file: rel, message: `chybí povinné pole: ${field}` });
+        issues.push({ file: rel, message: `missing required field: ${field}` });
       }
     }
 
     if (fm["status"] && !VALID_STATUSES.has(fm["status"])) {
       issues.push({
         file: rel,
-        message: `neplatný status: "${fm["status"]}" (povoleno: ${[...VALID_STATUSES].join(", ")})`,
+        message: `invalid status: "${fm["status"]}" (allowed: ${[...VALID_STATUSES].join(", ")})`,
       });
     }
   }
@@ -112,7 +112,7 @@ function checkDuplicateSlugs(files: string[]): Issue[] {
     if (seen.has(slug)) {
       issues.push({
         file: slug,
-        message: `duplicitní slug (konflikt s ${seen.get(slug)})`,
+        message: `duplicate slug (conflicts with ${seen.get(slug)})`,
       });
     } else {
       seen.set(slug, file);
@@ -173,7 +173,7 @@ function checkMissingImages(files: string[]): Issue[] {
         resolved = path.resolve(path.dirname(file), src);
       }
       if (!fs.existsSync(resolved)) {
-        issues.push({ file: slugOf(file), message: `chybí obrázek: ${src}` });
+        issues.push({ file: slugOf(file), message: `missing image: ${src}` });
       }
     }
   }
@@ -208,13 +208,13 @@ function checkMarkdownLint(files: string[]): Issue[] {
 }
 
 const files = allMdFiles(DOCS_ROOT);
-console.log(`Kontroluji ${files.length} souborů v ${root}/\n`);
+console.log(`Checking ${files.length} file(s) in ${root}/\n`);
 
 const checks: { name: string; issues: Issue[] }[] = [
   { name: "Frontmatter", issues: checkFrontmatter(files) },
-  { name: "Duplicitní slugy", issues: checkDuplicateSlugs(files) },
+  { name: "Duplicate slugs", issues: checkDuplicateSlugs(files) },
   { name: "Broken links", issues: checkBrokenLinks(files) },
-  { name: "Chybějící obrázky", issues: checkMissingImages(files) },
+  { name: "Missing images", issues: checkMissingImages(files) },
   { name: "Markdown lint", issues: checkMarkdownLint(files) },
 ];
 
@@ -225,7 +225,7 @@ for (const { name, issues } of checks) {
     console.log(`✓ ${name}`);
   } else {
     console.log(
-      `✗ ${name} (${issues.length} problém${issues.length > 1 ? "ů" : ""})`,
+      `✗ ${name} (${issues.length} issue${issues.length === 1 ? "" : "s"})`,
     );
     for (const issue of issues) {
       console.log(`  ${issue.file}: ${issue.message}`);
@@ -236,8 +236,8 @@ for (const { name, issues } of checks) {
 
 console.log();
 if (totalErrors > 0) {
-  console.error(`Nalezeno ${totalErrors} chyb.`);
+  console.error(`Found ${totalErrors} error(s).`);
   process.exit(1);
 } else {
-  console.log("Vše v pořádku.");
+  console.log("All good.");
 }

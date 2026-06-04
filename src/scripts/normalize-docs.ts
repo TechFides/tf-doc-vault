@@ -79,7 +79,7 @@ function fieldsEqual(a: [string, string][], b: [string, string][]): boolean {
 }
 
 const files = allMdFiles(DOCS_ROOT);
-console.log(`Normalizuji ${files.length} souborů v ${root}/\n`);
+console.log(`Normalizing ${files.length} file(s) in ${root}/\n`);
 
 let changed = 0;
 let skipped = 0;
@@ -90,7 +90,7 @@ for (const file of files) {
   const parsed = parse(content);
 
   if (!parsed) {
-    console.log(`  přeskočen (bez frontmatter): ${rel}`);
+    console.log(`  skipped (no frontmatter): ${rel}`);
     skipped++;
     continue;
   }
@@ -103,10 +103,10 @@ for (const file of files) {
   }
 
   fs.writeFileSync(file, serialize(normalized, parsed.body), "utf-8");
-  console.log(`  upraven: ${rel}`);
+  console.log(`  updated: ${rel}`);
   changed++;
 }
 
 console.log(
-  `\nHotovo. Upraveno: ${changed} souborů, přeskočeno: ${skipped} souborů.`,
+  `\nDone. Changed: ${changed} file(s), skipped: ${skipped} file(s).`,
 );

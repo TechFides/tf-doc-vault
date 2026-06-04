@@ -52,7 +52,7 @@ const SCRIPTS_TO_ADD: Record<string, string> = {
 function updatePackageJson(dir: string): void {
   const pkgPath = path.join(dir, "package.json");
   if (!fs.existsSync(pkgPath)) {
-    console.warn("  ⚠ package.json nenalezen, scripts nepřidány.");
+    console.warn("  ⚠ package.json not found; scripts not added.");
     return;
   }
   const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as {
@@ -67,12 +67,12 @@ function updatePackageJson(dir: string): void {
     }
   }
   if (added === 0) {
-    console.log("  package.json — scripts již existují, přeskočeno.");
+    console.log("  package.json — scripts already present; skipped.");
     return;
   }
   pkg.scripts = scripts;
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf-8");
-  console.log(`  package.json aktualizován (+${added} scripts)`);
+  console.log(`  package.json updated (+${added} scripts)`);
 }
 
 const GITIGNORE_ENTRIES = [
@@ -93,7 +93,7 @@ function updateGitignore(dir: string): void {
     existing + prefix + missing.join("\n") + "\n",
     "utf-8",
   );
-  console.log(`  .gitignore aktualizován (+${missing.length} záznamy)`);
+  console.log(`  .gitignore updated (+${missing.length} entries)`);
 }
 
 // ─── Main ────────────────────────────────────────────────────────────────────
@@ -104,7 +104,7 @@ if (flags.help || flags.h) usage(0);
 
 const serviceId = flags["service-id"];
 if (!serviceId) {
-  console.error("✗ --service-id je povinný argument.");
+  console.error("✗ --service-id is a required argument.");
   usage(1);
 }
 
@@ -113,7 +113,7 @@ const project = String(flags.project ?? path.basename(cwd));
 const repo = flags.repo;
 const outputDir = path.join(cwd, "tech-docs");
 
-console.log(`\nInitializuji tech-docs/`);
+console.log(`\nInitializing tech-docs/`);
 console.log(`  service-id : ${String(serviceId)}`);
 console.log(`  project    : ${project}`);
 if (repo) console.log(`  repo       : ${String(repo)}`);
@@ -125,9 +125,7 @@ const { copied, skipped } = copyDir(TEMPLATE_DIR, outputDir, {
   // import from @techfides/tf-doc-vault which is an ESM-only package.
   renameEntry: (name) => (name === "config.ts" ? "config.mts" : name),
 });
-console.log(
-  `  zkopírováno: ${copied} souborů, přeskočeno: ${skipped} (již existují)`,
-);
+console.log(`  copied: ${copied} file(s), skipped: ${skipped} (already exist)`);
 
 replacePlaceholders(outputDir, {
   __SERVICE_ID__: String(serviceId),
@@ -140,40 +138,40 @@ updatePackageJson(cwd);
 updateGitignore(cwd);
 
 console.log(`
-✓ Hotovo. Další kroky:
+✓ Done. Next steps:
 
-  1) Přidej VitePress závislosti do devDependencies v package.json:
+  1) Add the VitePress dependencies to devDependencies in package.json:
        "vitepress": "^1.6.4",
        "vitepress-plugin-mermaid": "^2.0.17",
        "mermaid": "^11.14.0"
 
-  2) Pokud používáš pnpm v11+, povol build skript esbuildu —
-     vytvoř (nebo doplň) pnpm-workspace.yaml v rootu služby:
+  2) If you use pnpm v11+, allow esbuild's build script —
+     create (or extend) pnpm-workspace.yaml at the service root:
        allowBuilds:
          esbuild: true
-     Bez tohoto pnpm 11 ukončí každé "pnpm <script>" s ERR_PNPM_IGNORED_BUILDS.
+     Without this, pnpm 11 aborts every "pnpm <script>" with ERR_PNPM_IGNORED_BUILDS.
 
-  3) Nainstaluj závislosti a spusť lokální preview:
+  3) Install dependencies and start a local preview:
        npm install && npm run docs:dev
 
-  4) Přidej docs-build stage do Dockerfile:
-       viz /tech-docs/docs-build-stage.md
+  4) Add a docs-build stage to your Dockerfile:
+       see /tech-docs/docs-build-stage.md
 
-  5) Zavolej setupTechDocs() v main.ts (NestJS):
+  5) Call setupTechDocs() in main.ts (NestJS):
        import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
        await setupTechDocs("tech-docs", app, {
          auth: { username: "docs", password: process.env.TECH_DOCS_PASSWORD },
          basePath: '/tech-docs/',
        });
 
-  6) Nastav TECH_DOCS_PASSWORD env proměnnou (dev/staging pouze, ne prod).
+  6) Set the TECH_DOCS_PASSWORD env variable (dev/staging only, not prod).
 
-  7) Zbuildi lokálně dokumentaci:
+  7) Build the documentation locally:
       npm run docs:build
 
-  8) Nastartuj aplikaci (pravděpodobně \`npm run dev\`):
-      Zkontroluj, že na route /tech-docs/ beží dokumentace
+  8) Start the application (likely \`npm run dev\`):
+      Check that the documentation is served at the /tech-docs/ route
 
       Username: docs
-      Password: uloženo v env TECH_DOCS_PASSWORD
+      Password: stored in the TECH_DOCS_PASSWORD env variable
 `);

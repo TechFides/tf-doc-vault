@@ -228,7 +228,7 @@ export async function fetchAttachments(
     return await fetchAllPages<Attachment>(site, url, authHeader);
   } catch (err) {
     console.warn(
-      `  ⚠ Nelze načíst seznam attachmentů pro page ${pageId}: ${errorMessage(err)}`,
+      `  ⚠ Could not fetch attachment list for page ${pageId}: ${errorMessage(err)}`,
     );
     return [];
   }

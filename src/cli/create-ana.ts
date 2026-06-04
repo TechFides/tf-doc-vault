@@ -192,17 +192,17 @@ const vitepressCommonDep = resolveDependencyValue(flags, targetDir);
 const skipGit = Boolean(flags["no-git"]);
 
 if (fs.existsSync(targetDir)) {
-  console.error(`✗ Cíl už existuje: ${targetDir}`);
+  console.error(`✗ Target already exists: ${targetDir}`);
   process.exit(1);
 }
 
-console.log(`Vytvářím nové analýzové repo:`);
-console.log(`  cíl       : ${targetDir}`);
-console.log(`  projekt   : ${projectName}`);
+console.log(`Creating a new analysis docs repo:`);
+console.log(`  target    : ${targetDir}`);
+console.log(`  project   : ${projectName}`);
 console.log(`  GCP       : ${gcpProject}`);
 console.log(`  server    : ${serverType}`);
 console.log(`  common    : ${vitepressCommonDep}`);
-console.log(`  git       : ${skipGit ? "ne (embedded)" : "ano"}`);
+console.log(`  git       : ${skipGit ? "no (embedded)" : "yes"}`);
 
 copyDir(TEMPLATE_DIR, targetDir, { renameEntry: consumerName });
 
@@ -213,8 +213,8 @@ replacePlaceholders(targetDir, {
   __SERVER_TYPE__: serverType,
   __VITEPRESS_COMMON_DEP__: vitepressCommonDep,
   __DATE__: new Date().toISOString().slice(0, 10),
-  // Basic auth defaultně prázdné; uživatel je vyplní v .gitlab-ci.yml
-  // až podle reálné potřeby (jen pro nginx-auth runtime).
+  // Basic auth defaults to empty; the user fills it in .gitlab-ci.yml
+  // later as actually needed (only for the nginx-auth runtime).
   __BASIC_AUTH_USER__: "",
   __BASIC_AUTH_PASS__: "",
 });
@@ -234,37 +234,37 @@ if (!skipGit) {
 const isDevSource = vitepressCommonDep.startsWith("file:");
 const devBootstrap = isDevSource
   ? `
-Pokud je @techfides/tf-doc-vault ještě nezbuildovaný, spusť jednou:
+If @techfides/tf-doc-vault is not built yet, run once:
   (cd ${path.relative(targetDir, PACKAGE_DIR) || "."} && pnpm install)
-  # → nainstaluje deps a postaví dist/ (přes "prepare" hook)
+  # → installs deps and builds dist/ (via the "prepare" hook)
 `
   : "";
 
 if (skipGit) {
   console.log(`
-✓ Hotovo (embedded — bez vlastního git repozitáře).
+✓ Done (embedded — no standalone git repository).
 ${devBootstrap}
-Další kroky:
+Next steps:
   cd ${projectName}
   pnpm install
   pnpm docs:dev          # http://localhost:5173
 
-Dokumentace žije uvnitř nadřazeného repozitáře.
-Commitni ji spolu s ostatními změnami:
+The documentation lives inside the parent repository.
+Commit it together with your other changes:
   git add ${projectName}/
   git commit -m "docs: add ${projectName} analytical documentation"
   git push
 
-Deploy (Cloud Run — vlastní pipeline nezávisle na službě):
+Deploy (Cloud Run — its own pipeline, independent of the service):
   cd ${projectName}/infra
   terraform init && terraform apply
-  # nastavit CI/CD variables (GCP_SA_KEY, …) dle outputů terraformu
+  # set CI/CD variables (GCP_SA_KEY, …) from the terraform outputs
 `);
 } else {
   console.log(`
-✓ Hotovo.
+✓ Done.
 ${devBootstrap}
-Další kroky:
+Next steps:
   cd ${projectName}
   pnpm install
   pnpm docs:dev          # http://localhost:5173
@@ -272,7 +272,7 @@ Další kroky:
 Deploy:
   cd infra
   terraform init && terraform apply
-  # nastavit CI/CD variables (GCP_SA_KEY, …) dle outputů terraformu
+  # set CI/CD variables (GCP_SA_KEY, …) from the terraform outputs
   git remote add origin git@github.com:techfides/tf-analysis/${projectName}.git
   git push -u origin master
 `);
