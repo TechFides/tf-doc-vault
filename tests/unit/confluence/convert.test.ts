@@ -66,7 +66,7 @@ describe("panels → VitePress containers", () => {
 describe("smart links (no raw JSON fragments)", () => {
   test("blockCard → markdown link", () => {
     const url =
-      "https://techfides.atlassian.net/wiki/spaces/TP/pages/4002349136";
+      "https://example.atlassian.net/wiki/spaces/DOC/pages/1234567890";
     const md = conv({ type: "blockCard", attrs: { url } });
     expect(md).toContain(`(${url})`);
     expect(md).not.toContain("adf:unknown");
@@ -345,10 +345,13 @@ describe("unknown nodes and safety", () => {
   });
 });
 
-describe("ground-truth page (Jak na open telemetry / jaeger)", () => {
+describe("representative Confluence page (end-to-end fixture)", () => {
+  // A single realistic page exercising the full node mix: prose, a list with a
+  // link, an image, headings, code blocks (with and without a language), a
+  // smart link, and a table with inline emoji.
   const adf = JSON.parse(
     fs.readFileSync(
-      path.join(__dirname, "fixtures", "jaeger.adf.json"),
+      path.join(__dirname, "fixtures", "example-page.adf.json"),
       "utf-8",
     ),
   );
@@ -363,16 +366,16 @@ describe("ground-truth page (Jak na open telemetry / jaeger)", () => {
     expect(markdown).toContain("**Service**");
   });
   test("image is a resolvable placeholder", () => {
-    expect(markdown).toContain("![image-20240218-222048.png](adf:media:");
+    expect(markdown).toContain("![architecture-diagram.png](adf:media:");
   });
   test("the 'see' blockCard became a real link, not a fragment", () => {
-    expect(markdown).toContain("/pages/4002349136)");
+    expect(markdown).toContain("/pages/1234567890)");
     expect(markdown).not.toContain("adf:unknown");
     expect(markdown).not.toContain('"type": "blockCard"');
   });
   test("both code blocks survive (with and without language)", () => {
     expect(markdown).toContain("```typescript");
-    expect(markdown).toContain("npm i nestjs-otel");
+    expect(markdown).toContain("npm install example-otel");
   });
   test("no round-trip comments leak", () => {
     expect(markdown).not.toContain("<!-- adf:");

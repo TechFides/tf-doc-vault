@@ -6,7 +6,7 @@
       "type": "paragraph",
       "content": [
         {
-          "text": "Ve všech backendovych servisach je implementovan open telementry.",
+          "text": "All backend services ship with built-in observability.",
           "type": "text"
         }
       ]
@@ -20,10 +20,7 @@
             {
               "type": "paragraph",
               "content": [
-                {
-                  "text": "Na localhostu je možné sledovat průběh requestů na ",
-                  "type": "text"
-                },
+                { "text": "View traces locally at ", "type": "text" },
                 {
                   "text": "http://localhost:16686/",
                   "type": "text",
@@ -45,7 +42,7 @@
               "type": "paragraph",
               "content": [
                 {
-                  "text": "na staging a prod je treba se připojit do k8s clusteru a udelat si proxy na jaeger service",
+                  "text": "On staging and production, connect to the cluster and port-forward to the tracing service.",
                   "type": "text"
                 }
               ]
@@ -62,9 +59,9 @@
           "type": "media",
           "attrs": {
             "width": 2542,
-            "alt": "image-20240218-222048.png",
-            "id": "f6e357c1-0ccb-45b6-b3f2-b329eafc9c31",
-            "collection": "contentId-3446374495",
+            "alt": "architecture-diagram.png",
+            "id": "11111111-2222-3333-4444-555555555555",
+            "collection": "contentId-100",
             "type": "file",
             "height": 1251
           }
@@ -75,7 +72,7 @@
     {
       "type": "heading",
       "attrs": { "level": 1 },
-      "content": [{ "text": "Open telemetry v nest.js", "type": "text" }]
+      "content": [{ "text": "Setup", "type": "text" }]
     },
     {
       "type": "heading",
@@ -86,7 +83,7 @@
       "type": "codeBlock",
       "content": [
         {
-          "text": "npm i nestjs-otel\nnpm i @techfides/nestjs-common-opentelemetry",
+          "text": "npm install example-otel\nnpm install example-tracing",
           "type": "text"
         }
       ]
@@ -98,7 +95,7 @@
     {
       "type": "blockCard",
       "attrs": {
-        "url": "https://techfides.atlassian.net/wiki/spaces/TP/pages/4002349136"
+        "url": "https://example.atlassian.net/wiki/spaces/DOC/pages/1234567890"
       }
     },
     {
@@ -108,33 +105,14 @@
     {
       "type": "heading",
       "attrs": { "level": 2 },
-      "content": [{ "text": "main.ts", "type": "text" }]
+      "content": [{ "text": "Bootstrap", "type": "text" }]
     },
     {
       "type": "codeBlock",
       "attrs": { "language": "typescript" },
       "content": [
         {
-          "text": "import { createOtelSDK } from '@techfides/nestjs-common-opentelemetry';\n\nconst otelSDK = createOtelSDK(\n  'tf-ios',\n  'http://jaeger-otpl.jaeger.svc.cluster.local:4318/v1/traces',\n);",
-          "type": "text"
-        }
-      ]
-    },
-    {
-      "type": "heading",
-      "attrs": { "level": 2 },
-      "content": [{ "text": "app.module.ts", "type": "text" }]
-    },
-    {
-      "type": "paragraph",
-      "content": [{ "text": "importovat module", "type": "text" }]
-    },
-    {
-      "type": "codeBlock",
-      "attrs": { "language": "typescript" },
-      "content": [
-        {
-          "text": "OpenTelemetryModule.forRoot({\n  metrics: {\n    hostMetrics: true, // Includes Host Metrics\n    apiMetrics: {\n      enable: true, // Includes api metrics\n      ignoreRoutes: ['health/'],\n      ignoreUndefinedRoutes: false,\n    },\n  },\n}),",
+          "text": "import { createTracer } from 'example-otel';\n\nconst tracer = createTracer(\n  'example-service',\n  'http://localhost:4318/v1/traces',\n);",
           "type": "text"
         }
       ]
@@ -142,16 +120,14 @@
     {
       "type": "heading",
       "attrs": { "level": 1 },
-      "content": [
-        { "text": "Aktuální stav implementace trackování", "type": "text" }
-      ]
+      "content": [{ "text": "Rollout status", "type": "text" }]
     },
     {
       "type": "table",
       "attrs": {
         "layout": "default",
         "width": 760,
-        "localId": "b70ea752-0551-41bb-a38f-9664de8ce077"
+        "localId": "11111111-aaaa-bbbb-cccc-222222222222"
       },
       "content": [
         {
@@ -181,7 +157,7 @@
                   "type": "paragraph",
                   "content": [
                     {
-                      "text": "Open Telemetry",
+                      "text": "Tracing",
                       "type": "text",
                       "marks": [{ "type": "strong" }]
                     }
@@ -202,7 +178,7 @@
                   "type": "paragraph",
                   "content": [
                     {
-                      "text": "TF-AWG",
+                      "text": "service-a",
                       "type": "text",
                       "marks": [{ "type": "strong" }]
                     }
@@ -224,8 +200,7 @@
                         "text": ":check_mark:",
                         "shortName": ":check_mark:"
                       }
-                    },
-                    { "text": "  ", "type": "text" }
+                    }
                   ]
                 }
               ]
@@ -243,7 +218,7 @@
                   "type": "paragraph",
                   "content": [
                     {
-                      "text": "TF-IOS",
+                      "text": "service-b",
                       "type": "text",
                       "marks": [{ "type": "strong" }]
                     }
