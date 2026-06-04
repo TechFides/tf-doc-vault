@@ -60,7 +60,7 @@ Single TypeScript package published to npm as `@techfides/tf-doc-vault`. The roo
 
 ## Testing
 
-See [`docs/TESTING.md`](docs/TESTING.md). In short: Vitest for pure logic in `src/scripts` and `src/sidebar`; Playwright smoke tests for CLI subcommands and the Express/Nest mount; a bug fix needs a regression test in the matching tier.
+See [`docs/TESTING.md`](docs/TESTING.md). In short: Vitest for pure logic in `src/scripts` and `src/sidebar`; Playwright smoke tests for CLI subcommands and the Express/Nest mount; a bug fix needs a regression test in the matching tier. When you change the Confluence importer (`src/confluence/**` or `src/cli/import-confluence.ts`), also follow **Confluence importer verification** in `docs/TESTING.md` before reporting done (the routine check is fixture-based and needs no Confluence access; a live page + credentials are optional).
 
 ## Domain glossary
 
