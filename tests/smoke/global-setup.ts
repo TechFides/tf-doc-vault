@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { log } from "./test-logger";
+import { logger } from "../../src/cli/logger";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,16 +31,16 @@ interface RunOptions {
  * something is actually broken.
  */
 function run(cmd: string, args: string[], cwd: string, opts: RunOptions): void {
-  log.info(opts.label);
+  logger.step(opts.label);
   const r = spawnSync(cmd, args, {
     cwd,
     encoding: "utf-8",
     env: { ...process.env, ...(opts.env ?? {}) },
   });
   if (r.status !== 0) {
-    log.fail(`${opts.label} failed (exit ${r.status})`);
-    log.dump("stdout", r.stdout ?? "");
-    log.dump("stderr", r.stderr ?? "");
+    logger.error(`${opts.label} failed (exit ${r.status})`);
+    if ((r.stdout ?? "").trim()) console.error(`--- stdout ---\n${r.stdout}`);
+    if ((r.stderr ?? "").trim()) console.error(`--- stderr ---\n${r.stderr}`);
     throw new Error(
       `Command failed (exit ${r.status}): ${cmd} ${args.join(" ")} (cwd=${cwd})`,
     );
@@ -73,7 +73,7 @@ function packRepo(): string {
 }
 
 function scaffoldTechDocs(tgz: string): string {
-  log.step("Building tech-docs sandbox");
+  logger.heading("Building tech-docs sandbox");
   const dir = path.join(SMOKE_ROOT, "tech-docs");
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(dir, { recursive: true });
@@ -111,12 +111,12 @@ function scaffoldTechDocs(tgz: string): string {
     label: "vitepress build docs",
   });
 
-  log.ok(`tech-docs sandbox ready at ${dir}`);
+  logger.success(`tech-docs sandbox ready at ${dir}`);
   return dir;
 }
 
 function scaffoldAna(tgz: string): string {
-  log.step("Building ana sandbox");
+  logger.heading("Building ana sandbox");
   const parent = path.join(SMOKE_ROOT, "ana-parent");
   fs.rmSync(parent, { recursive: true, force: true });
   fs.mkdirSync(parent, { recursive: true });
@@ -144,17 +144,17 @@ function scaffoldAna(tgz: string): string {
     env: { HUSKY: "0" },
   });
 
-  log.info("verifying hoist patterns (mermaid, dayjs, debug, cytoscape)");
+  logger.step("verifying hoist patterns (mermaid, dayjs, debug, cytoscape)");
   for (const dep of ["mermaid", "dayjs", "debug", "cytoscape"]) {
     const depPath = path.join(dir, "node_modules", dep);
     if (!fs.existsSync(depPath)) {
-      log.fail(`hoist regression: ${dep} missing from node_modules root`);
+      logger.error(`hoist regression: ${dep} missing from node_modules root`);
       throw new Error(
         `Hoist regression: ${dep} not found at ${depPath}. Check publicHoistPattern in template/_pnpm-workspace.yaml.`,
       );
     }
   }
-  log.ok("hoist patterns in place");
+  logger.success("hoist patterns in place");
 
   // Read-only verifications. We deliberately skip `pnpm fix` here because it
   // invokes the (separately-tracked) normalize bug; once that's fixed, fix can
@@ -163,12 +163,12 @@ function scaffoldAna(tgz: string): string {
   run("pnpm", ["docs:build"], dir, { label: "pnpm docs:build" });
   run("pnpm", ["sync"], dir, { label: "pnpm sync" });
 
-  log.ok(`ana sandbox ready at ${dir}`);
+  logger.success(`ana sandbox ready at ${dir}`);
   return dir;
 }
 
 function scaffoldProbes(tgz: string, techDocsDistDir: string): string {
-  log.step("Building setup-helper probes");
+  logger.heading("Building setup-helper probes");
   const probeRoot = path.join(SMOKE_ROOT, "probes");
   fs.rmSync(probeRoot, { recursive: true, force: true });
 
@@ -237,7 +237,7 @@ function scaffoldProbes(tgz: string, techDocsDistDir: string): string {
     );
   }
 
-  log.ok(`probe sandboxes ready at ${probeRoot}`);
+  logger.success(`probe sandboxes ready at ${probeRoot}`);
   return probeRoot;
 }
 
@@ -366,12 +366,12 @@ function substitutePlaceholders(
 // -------------- entry point ---------------------------------------------
 
 async function globalSetup(): Promise<void> {
-  log.step(`Smoke sandbox: ${SMOKE_ROOT}`);
+  logger.heading(`Smoke sandbox: ${SMOKE_ROOT}`);
   killOrphanProbes();
   fs.mkdirSync(SMOKE_ROOT, { recursive: true });
 
   const tgz = packRepo();
-  log.ok(`packed ${path.basename(tgz)}`);
+  logger.success(`packed ${path.basename(tgz)}`);
 
   const techDocsDir = scaffoldTechDocs(tgz);
   const anaDir = scaffoldAna(tgz);
@@ -385,7 +385,7 @@ async function globalSetup(): Promise<void> {
     JSON.stringify(sandboxes, null, 2),
   );
 
-  log.step("Sandboxes ready — handing off to spec files");
+  logger.heading("Sandboxes ready — handing off to spec files");
 }
 
 export default globalSetup;

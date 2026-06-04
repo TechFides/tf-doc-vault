@@ -226,10 +226,9 @@ export async function fetchAttachments(
   try {
     const url = `https://${site}/wiki/rest/api/content/${pageId}/child/attachment?limit=100&expand=extensions,metadata`;
     return await fetchAllPages<Attachment>(site, url, authHeader);
-  } catch (err) {
-    console.warn(
-      `  ⚠ Could not fetch attachment list for page ${pageId}: ${errorMessage(err)}`,
-    );
+  } catch {
+    // Attachment list unavailable (e.g. permissions): the page still imports;
+    // its images simply resolve to "unresolved" and are reported by the caller.
     return [];
   }
 }

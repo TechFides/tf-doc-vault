@@ -4,7 +4,7 @@
  * VitePress-compatible Markdown files in the output directory.
  *
  * Usage:
- *   import-confluence --site=<host> --root-page-id=<id> --output=<dir> [--space=<KEY>]
+ *   import-confluence --site=<host> --root-page-id=<id> --output=<dir> [--space=<KEY>] [--verbose]
  *
  * Env vars:
  *   CONFLUENCE_USER_EMAIL   Atlassian account e-mail
@@ -19,6 +19,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parseArgs } from "./utils.js";
+import { logger } from "./logger.js";
 import { convertAdf } from "../confluence/convert.js";
 import {
   buildAttachmentIndex,
@@ -45,7 +46,19 @@ interface WriteContext {
   docsRoot: string;
 }
 
+type WarnKind = "unsupported" | "download" | "unresolved" | "empty";
+
+interface PageWarning {
+  kind: WarnKind;
+  page: string;
+  detail: string;
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function plural(n: number): string {
+  return n === 1 ? "" : "s";
+}
 
 /** Quote a string for YAML only when needed; uses single quotes to avoid escaping. */
 function yamlString(value: string): string {
@@ -96,6 +109,7 @@ function childBasePath(
     : parentPath;
 }
 
+/** Map every page id → on-disk path, mirroring the index.md / leaf.md layout. */
 function buildPathMap(
   node: TreeNode,
   parentPath: string,
@@ -107,8 +121,11 @@ function buildPathMap(
   for (const child of node.children) buildPathMap(child, childBase, false, map);
 }
 
-function countNodes(node: TreeNode): number {
-  return 1 + node.children.reduce((s, c) => s + countNodes(c), 0);
+/** Pre-order flatten so we can iterate pages with a progress counter. */
+function flattenTree(node: TreeNode, acc: TreeNode[] = []): TreeNode[] {
+  acc.push(node);
+  for (const child of node.children) flattenTree(child, acc);
+  return acc;
 }
 
 /** Rewrite Confluence page links to relative VitePress paths (e.g. /v1/page). */
@@ -130,15 +147,20 @@ function rewriteConfluenceLinks(
 }
 
 /**
- * Download all image attachments of a page into publicDir and return the
- * attachments that landed on disk (used to resolve media placeholders).
+ * Download all image attachments of a page into publicDir. Returns the
+ * attachments that landed on disk plus any per-file download failures (so the
+ * caller can fold them into the run summary instead of logging inline).
  */
 async function downloadImages(
   pageId: string,
   ctx: WriteContext,
-): Promise<Attachment[]> {
+): Promise<{
+  downloaded: Attachment[];
+  failures: { file: string; error: string }[];
+}> {
   const attachments = await fetchAttachments(ctx.site, pageId, ctx.authHeader);
   const downloaded: Attachment[] = [];
+  const failures: { file: string; error: string }[] = [];
   for (const att of attachments) {
     if (!(att.metadata?.mediaType ?? "").startsWith("image/")) continue;
     if (!att.id) continue;
@@ -154,23 +176,21 @@ async function downloadImages(
       }
       downloaded.push(att);
     } catch (err) {
-      console.warn(
-        `  ⚠ Could not download attachment "${att.title}": ${errorMessage(err)}`,
-      );
+      failures.push({ file: att.title, error: errorMessage(err) });
     }
   }
-  return downloaded;
+  return { downloaded, failures };
 }
 
 // ─── Writer ───────────────────────────────────────────────────────────────────
 
 async function writePage(
   node: TreeNode,
-  parentPath: string,
-  isRoot: boolean,
+  filePath: string,
   ctx: WriteContext,
+  warnings: PageWarning[],
   errors: ImportError[],
-): Promise<void> {
+): Promise<{ written: boolean; images: number }> {
   try {
     const adfRoot = parseAdf(node.page.body?.atlas_doc_format?.value ?? "");
     let markdown = "";
@@ -178,30 +198,40 @@ async function writePage(
       const { markdown: md, unknownTypes } = convertAdf(adfRoot);
       markdown = md;
       if (unknownTypes.length > 0) {
-        const unique = [...new Set(unknownTypes)].join(", ");
-        console.warn(
-          `  ⚠ "${node.page.title}": skipped unsupported ADF nodes: ${unique}`,
-        );
+        warnings.push({
+          kind: "unsupported",
+          page: node.cleanTitle,
+          detail: [...new Set(unknownTypes)].join(", "),
+        });
       }
     } else {
-      console.warn(`  ⚠ "${node.page.title}": empty or invalid ADF body.`);
+      warnings.push({ kind: "empty", page: node.cleanTitle, detail: "" });
     }
 
-    const downloaded = await downloadImages(node.page.id, ctx);
+    const { downloaded, failures } = await downloadImages(node.page.id, ctx);
+    for (const f of failures) {
+      warnings.push({
+        kind: "download",
+        page: node.cleanTitle,
+        detail: `${f.file} (${f.error})`,
+      });
+    }
+
     const { markdown: resolvedMd, unresolved } = resolveMediaInMarkdown(
       markdown,
       buildAttachmentIndex(downloaded),
     );
     markdown = resolvedMd;
     if (unresolved.length > 0) {
-      console.warn(
-        `  ⚠ "${node.page.title}": ${unresolved.length} image(s) with no matching attachment.`,
-      );
+      warnings.push({
+        kind: "unresolved",
+        page: node.cleanTitle,
+        detail: String(unresolved.length),
+      });
     }
 
     markdown = rewriteConfluenceLinks(markdown, ctx.pagePathMap, ctx.docsRoot);
 
-    const filePath = pageFilePath(node, parentPath, isRoot);
     const updatedAt =
       node.page.version?.createdAt?.slice(0, 10) ??
       new Date().toISOString().slice(0, 10);
@@ -223,19 +253,98 @@ ${markdown}
 `,
       "utf-8",
     );
+    return { written: true, images: downloaded.length };
   } catch (err) {
     errors.push({
       pageId: node.page.id,
       title: node.page.title,
       error: errorMessage(err),
     });
+    return { written: false, images: 0 };
+  }
+}
+
+// ─── Summary ────────────────────────────────────────────────────────────────
+
+const MAX_LISTED = 10;
+
+function listPages(pages: string[], verbose: boolean): void {
+  if (verbose) {
+    for (const p of pages) logger.detail(`    • ${p}`);
+    return;
+  }
+  const shown = pages.slice(0, MAX_LISTED);
+  const extra = pages.length - shown.length;
+  logger.detail(
+    `    ${shown.join(", ")}${extra > 0 ? `, +${extra} more` : ""}`,
+  );
+}
+
+function reportWarnings(warnings: PageWarning[], verbose: boolean): void {
+  if (warnings.length === 0) return;
+  const of = (kind: WarnKind): PageWarning[] =>
+    warnings.filter((w) => w.kind === kind);
+
+  logger.blank();
+  logger.warn(`${warnings.length} warning${plural(warnings.length)}:`);
+
+  const unsupported = of("unsupported");
+  if (unsupported.length > 0) {
+    const types = [...new Set(unsupported.flatMap((w) => w.detail.split(", ")))]
+      .sort()
+      .join(", ");
+    logger.detail(
+      `${unsupported.length} page${plural(unsupported.length)} with unsupported nodes (${types})`,
+    );
+    listPages(
+      unsupported.map((w) => w.page),
+      verbose,
+    );
   }
 
-  // Recurse outside the try/catch: a failed page must not skip its children.
-  const childBase = childBasePath(node, parentPath, isRoot);
-  for (const child of node.children) {
-    await writePage(child, childBase, false, ctx, errors);
+  const unresolved = of("unresolved");
+  if (unresolved.length > 0) {
+    logger.detail(
+      `${unresolved.length} page${plural(unresolved.length)} with unresolved images`,
+    );
+    listPages(
+      unresolved.map((w) => w.page),
+      verbose,
+    );
   }
+
+  const empty = of("empty");
+  if (empty.length > 0) {
+    logger.detail(
+      `${empty.length} page${plural(empty.length)} with an empty or invalid body`,
+    );
+    listPages(
+      empty.map((w) => w.page),
+      verbose,
+    );
+  }
+
+  const download = of("download");
+  if (download.length > 0) {
+    logger.detail(
+      `${download.length} attachment download failure${plural(download.length)}`,
+    );
+    if (verbose) {
+      for (const w of download) logger.detail(`    • ${w.page} — ${w.detail}`);
+    }
+  }
+
+  if (!verbose) logger.detail("Run with --verbose to list affected pages.");
+}
+
+function reportErrors(errors: ImportError[]): void {
+  if (errors.length === 0) return;
+  logger.blank();
+  logger.error(
+    `${errors.length} page${plural(errors.length)} failed to import:`,
+  );
+  for (const e of errors)
+    logger.detail(`  • ${e.title ?? e.pageId}: ${e.error}`);
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -251,6 +360,7 @@ Options:
   --root-page-id=<id>     Confluence root page ID   (required)
   --output=<dir>          output directory           (required)
   --space=<KEY>           Confluence space key       (informational only)
+  --verbose               list every page affected by a warning
 
 Env vars:
   CONFLUENCE_USER_EMAIL
@@ -271,26 +381,25 @@ const outputDir =
   typeof outputFlag === "string"
     ? path.resolve(process.cwd(), outputFlag)
     : null;
+const verbose = Boolean(flags.verbose);
 
 const email = process.env["CONFLUENCE_USER_EMAIL"];
 const token = process.env["CONFLUENCE_API_TOKEN"];
 
 if (!site) {
-  console.error("✗ --site is a required argument.");
+  logger.error("--site is a required argument.");
   process.exit(1);
 }
 if (!rootPageId) {
-  console.error("✗ --root-page-id is a required argument.");
+  logger.error("--root-page-id is a required argument.");
   process.exit(1);
 }
 if (!outputDir) {
-  console.error("✗ --output is a required argument.");
+  logger.error("--output is a required argument.");
   process.exit(1);
 }
 if (!email || !token) {
-  console.error(
-    "✗ CONFLUENCE_USER_EMAIL and CONFLUENCE_API_TOKEN must be set.",
-  );
+  logger.error("CONFLUENCE_USER_EMAIL and CONFLUENCE_API_TOKEN must be set.");
   process.exit(1);
 }
 
@@ -299,43 +408,63 @@ const publicDir = path.resolve(docsRoot, "public", "images");
 const authHeader =
   "Basic " + Buffer.from(`${email}:${token}`).toString("base64");
 
-console.log(`\nImporting from Confluence`);
-console.log(`  site         : ${site}`);
-console.log(`  root-page-id : ${rootPageId}`);
-console.log(`  output       : ${outputDir}`);
-console.log();
+logger.heading("Importing from Confluence");
+logger.field("site", site);
+logger.field("root", rootPageId);
+logger.field("output", outputDir);
 
 const errors: ImportError[] = [];
+const warnings: PageWarning[] = [];
+
+logger.blank();
+logger.step("Fetching page tree…");
 const tree = await buildTree(site, rootPageId, authHeader, errors);
 
 if (!tree) {
-  console.error(
-    `✗ Failed to fetch the root page ${rootPageId}.${errors[0] ? ` (${errors[0].error})` : ""}`,
+  logger.error(
+    `Failed to fetch the root page ${rootPageId}.${errors[0] ? ` (${errors[0].error})` : ""}`,
   );
   process.exit(1);
 }
 
+const pages = flattenTree(tree);
+logger.success(`Fetched ${pages.length} page${plural(pages.length)}`);
+
 const pagePathMap = new Map<string, string>();
 buildPathMap(tree, outputDir, true, pagePathMap);
-
 fs.mkdirSync(outputDir, { recursive: true });
 fs.mkdirSync(publicDir, { recursive: true });
 
-await writePage(
-  tree,
-  outputDir,
-  true,
-  { site, authHeader, publicDir, pagePathMap, docsRoot },
-  errors,
+const ctx: WriteContext = {
+  site,
+  authHeader,
+  publicDir,
+  pagePathMap,
+  docsRoot,
+};
+
+logger.blank();
+logger.step("Converting and writing pages…");
+let written = 0;
+let images = 0;
+for (const [index, node] of pages.entries()) {
+  logger.progress(index + 1, pages.length, node.cleanTitle);
+  const filePath = pagePathMap.get(node.page.id);
+  if (!filePath) continue;
+  const result = await writePage(node, filePath, ctx, warnings, errors);
+  if (result.written) written++;
+  images += result.images;
+}
+logger.endProgress();
+logger.success(
+  `Wrote ${written} page${plural(written)}, downloaded ${images} image${plural(images)}`,
 );
 
-console.log(`\n✓ Done. Imported ${countNodes(tree)} page(s) into ${outputDir}`);
-if (errors.length > 0) {
-  console.warn(`⚠ ${errors.length} page(s) could not be processed:`);
-  for (const e of errors) {
-    console.warn(`  - ${e.title ?? e.pageId}: ${e.error}`);
-  }
-}
-console.log(
-  `  Review the files and set "status: published" where appropriate.`,
+reportWarnings(warnings, verbose);
+reportErrors(errors);
+
+logger.blank();
+logger.success(`Done → ${outputDir}`);
+logger.detail(
+  "Review the pages and set `status: published` where appropriate.",
 );
