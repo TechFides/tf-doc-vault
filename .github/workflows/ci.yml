@@ -35,6 +35,29 @@ jobs:
       - name: 🔍 Typecheck
         run: pnpm typecheck
 
+      - name: 🌍 Setup Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_wrapper: false
+
+      - name: 🌍 Terraform validate
+        working-directory: infra/terraform
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      - name: 🐳 Lint docker/Dockerfile
+        uses: hadolint/hadolint-action@2332a7b74a6de0dda2e2221d575162eba76ba5e5 # v3.3.0
+        with:
+          dockerfile: docker/Dockerfile
+          failure-threshold: error
+
+      - name: 🐳 Lint template/Dockerfile
+        uses: hadolint/hadolint-action@2332a7b74a6de0dda2e2221d575162eba76ba5e5 # v3.3.0
+        with:
+          dockerfile: template/Dockerfile
+          failure-threshold: error
+
   test-unit:
     name: 🧪 test:unit
     runs-on: ubuntu-latest
