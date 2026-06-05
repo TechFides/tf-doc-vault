@@ -19,6 +19,7 @@ import {
   type TreeNode,
   errorMessage,
 } from "./types.js";
+import { slugify } from "./layout.js";
 
 const MAX_CONCURRENCY = 6;
 const MAX_RETRIES = 3;
@@ -43,7 +44,7 @@ async function withLimit<T>(fn: () => Promise<T>): Promise<T> {
 
 // ─── retry ───────────────────────────────────────────────────────────────────
 
-class HttpError extends Error {
+export class HttpError extends Error {
   status: number;
   constructor(status: number, message: string) {
     super(message);
@@ -52,7 +53,7 @@ class HttpError extends Error {
   }
 }
 
-function isRetryable(err: unknown): boolean {
+export function isRetryable(err: unknown): boolean {
   if (err instanceof HttpError) return err.status === 429 || err.status >= 500;
   if (err instanceof Error && err.message.startsWith("Invalid JSON")) {
     return false;
@@ -173,7 +174,7 @@ interface Paged<T> {
   _links?: { next?: string };
 }
 
-function absoluteNext(
+export function absoluteNext(
   site: string,
   next: string | undefined,
 ): string | undefined {
@@ -256,18 +257,6 @@ export async function fetchPageEmoji(
 }
 
 // ─── tree ────────────────────────────────────────────────────────────────────
-
-export function slugify(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/^\[.*?\]\s*/, "") // strip [SERVICE_ID] prefix
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "") // remove diacritics
-    .replace(/[^\w\s-]/g, "")
-    .trim()
-    .replace(/[\s_]+/g, "-")
-    .replace(/-+/g, "-");
-}
 
 /**
  * Recursively fetch a page and its descendants. Per-page failures are collected

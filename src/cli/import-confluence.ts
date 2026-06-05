@@ -31,6 +31,11 @@ import {
   fetchAttachments,
 } from "../confluence/client.js";
 import {
+  buildPathMap,
+  flattenTree,
+  rewriteConfluenceLinks,
+} from "../confluence/layout.js";
+import {
   type AdfNode,
   type Attachment,
   type ImportError,
@@ -85,65 +90,6 @@ function parseAdf(value: string): AdfNode | null {
   } catch {
     return null;
   }
-}
-
-function pageFilePath(
-  node: TreeNode,
-  parentPath: string,
-  isRoot: boolean,
-): string {
-  if (isRoot) return path.join(parentPath, "index.md");
-  return node.children.length > 0
-    ? path.join(parentPath, node.slug, "index.md")
-    : path.join(parentPath, `${node.slug}.md`);
-}
-
-function childBasePath(
-  node: TreeNode,
-  parentPath: string,
-  isRoot: boolean,
-): string {
-  if (isRoot) return parentPath;
-  return node.children.length > 0
-    ? path.join(parentPath, node.slug)
-    : parentPath;
-}
-
-/** Map every page id → on-disk path, mirroring the index.md / leaf.md layout. */
-function buildPathMap(
-  node: TreeNode,
-  parentPath: string,
-  isRoot: boolean,
-  map: Map<string, string>,
-): void {
-  map.set(node.page.id, pageFilePath(node, parentPath, isRoot));
-  const childBase = childBasePath(node, parentPath, isRoot);
-  for (const child of node.children) buildPathMap(child, childBase, false, map);
-}
-
-/** Pre-order flatten so we can iterate pages with a progress counter. */
-function flattenTree(node: TreeNode, acc: TreeNode[] = []): TreeNode[] {
-  acc.push(node);
-  for (const child of node.children) flattenTree(child, acc);
-  return acc;
-}
-
-/** Rewrite Confluence page links to relative VitePress paths (e.g. /v1/page). */
-function rewriteConfluenceLinks(
-  markdown: string,
-  pagePathMap: Map<string, string>,
-  docsRoot: string,
-): string {
-  return markdown.replace(
-    /\[([^\]]+)\]\(https?:\/\/[^/]+\/wiki\/spaces\/[^/]+\/pages\/(\d+)[^)]*\)/g,
-    (match: string, text: string, linkedId: string): string => {
-      const absPath = pagePathMap.get(linkedId);
-      if (!absPath) return match;
-      const relativePath =
-        "/" + path.relative(docsRoot, absPath).replace(/\.md$/, "");
-      return `[${text}](${relativePath})`;
-    },
-  );
 }
 
 /**
