@@ -332,6 +332,14 @@ html.layout-max .VPContent {
   content: "📄 ";
 }
 
+.VPSidebarItem .text {
+  color: #4a5568;
+}
+
+.dark .VPSidebarItem .text {
+  color: rgba(255, 255, 255, 0.72);
+}
+
 .VPSidebarItem > .item {
   border-radius: 6px;
   transition: background-color 0.15s ease;
