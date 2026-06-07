@@ -16,6 +16,12 @@ const text = (t: string, marks?: any[]): any => ({
   text: t,
   ...(marks ? { marks } : {}),
 });
+const heading = (level: number, ...content: any[]): any => ({
+  type: "heading",
+  attrs: { level },
+  content,
+});
+const strong = [{ type: "strong" }];
 const conv = (...content: any[]): string =>
   convertAdf(doc(...content)).markdown;
 /* eslint-enable @typescript-eslint/no-explicit-any */
@@ -222,6 +228,58 @@ describe("tables", () => {
     });
     expect(md).toContain("<br>");
     expect(md).not.toContain("\\<br");
+  });
+});
+
+describe("bold with whitespace inside the markers", () => {
+  test("trailing space inside ** is moved outside so it renders as bold", () => {
+    const md = conv(heading(1, text("MySQL 8 ", strong)));
+    expect(md).toContain("**MySQL 8**");
+    expect(md).not.toContain("MySQL 8 **");
+  });
+
+  test("leading and trailing spaces are both moved outside", () => {
+    const md = conv(para(text(" spaced ", strong)));
+    expect(md).toContain("**spaced**");
+    expect(md).not.toContain("** spaced");
+    expect(md).not.toContain("spaced **");
+  });
+
+  test("already-tight bold is left untouched", () => {
+    const md = conv(para(text("Service", strong)));
+    expect(md).toContain("**Service**");
+  });
+});
+
+describe("headings inside table cells", () => {
+  const cell = (...content: any[]): any => ({
+    type: "tableCell",
+    attrs: {},
+    content,
+  });
+  const header = (t: string): any => ({
+    type: "tableHeader",
+    attrs: {},
+    content: [para(text(t))],
+  });
+  const row = (...cells: any[]): any => ({ type: "tableRow", content: cells });
+
+  test("a heading in a cell is demoted (no literal ### markup leaks)", () => {
+    const md = conv({
+      type: "table",
+      content: [
+        row(header("Type"), header("Detail")),
+        row(
+          cell(heading(3, text("Unit tests", strong)), para(text("Run fast."))),
+          cell(para(text("code"))),
+        ),
+      ],
+    });
+    expect(md).not.toContain("###");
+    // title stays bold, separated from the body by a line break (not glued to it)
+    expect(md).toMatch(/\*\*Unit tests\*\*\s*<br>\s*Run fast\./);
+    // the table still renders (header separator intact)
+    expect(md).toMatch(/\|\s*-+\s*\|\s*-+\s*\|/);
   });
 });
 

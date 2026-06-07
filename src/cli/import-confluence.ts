@@ -48,6 +48,7 @@ interface WriteContext {
   authHeader: string;
   publicDir: string;
   pagePathMap: Map<string, string>;
+  pageTitleMap: Map<string, string>;
   docsRoot: string;
 }
 
@@ -176,7 +177,12 @@ async function writePage(
       });
     }
 
-    markdown = rewriteConfluenceLinks(markdown, ctx.pagePathMap, ctx.docsRoot);
+    markdown = rewriteConfluenceLinks(
+      markdown,
+      ctx.pagePathMap,
+      ctx.pageTitleMap,
+      ctx.docsRoot,
+    );
 
     const updatedAt =
       node.page.version?.createdAt?.slice(0, 10) ??
@@ -378,6 +384,7 @@ logger.success(`Fetched ${pages.length} page${plural(pages.length)}`);
 
 const pagePathMap = new Map<string, string>();
 buildPathMap(tree, outputDir, true, pagePathMap);
+const pageTitleMap = new Map(pages.map((n) => [n.page.id, n.cleanTitle]));
 fs.mkdirSync(outputDir, { recursive: true });
 fs.mkdirSync(publicDir, { recursive: true });
 
@@ -386,6 +393,7 @@ const ctx: WriteContext = {
   authHeader,
   publicDir,
   pagePathMap,
+  pageTitleMap,
   docsRoot,
 };
 

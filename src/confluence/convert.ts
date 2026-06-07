@@ -194,6 +194,32 @@ function isSimpleCell(cell: AdfNode): boolean {
 }
 
 /**
+ * GFM table cells only render inline content, so a `heading` inside a cell is
+ * emitted as literal `### …` text. Demote every heading inside a cell to a
+ * paragraph (its inline marks — e.g. bold — are preserved), so the title stays
+ * emphasised without leaking the `#` markup into the rendered cell.
+ */
+function demoteCellHeadings(table: AdfNode): AdfNode {
+  const rows = asNodes(table.content).map((row): AdfNode => {
+    const cells = asNodes(row.content).map((cell): AdfNode => {
+      const blocks = asNodes(cell.content);
+      const mapped = blocks.map((block, i): AdfNode => {
+        if (block.type !== "heading") return block;
+        // A heading followed by more content keeps a line break after it so the
+        // (now inline) title is not glued to the body text in the rendered cell.
+        const inline = inlineChildren(block);
+        const content =
+          i < blocks.length - 1 ? [...inline, { type: "hardBreak" }] : inline;
+        return { type: "paragraph", content };
+      });
+      return { ...cell, content: mapped };
+    });
+    return { ...row, content: cells };
+  });
+  return { ...table, content: rows };
+}
+
+/**
  * GFM tables need a header row to emit a separator (and thus render at all).
  * Confluence tables whose first row is plain `tableCell` produce no separator,
  * so we promote that first row to `tableHeader` — but only when its cells are
@@ -257,7 +283,7 @@ function transformNode(node: AdfValue): AdfValue | AdfValue[] {
     case "layoutSection":
       return flattenLayout(withChildren);
     case "table":
-      return ensureTableHeader(withChildren);
+      return ensureTableHeader(demoteCellHeadings(withChildren));
     default:
       return withChildren;
   }
@@ -338,6 +364,24 @@ function transformOutsideCode(md: string, fn: (s: string) => string): string {
   return result + fn(md.slice(last));
 }
 
+/**
+ * Confluence applies a bold mark to the text *including* its surrounding spaces,
+ * so the parser emits `**text **` / `** text**`. Markdown only treats `**` as a
+ * delimiter when it hugs a non-space character, so those render as literal
+ * asterisks. Move any whitespace that sits just inside the markers to the
+ * outside (`**text **` → `**text** `); drop the emphasis entirely when it wraps
+ * nothing but whitespace (`** **`).
+ */
+function fixEmphasisWhitespace(md: string): string {
+  return transformOutsideCode(md, (s) =>
+    s.replace(
+      /\*\*([ \t]*)([^\n]*?)([ \t]*)\*\*/g,
+      (_match, lead: string, body: string, trail: string): string =>
+        body.trim() === "" ? lead + trail : `${lead}**${body}**${trail}`,
+    ),
+  );
+}
+
 function applyEmoji(md: string): string {
   return transformOutsideCode(md, (s) => {
     let out = s;
@@ -389,6 +433,7 @@ export function convertAdf(adf: AdfNode): ConvertResult {
   md = stripAdfComments(stripped.md);
   md = panelsToContainers(md);
   md = expandsToContainers(md);
+  md = fixEmphasisWhitespace(md);
   md = applyEmoji(md);
   md = escapeForVue(md);
   md = md.replace(/\n{3,}/g, "\n\n").trim();

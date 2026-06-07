@@ -64,13 +64,19 @@ export function flattenTree(node: TreeNode, acc: TreeNode[] = []): TreeNode[] {
 }
 
 /**
- * Rewrite Confluence page links to relative VitePress paths (e.g. `/v1/page`).
+ * Rewrite Confluence page links to absolute VitePress paths (e.g. `/v1/page`;
+ * VitePress prepends the site `base` to absolute markdown links at render time).
  * Only links whose target page was part of the import (present in `pagePathMap`)
  * are rewritten; everything else is left as the original URL.
+ *
+ * When the link's visible text is just the raw Confluence URL (Confluence stores
+ * a bare-link paste that way), it is replaced with the target page's title from
+ * `pageTitleMap` so the reader sees a label, not a page id.
  */
 export function rewriteConfluenceLinks(
   markdown: string,
   pagePathMap: Map<string, string>,
+  pageTitleMap: Map<string, string>,
   docsRoot: string,
 ): string {
   return markdown.replace(
@@ -80,7 +86,10 @@ export function rewriteConfluenceLinks(
       if (!absPath) return match;
       const relativePath =
         "/" + path.relative(docsRoot, absPath).replace(/\.md$/, "");
-      return `[${text}](${relativePath})`;
+      const label = /^https?:\/\//.test(text.trim())
+        ? (pageTitleMap.get(linkedId) ?? text)
+        : text;
+      return `[${label}](${relativePath})`;
     },
   );
 }

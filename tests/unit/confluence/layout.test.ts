@@ -94,26 +94,50 @@ describe("rewriteConfluenceLinks", () => {
     ["123", path.join(docsRoot, "v1", "page.md")],
     ["456", path.join(docsRoot, "v1", "section", "index.md")],
   ]);
+  const titles = new Map<string, string>([
+    ["123", "Page Title"],
+    ["456", "Section Title"],
+  ]);
 
   test("rewrites an in-import page link to a relative path", () => {
     const md =
       "see [Page](https://x.atlassian.net/wiki/spaces/K/pages/123/Title)";
-    expect(rewriteConfluenceLinks(md, map, docsRoot)).toBe(
+    expect(rewriteConfluenceLinks(md, map, titles, docsRoot)).toBe(
       "see [Page](/v1/page)",
     );
   });
   test("section pages resolve to their index path", () => {
     const md = "[S](https://x.atlassian.net/wiki/spaces/K/pages/456)";
-    expect(rewriteConfluenceLinks(md, map, docsRoot)).toBe(
+    expect(rewriteConfluenceLinks(md, map, titles, docsRoot)).toBe(
       "[S](/v1/section/index)",
+    );
+  });
+  test("replaces a bare-URL label with the target page title", () => {
+    const md =
+      "viz [https://x.atlassian.net/wiki/spaces/K/pages/123](https://x.atlassian.net/wiki/spaces/K/pages/123)";
+    expect(rewriteConfluenceLinks(md, map, titles, docsRoot)).toBe(
+      "viz [Page Title](/v1/page)",
+    );
+  });
+  test("keeps a meaningful label even when it is not a URL", () => {
+    const md = "[My label](https://x.atlassian.net/wiki/spaces/K/pages/123)";
+    expect(rewriteConfluenceLinks(md, map, titles, docsRoot)).toBe(
+      "[My label](/v1/page)",
+    );
+  });
+  test("falls back to the original URL label when no title is known", () => {
+    const md =
+      "[https://x.atlassian.net/wiki/spaces/K/pages/123](https://x.atlassian.net/wiki/spaces/K/pages/123)";
+    expect(rewriteConfluenceLinks(md, map, new Map(), docsRoot)).toBe(
+      "[https://x.atlassian.net/wiki/spaces/K/pages/123](/v1/page)",
     );
   });
   test("leaves out-of-import page links untouched", () => {
     const md = "[Other](https://x.atlassian.net/wiki/spaces/K/pages/999/Z)";
-    expect(rewriteConfluenceLinks(md, map, docsRoot)).toBe(md);
+    expect(rewriteConfluenceLinks(md, map, titles, docsRoot)).toBe(md);
   });
   test("leaves non-page links untouched", () => {
     const md = "[Ext](https://example.com/foo)";
-    expect(rewriteConfluenceLinks(md, map, docsRoot)).toBe(md);
+    expect(rewriteConfluenceLinks(md, map, titles, docsRoot)).toBe(md);
   });
 });
