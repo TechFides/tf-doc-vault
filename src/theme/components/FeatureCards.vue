@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useData } from "vitepress";
+import { useData, withBase } from "vitepress";
 import { computed, type Component } from "vue";
 import { useI18n } from "vue-i18n";
 import IconBusiness from "../icons/IconBusiness.vue";
@@ -37,7 +37,7 @@ const features = computed<FeatureCard[]>(
     <a
       v-for="card in features"
       :key="card.title"
-      :href="card.link"
+      :href="withBase(card.link)"
       class="feature-card"
     >
       <component :is="resolveIcon(card.icon)" class="feature-card__icon" />
