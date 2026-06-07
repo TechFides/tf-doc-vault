@@ -62,7 +62,6 @@ function hostName(url: string): string {
 
 <style scoped>
 .brand-footer {
-  border-top: 1px solid var(--vp-c-divider);
   margin-top: 24px;
   padding: 24px;
   text-align: center;

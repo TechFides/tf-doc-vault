@@ -134,6 +134,11 @@
   border-bottom-color: transparent !important;
 }
 
+.VPNavBarTitle.has-sidebar,
+.VPNavBarTitle.has-sidebar .title {
+  border-bottom-color: transparent !important;
+}
+
 .dark html,
 .dark body,
 .dark .Layout,
