@@ -81,6 +81,5 @@ export {
   NotFound,
 };
 export { useScrollSpy } from "./composables/useScrollSpy.js";
-export { useSidebarEmojiAlign } from "./composables/useSidebarEmojiAlign.js";
 export { i18n } from "./i18n/index.js";
 export * as icons from "./icons/index.js";
