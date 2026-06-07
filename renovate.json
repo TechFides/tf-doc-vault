@@ -9,7 +9,8 @@
   ],
   "labels": ["dependencies"],
   "schedule": ["before 6am on monday"],
-  "platformAutomerge": true,
+  "automergeSchedule": ["after 7am and before 11am on monday"],
+  "platformAutomerge": false,
   "packageRules": [
     {
       "description": "Auto-merge low-risk updates once CI is green. Major updates stay manual for human review.",
