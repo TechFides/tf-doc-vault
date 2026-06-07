@@ -16,7 +16,7 @@ pipeline (install → lint → build → deploy), and optional Basic auth.
 3. `git init` + first commit are run automatically (skip with `--no-git` when embedding into an existing repo).
 
 ```bash
-pnpm dlx @techfides/tf-doc-vault create my_analysis \
+pnpm dlx @techfides/tf-doc-vault@latest create my_analysis \
   --gcp-project=tfsa-my-analysis \
   --server=nginx
 ```
@@ -64,7 +64,7 @@ When the analytical docs belong inside an existing service or project repo, add 
 still generated, but `git init` is skipped so the output is committed as part of the parent repo:
 
 ```bash
-pnpm dlx @techfides/tf-doc-vault create ana_project \
+pnpm dlx @techfides/tf-doc-vault@latest create ana_project \
   --gcp-project=ana_project \
   --server=nginx \
   --no-git
