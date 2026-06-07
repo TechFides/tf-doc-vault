@@ -11,7 +11,6 @@ import FeatureCards from "./components/FeatureCards.vue";
 import BrandFooter from "./components/BrandFooter.vue";
 import NotFound from "./components/NotFound.vue";
 import { i18n, resolveLocale } from "./i18n/index.js";
-import SidebarEmojiAlign from "./components/SidebarEmojiAlign.vue";
 import "./styles/print.css";
 import "./styles/base.css";
 
@@ -49,8 +48,8 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
             Fragment,
             null,
             showFooter
-              ? [h(SidebarEmojiAlign), h(ImageLightbox), h(BrandFooter)]
-              : [h(SidebarEmojiAlign), h(ImageLightbox)],
+              ? [h(ImageLightbox), h(BrandFooter)]
+              : [h(ImageLightbox)],
           ),
         "not-found": (): VNode => h(NotFound),
       };

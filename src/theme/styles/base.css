@@ -294,13 +294,6 @@ html.layout-max .VPContent {
   padding-top: 20px;
 }
 
-.VPSidebarItem .text.default-emoji-folder::before {
-  content: "📁 ";
-}
-
-.VPSidebarItem .text.default-emoji-file::before {
-  content: "📄 ";
-}
 
 .VPSidebarItem.is-active > .item .link .text {
   color: var(--brand-primary) !important;
