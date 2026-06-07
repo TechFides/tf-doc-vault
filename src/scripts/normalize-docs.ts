@@ -29,53 +29,76 @@ function allMdFiles(dir: string): string[] {
   return results.sort();
 }
 
+interface Block {
+  key: string;
+  lines: string[];
+}
+
 interface ParsedFile {
-  fields: [string, string][];
+  blocks: Block[];
   body: string;
 }
+
+const TOP_LEVEL_KEY = /^([A-Za-z_][\w-]*)\s*:/;
 
 function parse(content: string): ParsedFile | null {
   const match = /^---\s*\n([\s\S]*?)\n---\n?([\s\S]*)$/.exec(content);
   if (!match) return null;
 
-  const fields: [string, string][] = [];
-  for (const line of match[1]!.split("\n")) {
-    const kv = /^([^:]+):\s*(.*)$/.exec(line.trim());
-    if (kv) fields.push([kv[1]!.trim(), kv[2]!.trim()]);
-  }
+  const blocks: Block[] = [];
+  let current: Block | null = null;
 
-  return { fields, body: match[2]! };
+  for (const line of match[1]!.split("\n")) {
+    const isTopLevel =
+      line.length > 0 &&
+      !line.startsWith(" ") &&
+      !line.startsWith("\t") &&
+      !line.startsWith("-") &&
+      !line.startsWith("#") &&
+      TOP_LEVEL_KEY.test(line);
+
+    if (isTopLevel) {
+      if (current) blocks.push(current);
+      current = { key: TOP_LEVEL_KEY.exec(line)![1]!, lines: [line] };
+    } else if (current) {
+      current.lines.push(line);
+    }
+  }
+  if (current) blocks.push(current);
+
+  return { blocks, body: match[2]! };
 }
 
-function serialize(fields: [string, string][], body: string): string {
-  const fm = fields.map(([k, v]) => `${k}: ${v}`).join("\n");
+function serialize(blocks: Block[], body: string): string {
+  const fm = blocks.map((b) => b.lines.join("\n")).join("\n");
   return `---\n${fm}\n---\n${body}`;
 }
 
-function normalize(fields: [string, string][]): [string, string][] {
-  const map = new Map(fields);
-  const ordered: [string, string][] = [];
+function normalize(blocks: Block[]): Block[] {
+  const seen = new Set<string>();
+  const ordered: Block[] = [];
 
   for (const key of FIELD_ORDER) {
-    if (map.has(key)) {
-      ordered.push([key, map.get(key)!]);
-      map.delete(key);
+    const block = blocks.find((b) => b.key === key);
+    if (block && !seen.has(key)) {
+      ordered.push(block);
+      seen.add(key);
     }
   }
 
-  for (const [k, v] of fields) {
-    if (map.has(k)) {
-      ordered.push([k, v]);
-      map.delete(k);
+  for (const block of blocks) {
+    if (!seen.has(block.key)) {
+      ordered.push(block);
+      seen.add(block.key);
     }
   }
 
   return ordered;
 }
 
-function fieldsEqual(a: [string, string][], b: [string, string][]): boolean {
+function blocksEqual(a: Block[], b: Block[]): boolean {
   if (a.length !== b.length) return false;
-  return a.every(([k, v], i) => b[i]?.[0] === k && b[i]?.[1] === v);
+  return a.every((blk, i) => b[i]?.key === blk.key);
 }
 
 const files = allMdFiles(DOCS_ROOT);
@@ -95,9 +118,9 @@ for (const file of files) {
     continue;
   }
 
-  const normalized = normalize(parsed.fields);
+  const normalized = normalize(parsed.blocks);
 
-  if (fieldsEqual(parsed.fields, normalized)) {
+  if (blocksEqual(parsed.blocks, normalized)) {
     skipped++;
     continue;
   }
