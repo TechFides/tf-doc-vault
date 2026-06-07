@@ -1,5 +1,52 @@
 # Changelog
 
+## v0.2.1
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.0...v0.2.1)
+
+### 🚀 Enhancements
+
+- **import-confluence:** Robust ADF conversion + scoped-token-safe downloads ([c0b8583](https://github.com/TechFides/tf-doc-vault/commit/c0b8583))
+
+### 🩹 Fixes
+
+- **import-confluence:** Resolve links and images against the VitePress srcDir ([6eee0e9](https://github.com/TechFides/tf-doc-vault/commit/6eee0e9))
+- **theme:** Prepend site base to FeatureCards links ([9393106](https://github.com/TechFides/tf-doc-vault/commit/9393106))
+- **import-confluence:** Cleaner links, bold and table cells ([93aa285](https://github.com/TechFides/tf-doc-vault/commit/93aa285))
+- Preserve nested YAML in frontmatter ([360097a](https://github.com/TechFides/tf-doc-vault/commit/360097a))
+
+### 💅 Refactors
+
+- **cli:** Migrate bin/*.mjs to TypeScript under src/cli ([f54b2fc](https://github.com/TechFides/tf-doc-vault/commit/f54b2fc))
+- Enhance logging and console outpout ([6f4dc06](https://github.com/TechFides/tf-doc-vault/commit/6f4dc06))
+
+### 📖 Documentation
+
+- Expand testing documentation to include confluence import verification ([8704774](https://github.com/TechFides/tf-doc-vault/commit/8704774))
+- Split the long README into focused docs/ guides ([c10e9e8](https://github.com/TechFides/tf-doc-vault/commit/c10e9e8))
+
+### 🏡 Chore
+
+- Translate tooling to english ([a396d40](https://github.com/TechFides/tf-doc-vault/commit/a396d40))
+- **renovate:** Automerge non-major updates once CI is green ([16148c8](https://github.com/TechFides/tf-doc-vault/commit/16148c8))
+- **skills:** Add prerelease-check skill ([58e229e](https://github.com/TechFides/tf-doc-vault/commit/58e229e))
+
+### ✅ Tests
+
+- Make confluence conversion test fixture generic ([d44aebc](https://github.com/TechFides/tf-doc-vault/commit/d44aebc))
+- Add missing tests for helper functions ([43e9bd0](https://github.com/TechFides/tf-doc-vault/commit/43e9bd0))
+- Update vitest exclude list to reflect reality for unit testing ([6062aa8](https://github.com/TechFides/tf-doc-vault/commit/6062aa8))
+- **normalize-docs:** Un-skip nested-frontmatter regression test ([5510911](https://github.com/TechFides/tf-doc-vault/commit/5510911))
+
+### 🤖 CI
+
+- Validate Terraform and lint Dockerfiles in the verify job ([d07b8a3](https://github.com/TechFides/tf-doc-vault/commit/d07b8a3))
+- **renovate:** Self-merge PRs on a delayed schedule ([7b07c60](https://github.com/TechFides/tf-doc-vault/commit/7b07c60))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.2.0
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.1.7...v0.2.0)
