@@ -285,7 +285,6 @@ html.layout-max .VPContent {
   text-overflow: ellipsis;
 }
 
-
 .VPSidebarItem.level-0:not(.collapsible) {
   padding-bottom: 10px;
 }
@@ -294,12 +293,10 @@ html.layout-max .VPContent {
   padding-top: 20px;
 }
 
-
 .VPSidebarItem.is-active > .item .link .text {
   color: var(--brand-primary) !important;
   font-weight: 700;
 }
-
 
 /* Mermaid is themed entirely here off the --brand-* tokens (no JS
    themeVariables), so overriding a brand token recolors diagrams in both

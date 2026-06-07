@@ -42,7 +42,10 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
 
       const slots: Record<string, () => VNode> = {
         "doc-before": (): VNode =>
-          h("div", { class: "doc-meta-wrapper" }, [h(DocMeta), h(DocPageTitle)]),
+          h("div", { class: "doc-meta-wrapper" }, [
+            h(DocMeta),
+            h(DocPageTitle),
+          ]),
         "layout-bottom": (): VNode =>
           h(
             Fragment,

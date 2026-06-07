@@ -5,7 +5,10 @@ import { computed } from "vue";
 const { page, frontmatter } = useData();
 
 const visible = computed(
-  () => !frontmatter.value?.hero && !frontmatter.value?.hideTitle && !!page.value.title,
+  () =>
+    !frontmatter.value?.hero &&
+    !frontmatter.value?.hideTitle &&
+    !!page.value.title,
 );
 </script>
 
