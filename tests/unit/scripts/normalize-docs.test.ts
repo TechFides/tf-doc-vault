@@ -94,15 +94,12 @@ describe("normalize-docs (flat frontmatter)", () => {
 });
 
 /**
- * Regression test for the known YAML-flattening bug — normalize-docs's
- * line-based frontmatter parser collapses nested YAML (hero / features blocks
- * in vitepress home pages) and truncates list entries past the first.
- *
- * Marked `.skip` until the parser is fixed. Tracked as a separate spawned task.
- *
- * To verify the fix: change `.skip` to plain `test(...)` and run pnpm test:unit.
+ * Regression test for the YAML-flattening bug — the original line-based
+ * frontmatter parser collapsed nested YAML (hero / features blocks in vitepress
+ * home pages) and truncated list entries past the first. The block-based parser
+ * preserves indentation and every list entry.
  */
-describe.skip("normalize-docs (nested frontmatter) — known bug, see spawned task", () => {
+describe("normalize-docs (nested frontmatter)", () => {
   test("preserves nested hero block and full features list", () => {
     const file = path.join(docsRoot, "home.md");
     const original = [
