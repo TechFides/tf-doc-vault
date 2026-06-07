@@ -67,7 +67,7 @@
     sans-serif;
 
   --vp-layout-max-width: var(--layout-max-width-content);
-  --vp-sidebar-width: 280px;
+  --vp-sidebar-width: 360px;
 
   /* VitePress `locales` config is used here for versions (v1, v2), not
      languages — hide the language switcher VitePress would otherwise
@@ -76,13 +76,13 @@
 }
 
 .dark {
-  --vp-c-bg: #04132a;
+  --vp-c-bg: #020a18;
   --vp-c-bg-alt: var(--brand-nav-navy);
   --vp-c-bg-soft: #0a2d52;
   --vp-c-bg-mute: #0f3870;
   --vp-c-bg-elv: #0a2d52;
 
-  --vp-sidebar-bg-color: var(--brand-nav-navy);
+  --vp-sidebar-bg-color: #04132a;
 
   --vp-c-text-1: #ffffff;
   --vp-c-text-2: rgba(255, 255, 255, 0.72);
@@ -94,7 +94,7 @@
 
   --vp-c-brand-2: var(--brand-secondary);
 
-  --vp-code-block-bg: #020a18;
+  --vp-code-block-bg: #051020;
 
   --brand-badge-published-bg: #052e16;
   --brand-badge-published-text: #4ade80;
@@ -269,15 +269,44 @@ html.layout-max .VPContent {
   background-color: rgba(255, 255, 255, 0.06);
 }
 
+.VPSidebarItem .item {
+  overflow: hidden;
+}
+
+.VPSidebarItem .link,
+.VPSidebarItem .button {
+  min-width: 0;
+  padding-right: 12px;
+}
+
+.VPSidebarItem .text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
+.VPSidebarItem.level-0:not(.collapsible) {
+  padding-bottom: 10px;
+}
+
+#VPSidebarNav {
+  padding-top: 20px;
+}
+
+.VPSidebarItem .text.default-emoji-folder::before {
+  content: "📁 ";
+}
+
+.VPSidebarItem .text.default-emoji-file::before {
+  content: "📄 ";
+}
+
 .VPSidebarItem.is-active > .item .link .text {
   color: var(--brand-primary) !important;
   font-weight: 700;
 }
 
-.VPSidebarItem.is-active > .item {
-  border-left: 2px solid var(--brand-primary);
-  padding-left: calc(var(--vp-sidebar-item-offset, 0px) + 14px);
-}
 
 /* Mermaid is themed entirely here off the --brand-* tokens (no JS
    themeVariables), so overriding a brand token recolors diagrams in both

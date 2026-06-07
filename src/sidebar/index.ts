@@ -85,29 +85,32 @@ function buildSidebarItems(
   dir: string,
   urlBase: string,
 ): DefaultTheme.SidebarItem[] {
-  const items: DefaultTheme.SidebarItem[] = [];
+  const entries = fs
+    .readdirSync(dir, { withFileTypes: true })
+    .filter(
+      (e: fs.Dirent) =>
+        (e.isFile() && e.name.endsWith(".md") && e.name !== "index.md") ||
+        (e.isDirectory() && !IGNORE.has(e.name) && !e.name.startsWith(".")),
+    )
+    .sort((a: fs.Dirent, b: fs.Dirent) => a.name.localeCompare(b.name, "cs"));
 
-  for (const f of mdFilesIn(dir)) {
-    if (f === "index.md") continue;
-    items.push({
-      text: extractTitle(path.join(dir, f)),
-      link: `${urlBase}${f.replace(/\.md$/, "")}`,
-    });
-  }
-
-  for (const sub of subDirs(dir)) {
-    const subDir = path.join(dir, sub);
-    const indexPath = path.join(subDir, "index.md");
-    const subBase = `${urlBase}${sub}/`;
-    items.push({
-      text: fs.existsSync(indexPath) ? extractTitle(indexPath) : sub,
-      link: fs.existsSync(indexPath) ? subBase : undefined,
-      collapsed: true,
-      items: buildSidebarItems(subDir, subBase),
-    });
-  }
-
-  return items;
+  return entries.map((e: fs.Dirent): DefaultTheme.SidebarItem => {
+    if (e.isDirectory()) {
+      const subDir = path.join(dir, e.name);
+      const indexPath = path.join(subDir, "index.md");
+      const subBase = `${urlBase}${e.name}/`;
+      return {
+        text: fs.existsSync(indexPath) ? extractTitle(indexPath) : e.name,
+        link: fs.existsSync(indexPath) ? subBase : undefined,
+        collapsed: true,
+        items: buildSidebarItems(subDir, subBase),
+      };
+    }
+    return {
+      text: extractTitle(path.join(dir, e.name)),
+      link: `${urlBase}${e.name.replace(/\.md$/, "")}`,
+    };
+  });
 }
 
 export function generateSidebar(docsRoot: string): DefaultTheme.SidebarMulti {
