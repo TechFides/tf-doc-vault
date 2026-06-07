@@ -125,6 +125,17 @@ export function findAncestorFile(
   }
 }
 
+export function findDocsRoot(outputDir: string): string {
+  let current = outputDir;
+  while (true) {
+    if (fs.existsSync(path.join(current, ".vitepress"))) return current;
+    const parent = path.dirname(current);
+    if (parent === current) break; // hit the filesystem root
+    current = parent;
+  }
+  return path.resolve(outputDir, "..");
+}
+
 /**
  * Replace all placeholder strings in text files under a directory tree.
  */

@@ -18,7 +18,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { parseArgs } from "./utils.js";
+import { parseArgs, findDocsRoot } from "./utils.js";
 import { logger } from "./logger.js";
 import { convertAdf } from "../confluence/convert.js";
 import {
@@ -349,7 +349,7 @@ if (!email || !token) {
   process.exit(1);
 }
 
-const docsRoot = path.resolve(outputDir, "..");
+const docsRoot = findDocsRoot(outputDir);
 const publicDir = path.resolve(docsRoot, "public", "images");
 const authHeader =
   "Basic " + Buffer.from(`${email}:${token}`).toString("base64");
