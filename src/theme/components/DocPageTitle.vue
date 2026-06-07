@@ -19,7 +19,9 @@ const visible = computed(
 <style scoped>
 .doc-page-title {
   margin-top: 0;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--vp-c-divider);
   font-size: 2rem;
   font-weight: 700;
   line-height: 1.25;

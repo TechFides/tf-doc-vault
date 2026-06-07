@@ -68,6 +68,7 @@
 
   --vp-layout-max-width: var(--layout-max-width-content);
   --vp-sidebar-width: 360px;
+  --vp-sidebar-bg-color: #f4f6fb;
 
   /* VitePress `locales` config is used here for versions (v1, v2), not
      languages — hide the language switcher VitePress would otherwise
@@ -139,6 +140,32 @@
   border-bottom-color: transparent !important;
 }
 
+/* Light mode: navbar title column matches sidebar background */
+.VPNavBar.has-sidebar > .wrapper > .container > .title {
+  background-color: var(--vp-sidebar-bg-color);
+  border-right: 1px solid var(--vp-c-border);
+}
+
+/* Sidebar right border for visual separation */
+.VPSidebar {
+  border-right: 1px solid var(--vp-c-border);
+}
+
+/* Sidebar custom scrollbar */
+.VPSidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.VPSidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.VPSidebar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+}
+.dark .VPSidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .dark html,
 .dark body,
 .dark .Layout,
@@ -157,7 +184,6 @@
 .VPButton,
 .VPLocalSearchBox,
 .VPLocalSearchBox input,
-.VPSidebarItem .item,
 .VPMenu,
 .custom-block {
   border-radius: 0 !important;
@@ -306,9 +332,34 @@ html.layout-max .VPContent {
   content: "📄 ";
 }
 
+.VPSidebarItem > .item {
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+}
+
+.VPSidebarItem > .item:hover {
+  background-color: rgba(0, 116, 200, 0.05);
+}
+
+.dark .VPSidebarItem > .item:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.VPSidebarItem.is-active > .item {
+  background-color: rgba(0, 116, 200, 0.09);
+}
+
+.dark .VPSidebarItem.is-active > .item {
+  background-color: rgba(0, 160, 227, 0.12);
+}
+
 .VPSidebarItem.is-active > .item .link .text {
   color: var(--brand-primary) !important;
   font-weight: 700;
+}
+
+.dark .VPSidebarItem.is-active > .item .link .text {
+  color: var(--brand-secondary) !important;
 }
 
 /* Mermaid is themed entirely here off the --brand-* tokens (no JS
@@ -529,6 +580,15 @@ html.layout-max .VPContent {
   stroke: var(--brand-text-muted) !important;
 }
 
+/* Code block subtle border */
+.vp-doc div[class*="language-"] {
+  border: 1px solid var(--brand-border-default);
+}
+
+.dark .vp-doc div[class*="language-"] {
+  border: 1px solid var(--vp-c-border);
+}
+
 .vp-doc a {
   color: var(--brand-primary);
   text-decoration: none;
@@ -541,4 +601,16 @@ html.layout-max .VPContent {
 
 .vp-doc a:active {
   color: var(--brand-primary-active);
+}
+
+.dark .vp-doc a {
+  color: var(--brand-secondary);
+}
+
+.dark .vp-doc a:hover {
+  color: #5bc8f5;
+}
+
+.dark .vp-doc a:active {
+  color: var(--brand-primary);
 }
