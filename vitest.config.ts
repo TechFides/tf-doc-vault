@@ -12,8 +12,15 @@ export default defineConfig({
       // `html` is the interactive local + artifact report.
       reporter: ["text", "html", "json-summary", "json"],
       reportOnFailure: true,
-      include: ["bin/**/*.mjs", "src/**/*.ts"],
-      exclude: ["src/setup/**", "src/**/*.d.ts"],
+      include: ["src/**/*.ts"],
+      exclude: [
+        "src/**/*.d.ts",
+        "src/setup/**", // built separately by unbuild
+        "src/index.ts", // public-API re-export barrel (no logic)
+        "src/theme/**", // Vue components/composables — need a browser/component runner, not node Vitest
+        "src/cli/tf-doc-vault.ts", // pure process-spawn router — exercised by the smoke suite
+        "src/cli/logger.ts", // console I/O
+      ],
     },
   },
 });

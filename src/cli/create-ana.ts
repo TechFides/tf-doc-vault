@@ -17,13 +17,15 @@ import {
   copyDir,
   replacePlaceholders,
   findAncestorFile,
-} from "./utils.mjs";
+  type ParsedArgs,
+} from "./utils.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const TEMPLATE_DIR = path.resolve(__dirname, "..", "template");
-const PACKAGE_DIR = path.resolve(__dirname, "..");
+// dist/cli → package root
+const PACKAGE_DIR = path.resolve(__dirname, "..", "..");
+const TEMPLATE_DIR = path.join(PACKAGE_DIR, "template");
 
-function usage(exitCode = 0) {
+function usage(exitCode = 0): never {
   console.log(`
 create-ana <project-name> [options]
 
@@ -59,16 +61,22 @@ Examples:
   process.exit(exitCode);
 }
 
-function packageVersion() {
+function packageVersion(): string {
   try {
-    const pkgPath = path.resolve(__dirname, "..", "package.json");
-    return JSON.parse(fs.readFileSync(pkgPath, "utf-8")).version;
+    const pkgPath = path.join(PACKAGE_DIR, "package.json");
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as {
+      version?: string;
+    };
+    return pkg.version ?? "0.1.0";
   } catch {
     return "0.1.0";
   }
 }
 
-function resolveDependencyValue(flags, targetDir) {
+function resolveDependencyValue(
+  flags: ParsedArgs["flags"],
+  targetDir: string,
+): string {
   // --dev is a shortcut for --source=file. Explicit --source still wins.
   const source = flags.source ?? (flags.dev ? "file" : "git");
   const version = packageVersion();
@@ -85,7 +93,7 @@ function resolveDependencyValue(flags, targetDir) {
       return `file:${target}`;
     }
     default:
-      console.error(`✗ Invalid --source: ${source}. Use git | file.`);
+      console.error(`✗ Invalid --source: ${String(source)}. Use git | file.`);
       process.exit(1);
   }
 }
@@ -95,7 +103,7 @@ function resolveDependencyValue(flags, targetDir) {
  * `npm pack` always strips `.npmrc` and `.gitignore` from published packages,
  * so we ship them as `_npmrc` / `_gitignore` and rename on copy.
  */
-function consumerName(templateName) {
+function consumerName(templateName: string): string {
   if (templateName === "_npmrc") return ".npmrc";
   if (templateName === "_gitignore") return ".gitignore";
   if (templateName === "_pnpm-workspace.yaml") return "pnpm-workspace.yaml";
@@ -112,7 +120,7 @@ function consumerName(templateName) {
  * Read-only with respect to the parent workspace — never patches the
  * ancestor file. The customer applies the diff themselves.
  */
-function warnIfEmbeddedInWorkspace(targetDir) {
+function warnIfEmbeddedInWorkspace(targetDir: string): void {
   const ancestor = findAncestorFile(targetDir, "pnpm-workspace.yaml");
   if (!ancestor) return;
 
@@ -158,9 +166,9 @@ ${rule}
 
 const { positional, flags } = parseArgs(process.argv.slice(2));
 
-if (flags.help || flags.h || positional.length === 0) usage(0);
-
 const projectName = positional[0];
+if (flags.help || flags.h || !projectName) usage(0);
+
 if (!/^[a-z][a-z0-9_-]*$/.test(projectName)) {
   console.error(`✗ Invalid project name: ${projectName}`);
   console.error(
@@ -169,9 +177,10 @@ if (!/^[a-z][a-z0-9_-]*$/.test(projectName)) {
   process.exit(1);
 }
 
-const gcpProject =
-  flags["gcp-project"] ?? `tfsa-${projectName.replace(/_/g, "-")}`;
-const serverType = flags.server ?? "nginx";
+const gcpProject = String(
+  flags["gcp-project"] ?? `tfsa-${projectName.replace(/_/g, "-")}`,
+);
+const serverType = String(flags.server ?? "nginx");
 
 if (!["nginx", "nginx-auth"].includes(serverType)) {
   console.error(`✗ Invalid --server: ${serverType}. Use nginx | nginx-auth.`);
@@ -180,20 +189,20 @@ if (!["nginx", "nginx-auth"].includes(serverType)) {
 
 const targetDir = path.resolve(process.cwd(), projectName);
 const vitepressCommonDep = resolveDependencyValue(flags, targetDir);
-const skipGit = flags["no-git"];
+const skipGit = Boolean(flags["no-git"]);
 
 if (fs.existsSync(targetDir)) {
-  console.error(`✗ Cíl už existuje: ${targetDir}`);
+  console.error(`✗ Target already exists: ${targetDir}`);
   process.exit(1);
 }
 
-console.log(`Vytvářím nové analýzové repo:`);
-console.log(`  cíl       : ${targetDir}`);
-console.log(`  projekt   : ${projectName}`);
+console.log(`Creating a new analysis docs repo:`);
+console.log(`  target    : ${targetDir}`);
+console.log(`  project   : ${projectName}`);
 console.log(`  GCP       : ${gcpProject}`);
 console.log(`  server    : ${serverType}`);
 console.log(`  common    : ${vitepressCommonDep}`);
-console.log(`  git       : ${skipGit ? "ne (embedded)" : "ano"}`);
+console.log(`  git       : ${skipGit ? "no (embedded)" : "yes"}`);
 
 copyDir(TEMPLATE_DIR, targetDir, { renameEntry: consumerName });
 
@@ -204,8 +213,8 @@ replacePlaceholders(targetDir, {
   __SERVER_TYPE__: serverType,
   __VITEPRESS_COMMON_DEP__: vitepressCommonDep,
   __DATE__: new Date().toISOString().slice(0, 10),
-  // Basic auth defaultně prázdné; uživatel je vyplní v .gitlab-ci.yml
-  // až podle reálné potřeby (jen pro nginx-auth runtime).
+  // Basic auth defaults to empty; the user fills it in .gitlab-ci.yml
+  // later as actually needed (only for the nginx-auth runtime).
   __BASIC_AUTH_USER__: "",
   __BASIC_AUTH_PASS__: "",
 });
@@ -225,37 +234,37 @@ if (!skipGit) {
 const isDevSource = vitepressCommonDep.startsWith("file:");
 const devBootstrap = isDevSource
   ? `
-Pokud je @techfides/tf-doc-vault ještě nezbuildovaný, spusť jednou:
+If @techfides/tf-doc-vault is not built yet, run once:
   (cd ${path.relative(targetDir, PACKAGE_DIR) || "."} && pnpm install)
-  # → nainstaluje deps a postaví dist/ (přes "prepare" hook)
+  # → installs deps and builds dist/ (via the "prepare" hook)
 `
   : "";
 
 if (skipGit) {
   console.log(`
-✓ Hotovo (embedded — bez vlastního git repozitáře).
+✓ Done (embedded — no standalone git repository).
 ${devBootstrap}
-Další kroky:
+Next steps:
   cd ${projectName}
   pnpm install
   pnpm docs:dev          # http://localhost:5173
 
-Dokumentace žije uvnitř nadřazeného repozitáře.
-Commitni ji spolu s ostatními změnami:
+The documentation lives inside the parent repository.
+Commit it together with your other changes:
   git add ${projectName}/
   git commit -m "docs: add ${projectName} analytical documentation"
   git push
 
-Deploy (Cloud Run — vlastní pipeline nezávisle na službě):
+Deploy (Cloud Run — its own pipeline, independent of the service):
   cd ${projectName}/infra
   terraform init && terraform apply
-  # nastavit CI/CD variables (GCP_SA_KEY, …) dle outputů terraformu
+  # set CI/CD variables (GCP_SA_KEY, …) from the terraform outputs
 `);
 } else {
   console.log(`
-✓ Hotovo.
+✓ Done.
 ${devBootstrap}
-Další kroky:
+Next steps:
   cd ${projectName}
   pnpm install
   pnpm docs:dev          # http://localhost:5173
@@ -263,7 +272,7 @@ Další kroky:
 Deploy:
   cd infra
   terraform init && terraform apply
-  # nastavit CI/CD variables (GCP_SA_KEY, …) dle outputů terraformu
+  # set CI/CD variables (GCP_SA_KEY, …) from the terraform outputs
   git remote add origin git@github.com:techfides/tf-analysis/${projectName}.git
   git push -u origin master
 `);

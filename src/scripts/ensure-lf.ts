@@ -61,19 +61,19 @@ function convertToLF(filePath: string): boolean {
   return false;
 }
 
-console.log("🔍 Prohledávám soubory pro konverzi na LF...");
+console.log("🔍 Scanning files to convert to LF...");
 const files = getAllFiles(ROOT);
 let convertedCount = 0;
 
 for (const file of files) {
   if (convertToLF(file)) {
-    console.log(`  ✅ Konvertováno na LF: ${path.relative(ROOT, file)}`);
+    console.log(`  ✅ Converted to LF: ${path.relative(ROOT, file)}`);
     convertedCount++;
   }
 }
 
 if (convertedCount > 0) {
-  console.log(`\n🎉 Celkem konvertováno ${convertedCount} souborů na LF.`);
+  console.log(`\n🎉 Converted ${convertedCount} file(s) to LF in total.`);
 } else {
-  console.log("\n✨ Všechny soubory již mají LF konce řádků.");
+  console.log("\n✨ All files already use LF line endings.");
 }

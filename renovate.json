@@ -9,8 +9,17 @@
   ],
   "labels": ["dependencies"],
   "schedule": ["before 6am on monday"],
+  "platformAutomerge": true,
+  "packageRules": [
+    {
+      "description": "Auto-merge low-risk updates once CI is green. Major updates stay manual for human review.",
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "bump"],
+      "automerge": true
+    }
+  ],
   "lockFileMaintenance": {
     "enabled": true,
+    "automerge": true,
     "schedule": ["before 6am on monday"]
   }
 }

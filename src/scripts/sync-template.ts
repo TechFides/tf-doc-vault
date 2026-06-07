@@ -228,7 +228,7 @@ const placeholders = detectPlaceholders();
 const tracked = flags.files ?? TRACKED_FILES;
 
 console.log(
-  `Porovnávám ${tracked.length} souborů proti šabloně @techfides/tf-doc-vault.`,
+  `Comparing ${tracked.length} file(s) against the @techfides/tf-doc-vault template.`,
 );
 console.log(`  cwd      : ${PROJECT_ROOT}`);
 console.log(`  template : ${TEMPLATE_DIR}`);
@@ -251,7 +251,7 @@ for (const rel of tracked) {
     missing++;
     if (flags.apply) {
       applyResult(r);
-      console.log(`     → vytvořeno z šablony`);
+      console.log(`     → created from template`);
     }
     continue;
   }
@@ -261,18 +261,18 @@ for (const rel of tracked) {
   if (r.diff) console.log(r.diff);
   if (flags.apply) {
     applyResult(r);
-    console.log(`     → přepsáno šablonou`);
+    console.log(`     → overwritten from template`);
   }
 }
 
 const total = drifted + missing;
 console.log();
 if (total === 0) {
-  console.log(`✓ vše v sync (${okCount} souborů)`);
+  console.log(`✓ all in sync (${okCount} files)`);
 } else if (flags.apply) {
-  console.log(`✓ aplikováno: ${drifted} drift + ${missing} missing → vyřešeno`);
+  console.log(`✓ applied: ${drifted} drift + ${missing} missing → resolved`);
 } else {
   console.log(`✗ ${drifted} drift, ${missing} missing, ${okCount} ok`);
-  console.log(`  Pro aplikaci spusť: tf-doc-vault sync --apply`);
+  console.log(`  To apply, run: tf-doc-vault sync --apply`);
   process.exit(1);
 }

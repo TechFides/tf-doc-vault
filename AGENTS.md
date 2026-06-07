@@ -39,7 +39,8 @@ Internal TechFides docs platform — CLI (`tf-doc-vault`, `create-ana`), reusabl
 - `src/theme/` — Vue theme: components, composables, styles
 - `src/setup/` — `setupTechDocs` mount for Express / NestJS; built by `unbuild`, NOT by `tsc` (excluded in `tsconfig.json`)
 - `src/scripts/` — docs tooling scripts (`validate-docs`, `normalize-docs`, `export-pdf`, …)
-- `bin/` — CLI entrypoints (`tf-doc-vault`, `create-ana`, `init-tech-docs`, `import-confluence`)
+- `src/cli/` — TypeScript CLI entrypoints (`tf-doc-vault`, `create-ana`, `init-tech-docs`, `import-confluence`, shared `utils`), compiled by `tsc` to `dist/cli/`; the `bin` field points at `dist/cli/*.js`
+- `src/confluence/` — Confluence importer internals: `client` (paginated/retried REST + tree), `convert` (ADF→Markdown via `extended-markdown-adf-parser` + glue), `resolve-media` (attachment resolution), `types`
 - `configs/` — published shared ESLint / Prettier / tsconfig base configs
 - `template/` — full ana-docs project scaffold used by `create-ana`
 - `template-tech-docs/` — tech-docs subset copied into consumer service repos by `init-tech-docs`
@@ -55,11 +56,11 @@ Internal TechFides docs platform — CLI (`tf-doc-vault`, `create-ana`), reusabl
 
 ## Architecture
 
-Single TypeScript package published to npm as `@techfides/tf-doc-vault`. The root entry (`src/index.ts`) re-exports the library API (config, sidebar, theme). The Express/NestJS mount (`src/setup/`) is built separately by `unbuild` and exposed only via the subpaths `@techfides/tf-doc-vault/setup/express` and `.../setup/nest` — never via the root index. The CLI in `bin/` scaffolds two flavours of consumer site from `template/` (full ana-docs project) and `template-tech-docs/` (subset mounted inside a service).
+Single TypeScript package published to npm as `@techfides/tf-doc-vault`. The root entry (`src/index.ts`) re-exports the library API (config, sidebar, theme). The Express/NestJS mount (`src/setup/`) is built separately by `unbuild` and exposed only via the subpaths `@techfides/tf-doc-vault/setup/express` and `.../setup/nest` — never via the root index. The CLI in `src/cli/` (compiled to `dist/cli/`) scaffolds two flavours of consumer site from `template/` (full ana-docs project) and `template-tech-docs/` (subset mounted inside a service).
 
 ## Testing
 
-See [`docs/TESTING.md`](docs/TESTING.md). In short: Vitest for pure logic in `src/scripts` and `src/sidebar`; Playwright smoke tests for CLI subcommands and the Express/Nest mount; a bug fix needs a regression test in the matching tier.
+See [`docs/TESTING.md`](docs/TESTING.md). In short: Vitest for pure logic in `src/scripts` and `src/sidebar`; Playwright smoke tests for CLI subcommands and the Express/Nest mount; a bug fix needs a regression test in the matching tier. When you change the Confluence importer (`src/confluence/**` or `src/cli/import-confluence.ts`), also follow **Confluence importer verification** in `docs/TESTING.md` before reporting done (the routine check is fixture-based and needs no Confluence access; a live page + credentials are optional).
 
 ## Domain glossary
 

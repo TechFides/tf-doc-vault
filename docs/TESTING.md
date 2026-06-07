@@ -4,11 +4,11 @@ Two tiers. Add new tests in the tier whose boundary you crossed.
 
 ## Tier 1 — Vitest unit tests (`tests/unit/`)
 
-Pure-logic tests for code that does not shell out, spawn processes, or build a site. Layout mirrors `src/` and `bin/`:
+Pure-logic tests for code that does not shell out, spawn processes, or build a site. Layout mirrors `src/`:
 
 - `tests/unit/sidebar/` — sidebar/nav generation against in-memory file trees
 - `tests/unit/scripts/` — doc-tooling helpers (e.g. `normalize-docs`)
-- `tests/unit/bin/` — CLI helpers in `bin/utils.mjs`
+- `tests/unit/cli/` — CLI helpers in `src/cli/utils.ts`
 
 Run:
 
@@ -36,10 +36,33 @@ Run:
 
 Config: `playwright.config.ts`. Global setup is in `tests/smoke/global-setup.ts` (builds `dist/` and prepares fixtures).
 
+## Confluence importer verification
+
+The importer (`src/cli/import-confluence.ts` + `src/confluence/**`) converts Confluence ADF to VitePress Markdown. Its conversion is covered by fixture-based unit tests, so the routine check needs **no Confluence access**:
+
+- **Always run `pnpm test`.** The `tests/unit/confluence/` specs run `convertAdf` against the committed `example-page.adf.json` fixture — asserting tables, emoji, images, code blocks and smart links convert correctly and that nothing leaks as a raw `adf:unknown` fragment — and the smoke suite exercises the CLI. No page or credentials required.
+
+- **Optional — live end-to-end.** Only when validating against a real page or a large tree (pagination / concurrency / per-page error isolation). This needs network access and credentials, so it is **not part of the routine gate**:
+
+  ```sh
+  CONFLUENCE_USER_EMAIL=… CONFLUENCE_API_TOKEN=… \
+    node dist/cli/import-confluence.js --site=<host> --root-page-id=<id> --output=<dir>
+  ```
+
+  To eyeball rendering, stage a converted page into `playground/docs/` and run `pnpm build:docs` (or `pnpm dev:docs`). A clean VitePress build confirms the Markdown compiles through Vue — i.e. it won't break dev-mode HMR.
+
+Good to know:
+
+- **Attachment downloads** must use the REST path `…/wiki/rest/api/content/{pageId}/child/attachment/{attId}/download`. The legacy `/wiki/download/attachments/…` link is OAuth-gated and returns `401` for API-token (scoped) auth.
+- **Dynamic `extension` macros** (table-of-contents, includes, drawio, …) can't become static Markdown; they are dropped with a per-page warning, not an error.
+- `makeConfig` already sets `ignoreDeadLinks: [/localhost/]`, so `localhost` links in imported pages don't fail a docs build.
+- If a build fails on a missing dependency, `node_modules` may be stale — re-sync with `pnpm install --frozen-lockfile`.
+
 ## When to add which
 
-- Touching `src/sidebar`, `src/scripts`, or pure helpers in `bin/`: **unit test** in the matching `tests/unit/<area>/` folder.
-- Touching `bin/*.mjs` user-visible CLI behaviour, `src/setup/**`, or anything that affects how a scaffolded site boots: **smoke test** in `tests/smoke/`.
+- Touching `src/sidebar`, `src/scripts`, or pure helpers in `src/cli/`: **unit test** in the matching `tests/unit/<area>/` folder.
+- Touching `src/cli/*` user-visible CLI behaviour, `src/setup/**`, or anything that affects how a scaffolded site boots: **smoke test** in `tests/smoke/`.
+- Touching `src/confluence/**` or the Confluence importer: cover it with a `tests/unit/confluence/` spec and follow **Confluence importer verification** above.
 - Fixing a bug: add a regression test in the tier that would have caught it before fixing the code.
 
 ## External dependencies

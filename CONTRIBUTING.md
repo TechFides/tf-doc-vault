@@ -77,16 +77,64 @@ The tag and `chore(release)` commit are already on `master`. Nothing was publish
 - **npm trusted publisher** is pinned to this repo, the `publish.yml` workflow, the `release` job, and the `npm-publish` environment. Any drift (e.g. someone edits the workflow to drop the environment) makes npm reject the publish, even if the workflow itself runs.
 - No `NPM_TOKEN` exists in the repo; auth is via OIDC at publish time.
 
-## Testing changes locally
+## Local development
+
+There are two ways to iterate, depending on what you're changing.
+
+### A. Playground with hot reload (recommended for theme/config work)
+
+The package ships with `playground/docs/` — a minimal VitePress site that imports `makeConfig` and `createTheme` directly from `src/`, not from `dist/`. Editing any
+`.vue` / `.css` / `.ts` under `src/theme/` or `src/config/` triggers Vite HMR in the browser instantly. No `pnpm build`, no syncing into a consumer.
 
 ```bash
-# In this repo:
-pnpm build
-
-# In a consumer repo (scaffolded with --dev):
-pnpm install   # picks up file: dependency
-pnpm docs:dev  # verifies changes via VitePress dev server
+pnpm install         # once after cloning
+pnpm dev:docs        # → http://localhost:5173
 ```
+
+Then edit, for example, `src/theme/components/DocMeta.vue` or `src/theme/styles/base.css` — the browser re-renders without restart. Sample content lives in
+`playground/docs/v1/index.md` and covers the common rendering cases (code blocks, tables, DocMeta, outline, inline code).
+
+Production build of the playground (useful for sanity-checking the eventual consumer build):
+
+```bash
+pnpm build:docs
+pnpm preview:docs    # serves the built output
+```
+
+**How it works.** `playground/docs/.vitepress/config.ts` imports `makeConfig` from `../../../src/config/index.ts`. A Vite alias maps
+`@techfides/tf-doc-vault/*` to local source paths, so internal imports inside the theme resolve the same way they would in a published consumer.
+
+**Mermaid is disabled in the playground** via `makeConfig({ mermaid: false })` to avoid `vitepress-plugin-mermaid` optimizeDeps friction with pnpm-installed sub-deps
+(dayjs, cytoscape, …). Diagrams render as plain code blocks. To test Mermaid specifically, use the consumer flow below.
+
+### B. Against a real consumer (full integration)
+
+For changes that touch sidebar/nav generation, multi-version flows, CLI scripts (`tf-doc-vault validate`, `print`, `export-pdf`, …), or anything that needs a fully
+scaffolded project:
+
+```bash
+# 1. in the package — once after cloning
+cd tf-doc-vault
+pnpm install                  # deps + "prepare" hook builds dist/
+pnpm dev                      # tsc --watch + auto-copy static assets (.vue/.css/.json/.ico)
+
+# 2. in an adjacent application repo scaffolded with --source=file
+cd ../<something>_ana
+pnpm install                  # pulls peer deps and links file:../tf-doc-vault
+pnpm docs:dev
+```
+
+An application repo scaffolded for local development declares the dependency via `file:`:
+
+```json
+"dependencies": { "@techfides/tf-doc-vault": "file:../tf-doc-vault" }
+```
+
+Prerequisite for `file:` install: both directories must be siblings (relative path `../tf-doc-vault`). If the package is elsewhere, `--file-path=/abs/path`
+during scaffolding overrides it.
+
+**Note.** pnpm `file:` dependencies are _copies_ from `dist/` into the consumer's pnpm store — not live symlinks. After each `tsc --watch` rebuild in the package,
+refresh the consumer with `pnpm install --force` so it picks up the new `dist/`. Path A above sidesteps this entirely, which is why it's the default for theme work.
 
 ## Local pre-publish testing (tarball flow)
 

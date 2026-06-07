@@ -1,0 +1,253 @@
+{
+  "type": "doc",
+  "version": 1,
+  "content": [
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "text": "All backend services ship with built-in observability.",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                { "text": "View traces locally at ", "type": "text" },
+                {
+                  "text": "http://localhost:16686/",
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "link",
+                      "attrs": { "href": "http://localhost:16686/" }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "On staging and production, connect to the cluster and port-forward to the tracing service.",
+                  "type": "text"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "mediaSingle",
+      "attrs": { "layout": "full-width", "width": 1800, "widthType": "pixel" },
+      "content": [
+        {
+          "type": "media",
+          "attrs": {
+            "width": 2542,
+            "alt": "architecture-diagram.png",
+            "id": "11111111-2222-3333-4444-555555555555",
+            "collection": "contentId-100",
+            "type": "file",
+            "height": 1251
+          }
+        }
+      ]
+    },
+    { "type": "paragraph" },
+    {
+      "type": "heading",
+      "attrs": { "level": 1 },
+      "content": [{ "text": "Setup", "type": "text" }]
+    },
+    {
+      "type": "heading",
+      "attrs": { "level": 2 },
+      "content": [{ "text": "Install", "type": "text" }]
+    },
+    {
+      "type": "codeBlock",
+      "content": [
+        {
+          "text": "npm install example-otel\nnpm install example-tracing",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [{ "text": "see ", "type": "text" }]
+    },
+    {
+      "type": "blockCard",
+      "attrs": {
+        "url": "https://example.atlassian.net/wiki/spaces/DOC/pages/1234567890"
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": [{ "text": " ", "type": "text" }]
+    },
+    {
+      "type": "heading",
+      "attrs": { "level": 2 },
+      "content": [{ "text": "Bootstrap", "type": "text" }]
+    },
+    {
+      "type": "codeBlock",
+      "attrs": { "language": "typescript" },
+      "content": [
+        {
+          "text": "import { createTracer } from 'example-otel';\n\nconst tracer = createTracer(\n  'example-service',\n  'http://localhost:4318/v1/traces',\n);",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": { "level": 1 },
+      "content": [{ "text": "Rollout status", "type": "text" }]
+    },
+    {
+      "type": "table",
+      "attrs": {
+        "layout": "default",
+        "width": 760,
+        "localId": "11111111-aaaa-bbbb-cccc-222222222222"
+      },
+      "content": [
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableHeader",
+              "attrs": { "colspan": 1, "rowspan": 1, "colwidth": [343] },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "text": "Service",
+                      "type": "text",
+                      "marks": [{ "type": "strong" }]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableHeader",
+              "attrs": { "colspan": 1, "rowspan": 1, "colwidth": [417] },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "text": "Tracing",
+                      "type": "text",
+                      "marks": [{ "type": "strong" }]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableCell",
+              "attrs": { "colspan": 1, "rowspan": 1, "colwidth": [343] },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "text": "service-a",
+                      "type": "text",
+                      "marks": [{ "type": "strong" }]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": { "colspan": 1, "rowspan": 1, "colwidth": [417] },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "emoji",
+                      "attrs": {
+                        "id": "atlassian-check_mark",
+                        "text": ":check_mark:",
+                        "shortName": ":check_mark:"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableCell",
+              "attrs": { "colspan": 1, "rowspan": 1, "colwidth": [343] },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "text": "service-b",
+                      "type": "text",
+                      "marks": [{ "type": "strong" }]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": { "colspan": 1, "rowspan": 1, "colwidth": [417] },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "emoji",
+                      "attrs": {
+                        "id": "atlassian-check_mark",
+                        "text": ":check_mark:",
+                        "shortName": ":check_mark:"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

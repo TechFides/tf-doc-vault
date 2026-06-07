@@ -149,4 +149,4 @@ for (const page of pages) {
 }
 
 fs.writeFileSync(OUTPUT, parts.join("\n"), "utf-8");
-console.log(`✓ Vygenerováno docs/print.md (${pages.length} stránek)`);
+console.log(`✓ Generated docs/print.md (${pages.length} pages)`);

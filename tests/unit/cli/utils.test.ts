@@ -3,13 +3,13 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-// bin/utils.mjs is plain ESM JS — vitest resolves the .mjs extension fine.
 import {
   parseArgs,
   copyDir,
   replacePlaceholders,
+  findDocsRoot,
   BINARY_EXTENSIONS,
-} from "../../../bin/utils.mjs";
+} from "../../../src/cli/utils.js";
 
 describe("parseArgs", () => {
   test("splits positional from flags", () => {
@@ -128,6 +128,50 @@ describe("replacePlaceholders", () => {
     expect(fs.readFileSync(f, "utf8")).toBe("no placeholders here");
     // File should not have been rewritten
     expect(fs.statSync(f).mtimeMs).toBe(mtimeBefore);
+  });
+});
+
+describe("findDocsRoot", () => {
+  let root: string;
+
+  beforeEach(() => {
+    root = fs.mkdtempSync(path.join(os.tmpdir(), "docsroot-"));
+  });
+
+  afterEach(() => {
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  test("returns the .vitepress srcDir from the version dir", () => {
+    const src = path.join(root, "docs");
+    fs.mkdirSync(path.join(src, ".vitepress"), { recursive: true });
+    expect(findDocsRoot(path.join(src, "v1"))).toBe(src);
+  });
+
+  test("returns the srcDir from a nested sub-section", () => {
+    const src = path.join(root, "docs");
+    fs.mkdirSync(path.join(src, ".vitepress"), { recursive: true });
+    expect(findDocsRoot(path.join(src, "v1", "technicka-specifikace"))).toBe(
+      src,
+    );
+  });
+
+  test("works for the tech-docs layout (tech-docs/docs)", () => {
+    const src = path.join(root, "tech-docs", "docs");
+    fs.mkdirSync(path.join(src, ".vitepress"), { recursive: true });
+    expect(findDocsRoot(path.join(src, "v1", "section"))).toBe(src);
+  });
+
+  test("resolves even when the output dir does not exist yet", () => {
+    const src = path.join(root, "docs");
+    fs.mkdirSync(path.join(src, ".vitepress"), { recursive: true });
+    expect(findDocsRoot(path.join(src, "v1", "brand-new-section"))).toBe(src);
+  });
+
+  test("falls back to the parent when no .vitepress is found", () => {
+    const out = path.join(root, "bare", "v1");
+    fs.mkdirSync(out, { recursive: true });
+    expect(findDocsRoot(out)).toBe(path.join(root, "bare"));
   });
 });
 
