@@ -73,7 +73,7 @@ You don't wire this up by hand — **scaffold the flavour you need**, then start
 - **Standalone analysis / spec site** (its own repo, deployed to Cloud Run):
 
   ```bash
-  pnpm dlx @techfides/tf-doc-vault create my_analysis --gcp-project=tfsa-my-analysis --server=nginx
+  pnpm dlx @techfides/tf-doc-vault@latest create my_analysis --gcp-project=tfsa-my-analysis --server=nginx
   ```
 
   Full guide → [Analytical documentation](./docs/ana-docs.md)
