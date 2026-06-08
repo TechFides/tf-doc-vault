@@ -1,5 +1,41 @@
 # Changelog
 
+## v0.2.2
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.1...v0.2.2)
+
+### 🚀 Enhancements
+
+- **theme:** Sidebar UX improvements — width, ellipsis, emoji align, page title ([6e76b80](https://github.com/TechFides/tf-doc-vault/commit/6e76b80))
+- **theme:** Add SidebarDefaultEmoji component ([ff7a7ae](https://github.com/TechFides/tf-doc-vault/commit/ff7a7ae))
+- **theme:** Remove footer border-top, remove navbar title bottom border ([245771a](https://github.com/TechFides/tf-doc-vault/commit/245771a))
+- **theme:** Polish dark/light theme visuals for professional look ([ef3199c](https://github.com/TechFides/tf-doc-vault/commit/ef3199c))
+
+### 🩹 Fixes
+
+- **theme:** Increase sidebar text contrast in light mode ([66f54f9](https://github.com/TechFides/tf-doc-vault/commit/66f54f9))
+- **theme:** Force sidebar text contrast with !important override ([8413aaa](https://github.com/TechFides/tf-doc-vault/commit/8413aaa))
+
+### 💅 Refactors
+
+- **theme:** Remove useSidebarEmojiAlign from public API ([d135f85](https://github.com/TechFides/tf-doc-vault/commit/d135f85))
+- **theme:** Inline SidebarEmojiAlign logic, remove separate composable ([7d2255f](https://github.com/TechFides/tf-doc-vault/commit/7d2255f))
+- **theme:** Remove SidebarEmojiAlign — all sidebar items have emoji ([be936c5](https://github.com/TechFides/tf-doc-vault/commit/be936c5))
+
+### 📖 Documentation
+
+- Update dlx command to include latest tag ([a8cb3f3](https://github.com/TechFides/tf-doc-vault/commit/a8cb3f3))
+- Update ana-docs.md to include latest tag in dlx ([bbc272c](https://github.com/TechFides/tf-doc-vault/commit/bbc272c))
+
+### 🏡 Chore
+
+- Fix prettier formatting ([a2ed60f](https://github.com/TechFides/tf-doc-vault/commit/a2ed60f))
+
+### ❤️ Contributors
+
+- Václav Mičulka ([@VaclavMiculka](https://github.com/VaclavMiculka))
+- Filip Koukal ([@filipkoukal](https://github.com/filipkoukal))
+
 ## v0.2.1
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.0...v0.2.1)
