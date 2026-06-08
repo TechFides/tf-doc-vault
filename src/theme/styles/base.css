@@ -67,7 +67,8 @@
     sans-serif;
 
   --vp-layout-max-width: var(--layout-max-width-content);
-  --vp-sidebar-width: 280px;
+  --vp-sidebar-width: 360px;
+  --vp-sidebar-bg-color: #f4f6fb;
 
   /* VitePress `locales` config is used here for versions (v1, v2), not
      languages — hide the language switcher VitePress would otherwise
@@ -76,13 +77,13 @@
 }
 
 .dark {
-  --vp-c-bg: #04132a;
+  --vp-c-bg: #020a18;
   --vp-c-bg-alt: var(--brand-nav-navy);
   --vp-c-bg-soft: #0a2d52;
   --vp-c-bg-mute: #0f3870;
   --vp-c-bg-elv: #0a2d52;
 
-  --vp-sidebar-bg-color: var(--brand-nav-navy);
+  --vp-sidebar-bg-color: #04132a;
 
   --vp-c-text-1: #ffffff;
   --vp-c-text-2: rgba(255, 255, 255, 0.72);
@@ -94,7 +95,7 @@
 
   --vp-c-brand-2: var(--brand-secondary);
 
-  --vp-code-block-bg: #020a18;
+  --vp-code-block-bg: #051020;
 
   --brand-badge-published-bg: #052e16;
   --brand-badge-published-text: #4ade80;
@@ -134,6 +135,37 @@
   border-bottom-color: transparent !important;
 }
 
+.VPNavBarTitle.has-sidebar,
+.VPNavBarTitle.has-sidebar .title {
+  border-bottom-color: transparent !important;
+}
+
+/* Light mode: navbar title column matches sidebar background */
+.VPNavBar.has-sidebar > .wrapper > .container > .title {
+  background-color: var(--vp-sidebar-bg-color);
+  border-right: 1px solid var(--vp-c-border);
+}
+
+/* Sidebar right border for visual separation */
+.VPSidebar {
+  border-right: 1px solid var(--vp-c-border);
+}
+
+/* Sidebar custom scrollbar */
+.VPSidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.VPSidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.VPSidebar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+}
+.dark .VPSidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .dark html,
 .dark body,
 .dark .Layout,
@@ -152,7 +184,6 @@
 .VPButton,
 .VPLocalSearchBox,
 .VPLocalSearchBox input,
-.VPSidebarItem .item,
 .VPMenu,
 .custom-block {
   border-radius: 0 !important;
@@ -269,14 +300,74 @@ html.layout-max .VPContent {
   background-color: rgba(255, 255, 255, 0.06);
 }
 
+.VPSidebarItem .item {
+  overflow: hidden;
+}
+
+.VPSidebarItem .link,
+.VPSidebarItem .button {
+  min-width: 0;
+  padding-right: 12px;
+}
+
+.VPSidebarItem .text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.VPSidebarItem.level-0:not(.collapsible) {
+  padding-bottom: 10px;
+}
+
+#VPSidebarNav {
+  padding-top: 20px;
+}
+
+.VPSidebarItem .text.default-emoji-folder::before {
+  content: "📁 ";
+}
+
+.VPSidebarItem .text.default-emoji-file::before {
+  content: "📄 ";
+}
+
+.VPSidebarItem .text {
+  color: #2d3748 !important;
+}
+
+.dark .VPSidebarItem .text {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.VPSidebarItem > .item {
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+}
+
+.VPSidebarItem > .item:hover {
+  background-color: rgba(0, 116, 200, 0.05);
+}
+
+.dark .VPSidebarItem > .item:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.VPSidebarItem.is-active > .item {
+  background-color: rgba(0, 116, 200, 0.09);
+}
+
+.dark .VPSidebarItem.is-active > .item {
+  background-color: rgba(0, 160, 227, 0.12);
+}
+
 .VPSidebarItem.is-active > .item .link .text {
   color: var(--brand-primary) !important;
   font-weight: 700;
 }
 
-.VPSidebarItem.is-active > .item {
-  border-left: 2px solid var(--brand-primary);
-  padding-left: calc(var(--vp-sidebar-item-offset, 0px) + 14px);
+.dark .VPSidebarItem.is-active > .item .link .text {
+  color: var(--brand-secondary) !important;
 }
 
 /* Mermaid is themed entirely here off the --brand-* tokens (no JS
@@ -497,6 +588,15 @@ html.layout-max .VPContent {
   stroke: var(--brand-text-muted) !important;
 }
 
+/* Code block subtle border */
+.vp-doc div[class*="language-"] {
+  border: 1px solid var(--brand-border-default);
+}
+
+.dark .vp-doc div[class*="language-"] {
+  border: 1px solid var(--vp-c-border);
+}
+
 .vp-doc a {
   color: var(--brand-primary);
   text-decoration: none;
@@ -509,4 +609,16 @@ html.layout-max .VPContent {
 
 .vp-doc a:active {
   color: var(--brand-primary-active);
+}
+
+.dark .vp-doc a {
+  color: var(--brand-secondary);
+}
+
+.dark .vp-doc a:hover {
+  color: #5bc8f5;
+}
+
+.dark .vp-doc a:active {
+  color: var(--brand-primary);
 }

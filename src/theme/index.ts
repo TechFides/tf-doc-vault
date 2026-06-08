@@ -2,6 +2,7 @@ import DefaultTheme from "vitepress/theme";
 import { useData, type Theme } from "vitepress";
 import { h, Fragment, type VNode } from "vue";
 import DocMeta from "./components/DocMeta.vue";
+import DocPageTitle from "./components/DocPageTitle.vue";
 import PrintLayout from "./components/PrintLayout.vue";
 import ImageLightbox from "./components/ImageLightbox.vue";
 import WidthToggle from "./components/WidthToggle.vue";
@@ -10,6 +11,7 @@ import FeatureCards from "./components/FeatureCards.vue";
 import BrandFooter from "./components/BrandFooter.vue";
 import NotFound from "./components/NotFound.vue";
 import { i18n, resolveLocale } from "./i18n/index.js";
+import SidebarDefaultEmoji from "./components/SidebarDefaultEmoji.vue";
 import "./styles/print.css";
 import "./styles/base.css";
 
@@ -41,14 +43,17 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
 
       const slots: Record<string, () => VNode> = {
         "doc-before": (): VNode =>
-          h("div", { class: "doc-meta-wrapper" }, [h(DocMeta)]),
+          h("div", { class: "doc-meta-wrapper" }, [
+            h(DocMeta),
+            h(DocPageTitle),
+          ]),
         "layout-bottom": (): VNode =>
           h(
             Fragment,
             null,
             showFooter
-              ? [h(ImageLightbox), h(BrandFooter)]
-              : [h(ImageLightbox)],
+              ? [h(SidebarDefaultEmoji), h(ImageLightbox), h(BrandFooter)]
+              : [h(SidebarDefaultEmoji), h(ImageLightbox)],
           ),
         "not-found": (): VNode => h(NotFound),
       };
@@ -69,6 +74,7 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
 
 export {
   DocMeta,
+  DocPageTitle,
   ImageLightbox,
   PrintLayout,
   WidthToggle,
