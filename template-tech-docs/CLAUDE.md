@@ -7,7 +7,7 @@ Tato složka obsahuje technickou dokumentaci pro službu **__SERVICE_ID__** proj
 ```
 docs/
   v1/
-    <sekce>/              # top-menu položka (= Confluence stránka s potomky)
+    <sekce>/              # sekce v sidebaru (= Confluence stránka s potomky)
       index.md            # popis sekce
       <skupina>/          # collapsible skupina (= vnořená stránka s potomky)
         index.md
