@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.2.3
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.2...v0.2.3)
+
+### 🚀 Enhancements
+
+- **config:** Add sectionNav option to hide navbar section links ([39a7a99](https://github.com/TechFides/tf-doc-vault/commit/39a7a99))
+- **template-tech-docs:** Hide navbar section links by default ([f17a649](https://github.com/TechFides/tf-doc-vault/commit/f17a649))
+
+### 🩹 Fixes
+
+- **theme:** Eliminate hydration mismatches on built pages ([0d69405](https://github.com/TechFides/tf-doc-vault/commit/0d69405))
+- **confluence:** Preserve task-list nesting and render GFM checkboxes ([38b3708](https://github.com/TechFides/tf-doc-vault/commit/38b3708))
+
+### 🏡 Chore
+
+- Translate remaining strings to english ([bb39104](https://github.com/TechFides/tf-doc-vault/commit/bb39104))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.2.2
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.1...v0.2.2)
