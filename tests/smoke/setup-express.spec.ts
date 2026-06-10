@@ -38,7 +38,7 @@ for (const flavor of flavors) {
       const page = await authContext.newPage();
       await page.goto(server.url);
       await assertCleanRender(page, {
-        expectedStrings: ["SMK", "Technická dokumentace"],
+        expectedStrings: ["SMK", "Technical documentation"],
       });
       await authContext.close();
     } finally {

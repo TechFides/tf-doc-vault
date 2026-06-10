@@ -1,6 +1,6 @@
-# Tech-docs build stage pro service Dockerfile
+# Tech-docs build stage for the service Dockerfile
 
-Přidej před production stage (některé comandy mohou být redundantní s již existujícími v Dockerfile):
+Add before the production stage (some commands may be redundant with ones already in the Dockerfile):
 
 ```dockerfile
 ###################
@@ -20,7 +20,7 @@ COPY --chown=node:node tech-docs ./tech-docs
 RUN npx vitepress build tech-docs/docs
 ```
 
-A v production stage:
+And in the production stage:
 
 ```dockerfile
 COPY --chown=node:node --from=docs-build \
@@ -28,9 +28,9 @@ COPY --chown=node:node --from=docs-build \
   ./tech-docs/docs/.vitepress/dist
 ```
 
-**Důležité:**
+**Important:**
 
-- docs-build stage běží paralelně s app build stage (Buildkit). Úprava
-  `tech-docs/architecture.md` invaliduje jen docs cache, ne app cache.
-- Žádný `GH_NPM_TOKEN` ani `.npmrc` registry override — `@techfides/tf-doc-vault`
-  je veřejně dostupný z npmjs.com.
+- The docs-build stage runs in parallel with the app build stage (Buildkit). Editing
+  `tech-docs/architecture.md` invalidates only the docs cache, not the app cache.
+- No `GH_NPM_TOKEN` or `.npmrc` registry override — `@techfides/tf-doc-vault`
+  is publicly available from npmjs.com.
