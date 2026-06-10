@@ -140,4 +140,23 @@ describe("rewriteConfluenceLinks", () => {
     const md = "[Ext](https://example.com/foo)";
     expect(rewriteConfluenceLinks(md, map, titles, docsRoot)).toBe(md);
   });
+  test("rewrites a link whose label contains a [SERVICE_ID] prefix", () => {
+    const md =
+      "viz [[BAT] Konfigurace mock modulů](https://x.atlassian.net/wiki/spaces/K/pages/123).";
+    expect(rewriteConfluenceLinks(md, map, titles, docsRoot)).toBe(
+      "viz [[BAT] Konfigurace mock modulů](/v1/page).",
+    );
+  });
+  test("leaves a bracketed-label link untouched when target is out of import", () => {
+    const md =
+      "[[AS] Migrace](https://x.atlassian.net/wiki/spaces/K/pages/999)";
+    expect(rewriteConfluenceLinks(md, map, titles, docsRoot)).toBe(md);
+  });
+  test("rewrites adjacent bracketed-label links independently", () => {
+    const md =
+      "[[BAT] One](https://x.atlassian.net/wiki/spaces/K/pages/123) a [[BAT] Two](https://x.atlassian.net/wiki/spaces/K/pages/456)";
+    expect(rewriteConfluenceLinks(md, map, titles, docsRoot)).toBe(
+      "[[BAT] One](/v1/page) a [[BAT] Two](/v1/section/index)",
+    );
+  });
 });

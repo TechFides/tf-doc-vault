@@ -80,7 +80,7 @@ export function rewriteConfluenceLinks(
   docsRoot: string,
 ): string {
   return markdown.replace(
-    /\[([^\]]+)\]\(https?:\/\/[^/]+\/wiki\/spaces\/[^/]+\/pages\/(\d+)[^)]*\)/g,
+    /\[((?:[^[\]]|\[[^\]]*\])+)\]\(https?:\/\/[^/]+\/wiki\/spaces\/[^/]+\/pages\/(\d+)[^)]*\)/g,
     (match: string, text: string, linkedId: string): string => {
       const absPath = pagePathMap.get(linkedId);
       if (!absPath) return match;
