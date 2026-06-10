@@ -72,3 +72,12 @@ describe("makeConfig sectionNav option", () => {
     expect(nav).toEqual(navLinks);
   });
 });
+
+describe("makeConfig markdown options", () => {
+  test("registers a markdown config hook (GFM task lists)", () => {
+    const config = makeConfig({ configDir, mermaid: false }) as unknown as {
+      markdown?: { config?: unknown };
+    };
+    expect(typeof config.markdown?.config).toBe("function");
+  });
+});

@@ -300,6 +300,16 @@ html.layout-max .VPContent {
   background-color: rgba(255, 255, 255, 0.06);
 }
 
+.vp-doc ul.contains-task-list {
+  list-style: none;
+  padding-left: 1.25rem;
+}
+
+.vp-doc .task-list-item-checkbox {
+  margin-right: 8px;
+  accent-color: var(--brand-primary);
+}
+
 .VPSidebarItem .item {
   overflow: hidden;
 }
