@@ -119,6 +119,13 @@ export interface MakeConfigOptions {
   analytics?: UmamiAnalytics;
   editLink?: EditLink;
   head?: HeadConfig[];
+  /**
+   * Auto-generated section links in the navbar (one per top-level section of
+   * the active version). With many sections they overflow the navbar, and the
+   * sidebar already lists the same sections — set `false` to omit them. The
+   * version dropdown and `branding.navLinks` are unaffected. Default: `true`.
+   */
+  sectionNav?: boolean;
   override?: Partial<UserConfig>;
   mermaid?: boolean;
 }
@@ -253,7 +260,8 @@ export function makeConfig(
     link: string;
     themeConfig: { nav: ReturnType<typeof generateNav> };
   } => {
-    const sectionNav = generateNav(docsRoot, v);
+    const sectionNav =
+      opts.sectionNav === false ? [] : generateNav(docsRoot, v);
     const showSections = sectionNav.length > 1;
     return {
       label: v,
