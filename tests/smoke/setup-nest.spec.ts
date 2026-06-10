@@ -30,7 +30,7 @@ for (const flavor of flavors) {
       const page = await ctx.newPage();
       await page.goto(server.url);
       await assertCleanRender(page, {
-        expectedStrings: ["SMK", "Technická dokumentace"],
+        expectedStrings: ["SMK", "Technical documentation"],
       });
       await ctx.close();
     } finally {

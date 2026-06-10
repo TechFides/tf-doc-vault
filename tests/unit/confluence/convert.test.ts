@@ -135,6 +135,49 @@ describe("lists that the library treats as unknown", () => {
     expect(md).not.toContain("adf:unknown");
   });
 
+  test("nested taskList → indented sub-list under the preceding item", () => {
+    const item = (state: string, label: string): any => ({
+      type: "taskItem",
+      attrs: { localId: label, state },
+      content: [text(label)],
+    });
+    const md = conv({
+      type: "taskList",
+      attrs: { localId: "outer" },
+      content: [
+        item("DONE", "GitHub"),
+        {
+          type: "taskList",
+          attrs: { localId: "inner" },
+          content: [item("DONE", "Dependabot"), item("TODO", "Jira")],
+        },
+        item("DONE", "CI/CD"),
+      ],
+    });
+    expect(md).toContain("- [x] GitHub");
+    expect(md).toContain("  - [x] Dependabot");
+    expect(md).toContain("  - [ ] Jira");
+    expect(md).toContain("- [x] CI/CD");
+    // The sub-items must not be glued into the parent paragraph.
+    expect(md).not.toMatch(/GitHub.*Dependabot/);
+  });
+
+  test("boundary whitespace is lifted out of emphasis marks", () => {
+    const md = conv(
+      para(
+        text("Přidání projektu do exporteru ", [{ type: "strike" }]),
+        text("odkaz", [
+          { type: "strike" },
+          { type: "link", attrs: { href: "https://example.com" } },
+        ]),
+      ),
+    );
+    // `~~text ~~` (whitespace before the closing delimiter) renders literal
+    // tildes in GFM — the space must end up outside the mark.
+    expect(md).toContain("~~Přidání projektu do exporteru~~");
+    expect(md).not.toContain("exporteru ~~");
+  });
+
   test("decisionList → bullet list", () => {
     const md = conv({
       type: "decisionList",

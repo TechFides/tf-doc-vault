@@ -150,19 +150,51 @@ function mediaContainer(node: AdfNode): AdfValue | AdfValue[] {
 }
 
 function taskListToBulletList(node: AdfNode): AdfNode {
-  const items = asNodes(node.content).map((item): AdfNode => {
-    const prefix = attrStr(item, "state") === "DONE" ? "[x] " : "[ ] ";
-    return {
+  const items: AdfNode[] = [];
+  for (const child of asNodes(node.content)) {
+    if (child.type !== "taskItem") {
+      const prev = items[items.length - 1];
+      if (prev) {
+        prev.content = [...asNodes(prev.content), child];
+      } else {
+        items.push({ type: "listItem", content: [child] });
+      }
+      continue;
+    }
+    const prefix = attrStr(child, "state") === "DONE" ? "[x] " : "[ ] ";
+    items.push({
       type: "listItem",
       content: [
         {
           type: "paragraph",
-          content: [{ type: "text", text: prefix }, ...inlineChildren(item)],
+          content: [{ type: "text", text: prefix }, ...inlineChildren(child)],
         },
       ],
-    };
-  });
+    });
+  }
   return { type: "bulletList", content: items };
+}
+
+const EMPHASIS_MARK_TYPES = new Set(["strong", "em", "strike"]);
+
+function liftMarkEdgeWhitespace(node: AdfNode): AdfValue | AdfValue[] {
+  const text = node.text;
+  if (
+    typeof text !== "string" ||
+    !node.marks?.some((m) => EMPHASIS_MARK_TYPES.has(m.type))
+  ) {
+    return node;
+  }
+  const match = /^(\s*)([\s\S]*?)(\s*)$/.exec(text);
+  if (!match) return node;
+  const [, lead = "", core = "", trail = ""] = match;
+  if (!lead && !trail) return node;
+  if (!core) return { type: "text", text: " " };
+  const out: AdfNode[] = [];
+  if (lead) out.push({ type: "text", text: lead });
+  out.push({ ...node, text: core });
+  if (trail) out.push({ type: "text", text: trail });
+  return out;
 }
 
 function decisionListToBulletList(node: AdfNode): AdfNode {
@@ -262,6 +294,8 @@ function transformNode(node: AdfValue): AdfValue | AdfValue[] {
       : node;
 
   switch (withChildren.type) {
+    case "text":
+      return liftMarkEdgeWhitespace(withChildren);
     case "blockCard":
     case "embedCard":
       return cardToParagraphLink(withChildren);

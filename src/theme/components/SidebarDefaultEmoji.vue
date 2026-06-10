@@ -45,4 +45,6 @@ watch(
 );
 </script>
 
-<template></template>
+<template>
+  <span v-if="false"></span>
+</template>

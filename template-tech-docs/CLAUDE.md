@@ -1,60 +1,62 @@
-# Tech Docs — instrukce pro Claude Code / AI agenty
+# Tech Docs — instructions for Claude Code / AI agents
 
-Tato složka obsahuje technickou dokumentaci pro službu **__SERVICE_ID__** projektu **__PROJECT__**.
+This folder contains the technical documentation for the **__SERVICE_ID__** service of the **__PROJECT__** project.
 
-## Struktura
+## Structure
 
 ```
 docs/
   v1/
-    <sekce>/              # top-menu položka (= Confluence stránka s potomky)
-      index.md            # popis sekce
-      <skupina>/          # collapsible skupina (= vnořená stránka s potomky)
+    <section>/            # sidebar section (= Confluence page with children)
+      index.md            # section description
+      <group>/            # collapsible group (= nested page with children)
         index.md
-        stranka.md
-      list-stranka.md     # přímý potomek sekce bez vlastních potomků
+        page.md
+      list-page.md        # direct child of the section without children of its own
 ```
 
-Sidebar se generuje automaticky z adresářové struktury. Sekce bez podsložek
-zobrazují soubory přímo; sekce s podsložkami je seskupují do collapsible skupin.
+The sidebar is generated automatically from the directory structure. Sections without
+subfolders list their files directly; sections with subfolders group them into
+collapsible groups.
 
-## Konvence pro úpravu
+## Editing conventions
 
-**Frontmatter** je povinný:
+**Frontmatter** is required:
 
 ```yaml
 ---
-title: Architektura
+title: Architecture
 status: published   # published | draft | review | archived
 updated_at: 2026-04-30
 ---
 ```
 
-- `updated_at` aktualizuj při každé úpravě obsahu (formát `YYYY-MM-DD`).
-- Pro diagramy používej Mermaid v code blocks (` ```mermaid `).
-- Obrázky ukládej do `tech-docs/docs/public/images/` a odkazuj absolutně `/images/foo.png`.
+- Update `updated_at` on every content change (format `YYYY-MM-DD`).
+- Use Mermaid in code blocks (` ```mermaid `) for diagrams.
+- Store images in `tech-docs/docs/public/images/` and reference them absolutely as `/images/foo.png`.
 
-## Pravidla pro AI agenty
+## Rules for AI agents
 
-- Při úpravě jakéhokoli `.md` souboru aktualizuj `updated_at` na dnešní datum.
-- Pokud měníš strukturu (přidáváš/odebíráš soubory), aktualizuj odkazy v `index.md`.
-- Nezasahuj do `docs/.vitepress/config.ts` bez explicitní instrukce — sidebar se generuje automaticky.
-- Před commitem spusť `pnpm docs:fix`.
+- When editing any `.md` file, update its `updated_at` to today's date.
+- When changing the structure (adding/removing files), update the links in `index.md`.
+- Don't touch `docs/.vitepress/config.ts` without an explicit instruction — the sidebar is generated automatically.
+- Run `pnpm docs:fix` before committing.
 
-## Lokální preview
-
-```bash
-pnpm docs:dev   # http://localhost:5174
-```
-
-## Validace
+## Local preview
 
 ```bash
-pnpm docs:validate   # frontmatter, broken links, chybějící obrázky, markdown lint
-pnpm docs:fix        # LF normalizace, frontmatter normalize, lint, validate
+pnpm docs:dev   # http://localhost:5173
 ```
 
-## Vystavení v běžící službě
+## Validation
 
-Dokumentace je mountována v NestJS `main.ts` přes `setupTechDocs(...)` na `/tech-docs`,
-chráněná Basic auth z `TECH_DOCS_PASSWORD` env. Dostupná pouze na non-prod prostředích.
+```bash
+pnpm docs:validate   # frontmatter, broken links, missing images, markdown lint
+pnpm docs:fix        # LF normalization, frontmatter normalize, lint, validate
+```
+
+## Serving from the running service
+
+The documentation is mounted in NestJS `main.ts` via `setupTechDocs(...)` at `/tech-docs`,
+protected by Basic auth from the `TECH_DOCS_PASSWORD` env var. Available on non-prod
+environments only.

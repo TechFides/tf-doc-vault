@@ -3,6 +3,7 @@ import path from "node:path";
 import type { HeadConfig, UserConfig } from "vitepress";
 import { defineConfig } from "vitepress";
 import { withMermaid } from "vitepress-plugin-mermaid";
+import { taskLists } from "./taskLists.js";
 import { generateNav, generateSidebar, getVersions } from "../sidebar/index.js";
 import { LOGO_SHAPES, LOGO_VIEW_BOX } from "../theme/icons/logoSymbol.js";
 import defaultStrings from "./strings.cs.json" with { type: "json" };
@@ -119,6 +120,7 @@ export interface MakeConfigOptions {
   analytics?: UmamiAnalytics;
   editLink?: EditLink;
   head?: HeadConfig[];
+  sectionNav?: boolean;
   override?: Partial<UserConfig>;
   mermaid?: boolean;
 }
@@ -253,7 +255,8 @@ export function makeConfig(
     link: string;
     themeConfig: { nav: ReturnType<typeof generateNav> };
   } => {
-    const sectionNav = generateNav(docsRoot, v);
+    const sectionNav =
+      opts.sectionNav === false ? [] : generateNav(docsRoot, v);
     const showSections = sectionNav.length > 1;
     return {
       label: v,
@@ -316,6 +319,13 @@ export function makeConfig(
       // useData().theme.value.docVault. Component copy lives in vue-i18n.
       docVault: {
         footer,
+      },
+    },
+    // GFM task lists (`- [x]`) — markdown-it has no built-in support, so the
+    // Confluence importer's checkboxes would render as literal `[x]` text.
+    markdown: {
+      config(md) {
+        taskLists(md);
       },
     },
     vite: {

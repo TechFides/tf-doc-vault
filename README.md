@@ -100,7 +100,7 @@ import { makeConfig } from "@techfides/tf-doc-vault/config";
 export default makeConfig({
   configDir: import.meta.dirname,
   project: "lapa",
-  // optional: analytics, editLink, branding, mermaid, …
+  // optional: analytics, editLink, branding, sectionNav, mermaid, …
   analytics: { provider: "umami", websiteId: "...", domain: "..." },
   editLink: { repo: "techfides/tf-analysis/lapa_ana", branch: "master" },
 });

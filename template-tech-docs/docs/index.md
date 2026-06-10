@@ -1,19 +1,19 @@
 ---
-title: __SERVICE_ID__ — technická dokumentace
+title: __SERVICE_ID__ — technical documentation
 status: published
 updated_at: __DATE__
 layout: home
 
 hero:
   name: __SERVICE_ID__
-  text: Technická dokumentace
-  tagline: Technická specifikace služby __SERVICE_ID__ projektu __PROJECT__.
+  text: Technical documentation
+  tagline: Technical specification of the __SERVICE_ID__ service in the __PROJECT__ project.
   actions:
     - theme: brand
-      text: Otevřít technickou specifikaci
+      text: Open the technical specification
       link: /v1/
 ---
 
-Vítejte v technické dokumentaci služby **__SERVICE_ID__** projektu **__PROJECT__**.
+Welcome to the technical documentation of the **__SERVICE_ID__** service in the **__PROJECT__** project.
 
-Tato dokumentace je generovaná z markdown zdrojů a verzovaná v Gitu přímo v repozitáři služby.
+This documentation is generated from markdown sources and versioned in Git directly in the service repository.

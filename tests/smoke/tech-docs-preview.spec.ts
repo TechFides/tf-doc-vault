@@ -24,6 +24,6 @@ test("vitepress preview serves tech-docs cleanly", async ({
 
   await page.goto(server.url);
   await assertCleanRender(page, {
-    expectedStrings: ["SMK", "Technická dokumentace"],
+    expectedStrings: ["SMK", "Technical documentation"],
   });
 });

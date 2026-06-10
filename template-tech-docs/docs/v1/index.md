@@ -1,21 +1,21 @@
 ---
-title: Technická specifikace
+title: Technical specification
 status: draft
 updated_at: __DATE__
 ---
 
-# Technická specifikace
+# Technical specification
 
-Jak je to postavené — architektura, integrace, deployment.
+How it's built — architecture, integrations, deployment.
 
-## Architektura
+## Architecture
 
-_(doplnit)_
+_(to be filled in)_
 
-## Integrace
+## Integrations
 
-_(doplnit)_
+_(to be filled in)_
 
 ## Deployment
 
-_(doplnit)_
+_(to be filled in)_
