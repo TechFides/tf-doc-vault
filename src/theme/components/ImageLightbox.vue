@@ -74,55 +74,66 @@ function svgToDataUrl(svgEl: SVGSVGElement): string {
   if (!clone.getAttribute("height"))
     clone.setAttribute("height", String(bbox.height));
 
-  // Mermaid SVGs get dark-mode styling from `.dark .mermaid` rules
-  // on the live DOM. Once serialized to a data URL that scope is
-  // gone, so copy computed styles onto the clone.
-  const isDark = document.documentElement.classList.contains("dark");
-  if (isDark) {
-    const liveEls = [
-      svgEl,
-      ...Array.from(svgEl.querySelectorAll<SVGElement>("*")),
-    ];
-    const cloneEls = [
-      clone,
-      ...Array.from(clone.querySelectorAll<SVGElement>("*")),
-    ];
-    const liveHtml = Array.from(
-      svgEl.querySelectorAll<HTMLElement>("foreignObject *"),
-    );
-    const cloneHtml = Array.from(
-      clone.querySelectorAll<HTMLElement>("foreignObject *"),
-    );
-    const allLive = [...liveEls, ...liveHtml];
-    const allClone = [...cloneEls, ...cloneHtml];
-    const props = [
-      "fill",
-      "stroke",
-      "stroke-width",
-      "color",
-      "background-color",
-    ];
-    for (let i = 0; i < allLive.length && i < allClone.length; i++) {
-      const cs = getComputedStyle(allLive[i] as Element);
-      const target = allClone[i];
-      if (!target) continue;
-      const parts: string[] = [];
-      for (const p of props) {
-        const v = cs.getPropertyValue(p);
-        if (v) parts.push(`${p}:${v}`);
-      }
-      const existing = target.getAttribute("style") || "";
-      target.setAttribute("style", `${existing};${parts.join(";")}`);
+  // CSS rules on `.mermaid` and `.dark .mermaid` are not part of the SVG
+  // itself — once serialized to a data URL that scope is gone. Copy the
+  // computed styles onto the clone so the lightbox renders the same colors
+  // in both light and dark mode.
+  const liveEls = [
+    svgEl,
+    ...Array.from(svgEl.querySelectorAll<SVGElement>("*")),
+  ];
+  const cloneEls = [
+    clone,
+    ...Array.from(clone.querySelectorAll<SVGElement>("*")),
+  ];
+  const liveHtml = Array.from(
+    svgEl.querySelectorAll<HTMLElement>("foreignObject *"),
+  );
+  const cloneHtml = Array.from(
+    clone.querySelectorAll<HTMLElement>("foreignObject *"),
+  );
+  const allLive = [...liveEls, ...liveHtml];
+  const allClone = [...cloneEls, ...cloneHtml];
+  const props = [
+    "fill",
+    "stroke",
+    "stroke-width",
+    "color",
+    "background-color",
+  ];
+  for (let i = 0; i < allLive.length && i < allClone.length; i++) {
+    const cs = getComputedStyle(allLive[i] as Element);
+    const target = allClone[i];
+    if (!target) continue;
+    const parts: string[] = [];
+    for (const p of props) {
+      const v = cs.getPropertyValue(p);
+      if (v) parts.push(`${p}:${v}`);
     }
-    const bg =
-      getComputedStyle(document.documentElement)
-        .getPropertyValue("--vp-c-bg")
-        .trim() || "#04132a";
-    clone.setAttribute(
-      "style",
-      `${clone.getAttribute("style") || ""};background-color:${bg};`,
-    );
+    const existing = target.getAttribute("style") || "";
+    target.setAttribute("style", `${existing};${parts.join(";")}`);
+
+    // CSS rx/ry on SVG <rect> is lost when the stylesheet is gone in the data
+    // URL. Copy the computed value as an SVG attribute, which is preserved.
+    if ((allLive[i] as Element).tagName === "rect") {
+      const rxVal = cs.getPropertyValue("rx");
+      const ryVal = cs.getPropertyValue("ry");
+      if (rxVal && rxVal !== "auto") {
+        (target as SVGElement).setAttribute("rx", String(parseFloat(rxVal)));
+      }
+      if (ryVal && ryVal !== "auto") {
+        (target as SVGElement).setAttribute("ry", String(parseFloat(ryVal)));
+      }
+    }
   }
+  const bg =
+    getComputedStyle(document.documentElement)
+      .getPropertyValue("--vp-c-bg")
+      .trim() || "#ffffff";
+  clone.setAttribute(
+    "style",
+    `${clone.getAttribute("style") || ""};background-color:${bg};`,
+  );
 
   const serialized = new XMLSerializer().serializeToString(clone);
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(serialized);

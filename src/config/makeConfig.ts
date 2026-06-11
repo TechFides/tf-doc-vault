@@ -344,6 +344,7 @@ export function makeConfig(
       flowchart: {
         curve: "basis",
         useMaxWidth: true,
+        subGraphTitleMargin: { top: 8, bottom: 4 },
       },
     },
     ...opts.override,

@@ -91,7 +91,7 @@ const visible = computed(
   <div v-if="visible" class="doc-meta">
     <span
       v-if="frontmatter.status"
-      class="doc-meta__badge"
+      class="doc-status-badge"
       :data-status="frontmatter.status"
     >
       {{ statusLabel(frontmatter.status) }}
@@ -116,37 +116,6 @@ const visible = computed(
   flex-wrap: wrap;
 }
 
-.doc-meta__badge {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 0;
-  font-weight: 700;
-  letter-spacing: 0;
-}
-
-.doc-meta__badge[data-status="published"] {
-  background: var(--brand-badge-published-bg);
-  color: var(--brand-badge-published-text);
-  border: 1px solid var(--brand-badge-published-border);
-}
-
-.doc-meta__badge[data-status="draft"] {
-  background: var(--brand-badge-draft-bg);
-  color: var(--brand-badge-draft-text);
-  border: 1px solid var(--brand-badge-draft-border);
-}
-
-.doc-meta__badge[data-status="review"] {
-  background: var(--brand-badge-review-bg);
-  color: var(--brand-badge-review-text);
-  border: 1px solid var(--brand-badge-review-border);
-}
-
-.doc-meta__badge[data-status="archived"] {
-  background: var(--brand-badge-archived-bg);
-  color: var(--brand-badge-archived-text);
-  border: 1px solid var(--brand-badge-archived-border);
-}
 
 .doc-meta__date {
   color: var(--vp-c-text-2);
