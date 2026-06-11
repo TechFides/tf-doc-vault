@@ -4,8 +4,6 @@ status: published
 updated_at: 2026-06-10
 ---
 
-# Task lists
-
 GFM task lists rendered by the package's own markdown-it rule
 (`src/config/taskLists.ts`, registered in `makeConfig`). The Confluence
 importer emits these for ADF `taskList` nodes, including nesting and

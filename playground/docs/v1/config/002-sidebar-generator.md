@@ -4,8 +4,6 @@ status: published
 updated_at: 2026-05-22
 ---
 
-# Sidebar generator
-
 `generateSidebar()` and `generateNav()` walk the `docs/<version>/`
 tree and produce the VitePress sidebar / nav structures automatically.
 No manual config needed — file system layout is the source of truth.

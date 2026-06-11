@@ -4,8 +4,6 @@ status: published
 updated_at: 2026-05-22
 ---
 
-# ImageLightbox
-
 Click any inline image or Mermaid diagram to open it in a full-screen
 overlay with pan/zoom. Mounted via the `layout-bottom` slot, so it's
 available on every doc page without authors adding markup.
