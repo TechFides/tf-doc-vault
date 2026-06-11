@@ -23,7 +23,9 @@ const { frontmatter } = useData();
 .brand-hero {
   background: linear-gradient(150deg, #1a6abf 0%, #0f4a8e 55%, #0a3570 100%);
   border-top: 4px solid var(--brand-secondary);
-  box-shadow: 0 0 0 1px rgba(0, 116, 200, 0.3), inset 0 1px 0 rgba(0, 160, 227, 0.25);
+  box-shadow:
+    0 0 0 1px rgba(0, 116, 200, 0.3),
+    inset 0 1px 0 rgba(0, 160, 227, 0.25);
   border-radius: 12px;
   color: #fff;
   margin-top: 0;

@@ -94,13 +94,7 @@ function svgToDataUrl(svgEl: SVGSVGElement): string {
   );
   const allLive = [...liveEls, ...liveHtml];
   const allClone = [...cloneEls, ...cloneHtml];
-  const props = [
-    "fill",
-    "stroke",
-    "stroke-width",
-    "color",
-    "background-color",
-  ];
+  const props = ["fill", "stroke", "stroke-width", "color", "background-color"];
   for (let i = 0; i < allLive.length && i < allClone.length; i++) {
     const cs = getComputedStyle(allLive[i] as Element);
     const target = allClone[i];

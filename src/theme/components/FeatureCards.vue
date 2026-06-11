@@ -47,8 +47,20 @@ const features = computed<FeatureCard[]>(
       <p class="feature-card__desc">{{ card.description }}</p>
       <span class="feature-card__cta">
         {{ card.linkText ?? t("feature.cta") }}
-        <svg class="feature-card__arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg
+          class="feature-card__arrow"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M3 8h10M9 4l4 4-4 4"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </span>
     </a>
@@ -84,10 +96,15 @@ const features = computed<FeatureCard[]>(
   border-radius: 10px;
   border: 1px solid rgba(0, 116, 200, 0.18);
   background: var(--vp-c-bg);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06), 0 0 0 0 transparent;
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.06),
+    0 0 0 0 transparent;
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
   cursor: pointer;
 }
 
@@ -170,7 +187,9 @@ const features = computed<FeatureCard[]>(
   font-size: 13px;
   font-weight: 600;
   color: var(--brand-primary);
-  transition: gap 0.15s ease, color 0.15s ease;
+  transition:
+    gap 0.15s ease,
+    color 0.15s ease;
 }
 
 .dark .feature-card__cta {

@@ -15,7 +15,7 @@ it will render twice.
 title: My page   ✅ title comes from here
 ---
 
-# My page        ❌ remove this — DocPageTitle already renders it
+# My page ❌ remove this — DocPageTitle already renders it
 ```
 
 To suppress the auto-generated title on a specific page (e.g. a hero landing
@@ -30,12 +30,12 @@ hideTitle: true
 
 ## Frontmatter fields
 
-| Field        | Type                                          | Purpose                         |
-| ------------ | --------------------------------------------- | ------------------------------- |
-| `title`      | `string`                                      | Page title — sidebar + H1       |
+| Field        | Type                                             | Purpose                          |
+| ------------ | ------------------------------------------------ | -------------------------------- |
+| `title`      | `string`                                         | Page title — sidebar + H1        |
 | `status`     | `published` \| `draft` \| `review` \| `archived` | Shown as a badge below the title |
-| `updated_at` | `YYYY-MM-DD`                                  | Last-updated date in the badge  |
-| `hideTitle`  | `boolean`                                     | Suppress the auto H1            |
+| `updated_at` | `YYYY-MM-DD`                                     | Last-updated date in the badge   |
+| `hideTitle`  | `boolean`                                        | Suppress the auto H1             |
 
 ## Heading hierarchy
 
@@ -43,7 +43,9 @@ Start section headings at `##` (H2) — never use `#` (H1) in content.
 H1 is reserved for the page title injected by `DocPageTitle`.
 
 ```md
-## Section        ✅
-### Subsection    ✅
-# Oops            ❌
+## Section ✅
+
+### Subsection ✅
+
+# Oops ❌
 ```

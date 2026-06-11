@@ -116,7 +116,6 @@ const visible = computed(
   flex-wrap: wrap;
 }
 
-
 .doc-meta__date {
   color: var(--vp-c-text-2);
 }

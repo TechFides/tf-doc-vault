@@ -10,8 +10,8 @@ of every page that has either field set in frontmatter.
 ```md
 ---
 title: My page
-status: published       # published | draft | review | archived
-updated_at: 2026-06-11  # YYYY-MM-DD
+status: published # published | draft | review | archived
+updated_at: 2026-06-11 # YYYY-MM-DD
 ---
 ```
 
@@ -76,12 +76,12 @@ status: archived
 All badge colors are defined as CSS custom properties in `base.css` so they
 adapt to dark mode automatically.
 
-| Status      | `bg`                              | `text`                          | `border`                          |
-| ----------- | --------------------------------- | ------------------------------- | --------------------------------- |
-| `published` | `--brand-badge-published-bg`      | `--brand-badge-published-text`  | `--brand-badge-published-border`  |
-| `draft`     | `--brand-badge-draft-bg`          | `--brand-badge-draft-text`      | `--brand-badge-draft-border`      |
-| `review`    | `--brand-badge-review-bg`         | `--brand-badge-review-text`     | `--brand-badge-review-border`     |
-| `archived`  | `--brand-badge-archived-bg`       | `--brand-badge-archived-text`   | `--brand-badge-archived-border`   |
+| Status      | `bg`                         | `text`                         | `border`                         |
+| ----------- | ---------------------------- | ------------------------------ | -------------------------------- |
+| `published` | `--brand-badge-published-bg` | `--brand-badge-published-text` | `--brand-badge-published-border` |
+| `draft`     | `--brand-badge-draft-bg`     | `--brand-badge-draft-text`     | `--brand-badge-draft-border`     |
+| `review`    | `--brand-badge-review-bg`    | `--brand-badge-review-text`    | `--brand-badge-review-border`    |
+| `archived`  | `--brand-badge-archived-bg`  | `--brand-badge-archived-text`  | `--brand-badge-archived-border`  |
 
 ## Suppressing the title
 

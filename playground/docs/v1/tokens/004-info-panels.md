@@ -160,20 +160,20 @@ pnpm test
 Collapsible sections work well for optional or advanced information that
 would otherwise clutter the page.
 
-| Version | Status    | Note                             |
-| ------- | --------- | -------------------------------- |
-| 0.2.x   | ✅ OK     | Currently supported              |
-| 0.1.x   | ❌ missing | Custom blocks not yet supported  |
+| Version | Status     | Note                            |
+| ------- | ---------- | ------------------------------- |
+| 0.2.x   | ✅ OK      | Currently supported             |
+| 0.1.x   | ❌ missing | Custom blocks not yet supported |
 
 :::
 
 ```md
 ::: details Dependencies and compatibility
 
-| Version | Status    | Note                             |
-| ------- | --------- | -------------------------------- |
-| 0.2.x   | ✅ OK     | Currently supported              |
-| 0.1.x   | ❌ missing | Custom blocks not yet supported  |
+| Version | Status     | Note                            |
+| ------- | ---------- | ------------------------------- |
+| 0.2.x   | ✅ OK      | Currently supported             |
+| 0.1.x   | ❌ missing | Custom blocks not yet supported |
 
 :::
 ```
