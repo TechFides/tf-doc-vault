@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.2.4
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.3...v0.2.4)
+
+### 🚀 Enhancements
+
+- **theme:** Visual design polish — tables, sidebar, landing page, custom blocks ([3aec8ca](https://github.com/TechFides/tf-doc-vault/commit/3aec8ca))
+
+### 🏡 Chore
+
+- **playground:** Remove duplicate h1 headings from all doc pages ([53de8e4](https://github.com/TechFides/tf-doc-vault/commit/53de8e4))
+- Fix prettier formatting ([34eb7ee](https://github.com/TechFides/tf-doc-vault/commit/34eb7ee))
+
+### ❤️ Contributors
+
+- Václav Mičulka ([@VaclavMiculka](https://github.com/VaclavMiculka))
+
 ## v0.2.3
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.2...v0.2.3)
