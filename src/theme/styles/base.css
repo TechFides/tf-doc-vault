@@ -24,6 +24,9 @@
   --brand-warning-bg: rgba(224, 136, 0, 0.08);
   --brand-danger: #c8232c;
   --brand-danger-bg: rgba(200, 35, 44, 0.08);
+  --brand-tip: #16a34a;
+  --brand-tip-bg: rgba(22, 163, 74, 0.08);
+
   --brand-info: #0074c8;
   --brand-info-bg: rgba(0, 116, 200, 0.08);
 
@@ -74,6 +77,15 @@
      languages — hide the language switcher VitePress would otherwise
      render. */
   --vp-nav-translations-display: none;
+
+  /* Custom blocks — remap VitePress colour vars to brand tokens */
+  --vp-c-warning-1: var(--brand-warning);
+  --vp-c-warning-2: rgba(224, 136, 0, 0.35);
+  --vp-c-warning-soft: var(--brand-warning-bg);
+
+  --vp-c-danger-1: var(--brand-danger);
+  --vp-c-danger-2: rgba(200, 35, 44, 0.35);
+  --vp-c-danger-soft: var(--brand-danger-bg);
 }
 
 .dark {
@@ -109,6 +121,9 @@
   --brand-badge-archived-bg: #1f2937;
   --brand-badge-archived-text: #9ca3af;
   --brand-badge-archived-border: #374151;
+
+  --brand-tip: #4ade80;
+  --brand-tip-bg: rgba(74, 222, 128, 0.1);
 }
 
 /* Dark-mode navbar chrome — targets VitePress' internal DOM:
@@ -184,14 +199,81 @@
 .VPButton,
 .VPLocalSearchBox,
 .VPLocalSearchBox input,
-.VPMenu,
-.custom-block {
+.VPMenu {
   border-radius: 0 !important;
+}
+
+.custom-block {
+  border-radius: 4px;
 }
 
 /* scrollbar-gutter prevents layout shift on lightbox open */
 html {
   scrollbar-gutter: stable;
+}
+
+/* Custom block (info panel) — left accent border + brand background */
+.custom-block {
+  color: var(--brand-text-default);
+}
+
+.dark .custom-block {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Strip full border, replace with 3px left accent */
+.custom-block.info,
+.custom-block.tip,
+.custom-block.warning,
+.custom-block.danger,
+.custom-block.details {
+  border-width: 0 0 0 3px !important;
+}
+
+.custom-block.info {
+  background-color: var(--brand-info-bg);
+  border-left-color: var(--brand-info) !important;
+}
+
+.custom-block.info .custom-block-title {
+  color: var(--brand-info);
+}
+
+.custom-block.tip {
+  background-color: var(--brand-tip-bg);
+  border-left-color: var(--brand-tip) !important;
+}
+
+.custom-block.tip .custom-block-title {
+  color: var(--brand-tip);
+}
+
+.custom-block.warning {
+  border-left-color: var(--brand-warning) !important;
+}
+
+.custom-block.danger {
+  border-left-color: var(--brand-danger) !important;
+}
+
+.custom-block.details {
+  background-color: var(--brand-surface);
+  border-left-color: var(--brand-border-strong) !important;
+}
+
+/* Dark mode adjustments */
+.dark .custom-block.info {
+  background-color: rgba(0, 116, 200, 0.1);
+  border-left-color: var(--brand-secondary) !important;
+}
+
+.dark .custom-block.info .custom-block-title {
+  color: var(--brand-secondary);
+}
+
+.dark .custom-block.details {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-left-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 .VPNavBarTranslations,
@@ -265,16 +347,22 @@ html.layout-max .VPContent {
 .vp-doc h2 {
   font-size: 24px;
   font-weight: 500;
-  margin-top: 32px;
+  margin-top: 40px;
   margin-bottom: 8px;
-  padding-top: 16px;
+  padding-top: 0;
+  border-top: none;
 }
 
 .vp-doc h3 {
   font-size: 20px;
   font-weight: 500;
-  margin-top: 32px;
-  margin-bottom: 8px;
+  margin-top: 24px;
+  margin-bottom: 4px;
+}
+
+/* H3 directly under H2 belongs to it — pull it closer */
+.vp-doc h2 + h3 {
+  margin-top: 12px;
 }
 
 .vp-doc p {
@@ -298,6 +386,51 @@ html.layout-max .VPContent {
 
 .dark .vp-doc table th {
   background-color: rgba(255, 255, 255, 0.06);
+}
+
+.vp-doc table {
+  display: table !important;
+  width: 100% !important;
+  border-radius: 6px;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border: 1px solid var(--brand-border-default);
+  overflow: hidden;
+}
+
+.dark .vp-doc table {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* In separate-borders model tr border-top is ignored, but reset it explicitly */
+.vp-doc tr {
+  border-top: none !important;
+}
+
+/* Interior grid: right + bottom only — outer frame comes from table border */
+.vp-doc th,
+.vp-doc td {
+  border: none !important;
+  border-right: 1px solid var(--brand-border-default) !important;
+  border-bottom: 1px solid var(--brand-border-default) !important;
+  vertical-align: top;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.vp-doc th:last-child,
+.vp-doc td:last-child {
+  border-right: none !important;
+}
+
+.vp-doc tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+.dark .vp-doc th,
+.dark .vp-doc td {
+  border-right-color: rgba(255, 255, 255, 0.15) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.15) !important;
 }
 
 .vp-doc ul.contains-task-list {
@@ -350,6 +483,28 @@ html.layout-max .VPContent {
   color: rgba(255, 255, 255, 0.75) !important;
 }
 
+.VPSidebarItem h2,
+.VPSidebarItem h3,
+.VPSidebarItem h4,
+.VPSidebarItem h5,
+.VPSidebarItem h6,
+.VPSidebarItem p {
+  padding-left: 8px !important;
+}
+
+.VPSidebarItem .caret {
+  padding-right: 8px !important;
+}
+
+/* Compensate text padding-left shift so border-left stays aligned with text */
+.VPSidebarItem.level-1 .items,
+.VPSidebarItem.level-2 .items,
+.VPSidebarItem.level-3 .items,
+.VPSidebarItem.level-4 .items,
+.VPSidebarItem.level-5 .items {
+  margin-left: 8px !important;
+}
+
 .VPSidebarItem > .item {
   border-radius: 6px;
   transition: background-color 0.15s ease;
@@ -394,6 +549,14 @@ html.layout-max .VPContent {
   fill: var(--brand-surface) !important;
   stroke: var(--brand-primary) !important;
   stroke-width: 1px !important;
+}
+
+.mermaid .node rect {
+  rx: 4;
+}
+
+.mermaid .cluster rect {
+  rx: 6;
 }
 
 .mermaid .node .label,
@@ -596,6 +759,39 @@ html.layout-max .VPContent {
 
 .dark .mermaid .classGroup line {
   stroke: var(--brand-text-muted) !important;
+}
+
+/* Page status badge — global mirror of DocMeta scoped styles, for use in markdown */
+.doc-status-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
+.doc-status-badge[data-status="published"] {
+  background: var(--brand-badge-published-bg);
+  color: var(--brand-badge-published-text);
+  border: 1px solid var(--brand-badge-published-border);
+}
+
+.doc-status-badge[data-status="draft"] {
+  background: var(--brand-badge-draft-bg);
+  color: var(--brand-badge-draft-text);
+  border: 1px solid var(--brand-badge-draft-border);
+}
+
+.doc-status-badge[data-status="review"] {
+  background: var(--brand-badge-review-bg);
+  color: var(--brand-badge-review-text);
+  border: 1px solid var(--brand-badge-review-border);
+}
+
+.doc-status-badge[data-status="archived"] {
+  background: var(--brand-badge-archived-bg);
+  color: var(--brand-badge-archived-text);
+  border: 1px solid var(--brand-badge-archived-border);
 }
 
 /* Code block subtle border */

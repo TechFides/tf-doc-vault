@@ -4,8 +4,6 @@ status: published
 updated_at: 2026-05-22
 ---
 
-# DocMeta
-
 Status pill + "Updated" date that renders above every doc page
 (skipped on hero pages). The badge above is rendered by `DocMeta`
 reading this file's frontmatter. Labels and date format follow the

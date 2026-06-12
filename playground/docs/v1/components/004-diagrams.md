@@ -4,8 +4,6 @@ status: published
 updated_at: 2026-05-22
 ---
 
-# Diagrams
-
 Three different Mermaid diagram types, all picking up the brand
 palette from the `--brand-*` CSS tokens (light and dark mode).
 

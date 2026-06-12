@@ -4,8 +4,6 @@ status: published
 updated_at: 2026-05-22
 ---
 
-# Colors
-
 ## Brand palette
 
 | Token               | Hex       | Role                              |

@@ -4,8 +4,6 @@ status: draft
 updated_at: 2026-05-22
 ---
 
-# Spacing
-
 Layout follows an **8-point grid** — paddings, gaps and margins are
 multiples of 8px (with an occasional 4px half-step for tight inline gaps
 like a badge next to its icon).

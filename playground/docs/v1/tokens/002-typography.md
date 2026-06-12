@@ -4,8 +4,6 @@ status: published
 updated_at: 2026-05-22
 ---
 
-# Typography
-
 ## Family
 
 The one typography token the theme exposes is the font family:

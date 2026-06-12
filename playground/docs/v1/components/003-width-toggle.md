@@ -4,8 +4,6 @@ status: draft
 updated_at: 2026-05-22
 ---
 
-# WidthToggle
-
 Opt-in navbar button that cycles content width: **default → wide → max**.
 Enabled via `createTheme({ widthToggle: true })`.
 

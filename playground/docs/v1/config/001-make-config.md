@@ -4,8 +4,6 @@ status: published
 updated_at: 2026-05-22
 ---
 
-# makeConfig()
-
 The factory function exported from `@techfides/tf-doc-vault/config`.
 It accepts a single options object and returns a fully-configured
 VitePress `UserConfig` wrapped in `withMermaid()`.

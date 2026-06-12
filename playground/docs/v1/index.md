@@ -4,8 +4,6 @@ status: published
 updated_at: 2026-05-22
 ---
 
-# tf-doc-vault — playground
-
 Local sandbox for theme + config development. Edit anything under
 `src/theme/components/*.vue`, `src/theme/styles/*.css`, or
 `src/config/makeConfig.ts` and Vite HMR re-renders the page instantly
