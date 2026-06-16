@@ -143,4 +143,55 @@ describe("generateSidebar", () => {
       { text: "Use cases", link: "/v1/funkcni-specifikace/use-cases" },
     ]);
   });
+
+  test("mixed structure: flat root pages stay in /version/, sections keep their own sidebar", () => {
+    write("v1/index.md", fm("v1 root"));
+    write("v1/architektura.md", fm("Architektura")); // flat file in the version root
+    write("v1/api/index.md", fm("API"));
+    write("v1/api/api-v1.md", fm("API v1"));
+    write("v1/monitoring/index.md", fm("Monitoring"));
+
+    const sidebar = generateSidebar(docsRoot);
+
+    // The flat root page is no longer orphaned: it sits under the /v1/ key
+    // next to the version index, instead of disappearing entirely.
+    expect(sidebar["/v1/"]).toEqual([
+      { text: "v1 root", link: "/v1/" },
+      { text: "Architektura", link: "/v1/architektura" },
+    ]);
+
+    // Per-section sidebars are preserved (conservative fix): sections are NOT
+    // merged into /v1/, they keep their own focused keys.
+    expect(Object.keys(sidebar).sort()).toEqual([
+      "/v1/",
+      "/v1/api/",
+      "/v1/monitoring/",
+    ]);
+    expect(sidebar["/v1/api/"]).toEqual([
+      { text: "API v1", link: "/v1/api/api-v1" },
+    ]);
+
+    // The flat root sidebar does not pull section groups into itself.
+    const rootLinks = (sidebar["/v1/"] ?? []).map((i) =>
+      "link" in i ? i.link : undefined,
+    );
+    expect(rootLinks).not.toContain("/v1/api/");
+    expect(rootLinks).not.toContain("/v1/monitoring/");
+  });
+
+  test("flat-only version lists every root page under /version/ (srvc-bat-like, unchanged)", () => {
+    write("v1/index.md", fm("v1 root"));
+    write("v1/api.md", fm("API"));
+    write("v1/architektura.md", fm("Architektura"));
+
+    const sidebar = generateSidebar(docsRoot);
+
+    // No subdirectories → a single unified /v1/ sidebar with every page.
+    expect(Object.keys(sidebar)).toEqual(["/v1/"]);
+    expect(sidebar["/v1/"]).toEqual([
+      { text: "v1 root", link: "/v1/" },
+      { text: "API", link: "/v1/api" },
+      { text: "Architektura", link: "/v1/architektura" },
+    ]);
+  });
 });
