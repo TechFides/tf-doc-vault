@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.5
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.4...v0.2.5)
+
+### 🩹 Fixes
+
+- **sidebar:** Keep flat root pages in the version sidebar for mixed structures ([b59e8fd](https://github.com/TechFides/tf-doc-vault/commit/b59e8fd))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.2.4
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.3...v0.2.4)
