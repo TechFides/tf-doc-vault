@@ -113,7 +113,10 @@ function buildSidebarItems(
   });
 }
 
-export function generateSidebar(docsRoot: string): DefaultTheme.SidebarMulti {
+export function generateSidebar(
+  docsRoot: string,
+  opts: { unified?: boolean } = {},
+): DefaultTheme.SidebarMulti {
   const sidebar: DefaultTheme.SidebarMulti = {};
 
   for (const version of getVersions(docsRoot)) {
@@ -121,7 +124,7 @@ export function generateSidebar(docsRoot: string): DefaultTheme.SidebarMulti {
     const versionBase = `/${version}/`;
     const sections = subDirs(versionRoot);
 
-    if (sections.length > 1) {
+    if (!opts.unified && sections.length > 1) {
       for (const section of sections) {
         const sectionBase = `${versionBase}${section}/`;
         const sectionDir = path.join(versionRoot, section);

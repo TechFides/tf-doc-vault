@@ -16,6 +16,16 @@ interface LocaleShape {
   themeConfig: { nav: NavItem[] };
 }
 
+/** Read the generated multi-sidebar off a built config. */
+function sidebarOf(
+  opts: Parameters<typeof makeConfig>[0],
+): Record<string, unknown[]> {
+  const config = makeConfig({ ...opts, mermaid: false }) as unknown as {
+    themeConfig: { sidebar: Record<string, unknown[]> };
+  };
+  return config.themeConfig.sidebar;
+}
+
 function write(rel: string, body: string): void {
   const full = path.join(docsRoot, rel);
   fs.mkdirSync(path.dirname(full), { recursive: true });
@@ -70,6 +80,20 @@ describe("makeConfig sectionNav option", () => {
       branding: { navLinks },
     });
     expect(nav).toEqual(navLinks);
+  });
+
+  test("default (ana-docs) keeps a focused sidebar per section", () => {
+    // beforeEach writes two sections (architektura, integrace), no flat pages.
+    expect(Object.keys(sidebarOf({ configDir })).sort()).toEqual([
+      "/v1/architektura/",
+      "/v1/integrace/",
+    ]);
+  });
+
+  test("sectionNav: false (tech-docs) unifies the sections into one /v1/ sidebar", () => {
+    expect(Object.keys(sidebarOf({ configDir, sectionNav: false }))).toEqual([
+      "/v1/",
+    ]);
   });
 });
 
