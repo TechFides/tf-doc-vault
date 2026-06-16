@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.6
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.5...v0.2.6)
+
+### 🩹 Fixes
+
+- **sidebar:** Unify the sidebar for tech-docs and de-orphan flat root pages ([013e72b](https://github.com/TechFides/tf-doc-vault/commit/013e72b))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.2.5
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.4...v0.2.5)
