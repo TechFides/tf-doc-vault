@@ -133,6 +133,13 @@ export function generateSidebar(docsRoot: string): DefaultTheme.SidebarMulti {
       if (fs.existsSync(rootIndex)) {
         rootItems.push({ text: extractTitle(rootIndex), link: versionBase });
       }
+      for (const file of mdFilesIn(versionRoot)) {
+        if (file === "index.md") continue;
+        rootItems.push({
+          text: extractTitle(path.join(versionRoot, file)),
+          link: `${versionBase}${file.replace(/\.md$/, "")}`,
+        });
+      }
       if (rootItems.length > 0) sidebar[versionBase] = rootItems;
       continue;
     }
