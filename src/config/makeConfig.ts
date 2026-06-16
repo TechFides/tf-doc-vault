@@ -307,7 +307,9 @@ export function makeConfig(
       siteTitle,
       logoLink: effectiveBase,
       nav: topLevelNav,
-      sidebar: generateSidebar(docsRoot),
+      sidebar: generateSidebar(docsRoot, {
+        unified: opts.sectionNav === false,
+      }),
       search: { provider: "local" },
       outline: {
         label: strings.searchLabel,

@@ -179,6 +179,34 @@ describe("generateSidebar", () => {
     expect(rootLinks).not.toContain("/v1/monitoring/");
   });
 
+  test("unified: true merges flat pages and section groups into one /version/ sidebar (tech-docs)", () => {
+    write("v1/index.md", fm("v1 root"));
+    write("v1/architektura.md", fm("Architektura")); // flat root page
+    write("v1/api/index.md", fm("API"));
+    write("v1/api/api-v1.md", fm("API v1"));
+    write("v1/monitoring/index.md", fm("Monitoring"));
+
+    const sidebar = generateSidebar(docsRoot, { unified: true });
+
+    // A single /v1/ sidebar — no per-section keys.
+    expect(Object.keys(sidebar)).toEqual(["/v1/"]);
+
+    const v1 = sidebar["/v1/"] ?? [];
+    // Version index first, then the flat page as a leaf.
+    expect(v1[0]).toEqual({ text: "v1 root", link: "/v1/" });
+    expect(v1).toContainEqual({
+      text: "Architektura",
+      link: "/v1/architektura",
+    });
+
+    // Sections show up as collapsible groups in the same sidebar.
+    const api = v1.find((i) => "text" in i && i.text === "API");
+    expect(api?.link).toBe("/v1/api/");
+    expect(api?.collapsed).toBe(true);
+    expect(api?.items).toEqual([{ text: "API v1", link: "/v1/api/api-v1" }]);
+    expect(v1.some((i) => "text" in i && i.text === "Monitoring")).toBe(true);
+  });
+
   test("flat-only version lists every root page under /version/ (srvc-bat-like, unchanged)", () => {
     write("v1/index.md", fm("v1 root"));
     write("v1/api.md", fm("API"));
