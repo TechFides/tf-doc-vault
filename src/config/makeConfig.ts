@@ -216,12 +216,62 @@ function resolveFooter(branding: Branding | undefined): BrandingFooter | null {
   return null;
 }
 
+// Mirrors VitePress' own config resolution: .vitepress/config.{js,ts,mjs,mts}
+function findConfigFile(configDir: string): string | undefined {
+  const layouts: ReadonlyArray<readonly [string, RegExp]> = [
+    [configDir, /^config\.m?[jt]s$/],
+    [path.join(configDir, "config"), /^index\.m?[jt]s$/],
+  ];
+  for (const [dir, pattern] of layouts) {
+    let entries: string[];
+    try {
+      entries = fs.readdirSync(dir);
+    } catch {
+      continue;
+    }
+    const match = entries.find((f) => pattern.test(f));
+    if (match) return path.join(dir, match);
+  }
+  return undefined;
+}
+
+interface DevServerLike {
+  watcher: { on: (event: string, listener: (file: string) => void) => unknown };
+}
+
+/* Sidebar/nav are generated from the docs tree when the config is evaluated.
+   On a .md add/delete VitePress refreshes its page list (so the new route
+   resolves) but does NOT re-run the user config, so the sidebar stays stale.
+   Touching the config file triggers VitePress' own config-reload, which
+   re-runs makeConfig and regenerates the sidebar. */
+function dynamicNavReload(
+  docsRoot: string,
+  configFile: string | undefined,
+): { name: string; configureServer: (server: DevServerLike) => void } {
+  return {
+    name: "tf-doc-vault:dynamic-nav-reload",
+    configureServer(server: DevServerLike): void {
+      if (!configFile) return;
+      const onChange = (file: string): void => {
+        if (file.endsWith(".md") && file.startsWith(docsRoot)) {
+          const now = new Date();
+          fs.utimesSync(configFile, now, now);
+        }
+      };
+      server.watcher.on("add", onChange);
+      server.watcher.on("unlink", onChange);
+    },
+  };
+}
+
 export function makeConfig(
   opts: MakeConfigOptions,
 ): ReturnType<typeof withMermaid> | UserConfig {
   const docsRoot = path.resolve(opts.configDir, "..");
   const folderName = path.basename(docsRoot);
   const base = `/${folderName}/`;
+
+  const configFile = findConfigFile(opts.configDir);
 
   const versions = getVersions(docsRoot);
   const defaultVersion = versions[0] ?? "v1";
@@ -295,6 +345,8 @@ export function makeConfig(
         ]
       : [...navLinks];
 
+  const { vite: overrideVite, ...restOverride } = opts.override ?? {};
+
   const baseConfig: UserConfig = {
     base,
     title: strings.title,
@@ -334,6 +386,8 @@ export function makeConfig(
       ssr: {
         noExternal: ["@techfides/tf-doc-vault"],
       },
+      plugins: [dynamicNavReload(docsRoot, configFile)],
+      ...overrideVite,
     },
     ignoreDeadLinks: [/^https?:\/\/localhost/],
     /* Mermaid diagram colors are driven entirely by CSS (`.mermaid` and
@@ -349,7 +403,7 @@ export function makeConfig(
         subGraphTitleMargin: { top: 8, bottom: 4 },
       },
     },
-    ...opts.override,
+    ...restOverride,
   };
 
   const config = defineConfig(baseConfig);
