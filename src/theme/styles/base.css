@@ -463,6 +463,21 @@ html.layout-max .VPContent {
   padding-bottom: 10px;
 }
 
+/* VitePress bundles consecutive childless top-level pages into one sidebar
+   group, so its `.group + .group` divider skips them and only brackets folders. */
+.VPSidebarItem.level-0:not(.collapsible)
+  > .items
+  > .VPSidebarItem
+  + .VPSidebarItem {
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: 10px;
+}
+.VPSidebarItem.level-0:not(.collapsible)
+  > .items
+  > .VPSidebarItem:not(:last-child) {
+  padding-bottom: 10px;
+}
+
 #VPSidebarNav {
   padding-top: 20px;
 }
