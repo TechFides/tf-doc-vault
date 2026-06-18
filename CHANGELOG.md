@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.2.7
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.6...v0.2.7)
+
+### 🩹 Fixes
+
+- **theme:** Separate every top-level sidebar entry, not just folders ([3fe34df](https://github.com/TechFides/tf-doc-vault/commit/3fe34df))
+- **config:** Regenerate the sidebar when pages are added or removed in dev ([c4a13ed](https://github.com/TechFides/tf-doc-vault/commit/c4a13ed))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.2.6
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.5...v0.2.6)
