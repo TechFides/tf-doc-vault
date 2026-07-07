@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.8
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.7...v0.2.8)
+
+### 🩹 Fixes
+
+- **scripts:** Skip external http(s) images in validate-docs missing-image check ([5aae8cf](https://github.com/TechFides/tf-doc-vault/commit/5aae8cf))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.2.7
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.6...v0.2.7)
