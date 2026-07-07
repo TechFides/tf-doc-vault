@@ -159,7 +159,9 @@ function checkBrokenLinks(files: string[]): Issue[] {
 }
 
 function checkMissingImages(files: string[]): Issue[] {
-  const imgRe = /!\[.*?\]\(([^)]+\.(svg|png|jpg|jpeg|gif|webp))\)/gi;
+  // External http(s) images are excluded — only local paths can be checked on disk
+  const imgRe =
+    /!\[.*?\]\((?!https?:\/\/)([^)]+\.(svg|png|jpg|jpeg|gif|webp))\)/gi;
   const issues: Issue[] = [];
   for (const file of files) {
     const content = fs.readFileSync(file, "utf-8");
