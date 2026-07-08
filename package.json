@@ -125,6 +125,7 @@
     "test:unit": "vitest run",
     "test:unit:coverage": "vitest run --coverage",
     "test:smoke": "playwright test",
+    "test:e2e": "bash scripts/e2e-happy-path.sh",
     "test": "pnpm test:unit && pnpm test:smoke",
     "release": "changelogen --release --no-github"
   },
