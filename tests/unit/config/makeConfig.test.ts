@@ -97,6 +97,38 @@ describe("makeConfig sectionNav option", () => {
   });
 });
 
+describe("makeConfig base", () => {
+  function baseOf(opts: Parameters<typeof makeConfig>[0]): string | undefined {
+    const config = makeConfig({ ...opts, mermaid: false }) as unknown as {
+      base?: string;
+    };
+    return config.base;
+  }
+
+  function logoLinkOf(
+    opts: Parameters<typeof makeConfig>[0],
+  ): string | undefined {
+    const config = makeConfig({ ...opts, mermaid: false }) as unknown as {
+      themeConfig: { logoLink?: string };
+    };
+    return config.themeConfig.logoLink;
+  }
+
+  test("defaults to the docs folder name (tech-docs mount contract)", () => {
+    const expected = `/${path.basename(path.dirname(configDir))}/`;
+    expect(baseOf({ configDir })).toBe(expected);
+  });
+
+  // Regression: the ana template serves at "/", so the folder-derived "/docs/" must be overridable.
+  test("override.base wins so the ana site can be served at the root", () => {
+    expect(baseOf({ configDir, override: { base: "/" } })).toBe("/");
+  });
+
+  test("logoLink follows the overridden base", () => {
+    expect(logoLinkOf({ configDir, override: { base: "/" } })).toBe("/");
+  });
+});
+
 describe("makeConfig markdown options", () => {
   test("registers a markdown config hook (GFM task lists)", () => {
     const config = makeConfig({ configDir, mermaid: false }) as unknown as {

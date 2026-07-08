@@ -19,7 +19,9 @@ test("vitepress preview serves ana scaffold cleanly", async ({
       "127.0.0.1",
     ],
     cwd: sandboxes.anaDir,
-    readyUrl: "http://127.0.0.1:4174/docs/",
+    // The ana template pins base to "/" (served at the domain root by nginx),
+    // so vitepress preview serves at "/", not "/docs/".
+    readyUrl: "http://127.0.0.1:4174/",
   });
 
   await page.goto(server.url);

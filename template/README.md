@@ -27,16 +27,21 @@ GCP Cloud Run, image v Artifact Registry, deploy přes GitLab CI/CD po pushi do 
 
 ### První nasazení
 
-GitLab repozitář není potřeba předem vytvářet — push-to-create ho založí v `techfides/tf-analysis` při prvním pushi:
+GitLab repozitář není potřeba předem vytvářet — push-to-create ho založí v `techfides/tf-analysis` při prvním pushi. Přidej remote a pushni:
 
 ```bash
 git remote add origin git@gitlab.com:techfides/tf-analysis/__PROJECT__.git
 git push -u origin master
 ```
 
+> CI i Docker build instalují s `--frozen-lockfile`, takže v repu musí být commitnutý `pnpm-lock.yaml`. Scaffolding ho vytvořil a přidal do prvního commitu automaticky; pokud v `git status` chybí, nebo jsi měnil závislosti, vygeneruj a commitni ho před pushnutím: `pnpm install && git add pnpm-lock.yaml && git commit`.
+
 Pak v nově vzniklém projektu nastav infra a CI/CD variables:
 
 ```bash
+pnpm install                                       # Terraform modul se čte z node_modules/
+gcloud auth application-default login              # jednorázově — pro Terraform (GCS backend + provider)
+
 cd infra
 cp terraform.tfvars.example terraform.tfvars     # vyplnit project_id
 
