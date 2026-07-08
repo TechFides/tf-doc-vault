@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["src/cli/*.ts", "src/scripts/*"],
+  "project": ["src/**/*.{ts,cts,mts,cjs,vue}"],
+  "ignore": ["src/theme/components/VersionSwitcher.vue"],
+  "ignoreBinaries": ["diff", "tf-doc-vault"],
+  "ignoreDependencies": ["@nestjs/common", "express", "tsx"],
+  "ignoreExportsUsedInFile": true
+}
