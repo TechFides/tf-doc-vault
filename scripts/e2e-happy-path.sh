@@ -62,6 +62,8 @@ cd "$WORK/demo_ana"
 git ls-files | grep -qx "pnpm-lock.yaml" && pass "pnpm-lock.yaml committed" || fail "lockfile not committed"
 grep -q '"@techfides/tf-doc-vault": "[0-9]' package.json && pass "npm-versioned dependency" || fail "dependency not npm-versioned"
 grep -q '"packageManager": "pnpm@' package.json && pass "packageManager pinned" || fail "packageManager missing"
+# Setting BASIC_AUTH_* must auto-select nginx-auth in CI (else the creds are inert).
+grep -qE 'BASIC_AUTH_USER.+then SERVER_TYPE=nginx-auth' .gitlab-ci.yml && pass "CI derives nginx-auth from BASIC_AUTH_USER" || fail "CI does not enable auth from BASIC_AUTH_USER"
 
 step "2. simulate CI jobs on a FRESH clone (like the GitLab runner checkout)"
 git clone -q "$WORK/demo_ana" "$WORK/ci" || die "clone failed"
