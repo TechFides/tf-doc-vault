@@ -1,5 +1,32 @@
 # Changelog
 
+## v0.2.9
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.8...v0.2.9)
+
+### 🚀 Enhancements
+
+- Add knip ([35957e0](https://github.com/TechFides/tf-doc-vault/commit/35957e0))
+
+### 🩹 Fixes
+
+- **create-ana:** Make a scaffolded ana project deployable out of the box ([8bb243e](https://github.com/TechFides/tf-doc-vault/commit/8bb243e))
+- **template:** Enable Basic auth when BASIC_AUTH_* is set ([b30c3aa](https://github.com/TechFides/tf-doc-vault/commit/b30c3aa))
+- **template:** Drop flaky dind layer cache from the build job ([e78b44e](https://github.com/TechFides/tf-doc-vault/commit/e78b44e))
+- **template:** Render the project name in the ana hero subtitle ([6d86283](https://github.com/TechFides/tf-doc-vault/commit/6d86283))
+
+### 🏡 Chore
+
+- **create-ana:** Translate readme to english ([f55437e](https://github.com/TechFides/tf-doc-vault/commit/f55437e))
+
+### ✅ Tests
+
+- **e2e:** Add local Docker regression for the ana deploy happy-path ([2f1b2ba](https://github.com/TechFides/tf-doc-vault/commit/2f1b2ba))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.2.8
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.7...v0.2.8)
