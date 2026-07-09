@@ -136,9 +136,6 @@ stages:
     - gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev --quiet
     - export IMAGE="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/${SERVICE_NAME:-docs-web}/${SERVICE_NAME:-docs-web}"
     - export DATE_TAG=$(date -u -d "$(echo "$CI_COMMIT_TIMESTAMP" | cut -d+ -f1 | sed 's/T/ /')" +"%Y%m%d-%H%M")
-    # SERVER_TYPE picks the runtime stage. Setting BASIC_AUTH_USER auto-selects
-    # nginx-auth so filling the credentials actually turns auth on; otherwise fall
-    # back to the scaffolded default (__SERVER_TYPE__).
     - if [ -n "$BASIC_AUTH_USER" ]; then SERVER_TYPE=nginx-auth; else SERVER_TYPE=__SERVER_TYPE__; fi
     - export BUILD_ARGS="--build-arg SERVER_TYPE=$SERVER_TYPE --build-arg GITLAB_CI_TOKEN=$CI_JOB_TOKEN"
     - if [ -n "$BASIC_AUTH_USER" ]; then BUILD_ARGS="$BUILD_ARGS --build-arg BASIC_AUTH_USER=$BASIC_AUTH_USER"; fi
@@ -147,8 +144,7 @@ stages:
     - docker-privileged
   script:
     - while ! nc -z docker 2375; do sleep 0.1 ; done
-    - docker pull "${IMAGE}:latest" || true
-    - docker build $BUILD_ARGS --cache-from "${IMAGE}:latest" --tag "${IMAGE}:${DATE_TAG}" --tag "${IMAGE}:latest" .
+    - docker build $BUILD_ARGS --no-cache --tag "${IMAGE}:${DATE_TAG}" --tag "${IMAGE}:latest" .
     - docker push "${IMAGE}:${DATE_TAG}"
     - docker push "${IMAGE}:latest"
 
