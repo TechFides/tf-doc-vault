@@ -2,8 +2,8 @@ image: node:24@sha256:392e1e23f34da768d8d1f4e502b64f200d3be3465934d4b7930f57d7e2
 
 variables:
   PNPM_STORE: "$CI_PROJECT_DIR/.pnpm-store"
-  # Basic auth pro runtime `nginx-auth` (jinak nech prázdné).
-  # Není to tajný údaj — přístup do repa = přístup do aplikace.
+  # By filling in we automatically enable runtime `nginx-auth` (otherwise leave blank).
+  # Not a secret — access to repo = access to the app.
   BASIC_AUTH_USER: "__BASIC_AUTH_USER__"
   BASIC_AUTH_PASS: "__BASIC_AUTH_PASS__"
 
@@ -136,16 +136,15 @@ stages:
     - gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev --quiet
     - export IMAGE="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/${SERVICE_NAME:-docs-web}/${SERVICE_NAME:-docs-web}"
     - export DATE_TAG=$(date -u -d "$(echo "$CI_COMMIT_TIMESTAMP" | cut -d+ -f1 | sed 's/T/ /')" +"%Y%m%d-%H%M")
-    # Build args fed into the multi-stage Dockerfile (SERVER_TYPE picks runtime).
-    - export BUILD_ARGS="--build-arg SERVER_TYPE=__SERVER_TYPE__ --build-arg GITLAB_CI_TOKEN=$CI_JOB_TOKEN"
+    - if [ -n "$BASIC_AUTH_USER" ]; then SERVER_TYPE=nginx-auth; else SERVER_TYPE=__SERVER_TYPE__; fi
+    - export BUILD_ARGS="--build-arg SERVER_TYPE=$SERVER_TYPE --build-arg GITLAB_CI_TOKEN=$CI_JOB_TOKEN"
     - if [ -n "$BASIC_AUTH_USER" ]; then BUILD_ARGS="$BUILD_ARGS --build-arg BASIC_AUTH_USER=$BASIC_AUTH_USER"; fi
     - if [ -n "$BASIC_AUTH_PASS" ]; then BUILD_ARGS="$BUILD_ARGS --build-arg BASIC_AUTH_PASS=$BASIC_AUTH_PASS"; fi
   tags:
     - docker-privileged
   script:
     - while ! nc -z docker 2375; do sleep 0.1 ; done
-    - docker pull "${IMAGE}:latest" || true
-    - docker build $BUILD_ARGS --cache-from "${IMAGE}:latest" --tag "${IMAGE}:${DATE_TAG}" --tag "${IMAGE}:latest" .
+    - docker build $BUILD_ARGS --no-cache --tag "${IMAGE}:${DATE_TAG}" --tag "${IMAGE}:latest" .
     - docker push "${IMAGE}:${DATE_TAG}"
     - docker push "${IMAGE}:latest"
 

@@ -36,6 +36,22 @@ Run:
 
 Config: `playwright.config.ts`. Global setup is in `tests/smoke/global-setup.ts` (builds `dist/` and prepares fixtures).
 
+## Tier 3 — Docker deploy regression (`scripts/e2e-happy-path.sh`)
+
+Reproduces the full ana deploy chain locally — `scaffold → CI jobs → Docker build → live web behind Basic auth` — everything except `gcloud run deploy` (Cloud Run just runs the same container on port 8080). Unlike the smoke tier it builds the real `nginx-auth` image and probes it over HTTP, so it catches base-path/serving-layer regressions the `vitepress preview`/`dev` servers can't (they auto-serve under the configured base).
+
+What it asserts: the scaffold commits a `pnpm-lock.yaml` on branch `master` with an npm-versioned dependency; a fresh clone passes `pnpm install --frozen-lockfile` + the lint jobs; the `SERVER_TYPE=nginx-auth` image builds; and the running container returns `401` without creds, `200` with creds, and — probing the **base-prefixed** asset URL from the built HTML — `200` (not `404`) for a hashed asset, so Basic auth works and the site base matches the root serving layout.
+
+Coverage boundary: it scaffolds with the default npm source, so the scaffolded site consumes the **published** `@techfides/tf-doc-vault` library — this branch's `template/` and `create-ana` CLI are exercised, but the shipped library code (`src/config`, `src/theme`, …) is not. Run it while `package.json` still points at the published version (i.e. **before** the release version bump), otherwise the scaffold pins an unpublished version and the frozen install fails.
+
+Run before cutting a release:
+
+```sh
+pnpm test:e2e          # needs a running docker daemon; overrides: PORT, BASIC_AUTH_USER, BASIC_AUTH_PASS
+```
+
+Requires docker + pnpm + node + git + curl. Idempotent — it scaffolds into a `mktemp` dir and removes the container, image and temp dir on exit. Exit code = number of failed checks. Not part of `pnpm test` (needs Docker); run it manually or in the release job. `scripts/` is outside the published `files`, so it never ships to consumers.
+
 ## Confluence importer verification
 
 The importer (`src/cli/import-confluence.ts` + `src/confluence/**`) converts Confluence ADF to VitePress Markdown. Its conversion is covered by fixture-based unit tests, so the routine check needs **no Confluence access**:

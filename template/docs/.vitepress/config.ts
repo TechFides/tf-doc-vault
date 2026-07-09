@@ -3,6 +3,9 @@ import { makeConfig } from "@techfides/tf-doc-vault/config";
 export default makeConfig({
   configDir: import.meta.dirname,
   project: "__PROJECT__",
+  // nginx serves the site at the domain root, so base must be "/" — the
+  // folder-derived default ("/docs/") would 404 every asset on the deployed site.
+  override: { base: "/" },
   // Volitelné: branding overrides (siteTitle, logo, navbar links, footer)
   // branding: {
   //   siteTitle: "__PROJECT__",

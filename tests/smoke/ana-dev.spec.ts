@@ -14,7 +14,8 @@ test("vitepress dev server hydrates ana scaffold without errors", async ({
     cmd: "pnpm",
     args: ["docs:dev", "--port", "5174", "--host", "127.0.0.1"],
     cwd: sandboxes.anaDir,
-    readyUrl: "http://127.0.0.1:5174/docs/",
+    // base is pinned to "/" in the ana template, so dev serves at "/".
+    readyUrl: "http://127.0.0.1:5174/",
     timeoutSec: 60,
   });
 

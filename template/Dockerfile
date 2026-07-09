@@ -20,7 +20,9 @@ RUN corepack enable
 # the GitLab npm registry for non-CI builds).
 ARG GITLAB_CI_TOKEN=""
 
-COPY package.json pnpm-lock.yaml* ./
+# pnpm-workspace.yaml carries allowBuilds (esbuild); without it the build stage
+# fails on ERR_PNPM_IGNORED_BUILDS.
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
 RUN if [ -n "$GITLAB_CI_TOKEN" ]; then \
       git config --global url."https://gitlab-ci-token:${GITLAB_CI_TOKEN}@gitlab.com/".insteadOf "ssh://git@gitlab.com/"; \
       git config --global url."https://gitlab-ci-token:${GITLAB_CI_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"; \

@@ -10,7 +10,7 @@ pipeline (install → lint → build → deploy), and optional Basic auth.
 
 ## How it works
 
-1. `pnpm dlx` downloads the tooling from GitHub, builds `dist/` (via the `prepare` hook), and runs `tf-doc-vault create`.
+1. `pnpm dlx` downloads the tooling from the npm registry and runs `tf-doc-vault create`.
 2. The scaffolder copies `template/` to `./my_analysis/`, substituting placeholders (`__PROJECT__`, `__GCP_PROJECT__`, `__SERVER_TYPE__`,
    `__VITEPRESS_COMMON_DEP__`).
 3. `git init` + first commit are run automatically (skip with `--no-git` when embedding into an existing repo).
@@ -25,15 +25,15 @@ pnpm dlx @techfides/tf-doc-vault@latest create my_analysis \
 
 `tf-doc-vault create <project-name> [options]`:
 
-| Option               | Default                                               | Description                                                                                                                                             |
-| -------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--gcp-project=<id>` | `tfsa-<project>`                                      | GCP project ID (written to `terraform.tfvars`).                                                                                                         |
-| `--server=<type>`    | `nginx`                                               | Runtime image: `nginx` (static, no auth) or `nginx-auth` (Nginx + Basic auth from `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`).                                 |
-| `--source=<src>`     | `git`                                                 | `git` → `git+ssh://…/tf-doc-vault.git#<ref>` (production, pinned to tag). `file` → `file:<path>` (local package development next to the consumer repo). |
-| `--ref=<git-ref>`    | `v<package version>`                                  | Tag/branch/SHA for `--source=git`.                                                                                                                      |
-| `--git-url=<url>`    | `git+ssh://git@github.com/techfides/tf-doc-vault.git` | Override git URL for `--source=git`.                                                                                                                    |
-| `--file-path=<path>` | relative path to the package                          | Override `file:` path for `--source=file`.                                                                                                              |
-| `--no-git`           | _(false)_                                             | Skip `git init` + first commit. Use when embedding the docs inside an existing repo — all infrastructure is still generated.                            |
+| Option               | Default                                               | Description                                                                                                                                                                                                                                                    |
+| -------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--gcp-project=<id>` | `tfsa-<project>`                                      | GCP project ID (written to `terraform.tfvars`).                                                                                                                                                                                                                |
+| `--server=<type>`    | `nginx`                                               | Runtime image: `nginx` (static, no auth) or `nginx-auth` (Nginx + Basic auth from `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`).                                                                                                                                        |
+| `--source=<src>`     | `npm`                                                 | `npm` → published version from the public registry (default; no git credentials needed in CI or the Docker build). `git` → `git+ssh://…/tf-doc-vault.git#<ref>` (pinned to tag). `file` → `file:<path>` (local package development next to the consumer repo). |
+| `--ref=<git-ref>`    | `v<package version>`                                  | Tag/branch/SHA for `--source=git` (ignored for `npm`/`file`).                                                                                                                                                                                                  |
+| `--git-url=<url>`    | `git+ssh://git@github.com/techfides/tf-doc-vault.git` | Override git URL for `--source=git`.                                                                                                                                                                                                                           |
+| `--file-path=<path>` | relative path to the package                          | Override `file:` path for `--source=file`.                                                                                                                                                                                                                     |
+| `--no-git`           | _(false)_                                             | Skip `git init` + first commit. Use when embedding the docs inside an existing repo — all infrastructure is still generated.                                                                                                                                   |
 
 ### Dedicated repository
 
@@ -45,7 +45,7 @@ supports [push-to-create](https://docs.gitlab.com/topics/git/project/#create-a-p
 
 ```bash
 cd my_analysis
-pnpm install            # pulls peer deps + tf-doc-vault from git (prepare hook builds dist/)
+pnpm install            # installs peer deps + tf-doc-vault from the npm registry
 pnpm docs:dev           # http://localhost:5173
 
 git remote add origin git@gitlab.com:techfides/tf-analysis/my_analysis.git

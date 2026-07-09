@@ -25,7 +25,7 @@ features:
 
 <BrandHero>
   <template #subtitle>
-    Byznys, funkční a technická specifikace projektu **__PROJECT__**.
+    Byznys, funkční a technická specifikace projektu <strong>__PROJECT__</strong>.
   </template>
 </BrandHero>
 
