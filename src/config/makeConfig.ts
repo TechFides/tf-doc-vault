@@ -4,6 +4,7 @@ import type { HeadConfig, UserConfig } from "vitepress";
 import { defineConfig } from "vitepress";
 import { withMermaid } from "vitepress-plugin-mermaid";
 import { taskLists } from "./taskLists.js";
+import { tableWrapper } from "./tableWrapper.js";
 import { generateNav, generateSidebar, getVersions } from "../sidebar/index.js";
 import { LOGO_SHAPES, LOGO_VIEW_BOX } from "../theme/icons/logoSymbol.js";
 import defaultStrings from "./strings.cs.json" with { type: "json" };
@@ -377,9 +378,11 @@ export function makeConfig(
     },
     // GFM task lists (`- [x]`) — markdown-it has no built-in support, so the
     // Confluence importer's checkboxes would render as literal `[x]` text.
+    // tableWrapper wraps every table in a horizontally scrollable container.
     markdown: {
       config(md) {
         taskLists(md);
+        tableWrapper(md);
       },
     },
     vite: {
