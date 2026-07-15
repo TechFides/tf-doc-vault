@@ -89,13 +89,16 @@
 }
 
 .dark {
-  --vp-c-bg: #020a18;
+  /* Overall a touch darker: deepen the blue surface tokens (bg-alt / nav title
+     follow the dark-scoped --brand-nav-navy override below). */
+  --brand-nav-navy: #061f3e;
+  --vp-c-bg: #010710;
   --vp-c-bg-alt: var(--brand-nav-navy);
-  --vp-c-bg-soft: #0a2d52;
-  --vp-c-bg-mute: #0f3870;
-  --vp-c-bg-elv: #0a2d52;
+  --vp-c-bg-soft: #082340;
+  --vp-c-bg-mute: #0c2c57;
+  --vp-c-bg-elv: #082340;
 
-  --vp-sidebar-bg-color: #04132a;
+  --vp-sidebar-bg-color: #030f21;
 
   --vp-c-text-1: #ffffff;
   --vp-c-text-2: rgba(255, 255, 255, 0.72);
@@ -107,7 +110,7 @@
 
   --vp-c-brand-2: var(--brand-secondary);
 
-  --vp-code-block-bg: #051020;
+  --vp-code-block-bg: #040c19;
 
   --brand-badge-published-bg: #052e16;
   --brand-badge-published-text: #4ade80;
@@ -195,12 +198,16 @@
 .vp-doc div[class*="language-"],
 .vp-doc div[class*="language-"] pre,
 .vp-doc div[class*="language-"] code,
-.vp-doc :not(pre) > code,
 .VPButton,
 .VPLocalSearchBox,
 .VPLocalSearchBox input,
 .VPMenu {
   border-radius: 0 !important;
+}
+
+/* Inline code keeps a gentle radius (block code fences stay square). */
+.vp-doc :not(pre) > code {
+  border-radius: 4px;
 }
 
 .custom-block {
@@ -414,14 +421,31 @@ html.layout-max .VPContent {
 }
 
 /* Brand-tinted header so the row reads as a header when scanning data tables.
-   Dark mode needs a stronger alpha since the dark surface swallows low tints. */
+   A flat 0.1 tint was too weak on white to separate the header from the first
+   zebra row, so light mode uses a stronger alpha; dark keeps its own. */
 .vp-doc table th {
-  background-color: var(--brand-primary-soft);
+  background-color: rgba(0, 116, 200, 0.15);
   font-weight: 700;
 }
 
 .dark .vp-doc table th {
   background-color: rgba(0, 116, 200, 0.22);
+}
+
+/* Colour swatch for documenting design tokens (e.g. the Colors token page).
+   Sizes to the surrounding text via `em`. */
+.vp-doc .tf-swatch {
+  display: inline-block;
+  width: 0.95em;
+  height: 0.95em;
+  margin-right: 0.4em;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  vertical-align: -0.12em;
+}
+
+.dark .vp-doc .tf-swatch {
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 /* Click-to-sort affordance (behavior in components/TableEnhancer.vue). A faint

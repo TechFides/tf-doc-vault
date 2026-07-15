@@ -1,6 +1,6 @@
 ---
 title: Tables
-status: draft
+status: published
 updated_at: 2026-07-15
 ---
 

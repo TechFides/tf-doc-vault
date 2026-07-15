@@ -1,6 +1,6 @@
 ---
 title: WidthToggle
-status: draft
+status: published
 updated_at: 2026-05-22
 ---
 
