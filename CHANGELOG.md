@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.2.10
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.9...v0.2.10)
+
+### 🚀 Enhancements
+
+- **theme:** Sortable, filterable, scrollable data tables ([7f67ebc](https://github.com/TechFides/tf-doc-vault/commit/7f67ebc))
+- **theme:** Dark-mode dimming, softer inline code, table-header & swatch polish ([fdd0fe4](https://github.com/TechFides/tf-doc-vault/commit/fdd0fe4))
+
+### ❤️ Contributors
+
+- Václav Mičulka ([@VaclavMiculka](https://github.com/VaclavMiculka))
+
 ## v0.2.9
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.8...v0.2.9)

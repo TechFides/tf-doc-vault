@@ -1,6 +1,6 @@
 {
   "name": "@techfides/tf-doc-vault",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "Shared VitePress tooling for TFSA documentation — config factory, theme components, sidebar generator, build/export scripts, Express/NestJS tech-docs mount, CI and Terraform module.",
   "type": "module",
   "license": "MIT",
