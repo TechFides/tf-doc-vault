@@ -18,6 +18,10 @@
   "lightbox": {
     "close": "Close"
   },
+  "table": {
+    "filter": "Filter…",
+    "noResults": "No results"
+  },
   "feature": {
     "cta": "Open"
   }

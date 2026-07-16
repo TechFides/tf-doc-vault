@@ -89,13 +89,16 @@
 }
 
 .dark {
-  --vp-c-bg: #020a18;
+  /* Overall a touch darker: deepen the blue surface tokens (bg-alt / nav title
+     follow the dark-scoped --brand-nav-navy override below). */
+  --brand-nav-navy: #061f3e;
+  --vp-c-bg: #010710;
   --vp-c-bg-alt: var(--brand-nav-navy);
-  --vp-c-bg-soft: #0a2d52;
-  --vp-c-bg-mute: #0f3870;
-  --vp-c-bg-elv: #0a2d52;
+  --vp-c-bg-soft: #082340;
+  --vp-c-bg-mute: #0c2c57;
+  --vp-c-bg-elv: #082340;
 
-  --vp-sidebar-bg-color: #04132a;
+  --vp-sidebar-bg-color: #030f21;
 
   --vp-c-text-1: #ffffff;
   --vp-c-text-2: rgba(255, 255, 255, 0.72);
@@ -107,7 +110,7 @@
 
   --vp-c-brand-2: var(--brand-secondary);
 
-  --vp-code-block-bg: #051020;
+  --vp-code-block-bg: #040c19;
 
   --brand-badge-published-bg: #052e16;
   --brand-badge-published-text: #4ade80;
@@ -195,12 +198,16 @@
 .vp-doc div[class*="language-"],
 .vp-doc div[class*="language-"] pre,
 .vp-doc div[class*="language-"] code,
-.vp-doc :not(pre) > code,
 .VPButton,
 .VPLocalSearchBox,
 .VPLocalSearchBox input,
 .VPMenu {
   border-radius: 0 !important;
+}
+
+/* Inline code keeps a gentle radius (block code fences stay square). */
+.vp-doc :not(pre) > code {
+  border-radius: 4px;
 }
 
 .custom-block {
@@ -371,6 +378,14 @@ html.layout-max .VPContent {
   line-height: 1.6;
 }
 
+/* Zebra striping. The nth-child rules are the static / pre-hydration / no-JS
+   fallback (brand colour). Once TableEnhancer.vue hydrates it tags every data
+   row `.tf-row` and every 2nd VISIBLE row `.tf-stripe`, reassigned fresh on
+   load / sort / filter — those class rules follow these and `.tf-row` carries
+   a `.dark` variant, so they outrank the nth-child rules in both themes. This
+   matters because nth-child paint goes stale when the filter hides rows or
+   sort reorders them (parity shifts, and this engine doesn't re-invalidate);
+   the class rules never do, so live striping stays correct. */
 .vp-doc table tr:nth-child(even) {
   background-color: var(--brand-surface);
 }
@@ -379,27 +394,220 @@ html.layout-max .VPContent {
   background-color: rgba(255, 255, 255, 0.04);
 }
 
-.vp-doc table th {
+.vp-doc table tr.tf-row {
+  background-color: transparent;
+}
+
+.dark .vp-doc table tr.tf-row {
+  background-color: transparent;
+}
+
+.vp-doc table tr.tf-stripe {
   background-color: var(--brand-surface);
+}
+
+.dark .vp-doc table tr.tf-stripe {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+/* Row hover: keeps the eye on one row across many columns. Must follow the
+   zebra rules (equal specificity) so it wins on hovered rows. */
+.vp-doc tbody tr:hover {
+  background-color: rgba(0, 116, 200, 0.07);
+}
+
+.dark .vp-doc tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.09);
+}
+
+/* Brand-tinted header so the row reads as a header when scanning data tables.
+   A flat 0.1 tint was too weak on white to separate the header from the first
+   zebra row, so light mode uses a stronger alpha; dark keeps its own. */
+.vp-doc table th {
+  background-color: rgba(0, 116, 200, 0.15);
   font-weight: 700;
 }
 
 .dark .vp-doc table th {
-  background-color: rgba(255, 255, 255, 0.06);
+  background-color: rgba(0, 116, 200, 0.22);
+}
+
+/* Colour swatch for documenting design tokens (e.g. the Colors token page).
+   Sizes to the surrounding text via `em`. */
+.vp-doc .tf-swatch {
+  display: inline-block;
+  width: 0.95em;
+  height: 0.95em;
+  margin-right: 0.4em;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  vertical-align: -0.12em;
+}
+
+.dark .vp-doc .tf-swatch {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Click-to-sort affordance (behavior in components/TableEnhancer.vue). A faint
+   double-arrow hints sortability; aria-sort swaps it for a solid direction
+   arrow on the active column. */
+.vp-doc thead th {
+  cursor: pointer;
+  user-select: none;
+}
+
+.vp-doc thead th::after {
+  content: "⇅";
+  margin-left: 6px;
+  font-size: 0.85em;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.vp-doc thead th:hover::after,
+.vp-doc thead th:focus-visible::after {
+  opacity: 0.45;
+}
+
+.vp-doc thead th[aria-sort]::after {
+  opacity: 1;
+  color: var(--brand-primary);
+}
+
+.vp-doc thead th[aria-sort="ascending"]::after {
+  content: "↑";
+}
+
+.vp-doc thead th[aria-sort="descending"]::after {
+  content: "↓";
+}
+
+.dark .vp-doc thead th[aria-sort]::after {
+  color: #7cc4f5;
+}
+
+/* Table wrapper (injected by the tableWrapper markdown-it rule in
+   config/tableWrapper.ts). The outer .tf-table holds the frame + scroll-shadow
+   pseudo-elements and does NOT scroll, so the shadows stay pinned to its edges;
+   the inner .tf-table-scroll owns the horizontal scroll. A wide table scrolls
+   inside this box instead of overflowing the content column. */
+.vp-doc .tf-table {
+  /* Block spacing lives on the wrapper; the table's own margin is zeroed
+     below so it doesn't push an empty strip inside this bordered frame. */
+  position: relative;
+  margin: 20px 0;
+  border-radius: 6px;
+  border: 1px solid var(--brand-border-default);
+  overflow: hidden; /* clip the inner scroller to the rounded corners */
+}
+
+.vp-doc .tf-table-scroll {
+  overflow-x: auto;
+}
+
+.dark .vp-doc .tf-table {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Scroll-shadow affordance: edge gradients that appear only when there's more
+   table to scroll toward. The .is-overflow-* classes are toggled from
+   TableEnhancer.vue on scroll/resize. pointer-events:none keeps them inert. */
+.vp-doc .tf-table::before,
+.vp-doc .tf-table::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 1;
+}
+
+.vp-doc .tf-table::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0));
+}
+
+.vp-doc .tf-table::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0));
+}
+
+.dark .vp-doc .tf-table::before {
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+}
+
+.dark .vp-doc .tf-table::after {
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+}
+
+.vp-doc .tf-table.is-overflow-start::before,
+.vp-doc .tf-table.is-overflow-end::after {
+  opacity: 1;
+}
+
+/* Numeric columns align right with tabular figures for easy comparison.
+   Applied by TableEnhancer.vue only to auto-detected number columns that the
+   author didn't align explicitly in Markdown. */
+.vp-doc .tf-col-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Filter toolbar (injected by TableEnhancer.vue). Sits inside the frame above
+   the scroller, right-aligned; z-index keeps it above the scroll shadows. */
+.vp-doc .tf-table-toolbar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 10px;
+  background-color: var(--brand-surface);
+  border-bottom: 1px solid var(--brand-border-default);
+}
+
+.dark .vp-doc .tf-table-toolbar {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-bottom-color: rgba(255, 255, 255, 0.15);
+}
+
+.vp-doc .tf-table-filter {
+  width: min(240px, 60%);
+  padding: 4px 10px;
+  font-size: 0.85em;
+  color: var(--vp-c-text-1);
+  background-color: var(--vp-c-bg);
+  border: 1px solid var(--brand-border-default);
+  border-radius: 4px;
+  outline: none;
+}
+
+.vp-doc .tf-table-filter:focus {
+  border-color: var(--brand-primary);
+}
+
+.dark .vp-doc .tf-table-filter {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* "No results" row shown when the filter matches nothing. */
+.vp-doc .tf-no-results td {
+  text-align: center;
+  color: var(--vp-c-text-2);
+  font-style: italic;
 }
 
 .vp-doc table {
   display: table !important;
   width: 100% !important;
-  border-radius: 6px;
+  /* Spacing is on .tf-table; a margin here would gap inside the frame. */
+  margin: 0 !important;
   border-collapse: separate !important;
   border-spacing: 0 !important;
-  border: 1px solid var(--brand-border-default);
-  overflow: hidden;
-}
-
-.dark .vp-doc table {
-  border-color: rgba(255, 255, 255, 0.15);
+  /* Outer frame comes from .tf-table; the table draws interior grid only. */
+  border: none !important;
 }
 
 /* In separate-borders model tr border-top is ignored, but reset it explicitly */
@@ -415,7 +623,22 @@ html.layout-max .VPContent {
   border-bottom: 1px solid var(--brand-border-default) !important;
   vertical-align: top;
   overflow-wrap: break-word;
-  word-break: break-word;
+  /* Floor so columns can't collapse into unreadable slivers; once the sum of
+     column min-widths exceeds the wrapper, .tf-table scrolls horizontally. */
+  min-width: 6ch;
+}
+
+/* Headers shouldn't break mid-word in narrow columns; keep them on as few
+   lines as the words allow (overflow-wrap still saves unbreakable tokens). */
+.vp-doc th {
+  word-break: keep-all;
+}
+
+/* First column is almost always a short key/ID (FR-001, v0.2.9, …). Keep it
+   on one line so auto-layout can't squeeze it into a hyphen-broken sliver. */
+.vp-doc th:first-child,
+.vp-doc td:first-child {
+  white-space: nowrap;
 }
 
 .vp-doc th:last-child,

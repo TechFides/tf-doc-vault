@@ -5,6 +5,7 @@ import DocMeta from "./components/DocMeta.vue";
 import DocPageTitle from "./components/DocPageTitle.vue";
 import PrintLayout from "./components/PrintLayout.vue";
 import ImageLightbox from "./components/ImageLightbox.vue";
+import TableEnhancer from "./components/TableEnhancer.vue";
 import WidthToggle from "./components/WidthToggle.vue";
 import BrandHero from "./components/BrandHero.vue";
 import FeatureCards from "./components/FeatureCards.vue";
@@ -52,8 +53,13 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
             Fragment,
             null,
             showFooter
-              ? [h(SidebarDefaultEmoji), h(ImageLightbox), h(BrandFooter)]
-              : [h(SidebarDefaultEmoji), h(ImageLightbox)],
+              ? [
+                  h(SidebarDefaultEmoji),
+                  h(ImageLightbox),
+                  h(TableEnhancer),
+                  h(BrandFooter),
+                ]
+              : [h(SidebarDefaultEmoji), h(ImageLightbox), h(TableEnhancer)],
           ),
         "not-found": (): VNode => h(NotFound),
       };
@@ -76,6 +82,7 @@ export {
   DocMeta,
   DocPageTitle,
   ImageLightbox,
+  TableEnhancer,
   PrintLayout,
   WidthToggle,
   BrandHero,

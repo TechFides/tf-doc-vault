@@ -6,29 +6,29 @@ updated_at: 2026-05-22
 
 ## Brand palette
 
-| Token               | Hex       | Role                              |
-| ------------------- | --------- | --------------------------------- |
-| `--brand-primary`   | `#0074c8` | Active items, CTAs, links, focus  |
-| `--brand-secondary` | `#00a0e3` | Icons, decoration, hover on dark  |
-| `--brand-navy`      | `#092646` | Dark mode, hero, footer           |
-| `--brand-nav-navy`  | `#082850` | Text, sidebar in dark mode        |
-| `--brand-surface`   | `#f5f7fa` | Section background, tables, cards |
+| Token               | Hex                                                                  | Role                              |
+| ------------------- | -------------------------------------------------------------------- | --------------------------------- |
+| `--brand-primary`   | <span class="tf-swatch" style="background:#0074c8"></span> `#0074c8` | Active items, CTAs, links, focus  |
+| `--brand-secondary` | <span class="tf-swatch" style="background:#00a0e3"></span> `#00a0e3` | Icons, decoration, hover on dark  |
+| `--brand-navy`      | <span class="tf-swatch" style="background:#092646"></span> `#092646` | Dark mode, hero, footer           |
+| `--brand-nav-navy`  | <span class="tf-swatch" style="background:#082850"></span> `#082850` | Text, sidebar in dark mode        |
+| `--brand-surface`   | <span class="tf-swatch" style="background:#f5f7fa"></span> `#f5f7fa` | Section background, tables, cards |
 
 ## Interaction states
 
-| Token                    | Hex       | Use                   |
-| ------------------------ | --------- | --------------------- |
-| `--brand-primary-hover`  | `#0f75c5` | CTA hover             |
-| `--brand-primary-active` | `#092646` | Active / pressed link |
+| Token                    | Hex                                                                  | Use                   |
+| ------------------------ | -------------------------------------------------------------------- | --------------------- |
+| `--brand-primary-hover`  | <span class="tf-swatch" style="background:#0f75c5"></span> `#0f75c5` | CTA hover             |
+| `--brand-primary-active` | <span class="tf-swatch" style="background:#092646"></span> `#092646` | Active / pressed link |
 
 ## Status
 
-| Token             | Hex       |
-| ----------------- | --------- |
-| `--brand-success` | `#00dd0a` |
-| `--brand-warning` | `#e08800` |
-| `--brand-danger`  | `#c8232c` |
-| `--brand-info`    | `#0074c8` |
+| Token             | Hex                                                                  |
+| ----------------- | -------------------------------------------------------------------- |
+| `--brand-success` | <span class="tf-swatch" style="background:#00dd0a"></span> `#00dd0a` |
+| `--brand-warning` | <span class="tf-swatch" style="background:#e08800"></span> `#e08800` |
+| `--brand-danger`  | <span class="tf-swatch" style="background:#c8232c"></span> `#c8232c` |
+| `--brand-info`    | <span class="tf-swatch" style="background:#0074c8"></span> `#0074c8` |
 
 ## WCAG note
 

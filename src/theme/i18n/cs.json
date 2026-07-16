@@ -18,6 +18,10 @@
   "lightbox": {
     "close": "Zavřít"
   },
+  "table": {
+    "filter": "Filtrovat…",
+    "noResults": "Žádné výsledky"
+  },
   "feature": {
     "cta": "Otevřít"
   }
