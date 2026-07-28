@@ -14,7 +14,6 @@ interface Sandboxes {
   tgz: string;
   techDocsDir: string;
   anaDir: string;
-  probeRoot: string;
 }
 
 interface RunOptions {
@@ -48,7 +47,7 @@ function run(cmd: string, args: string[], cwd: string, opts: RunOptions): void {
 function killOrphanProbes(): void {
   // Kill anything left on the smoke ports from a previous run so tests don't
   // hit a stale server with stale handler state.
-  for (const port of [3001, 3002, 3003, 3004, 4173, 4174, 5174]) {
+  for (const port of [4173, 4174, 5174]) {
     spawnSync("sh", [
       "-c",
       `lsof -ti:${port} 2>/dev/null | xargs -r kill -9 2>/dev/null`,
@@ -164,143 +163,6 @@ function scaffoldAna(tgz: string): string {
   return dir;
 }
 
-function scaffoldProbes(tgz: string, techDocsDistDir: string): string {
-  logger.heading("Building setup-helper probes");
-  const probeRoot = path.join(SMOKE_ROOT, "probes");
-  fs.rmSync(probeRoot, { recursive: true, force: true });
-
-  const flavors: {
-    name: string;
-    type: "module" | "commonjs";
-    entry: string;
-    port: number;
-    helper: "express" | "nest";
-  }[] = [
-    {
-      name: "express-esm",
-      type: "module",
-      entry: "app.mjs",
-      port: 3001,
-      helper: "express",
-    },
-    {
-      name: "express-cjs",
-      type: "commonjs",
-      entry: "app.cjs",
-      port: 3002,
-      helper: "express",
-    },
-    {
-      name: "nest-esm",
-      type: "module",
-      entry: "app.mjs",
-      port: 3003,
-      helper: "nest",
-    },
-    {
-      name: "nest-cjs",
-      type: "commonjs",
-      entry: "app.cjs",
-      port: 3004,
-      helper: "nest",
-    },
-  ];
-
-  for (const f of flavors) {
-    const dir = path.join(probeRoot, f.name);
-    fs.mkdirSync(dir, { recursive: true });
-
-    fs.writeFileSync(
-      path.join(dir, "package.json"),
-      JSON.stringify(
-        { name: `probe-${f.name}`, private: true, type: f.type },
-        null,
-        2,
-      ) + "\n",
-    );
-    fs.writeFileSync(
-      path.join(dir, "pnpm-workspace.yaml"),
-      "allowBuilds:\n  esbuild: true\n",
-    );
-
-    run("pnpm", ["add", `file:${tgz}`, "express"], dir, {
-      label: `pnpm add (${f.name})`,
-      env: { HUSKY: "0" },
-    });
-
-    fs.writeFileSync(
-      path.join(dir, f.entry),
-      probeSource(f.helper, f.type, techDocsDistDir, f.port),
-    );
-  }
-
-  logger.success(`probe sandboxes ready at ${probeRoot}`);
-  return probeRoot;
-}
-
-function probeSource(
-  helper: "express" | "nest",
-  type: "module" | "commonjs",
-  distDir: string,
-  port: number,
-): string {
-  if (helper === "express" && type === "module") {
-    return `import express from "express";
-import { createTechDocsHandler } from "@techfides/tf-doc-vault/setup/express";
-const app = express();
-const h = await createTechDocsHandler({
-  basePath: "/tech-docs",
-  distDir: ${JSON.stringify(distDir)},
-  auth: { password: "pw" },
-});
-if (!h) { console.error("FAIL: handler null"); process.exit(1); }
-app.use("/tech-docs", h);
-app.listen(${port}, () => console.log("listening"));
-`;
-  }
-  if (helper === "express" && type === "commonjs") {
-    return `const express = require("express");
-(async () => {
-  const { createTechDocsHandler } = require("@techfides/tf-doc-vault/setup/express");
-  const h = await createTechDocsHandler({
-    basePath: "/tech-docs",
-    distDir: ${JSON.stringify(distDir)},
-    auth: { password: "pw" },
-  });
-  if (!h) { console.error("FAIL: handler null"); process.exit(1); }
-  const app = express();
-  app.use("/tech-docs", h);
-  app.listen(${port}, () => console.log("listening"));
-})();
-`;
-  }
-  if (helper === "nest" && type === "module") {
-    return `import express from "express";
-import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
-const e = express();
-const fakeNestApp = { getHttpAdapter: () => ({ use: (p, h) => e.use(p, h) }) };
-await setupTechDocs("/tech-docs", fakeNestApp, {
-  distDir: ${JSON.stringify(distDir)},
-  auth: { password: "pw" },
-});
-e.listen(${port}, () => console.log("listening"));
-`;
-  }
-  // nest-cjs
-  return `const express = require("express");
-(async () => {
-  const { setupTechDocs } = require("@techfides/tf-doc-vault/setup/nest");
-  const e = express();
-  const fakeNestApp = { getHttpAdapter: () => ({ use: (p, h) => e.use(p, h) }) };
-  await setupTechDocs("/tech-docs", fakeNestApp, {
-    distDir: ${JSON.stringify(distDir)},
-    auth: { password: "pw" },
-  });
-  e.listen(${port}, () => console.log("listening"));
-})();
-`;
-}
-
 // ─── filesystem helpers, kept independent of src/cli/utils.ts ────────────────
 
 function copyDir(src: string, dest: string): void {
@@ -373,10 +235,7 @@ async function globalSetup(): Promise<void> {
   const techDocsDir = scaffoldTechDocs(tgz);
   const anaDir = scaffoldAna(tgz);
 
-  const techDocsDistDir = path.join(techDocsDir, "docs", ".vitepress", "dist");
-  const probeRoot = scaffoldProbes(tgz, techDocsDistDir);
-
-  const sandboxes: Sandboxes = { tgz, techDocsDir, anaDir, probeRoot };
+  const sandboxes: Sandboxes = { tgz, techDocsDir, anaDir };
   fs.writeFileSync(
     path.join(SMOKE_ROOT, "sandboxes.json"),
     JSON.stringify(sandboxes, null, 2),

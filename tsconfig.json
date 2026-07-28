@@ -22,7 +22,6 @@
     "template",
     "dist",
     "src/**/*.vue",
-    "src/**/*.css",
-    "src/setup/**"
+    "src/**/*.css"
   ]
 }
