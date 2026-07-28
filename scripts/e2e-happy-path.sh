@@ -50,9 +50,10 @@ step "0. build local package (dist/cli + boilerplate must be current)"
 pass "local build ok"
 
 step "1. scaffold clean project (nginx-auth, default npm source)"
-# create-ana writes into $PWD, so run it from $WORK.
+# The wizard writes into $PWD, so run it from $WORK. stdout is redirected, so
+# there is no TTY and every value has to arrive as a flag.
 cd "$WORK" || die "cannot cd into work dir $WORK"
-node "$REPO/dist/cli/create-ana.js" demo_ana \
+node "$REPO/dist/cli/setup.js" demo_ana --template=ana-docs \
   --gcp-project=tfsa-demo --server=nginx-auth >/dev/null 2>&1 \
   || die "scaffold failed"
 [ -d "$WORK/demo_ana" ] || die "scaffold did not produce $WORK/demo_ana"

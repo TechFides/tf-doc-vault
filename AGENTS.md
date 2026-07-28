@@ -42,7 +42,7 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 - `src/confluence/`: Confluence importer internals: `client` (paginated/retried REST + tree), `convert` (ADF→Markdown via `extended-markdown-adf-parser` + glue), `resolve-media` (attachment resolution), `types`
 - `configs/`: published shared ESLint / Prettier / tsconfig base configs
 - `boilerplate/`: the single VitePress project scaffold shared by every template (config, theme wiring, Docker, CI, Terraform); flat, no per-template subfolders
-- `templates/<name>/`: Markdown content for one template plus a `_template.md` manifest (never copied to a scaffold) declaring its behaviour: target location, wizard fields, `boilerplate/` excludes, deploy files, host integration. Adding a template is adding a folder here, no code change
+- `templates/<name>/`: Markdown content for one template plus a `_template.md` manifest (never copied to a scaffold) declaring its behaviour: target location, wizard fields, `boilerplate/` excludes, host integration. Adding a template is adding a folder here, no code change
 - `playground/docs/`: local VitePress sandbox for theme / config development
 - `tests/unit/`: Vitest specs
 - `tests/smoke/`: Playwright specs

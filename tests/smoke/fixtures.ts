@@ -10,6 +10,7 @@ const SMOKE_ROOT = process.env.SMOKE_ROOT ?? path.join(os.tmpdir(), "tf-smoke");
 
 interface Sandboxes {
   tgz: string;
+  techDocsHostDir: string;
   techDocsDir: string;
   anaDir: string;
 }

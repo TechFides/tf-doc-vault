@@ -23,3 +23,20 @@ for (const subpath of SUBPATHS) {
     expect(r.stdout.trim()).toMatch(/@techfides\/tf-doc-vault/);
   });
 }
+
+// `specs/` is internal planning material. The `files` whitelist keeps it out of
+// the tarball; this asserts it instead of assuming it.
+test("the packed tarball ships no specs/ paths", ({ sandboxes }) => {
+  const r = spawnSync("tar", ["-tzf", sandboxes.tgz], { encoding: "utf-8" });
+  expect(r.status, r.stderr).toBe(0);
+
+  const paths = r.stdout.split("\n").filter((line) => line.trim() !== "");
+  expect(paths.length).toBeGreaterThan(0);
+  expect(paths.filter((entry) => /^package\/specs\//.test(entry))).toEqual([]);
+  expect(paths.some((entry) => entry.startsWith("package/boilerplate/"))).toBe(
+    true,
+  );
+  expect(paths.some((entry) => entry.startsWith("package/templates/"))).toBe(
+    true,
+  );
+});

@@ -23,8 +23,10 @@ export default makeConfig({
   //   domain: "docs-web.example.com",
   // },
   //
-  // Optional: edit link. GitLab is the default host, so a GitHub repo needs the
-  // `host` line as well.
+  // Optional: put an "Edit this page" link at the bottom of every page, going
+  // to the Markdown source in the repository. `repo` is the path part of the
+  // repository URL, so https://github.com/acme/srvc-foo means "acme/srvc-foo".
+  // GitLab is the default host, so a GitHub repo needs the `host` line too.
   // editLink: {
   //   repo: "__REPO__",
   //   branch: "master",

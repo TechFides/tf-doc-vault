@@ -25,15 +25,26 @@ pnpm dlx @techfides/tf-doc-vault@latest setup my_analysis --template=ana-docs \
 
 `tf-doc-vault setup <project-name> --template=ana-docs [options]`:
 
-| Option               | Default                                               | Description                                                                                                                                                                                                                                                    |
-| -------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--gcp-project=<id>` | `tfsa-<project>`                                      | GCP project ID (written to `terraform.tfvars`).                                                                                                                                                                                                                |
-| `--server=<type>`    | `nginx`                                               | Runtime image: `nginx` (static, no auth) or `nginx-auth` (Nginx + Basic auth from `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`).                                                                                                                                        |
-| `--source=<src>`     | `npm`                                                 | `npm` → published version from the public registry (default; no git credentials needed in CI or the Docker build). `git` → `git+ssh://…/tf-doc-vault.git#<ref>` (pinned to tag). `file` → `file:<path>` (local package development next to the consumer repo). |
-| `--ref=<git-ref>`    | `v<package version>`                                  | Tag/branch/SHA for `--source=git` (ignored for `npm`/`file`).                                                                                                                                                                                                  |
-| `--git-url=<url>`    | `git+ssh://git@github.com/techfides/tf-doc-vault.git` | Override git URL for `--source=git`.                                                                                                                                                                                                                           |
-| `--file-path=<path>` | relative path to the package                          | Override `file:` path for `--source=file`.                                                                                                                                                                                                                     |
-| `--no-git`           | _(false)_                                             | Skip `git init` + first commit. Use when embedding the docs inside an existing repo; all infrastructure is still generated.                                                                                                                                    |
+Each of these except `--repo` is also a prompt, with the listed default pre-filled:
+
+| Option                               | Default                           | Description                                                                                                                 |
+| ------------------------------------ | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `--gcp-project=<id>`                 | `tfsa-<project>`                  | GCP project ID (written to `terraform.tfvars`).                                                                             |
+| `--server=<type>`                    | `nginx`                           | Runtime image: `nginx` (static, no auth) or `nginx-auth` (Nginx + Basic auth from `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`).     |
+| `--section-nav` / `--no-section-nav` | `--section-nav`                   | Whether the top bar gets a link per documentation section. Off means one flat sidebar.                                      |
+| `--base=<path>`                      | `/`                               | Base path baked into the VitePress build. Has to start and end with a slash.                                                |
+| `--repo=<org/repo>`                  | `techfides/tf-analysis/<project>` | Not prompted for. Pre-fills the path inside the commented-out edit-link block of `docs/.vitepress/config.ts`.               |
+| `--no-git`                           | _(false)_                         | Skip `git init` + first commit. Use when embedding the docs inside an existing repo; all infrastructure is still generated. |
+
+The flags below are for maintainers developing this package against a local checkout. The wizard never prompts for them, and a consumer wants the default (`npm`):
+
+| Option               | Default                                               | Description                                                                                                                                                                                       |
+| -------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--source=<src>`     | `npm`                                                 | `npm` → published version from the public registry (no git credentials needed in CI or the Docker build). `git` → `git+ssh://…/tf-doc-vault.git#<ref>` (pinned to a tag). `file` → `file:<path>`. |
+| `--dev`              | _(false)_                                             | Shortcut for `--source=file` pointing at this package's checkout.                                                                                                                                 |
+| `--ref=<git-ref>`    | `v<package version>`                                  | Tag/branch/SHA for `--source=git` (ignored for `npm`/`file`).                                                                                                                                     |
+| `--git-url=<url>`    | `git+ssh://git@github.com/techfides/tf-doc-vault.git` | Override git URL for `--source=git`.                                                                                                                                                              |
+| `--file-path=<path>` | relative path to the package                          | Override `file:` path for `--source=file`.                                                                                                                                                        |
 
 ### Dedicated repository
 

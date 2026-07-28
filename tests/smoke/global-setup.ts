@@ -12,6 +12,8 @@ const SMOKE_ROOT = process.env.SMOKE_ROOT ?? path.join(os.tmpdir(), "tf-smoke");
 
 interface Sandboxes {
   tgz: string;
+  /** Host repo the tech-docs scaffold landed in; its scripts and deps live here. */
+  techDocsHostDir: string;
   techDocsDir: string;
   anaDir: string;
 }
@@ -47,7 +49,7 @@ function run(cmd: string, args: string[], cwd: string, opts: RunOptions): void {
 function killOrphanProbes(): void {
   // Kill anything left on the smoke ports from a previous run so tests don't
   // hit a stale server with stale handler state.
-  for (const port of [4173, 4174, 5174]) {
+  for (const port of [4173, 4174, 5174, 5175]) {
     spawnSync("sh", [
       "-c",
       `lsof -ti:${port} 2>/dev/null | xargs -r kill -9 2>/dev/null`,
@@ -69,47 +71,69 @@ function packRepo(): string {
   return path.join(packDir, tgz);
 }
 
-function scaffoldTechDocs(tgz: string): string {
+/**
+ * Mermaid's transitive dependencies are CJS, so Vite pre-bundles them wrong
+ * unless pnpm hoists them and the page renders blank at runtime. A build still
+ * succeeds, which is how a broken dev server shipped once.
+ */
+function verifyHoistPatterns(dir: string): void {
+  logger.step("verifying hoist patterns (mermaid, dayjs, debug, cytoscape)");
+  for (const dep of ["mermaid", "dayjs", "debug", "cytoscape"]) {
+    const depPath = path.join(dir, "node_modules", dep);
+    if (!fs.existsSync(depPath)) {
+      logger.error(`hoist regression: ${dep} missing from node_modules root`);
+      throw new Error(
+        `Hoist regression: ${dep} not found at ${depPath}. Check publicHoistPattern in boilerplate/_pnpm-workspace.yaml and the host merge in setup.ts.`,
+      );
+    }
+  }
+  logger.success("hoist patterns in place");
+}
+
+/**
+ * The host repo owns the dependencies, the scripts and the pnpm settings, all of
+ * them written by the wizard, so everything here runs from the host root. The
+ * scaffolded subfolder is returned as well because that is where `docs/` lives.
+ */
+function scaffoldTechDocs(tgz: string): { host: string; dir: string } {
   logger.heading("Building tech-docs sandbox");
-  const dir = path.join(SMOKE_ROOT, "tech-docs");
-  fs.rmSync(dir, { recursive: true, force: true });
-  fs.mkdirSync(dir, { recursive: true });
+  const host = path.join(SMOKE_ROOT, "tech-docs");
+  fs.rmSync(host, { recursive: true, force: true });
+  fs.mkdirSync(host, { recursive: true });
 
-  // Mirror the CI bash heredoc: copy template-tech-docs/, substitute placeholders.
-  const tpl = path.join(REPO_ROOT, "template-tech-docs");
-  copyDir(tpl, dir);
-  substitutePlaceholders(dir, {
-    __SERVICE_ID__: "SMK",
-    __PROJECT__: "smoke",
-    __DATE__: "2026-01-01",
-    __REPO__: "test/test",
-  });
-
+  // A host package.json, so the wizard's docs:* merge runs instead of warning.
   fs.writeFileSync(
-    path.join(dir, "pnpm-workspace.yaml"),
-    "allowBuilds:\n  esbuild: true\n",
+    path.join(host, "package.json"),
+    JSON.stringify({ name: "smoke-host", private: true }, null, 2) + "\n",
   );
 
   run(
-    "pnpm",
+    "node",
     [
-      "add",
-      `file:${tgz}`,
-      "vitepress",
-      "vitepress-plugin-mermaid",
-      "mermaid",
-      "vue",
+      path.join(REPO_ROOT, "dist/cli/setup.js"),
+      "--template=tech-docs",
+      "--service-id=SMK",
+      "--project=smoke",
+      "--repo=test/test",
     ],
-    dir,
-    { label: "pnpm add (tech-docs deps)", env: { HUSKY: "0" } },
+    host,
+    { label: "setup --template=tech-docs" },
   );
 
-  run("pnpm", ["exec", "vitepress", "build", "docs"], dir, {
-    label: "vitepress build docs",
+  // The wizard merged the documentation dependencies into the host package.json
+  // and wrote the hoist patterns into its pnpm-workspace.yaml, so adding the
+  // packed tarball is the only thing left before installing.
+  run("pnpm", ["add", `file:${tgz}`], host, {
+    label: "pnpm add (tech-docs deps)",
+    env: { HUSKY: "0" },
   });
+  verifyHoistPatterns(host);
 
+  run("pnpm", ["docs:build"], host, { label: "pnpm docs:build (tech-docs)" });
+
+  const dir = path.join(host, "tech-docs");
   logger.success(`tech-docs sandbox ready at ${dir}`);
-  return dir;
+  return { host, dir };
 }
 
 function scaffoldAna(tgz: string): string {
@@ -121,18 +145,19 @@ function scaffoldAna(tgz: string): string {
   run(
     "node",
     [
-      // create-ana is compiled to dist/cli/ by the `prepare` build that runs
+      // The wizard is compiled to dist/cli/ by the `prepare` build that runs
       // during `pnpm pack` above, so dist/ is present by the time we get here.
-      path.join(REPO_ROOT, "dist/cli/create-ana.js"),
+      path.join(REPO_ROOT, "dist/cli/setup.js"),
       "ana_test",
+      "--template=ana-docs",
       "--gcp-project=ci",
       "--server=nginx",
       "--source=file",
-      `--file-path=${tgz}`, // create-ana prepends `file:` itself
+      `--file-path=${tgz}`, // the scaffold prepends `file:` itself
       "--no-git",
     ],
     parent,
-    { label: "create-ana ana_test" },
+    { label: "setup --template=ana-docs ana_test" },
   );
 
   const dir = path.join(parent, "ana_test");
@@ -141,17 +166,7 @@ function scaffoldAna(tgz: string): string {
     env: { HUSKY: "0" },
   });
 
-  logger.step("verifying hoist patterns (mermaid, dayjs, debug, cytoscape)");
-  for (const dep of ["mermaid", "dayjs", "debug", "cytoscape"]) {
-    const depPath = path.join(dir, "node_modules", dep);
-    if (!fs.existsSync(depPath)) {
-      logger.error(`hoist regression: ${dep} missing from node_modules root`);
-      throw new Error(
-        `Hoist regression: ${dep} not found at ${depPath}. Check publicHoistPattern in template/_pnpm-workspace.yaml.`,
-      );
-    }
-  }
-  logger.success("hoist patterns in place");
+  verifyHoistPatterns(dir);
 
   // Read-only verifications only. `pnpm fix` is left out because it triggers
   // the normalize bug that is tracked separately.
@@ -161,65 +176,6 @@ function scaffoldAna(tgz: string): string {
 
   logger.success(`ana sandbox ready at ${dir}`);
   return dir;
-}
-
-// ─── filesystem helpers, kept independent of src/cli/utils.ts ────────────────
-
-function copyDir(src: string, dest: string): void {
-  fs.mkdirSync(dest, { recursive: true });
-  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
-    const s = path.join(src, entry.name);
-    const d = path.join(dest, entry.name);
-    if (entry.isDirectory()) copyDir(s, d);
-    else fs.copyFileSync(s, d);
-  }
-}
-
-const BINARY_EXT = new Set([
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".gif",
-  ".webp",
-  ".ico",
-  ".pdf",
-  ".woff",
-  ".woff2",
-  ".ttf",
-  ".otf",
-  ".eot",
-  ".zip",
-  ".tar",
-  ".gz",
-  ".tgz",
-]);
-
-function substitutePlaceholders(
-  dir: string,
-  replacements: Record<string, string>,
-): void {
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      substitutePlaceholders(full, replacements);
-      continue;
-    }
-    if (BINARY_EXT.has(path.extname(entry.name).toLowerCase())) continue;
-    let content: string;
-    try {
-      content = fs.readFileSync(full, "utf-8");
-    } catch {
-      continue;
-    }
-    let changed = false;
-    for (const [k, v] of Object.entries(replacements)) {
-      if (content.includes(k)) {
-        content = content.split(k).join(v);
-        changed = true;
-      }
-    }
-    if (changed) fs.writeFileSync(full, content);
-  }
 }
 
 // ─── entry point ─────────────────────────────────────────────────────────────
@@ -232,10 +188,15 @@ async function globalSetup(): Promise<void> {
   const tgz = packRepo();
   logger.success(`packed ${path.basename(tgz)}`);
 
-  const techDocsDir = scaffoldTechDocs(tgz);
+  const techDocs = scaffoldTechDocs(tgz);
   const anaDir = scaffoldAna(tgz);
 
-  const sandboxes: Sandboxes = { tgz, techDocsDir, anaDir };
+  const sandboxes: Sandboxes = {
+    tgz,
+    techDocsHostDir: techDocs.host,
+    techDocsDir: techDocs.dir,
+    anaDir,
+  };
   fs.writeFileSync(
     path.join(SMOKE_ROOT, "sandboxes.json"),
     JSON.stringify(sandboxes, null, 2),

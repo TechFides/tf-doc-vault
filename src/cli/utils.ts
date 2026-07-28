@@ -1,6 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 
+/**
+ * A problem the user can fix by changing the command line or a template
+ * manifest. The CLI prints the message and exits 1; anything else keeps its
+ * stack trace because it is a bug.
+ */
+export class SetupError extends Error {}
+
 export interface ParsedArgs {
   positional: string[];
   flags: Record<string, string | boolean>;
@@ -57,6 +64,15 @@ export interface CopyDirResult {
   skipped: number;
 }
 
+/** lstat, so a dangling symlink still counts as an occupied path. */
+function lstatOrNull(target: string): fs.Stats | null {
+  try {
+    return fs.lstatSync(target);
+  } catch {
+    return null;
+  }
+}
+
 export function copyDir(
   src: string,
   dest: string,
@@ -74,11 +90,31 @@ export function copyDir(
     if (exclude.includes(entry.name)) continue;
     const s = path.join(src, entry.name);
     const d = path.join(dest, renameEntry(entry.name));
-    if (entry.isDirectory()) {
+    // Dirent reflects lstat, so a symlink is neither a directory nor a file
+    // here. Recreate the link rather than dereferencing it: copyFileSync on a
+    // symlinked directory throws ENOTSUP.
+    if (entry.isSymbolicLink()) {
+      const occupied = lstatOrNull(d);
+      if (occupied) {
+        if (idempotent) {
+          skipped++;
+          continue;
+        }
+        // symlinkSync refuses an occupied target, so overwriting means removing.
+        // rmSync would follow a dangling link and silently do nothing.
+        if (occupied.isDirectory()) {
+          fs.rmSync(d, { recursive: true, force: true });
+        } else {
+          fs.unlinkSync(d);
+        }
+      }
+      fs.symlinkSync(fs.readlinkSync(s), d);
+      copied++;
+    } else if (entry.isDirectory()) {
       const sub = copyDir(s, d, { ...opts, exclude: [] });
       copied += sub.copied;
       skipped += sub.skipped;
-    } else if (idempotent && fs.existsSync(d)) {
+    } else if (idempotent && lstatOrNull(d)) {
       skipped++;
     } else {
       fs.copyFileSync(s, d);
@@ -124,6 +160,8 @@ export function replacePlaceholders(
 ): void {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
+    // Writing through a symlink would edit its target, possibly outside `dir`.
+    if (entry.isSymbolicLink()) continue;
     if (entry.isDirectory()) {
       replacePlaceholders(full, replacements);
       continue;

@@ -14,7 +14,7 @@ Složka `specs/` je interní. `package.json` má whitelist `files`, takže se do
 - **Manifest šablony je `templates/<name>/_template.md`**: YAML frontmatter nese konfiguraci, tělo je krátký popis pro člověka. Soubor se při scaffoldu vynechává. Tím zůstává pravidlo „`templates/` obsahuje jen md" doslova splněné a veškerá znalost varianty žije v šabloně.
 - **Boilerplate je jen jeden a identický pro všechny šablony.** Žádné podsložky podle varianty. Manifest z něj vyjmenuje, co se pro danou šablonu vynechá.
 - **Wizard drží katalog polí, manifest je zapíná.** Katalog (klíč, typ, text promptu, validace, placeholder, default) je v kódu jednou a generický; manifest v `fields:` vybere, na co se ptát, a v `defaults:` může přepsat default. Nová šablona s novým polem si vyžádá doplnění katalogu, což je vědomý kompromis proti plně data-driven variantě.
-- **Servírování tech-docs** po zrušení mountu: šablona nabízí pole `deploy-files`. Když ho konzument potvrdí, dostane z boilerplate deploy soubory (Dockerfile, `.gitlab-ci.yml`, `infra/`) a nasazuje dokumentaci stejnou cestou jako samostatný portál. Když ne, publikaci si řeší vlastní pipeline. Migrační dokumentace musí obě cesty popsat; nic jiného dokumentaci neservíruje.
+- **Dokumentace uvnitř service repa nemá v tomto balíčku deploy story.** Build a publikaci vlastní konzument. Šablona pro podsložku proto vyjímá deploy soubory z boilerplate (`Dockerfile`, `docker/`, `.gitlab-ci.yml`, `infra/`): `Dockerfile` kopíruje `package.json`, `pnpm-workspace.yaml` a `tsconfig.json` a spouští `pnpm run docs:build`, ale šablona přesně tyto soubory vynechává a dostává jen `{private, type:module}` package.json, takže by se takový image nikdy nesestavil; `.gitlab-ci.yml` v podsložce navíc GitLab nikdy nečte. Co v šabloně zůstává: merge `docs:*` scriptů do `package.json` hostitelského repa, merge pnpm nastavení do jeho `pnpm-workspace.yaml` a append build outputů do jeho `.gitignore`.
 - **Rozdíly řeší placeholdery**, ne varianty souborů: `__DOCS_BASE__`, `__SECTION_NAV__` v `docs/.vitepress/config.ts`, dál `__PROJECT__`, `__SERVICE_ID__` a spol.
 - Prompty a veškerý CLI text jsou **anglicky** (AGENTS.md § Prose; všechny stávající CLI stringy jsou anglicky). České formulace v tomto plánu jsou popis pro člověka; závazné znění je v tabulce U3.
 
@@ -27,11 +27,11 @@ label: Technical documentation inside an existing service repo # text ve wizard 
 target:
   mode: subfolder # new-folder | subfolder
   path: tech-docs # jen pro subfolder
-base: /tech-docs/ # plní __DOCS_BASE__, přepsatelné flagem --base
-sectionNav: false # plní __SECTION_NAV__
-fields: [service-id, project, repo, deploy-files] # klíče z katalogu polí
+base: /tech-docs/ # default pole `base`, které plní __DOCS_BASE__
+sectionNav: false # default pole `section-nav`, které plní __SECTION_NAV__
+fields: [service-id, project, section-nav, base, repo] # klíče z katalogu polí
 defaults:
-  deploy-files: false
+  repo: techfides/__PROJECT_DASHED__ # smí interpolovat placeholder dříve zodpovězeného pole
 exclude: # cesty z boilerplate/, které tato šablona nechce
   - README.md
   - eslint.config.js
@@ -42,8 +42,7 @@ exclude: # cesty z boilerplate/, které tato šablona nechce
   - _pnpm-workspace.yaml
   - package.json
   - .claude
-deployFiles: # vynechá se, když pole deploy-files vyjde false
-  - Dockerfile
+  - Dockerfile # deploy soubory: dokumentaci v service repu nasazuje konzument sám
   - docker
   - .gitlab-ci.yml
   - infra
@@ -51,8 +50,10 @@ renames:
   docs/.vitepress/config.ts: docs/.vitepress/config.mts
 host: # integrace do nadřazeného repa
   packageJsonScripts: true # merge docs:* scriptů do package.json v cwd
+  devDependencies: true # doplnit chybějící peerDependencies balíčku do devDependencies v cwd
   gitignore: true # append build outputs do .gitignore v cwd
   minimalPackageJson: true # zapsat {private, type:module} do cílové složky
+  pnpmWorkspace: true # merge pnpm nastavení do pnpm-workspace.yaml v cwd
 git:
   init: false
 lockfile: false # pre-generovat pnpm-lock.yaml
@@ -60,9 +61,11 @@ workspaceWarning: false # hlásit nadřazený pnpm workspace
 ---
 ```
 
-Šablona `ana-docs` má `target.mode: new-folder`, `base: /`, `sectionNav: true`, `fields: [name, gcp-project, server, source, git]`, prázdný `exclude`, `git.init: true`, `lockfile: true`, `workspaceWarning: true`, `host.*: false`, žádné `renames`.
+Šablona `ana-docs` má `target.mode: new-folder`, `base: /`, `sectionNav: true`, `fields: [name, gcp-project, server, source, section-nav, base, repo, git]`, `defaults.repo: techfides/tf-analysis/__PROJECT__`, prázdný `exclude`, `git.init: true`, `lockfile: true`, `workspaceWarning: true`, `host.*: false`, žádné `renames`.
 
-`_template.md` se nikdy nekopíruje do výstupu. Neznámý klíč v manifestu je chyba, ne varování: wizard při načtení manifest validuje a při nesouladu (neznámé pole v `fields`, neexistující cesta v `exclude`, chybějící `target.path` u `subfolder`) skončí `exit 1`.
+`host.pnpmWorkspace` existuje proto, že `tech-docs` vyjímá `_pnpm-workspace.yaml` z boilerplate (workspace soubor vlastní hostitelské repo), ale bez `publicHoistPattern` pro CJS tranzitivní závislosti mermaidu se dokumentace v dev serveru vyrenderuje jako prázdná stránka s `dayjs.min.js does not provide an export named 'default'`. Hodnoty se čtou z `boilerplate/_pnpm-workspace.yaml` až za běhu, takže existuje jediný zdroj pravdy, stejně jako u `peerDependencies`. Merge je čistě aditivní: co hostitel už deklaruje, si drží pozici i hodnotu, a druhý běh nemá co přidat.
+
+`_template.md` se nikdy nekopíruje do výstupu. Neznámý klíč v manifestu je chyba, ne varování: wizard při načtení manifest validuje a při nesouladu (neznámé pole ve `fields`, klíč ve `defaults` mimo `fields`, hodnota ve `defaults`, která neprojde validací svého pole, neexistující cesta v `exclude`, chybějící `target.path` u `subfolder`) skončí `exit 1`. Chyba jedné složky v `templates/` shodí jen tu složku: ohlásí se jako nedostupná šablona a zbytek včetně `--help` funguje dál.
 
 ## Práce subagentů
 
@@ -160,7 +163,7 @@ Přesuny dělat přes `git mv`. `templates/` obsahuje výhradně `.md`.
 
 **Smazat:** `template-tech-docs/docs-build-stage.md` (souvisel s odstraněným mountem), `template-tech-docs/package.json` (minimální `{private, type:module}`, generuje ho `host.minimalPackageJson`), `template-tech-docs/docs/.vitepress/theme/**` a `template-tech-docs/docs/**/*.md` po sloučení, `template/.claude/settings.local.json`.
 
-**Napsat:** `templates/ana-docs/_template.md` a `templates/tech-docs/_template.md` podle schématu výše. Hodnoty `exclude`, `deployFiles`, `renames`, `host.*`, `git.init`, `lockfile`, `workspaceWarning` odvodit z dnešního chování `create-ana.ts` a `init-tech-docs.ts`, ať se scaffold nezmění.
+**Napsat:** `templates/ana-docs/_template.md` a `templates/tech-docs/_template.md` podle schématu výše. Hodnoty `exclude`, `renames`, `host.*`, `git.init`, `lockfile`, `workspaceWarning` odvodit z dnešního chování `create-ana.ts` a `init-tech-docs.ts`, ať se scaffold nezmění.
 
 ### Sloučení dvou souborů
 
@@ -177,7 +180,7 @@ Přesuny dělat přes `git mv`. `templates/` obsahuje výhradně `.md`.
 Generické, čisté funkce; FS operace delegovat na `utils.ts`:
 
 - `listTemplates()` → načte `templates/*/_template.md`, zparsuje frontmatter, zvaliduje a vrátí manifesty. Zdroj pravdy o dostupných šablonách; nikde žádný hardcoded seznam.
-- `resolveCopyPlan(manifest, answers)` → `{ sources, exclude, renames, placeholders, target }`. `sources` je `[boilerplate, templates/<name>]` v tomto pořadí. `exclude` = `manifest.exclude` plus `manifest.deployFiles`, pokud odpověď na `deploy-files` je nepravdivá, plus vždy `_template.md`.
+- `resolveCopyPlan(manifest, answers)` → `{ sources, exclude, renames, placeholders, target }`. `sources` je `[boilerplate, templates/<name>]` v tomto pořadí. `exclude` = `manifest.exclude` plus vždy `_template.md`.
 - Rename pravidla: přenést `consumerName` z `create-ana.ts:132-137` **nezměněné, všechny tři případy** včetně `_npmrc` → `.npmrc` (v `template/` dnes žádný `_npmrc` není, takže je větev mrtvá, ale zrcadlí ji `sync-template.ts:176-180` a `.npmrc` je v `TRACKED_FILES`; nerozpojovat to jednostranně). Rename pravidla specifická pro šablonu bere z `manifest.renames` (důvod `config.ts` → `config.mts` z komentáře v `init-tech-docs.ts:116-118` přenést do manifestu jako komentář v těle `_template.md`).
 - Přesunout z `create-ana.ts`: `resolveSource`, `resolveDependencyValue`, `originUrl` včetně JSDoc a komentářů.
 
@@ -196,7 +199,7 @@ Generické, čisté funkce; FS operace delegovat na `utils.ts`:
 
 **Nesahat na:** `src/setup/**`, `tests/smoke/global-setup.ts` (U1 z něj odebírá probes, U3 přepisuje fixtures; stálou cestu k šablonám tam nechat a zmínit ve zprávě), ostatní smoke specs kromě `exports.spec.ts`, README, `docs/**`, AGENTS.md, `CONTRIBUTING.md`.
 
-**Testy:** nový `tests/unit/cli/scaffold.test.ts` (parsování a validace manifestů, copy plan pro obě šablony, pořadí zdrojů, `exclude` včetně `deployFiles` a `_template.md`, rename pravidla, idempotence semantika, chyba na neznámém klíči a na neexistující cestě v `exclude`). `tests/unit/cli/create-ana.test.ts` upravit na nové importy. Přidat unit test na `sync-template` resolution (dnes žádný nemá a jeho jediné pokrytí je smoke, který U2 nepouští).
+**Testy:** nový `tests/unit/cli/scaffold.test.ts` (parsování a validace manifestů, copy plan pro obě šablony, pořadí zdrojů, `exclude` včetně `_template.md`, rename pravidla, idempotence semantika, chyba na neznámém klíči a na neexistující cestě v `exclude`). `tests/unit/cli/create-ana.test.ts` upravit na nové importy. Přidat unit test na `sync-template` resolution (dnes žádný nemá a jeho jediné pokrytí je smoke, který U2 nepouští).
 
 **Akceptace:**
 
@@ -219,32 +222,37 @@ Generické, čisté funkce; FS operace delegovat na `utils.ts`:
 
 Katalog polí. Wizard zná tuto tabulku; manifest šablony přes `fields:` určuje, na co se ptá, a přes `defaults:` může přepsat default.
 
-| Flag / pole                                             | Default                   | Plní                                               | Prompt (anglicky, závazné znění)                                                                                     |
-| ------------------------------------------------------- | ------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `--template=<name>`                                     | —                         | volba šablony                                      | select `Which template do you want to use?`, volby se generují z `label` nalezených manifestů                        |
-| `[name]` pozičně (pole `name`)                          | —                         | `__PROJECT__`, `__PROJECT_DASHED__`, cílová složka | text `Project name`, validace `^[a-z][a-z0-9_-]*$`                                                                   |
-| `--gcp-project` (`gcp-project`)                         | `tfsa-<name s pomlčkami>` | `__GCP_PROJECT__`                                  | text `GCP project ID` s předvyplněným defaultem                                                                      |
-| `--server=nginx\|nginx-auth` (`server`)                 | `nginx`                   | `__SERVER_TYPE__`                                  | select `Server flavour`                                                                                              |
-| `--source=npm\|git\|file` (`source`)                    | `npm`                     | `__VITEPRESS_COMMON_DEP__`                         | select `Where should the scaffold pull @techfides/tf-doc-vault from?`, popisy převzít z dnešního `create-ana --help` |
-| `--dev`, `--file-path`, `--ref`, `--git-url`            | dnešní defaulty           | `__VITEPRESS_COMMON_DEP__`                         | bez promptu, pokročilé; validace a warningy převzít z `create-ana`                                                   |
-| `--git` / `--no-git` (`git`)                            | z `manifest.git.init`     | post-krok                                          | confirm `Initialize a git repository?`                                                                               |
-| `--service-id` (`service-id`)                           | —                         | `__SERVICE_ID__`                                   | text `Service ID (for example BAT)`                                                                                  |
-| `--project` (`project`)                                 | basename cwd              | `__PROJECT__`                                      | text `Project name` s předvyplněným defaultem                                                                        |
-| `--repo` (`repo`)                                       | prázdné                   | `__REPO__`                                         | text `Repository for edit links (optional)`                                                                          |
-| `--deploy-files` / `--no-deploy-files` (`deploy-files`) | z `manifest.defaults`     | `manifest.deployFiles` exclude                     | confirm `Include the deploy files (Dockerfile, CI, Terraform)?`                                                      |
-| `--base`                                                | z `manifest.base`         | `__DOCS_BASE__`                                    | bez promptu                                                                                                          |
-| `--help`, `-h`                                          | —                         | —                                                  | bez promptu; vypíše usage a `exit 0`                                                                                 |
+Pořadí polí v tabulce je pořadí katalogu, tedy i pořadí promptů. Každé promptované pole nese jednořádkový `hint`, který wizard vypíše pod prompt; u selectu ho nesou jednotlivé volby.
+
+| Flag / pole                                          | Default                             | Plní                                               | Prompt (anglicky, závazné znění)                                                                                                                                     |
+| ---------------------------------------------------- | ----------------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--template=<name>`                                  | —                                   | volba šablony                                      | select `Which template do you want to use?`, volby se generují z `label` nalezených manifestů                                                                        |
+| `[name]` pozičně (pole `name`)                       | —                                   | `__PROJECT__`, `__PROJECT_DASHED__`, cílová složka | text `Project name`, hint `Names the folder created here; lowercase letters, digits, - and _.`, validace `^[a-z][a-z0-9_-]*$`                                        |
+| `--gcp-project` (`gcp-project`)                      | `tfsa-<name s pomlčkami>`           | `__GCP_PROJECT__`                                  | text `GCP project ID`, hint `Written to infra/terraform.tfvars; you can edit it there later.`                                                                        |
+| `--server=nginx\|nginx-auth` (`server`)              | `nginx`                             | `__SERVER_TYPE__`                                  | select `Server flavour`; volba `nginx (recommended)` s hintem o obyčejném statickém hostingu, `nginx-auth` s hintem o Basic auth a o tom, kdo si dokumentaci přečte  |
+| `--source=npm\|git\|file` (`source`)                 | `npm`                               | `__VITEPRESS_COMMON_DEP__`                         | **bez promptu** (`flagOnly`): konzument chce vždy publikovanou verzi, volba zdroje je věc údržby balíčku                                                             |
+| `--dev`, `--file-path`, `--ref`, `--git-url`         | dnešní defaulty                     | `__VITEPRESS_COMMON_DEP__`                         | bez promptu, companion flagy pole `source`; validace a warningy převzít z `create-ana`                                                                               |
+| `--service-id` (`service-id`)                        | —                                   | `__SERVICE_ID__`                                   | text `Service ID (for example BAT)`, hint `Short identifier of the service, shown in the documentation titles.`                                                      |
+| `--project` (`project`)                              | basename cwd                        | `__PROJECT__`, `__PROJECT_DASHED__`                | text `Project name`, hint `Shown in the documentation titles; defaults to this folder's name.`                                                                       |
+| `--section-nav` / `--no-section-nav` (`section-nav`) | z `manifest.sectionNav`             | `__SECTION_NAV__`                                  | confirm `Show a top navigation link per documentation section?`, hint `Off gives one flat sidebar over all sections and no section links.`                           |
+| `--base=<path>` (`base`)                             | z `manifest.base`                   | `__DOCS_BASE__`                                    | text `Base path the site is served from`, hint `Has to match the URL path the site is published under, slash at each end.`, validace: musí začínat a končit lomítkem |
+| `--repo` (`repo`)                                    | prázdné, nebo z `manifest.defaults` | `__REPO__`                                         | bez promptu (flag-only): hodnota jen předplní zakomentovaný `editLink` blok, takže dotaz v dialogu nemá viditelný efekt                                              |
+| `--git` / `--no-git` (`git`)                         | z `manifest.git.init`               | post-krok                                          | confirm `Initialize a git repository?`, hint `Runs git init in the new folder and commits the scaffold.`                                                             |
+| `--help`, `-h`                                       | —                                   | —                                                  | bez promptu; vypíše usage a `exit 0`. Flagy s `flagOnly` jsou v usage pod vlastním nadpisem `Maintainer and local-development options, never prompted for:`          |
 
 Pevná pravidla, ať se U3 a U4 nerozejdou:
 
 - **Jediná forma jména projektu je poziční argument.** Žádný `--name`.
 - **Neinteraktivní režim:** když `process.stdin.isTTY` nebo `process.stdout.isTTY` je nepravdivé, nikdy nepromptovat. Chybí-li povinná hodnota (`--template`, nebo pole z `fields:` bez defaultu), vypsat na stderr chybu se seznamem chybějících flagů a `exit 1`. Žádný `--yes`, žádná detekce `CI`: ne-TTY je jediný přepínač. (`scripts/e2e-happy-path.sh` přesměrovává stdout, takže tam to platí.)
 - Neznámá hodnota `--template`: chyba na stderr se seznamem dostupných šablon, `exit 1`.
-- Flag, který není v `fields:` zvolené šablony: warning na stderr, hodnota se ignoruje, běh pokračuje. Stejná logika jako dnešní warning u `--ref` mimo `--source=git`.
+- Flag, který není v `fields:` zvolené šablony: warning na stderr, hodnota se ignoruje, běh pokračuje. Stejná logika jako dnešní warning u `--ref` mimo `--source=git`. Flag mimo celou známou množinu (typo v názvu) dostane warning taky, jinak by neinteraktivní běh mlčky použil default.
+- Confirm flag nebere hodnotu: `--git=false` je chyba se zmínkou obou platných forem, ne mlčky zahozená hodnota. Value flag bez hodnoty (`--base`, `--service-id`) je chyba také.
 - **Prázdný `--repo`** (a prázdná odpověď v promptu): `__REPO__` se nahradí prázdným stringem. Dnešní `init-tech-docs.ts:126` substituuje jen při zadaném flagu, takže by v `config.ts` zůstal literál `__REPO__`; na defaultní cestě se na to dosud nešlo.
 - Zrušení promptu (Ctrl+C, `isCancel`): `exit 1` bez vedlejších efektů.
 - Průběh: `intro` → select šablony → prompty podle `fields:` → shrnutí voleb → copy plan z `scaffold.ts` → `replacePlaceholders` → post-kroky podle manifestu → `outro` s next steps.
-- Post-kroky jsou řízené manifestem, ne názvem šablony: `target.mode` (nová složka z `name`, nebo podsložka `target.path`), `host.packageJsonScripts` (merge `docs:*` scriptů do `package.json` v cwd, cesty derivovat z `target.path`), `host.gitignore` (append build outputs, cesty derivovat z `target.path`), `host.minimalPackageJson`, `git.init`, `lockfile`, `workspaceWarning`. Chování jednotlivých kroků převzít z dnešních CLI beze změny.
+- Post-kroky jsou řízené manifestem, ne názvem šablony: `target.mode` (nová složka z `name`, nebo podsložka `target.path`), `host.packageJsonScripts` (merge `docs:*` scriptů do `package.json` v cwd, cesty derivovat z `target.path`), `host.gitignore` (append build outputs, cesty derivovat z `target.path`), `host.minimalPackageJson`, `host.devDependencies`, `host.pnpmWorkspace`, `git.init`, `lockfile`, `workspaceWarning`. Chování jednotlivých kroků převzít z dnešních CLI beze změny.
+- **`host.pnpmWorkspace`** zapíše `publicHoistPattern` a `allowBuilds` do `pnpm-workspace.yaml` v cwd; soubor založí, když neexistuje. Hodnoty čte z `boilerplate/_pnpm-workspace.yaml`. Merge nikdy nic nemaže ani nepřeuspořádává, respektuje odsazení, které hostitelův soubor používá, a porovnává hodnoty bez uvozovek (`"*mermaid*"` a `*mermaid*` je totéž). Když hostitel píše některý z těch dvou klíčů inline (`publicHoistPattern: [...]`), merge se nedotkne souboru a vypíše blok k ručnímu doplnění, protože přidání položek seznamu pod flow zápis by dalo nevalidní YAML.
+- **`--base` a `--section-nav` jsou promptovaná pole**, jejichž default je `manifest.base`, resp. `manifest.sectionNav`. `resolveCopyPlan` proto žádné placeholdery nevrací: `resolvePlaceholders` má hodnoty z manifestu jako spodní vrstvu a odpověď je přebíjí, takže o `__DOCS_BASE__` a `__SECTION_NAV__` rozhoduje jedno místo.
 - Soubor musí mít shebang a `invokedAsScript` realpath guard jako `create-ana.ts:348-360`, aby unit test mohl importovat čisté funkce bez spuštění `main()`.
 
 ### Změny
@@ -304,7 +312,7 @@ Pevná pravidla, ať se U3 a U4 nerozejdou:
 Breaking change. Verze 0.2.10 → **0.3.0**: changelogen mapuje `!` na major a u `0.x` ho degraduje na minor (ověřeno v `bumpVersion`).
 
 1. **Subpath exporty `@techfides/tf-doc-vault/setup/express` a `/setup/nest` neexistují.** Service repa (např. srvc-bat) musí z `main.ts` odstranit import a volání `setupTechDocs(...)`, přestat nastavovat `TECH_DOCS_PASSWORD` a z Dockerfile odstranit docs-build stage.
-2. **Servírování dokumentace uvnitř service repa se mění.** Dokumentace už není součástí běžící aplikace na `/tech-docs`. Konzument má dvě cesty: buď při setupu potvrdí `--deploy-files` a dostane Dockerfile, CI a Terraform z boilerplate, takže nasazuje dokumentaci stejně jako samostatný portál, nebo je vynechá a build i publikaci si řeší vlastní pipeline. Base path je nově konfigurovatelný (`--base`), takže portál na jiné cestě než `/tech-docs/` nerozbije assety.
+2. **Dokumentace uvnitř service repa nemá v tomto balíčku deploy story.** Není součástí běžící aplikace na `/tech-docs` a balíček k ní nedodává ani Dockerfile, ani CI, ani Terraform: build a publikaci vlastní konzument. Scaffold do podsložky dá `docs/`, VitePress config a `docs:*` scripty v `package.json` hostitelského repa; zbytek je na jeho vlastní pipeline. Base path je konfigurovatelný (`--base`), takže portál na jiné cestě než `/tech-docs/` nerozbije assety.
 3. **Migrace není vynucená.** Scaffoldy pinují přesnou verzi (`resolveDependencyValue` vrací `ctx.version`) a konzumenti s dokumentací uvnitř service repa si závislost přidávají ručně, typicky caret rozsahem, který pod 0.x pravidly 0.3.0 nezahrne. Nikoho k upgradu nic nedotlačí a 0.2.x dál funguje. Přechod se musí komunikovat mimo balíček; teprve při ručním zvednutí verze selže build na nerezolvovatelném importu.
 4. **CLI:** bin `create-ana` a subcommandy `tf-doc-vault create` a `init-tech-docs` neexistují. Náhrada:
    - `create-ana <name> --gcp-project=X --server=Y --source=Z [--no-git]` → `tf-doc-vault setup <name> --template=ana-docs --gcp-project=X --server=Y --source=Z [--no-git]`

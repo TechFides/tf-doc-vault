@@ -10,6 +10,7 @@ import path from "node:path";
 import os from "node:os";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { boilerplateName } from "../cli/scaffold.js";
 
 const PROJECT_ROOT = process.cwd();
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -23,6 +24,8 @@ export const BOILERPLATE_DIR = path.resolve(
 
 // Every entry needs a counterpart in the boilerplate: a missing one counts as
 // an error, so tracking a file the package does not ship fails every sync run.
+// That is why `.npmrc` is absent even though the scaffold renames `_npmrc` to
+// it: the boilerplate carries no `_npmrc` baseline to compare against.
 export const TRACKED_FILES: string[] = [
   "Dockerfile",
   ".gitlab-ci.yml",
@@ -176,17 +179,10 @@ interface Result {
   expected?: string;
 }
 
-// `npm pack` strips dotfiles, so the boilerplate ships .gitignore / .npmrc
-// under _gitignore / _npmrc and the scaffolder renames on copy. Mirror the
-// same mapping when resolving the boilerplate counterpart of a consumer file.
-export function boilerplateNameFor(rel: string): string {
-  if (rel === ".gitignore") return "_gitignore";
-  if (rel === ".npmrc") return "_npmrc";
-  return rel;
-}
-
 export function resolveBoilerplatePath(rel: string): string {
-  return path.join(BOILERPLATE_DIR, boilerplateNameFor(rel));
+  // Inverse of the scaffold's own rename table, so every renamed file resolves
+  // to the baseline it was copied from.
+  return path.join(BOILERPLATE_DIR, boilerplateName(rel));
 }
 
 function inspect(rel: string, placeholders: Record<string, string>): Result {
@@ -286,7 +282,19 @@ function main(): void {
   console.log(
     `✗ ${drifted} drift, ${missing} missing, ${noBaseline} without a baseline, ${okCount} ok`,
   );
-  if (!flags.apply) console.log(`  To apply, run: tf-doc-vault sync --apply`);
+  // Only drift and missing files are fixable. A file without a baseline is not,
+  // and --apply exits 1 on it regardless, so pointing at --apply would loop.
+  if (!flags.apply && drifted + missing > 0) {
+    console.log(
+      `  To overwrite the ${drifted + missing} fixable file(s), run: tf-doc-vault sync --apply`,
+    );
+  }
+  if (noBaseline > 0) {
+    console.log(
+      `  A file without a baseline cannot be applied. Drop it from --files, or` +
+        ` upgrade @techfides/tf-doc-vault to a version whose boilerplate ships it.`,
+    );
+  }
   process.exit(1);
 }
 

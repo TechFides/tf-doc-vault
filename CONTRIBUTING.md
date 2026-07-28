@@ -18,7 +18,23 @@ pnpm dev       # watch mode: tsc --watch + asset copy
 
 ## Adding a template
 
-A template is a folder under `templates/<name>/`: Markdown content plus a `_template.md` manifest (YAML frontmatter, never copied to a scaffold). The manifest declares the template's label, target location, which fields from the wizard's field catalog to prompt for, which `boilerplate/` files to exclude, and any post-scaffold steps (`git init`, pre-generating `pnpm-lock.yaml`, merging `docs:*` scripts into the host `package.json`, and so on). Adding a template never touches `src/**`: `tf-doc-vault setup` reads `templates/*/_template.md` at startup and lists whatever it finds. A wizard field with no existing entry in the field catalog (`src/cli/setup.ts`) needs that catalog extended first.
+A template is a folder under `templates/<name>/`: Markdown content plus a `_template.md` manifest (YAML frontmatter, never copied to a scaffold). The manifest declares the template's label, target location, which fields from the wizard's field catalog to prompt for, which `boilerplate/` files to exclude, and any post-scaffold steps (`git init`, pre-generating `pnpm-lock.yaml`, merging `docs:*` scripts into the host `package.json`, merging the pnpm settings into its `pnpm-workspace.yaml`, and so on). Adding a template never touches `src/**`: `tf-doc-vault setup` reads `templates/*/_template.md` at startup and lists whatever it finds. A wizard field with no existing entry in the field catalog (`FIELD_CATALOG` in `src/cli/scaffold.ts`) needs that catalog extended first.
+
+A template that excludes `_pnpm-workspace.yaml` from the boilerplate has to set `host.pnpmWorkspace: true`, or the scaffolded site has no hoist patterns and its dev server serves a blank page. The values come from `boilerplate/_pnpm-workspace.yaml` at runtime, so that file is the only place they are written down.
+
+A field the wizard should never ask about (a maintainer or local-development concern such as the dependency source) is marked `flagOnly` in the catalog and needs a `defaultValue`, because there is no dialogue to fall back to. Every other prompted field carries a one-line `hint`, or, for a select, a `hint` on each option.
+
+**Field order is the catalog's, not the manifest's.** `fields:` is a set: the prompt order, the order in the summary, and which field counts as resolved before another all follow the order of `FIELD_CATALOG`. Reordering `fields:` changes nothing. Two fields can fill the same placeholder (`name` and `project` both fill `__PROJECT__`); the later one in the catalog wins, in the interpolated defaults and in the scaffolded files alike.
+
+**`defaults:` may interpolate placeholders.** A `defaults:` value overrides the catalog default for that field, and a string value may contain the placeholders of any field resolved before it, so a template can pre-fill something derived from an earlier answer:
+
+```yaml
+fields: [service-id, project, repo]
+defaults:
+  repo: techfides/__PROJECT_DASHED__ # `project` fills this, and resolves first
+```
+
+A placeholder that no earlier field fills is rejected when the manifest loads. The interpolated result then goes through the field's own validation, so a value that expands into something the field rejects (a `server` default expanding to `nginx-probe`) fails the run with `exit 1` instead of reaching the scaffold.
 
 ## Releasing
 

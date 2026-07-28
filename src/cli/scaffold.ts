@@ -1,14 +1,20 @@
 /**
- * Copy plan for the bundled scaffolds: reads the manifests in `templates/*`,
- * works out which `boilerplate/` paths each one wants, and lays the sources
- * down into the target directory.
+ * Template manifests, the wizard's field catalog, and the copy plan: reads the
+ * manifests in `templates/*`, works out which `boilerplate/` paths each one
+ * wants, and lays the sources down into the target directory. The catalog lives
+ * here so the manifest validator can check `fields:` and `defaults:` against it.
  */
 
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { copyDir, type CopyDirResult, type ParsedArgs } from "./utils.js";
+import {
+  SetupError,
+  copyDir,
+  type CopyDirResult,
+  type ParsedArgs,
+} from "./utils.js";
 
 // gitlab, not github: the scaffold's CI token `insteadOf` rewrite only covers gitlab.com.
 const GITLAB_HOST = "gitlab.com";
@@ -23,9 +29,6 @@ export const TEMPLATES_DIR = path.join(PACKAGE_DIR, "templates");
 /** Carries the manifest, so it is always excluded from the copy. */
 const MANIFEST_FILE = "_template.md";
 
-/** Answer key that decides whether `deployFiles` are copied. */
-const DEPLOY_FILES_FIELD = "deploy-files";
-
 export type Answer = string | boolean | undefined;
 
 export interface TemplateManifest {
@@ -37,12 +40,13 @@ export interface TemplateManifest {
   fields: string[];
   defaults: Record<string, string | boolean>;
   exclude: string[];
-  deployFiles: string[];
   renames: Record<string, string>;
   host: {
     packageJsonScripts: boolean;
+    devDependencies: boolean;
     gitignore: boolean;
     minimalPackageJson: boolean;
+    pnpmWorkspace: boolean;
   };
   git: { init: boolean };
   lockfile: boolean;
@@ -57,8 +61,338 @@ export interface CopyPlan {
   sources: string[];
   exclude: string[];
   renames: Record<string, string>;
-  placeholders: Record<string, string>;
   target: string;
+}
+
+// ─── field catalog ───
+
+export type FieldType = "text" | "select" | "confirm";
+
+export interface FieldOption {
+  value: string;
+  label: string;
+  hint?: string;
+}
+
+export interface PlaceholderFill {
+  placeholder: string;
+  format?: (value: string) => string;
+}
+
+export interface CompanionFlag {
+  key: string;
+  flag: string;
+  help: string;
+}
+
+export interface DefaultContext {
+  cwd: string;
+  manifest: TemplateManifest;
+  /** Answers resolved so far, in catalog order. */
+  answers: Record<string, Answer>;
+  /** Raw command line, so a default can read a companion flag. */
+  flags: ParsedArgs["flags"];
+}
+
+export interface FieldSpec {
+  key: string;
+  type: FieldType;
+  /** Prompt wording, frozen by the CLI contract. */
+  prompt: string;
+  /** One line under the prompt saying what the value does. */
+  hint?: string;
+  /**
+   * How the value is passed on the command line. Square brackets mark the
+   * positional form, which is the only way to pass a project name.
+   */
+  flag: string;
+  /** Line printed by `--help`. */
+  help: string;
+  /**
+   * Never prompted, only read from the command line: a maintainer or local
+   * development concern that a consumer has no reason to answer. Such a field
+   * needs a `defaultValue`, because there is no dialogue to fall back to.
+   */
+  flagOnly?: boolean;
+  options?: FieldOption[];
+  validate?: (value: string) => string | undefined;
+  /** Flags that only make sense together with this field. */
+  companions?: CompanionFlag[];
+  fills?: PlaceholderFill[];
+  /**
+   * Default offered by the prompt and used when the flag is absent. Returning
+   * undefined makes the field required.
+   */
+  defaultValue?: (ctx: DefaultContext) => Answer;
+}
+
+export function dashed(value: string): string {
+  return value.replace(/_/g, "-");
+}
+
+const NAME_PATTERN = /^[a-z][a-z0-9_-]*$/;
+
+function validateName(value: string): string | undefined {
+  if (NAME_PATTERN.test(value)) return undefined;
+  return "Use lowercase letters, digits, hyphens or underscores; must start with a letter.";
+}
+
+/**
+ * An empty value would leave the placeholders it fills blank, which reads as a
+ * gap in the rendered prose and as a truncated path in the edit link.
+ */
+function validateRequired(value: string): string | undefined {
+  if (value.trim() === "") return "This value is required.";
+  return undefined;
+}
+
+/**
+ * A base path that does not start and end with a slash 404s every asset once
+ * the site is deployed, which is the trap the boilerplate config warns about.
+ */
+export function validateBase(value: string): string | undefined {
+  if (!value.startsWith("/") || !value.endsWith("/")) {
+    return "A base path has to start and end with a slash, for example /docs/ (or / for the site root).";
+  }
+  return undefined;
+}
+
+const PROJECT_FILLS: PlaceholderFill[] = [
+  { placeholder: "__PROJECT__" },
+  { placeholder: "__PROJECT_DASHED__", format: dashed },
+];
+
+export const FIELD_CATALOG: FieldSpec[] = [
+  {
+    key: "name",
+    type: "text",
+    prompt: "Project name",
+    hint: "Names the folder created here; lowercase letters, digits, - and _.",
+    flag: "[name]",
+    help: "Project name; also the folder the scaffold is written to",
+    validate: validateName,
+    fills: PROJECT_FILLS,
+  },
+  {
+    key: "gcp-project",
+    type: "text",
+    prompt: "GCP project ID",
+    hint: "Written to infra/terraform.tfvars; you can edit it there later.",
+    flag: "--gcp-project=<id>",
+    help: "GCP project ID, filled into terraform.tfvars",
+    fills: [{ placeholder: "__GCP_PROJECT__" }],
+    defaultValue: ({ answers }) =>
+      typeof answers.name === "string"
+        ? `tfsa-${dashed(answers.name)}`
+        : undefined,
+  },
+  {
+    key: "server",
+    type: "select",
+    prompt: "Server flavour",
+    flag: "--server=<type>",
+    help: "nginx | nginx-auth, the flavour the Docker image serves",
+    options: [
+      {
+        value: "nginx",
+        label: "nginx (recommended)",
+        hint: "plain static hosting: everyone who can reach the URL reads the site",
+      },
+      {
+        value: "nginx-auth",
+        label: "nginx-auth",
+        hint: "static hosting behind Basic auth: only readers with the shared password get in",
+      },
+    ],
+    fills: [{ placeholder: "__SERVER_TYPE__" }],
+    defaultValue: () => "nginx",
+  },
+  {
+    key: "source",
+    type: "select",
+    prompt: "Where should the scaffold pull @techfides/tf-doc-vault from?",
+    flag: "--source=<src>",
+    help: "npm | git | file, where the scaffold pulls @techfides/tf-doc-vault from",
+    // A consumer always wants the published version, so this is never asked.
+    flagOnly: true,
+    options: [
+      {
+        value: "npm",
+        label: "npm",
+        hint: "published version from the public registry, so CI and the Docker build need no git credentials",
+      },
+      { value: "git", label: "git", hint: "git+ssh URL pinned to --ref" },
+      {
+        value: "file",
+        label: "file",
+        hint: "file:<path> to a local checkout, the --dev shortcut",
+      },
+    ],
+    companions: [
+      {
+        key: "dev",
+        flag: "--dev",
+        help: "Shortcut for --source=file, pointing at this package's checkout",
+      },
+      {
+        key: "file-path",
+        flag: "--file-path=<path>",
+        help: "Override the file: target (default: relative path to this package)",
+      },
+      {
+        key: "ref",
+        flag: "--ref=<git-ref>",
+        help: "Tag, branch or SHA to pin to with --source=git (default: v<version>)",
+      },
+      {
+        key: "git-url",
+        flag: "--git-url=<url>",
+        help: "Override the git URL used with --source=git",
+      },
+    ],
+    // --dev has to land in the answered source: `source` always ends up
+    // answered, so a flat "npm" default would reach resolveSource first and
+    // shadow the shortcut for good.
+    defaultValue: ({ flags }) => (flags.dev === true ? "file" : "npm"),
+  },
+  {
+    key: "service-id",
+    type: "text",
+    prompt: "Service ID (for example BAT)",
+    hint: "Short identifier of the service, shown in the documentation titles.",
+    flag: "--service-id=<id>",
+    help: "Service identifier shown on the documentation front page",
+    validate: validateRequired,
+    fills: [{ placeholder: "__SERVICE_ID__" }],
+  },
+  {
+    key: "project",
+    type: "text",
+    prompt: "Project name",
+    hint: "Shown in the documentation titles; defaults to this folder's name.",
+    flag: "--project=<name>",
+    help: "Project name (default: the current folder name)",
+    validate: validateRequired,
+    fills: PROJECT_FILLS,
+    defaultValue: ({ cwd }) => path.basename(cwd),
+  },
+  {
+    key: "section-nav",
+    type: "confirm",
+    prompt: "Show a top navigation link per documentation section?",
+    hint: "Off gives one flat sidebar over all sections and no section links.",
+    flag: "--section-nav | --no-section-nav",
+    help: "Add a top navigation entry per documentation section",
+    fills: [{ placeholder: "__SECTION_NAV__" }],
+    defaultValue: ({ manifest }) => manifest.sectionNav,
+  },
+  {
+    key: "base",
+    type: "text",
+    prompt: "Base path the site is served from",
+    hint: "Has to match the URL path the site is published under, slash at each end.",
+    flag: "--base=<path>",
+    help: "Base path the site is served from (default: per template)",
+    validate: validateBase,
+    fills: [{ placeholder: "__DOCS_BASE__" }],
+    defaultValue: ({ manifest }) => manifest.base,
+  },
+  {
+    key: "repo",
+    type: "text",
+    prompt: "Repository path for edit links, as org/repo (optional)",
+    flag: "--repo=<org/repo>",
+    help: "Repository path pre-filled into the commented-out edit-link block",
+    // The value only pre-fills a block the reader has to uncomment, so asking
+    // for it in the dialogue buys nothing. The comment in the generated config
+    // explains the block; whoever enables it can fill the path in there.
+    flagOnly: true,
+    fills: [{ placeholder: "__REPO__" }],
+    defaultValue: () => "",
+  },
+  {
+    key: "git",
+    type: "confirm",
+    prompt: "Initialize a git repository?",
+    hint: "Runs git init in the new folder and commits the scaffold.",
+    flag: "--git | --no-git",
+    help: "Run git init and make the first commit",
+    defaultValue: ({ manifest }) => manifest.git.init,
+  },
+];
+
+export function findField(key: string): FieldSpec | undefined {
+  return FIELD_CATALOG.find((field) => field.key === key);
+}
+
+/** Option list plus the field's own validator, shared by flags and manifests. */
+export function checkFieldValue(
+  field: FieldSpec,
+  value: string,
+): string | undefined {
+  if (field.type === "select") {
+    const allowed = (field.options ?? []).map((option) => option.value);
+    if (!allowed.includes(value)) return `Use ${allowed.join(" | ")}.`;
+  }
+  return field.validate?.(value);
+}
+
+/** Placeholders a field fills, so a manifest default can interpolate them. */
+export function fieldPlaceholders(field: FieldSpec): string[] {
+  return (field.fills ?? []).map((fill) => fill.placeholder);
+}
+
+/**
+ * What the answers so far fill each placeholder with, walked in catalog order so
+ * that the last field of the template filling a shared placeholder wins. Both
+ * the interpolated `defaults:` and the scaffolded file contents read this one
+ * map, so they cannot disagree on which field a placeholder comes from.
+ */
+export function placeholderValues(
+  fields: string[],
+  answers: Record<string, Answer>,
+): Record<string, string> {
+  const values: Record<string, string> = {};
+  for (const field of FIELD_CATALOG) {
+    if (!fields.includes(field.key)) continue;
+    const answer = answers[field.key];
+    if (answer === undefined) continue;
+    // A confirm answer reaches the scaffold as the literal `true` / `false` a
+    // TypeScript config expects.
+    const value = typeof answer === "boolean" ? String(answer) : answer;
+    for (const fill of field.fills ?? []) {
+      values[fill.placeholder] = fill.format ? fill.format(value) : value;
+    }
+  }
+  return values;
+}
+
+/**
+ * Expand a manifest `defaults:` value against the answers resolved so far, then
+ * put the result through the field's own checks. The manifest validator sees
+ * only the uninterpolated string, so a value such as `nginx-__PROJECT__` can
+ * reach a select field whose option list it does not match.
+ */
+export function resolveManifestDefault(
+  manifest: TemplateManifest,
+  field: FieldSpec,
+  value: string,
+  answers: Record<string, Answer>,
+): string {
+  let filled = value;
+  for (const [placeholder, replacement] of Object.entries(
+    placeholderValues(manifest.fields, answers),
+  )) {
+    filled = filled.split(placeholder).join(replacement);
+  }
+  const problem = checkFieldValue(field, filled);
+  if (problem) {
+    fail(
+      manifest.name,
+      `"defaults.${field.key}" resolves to "${filled}", which is invalid: ${problem}`,
+    );
+  }
+  return filled;
 }
 
 // ─── manifest frontmatter ───
@@ -98,6 +432,14 @@ function tokenizeYaml(source: string): YamlLine[] {
   return lines;
 }
 
+/** `"*mermaid*"` and `*mermaid*` are the same value, so compare them unquoted. */
+export function unquoteYaml(raw: string): string {
+  const quoted =
+    (raw.startsWith('"') && raw.endsWith('"')) ||
+    (raw.startsWith("'") && raw.endsWith("'"));
+  return quoted && raw.length >= 2 ? raw.slice(1, -1) : raw;
+}
+
 function parseYamlScalar(raw: string): YamlValue {
   if (raw === "{}") return {};
   if (raw.startsWith("[") && raw.endsWith("]")) {
@@ -105,10 +447,8 @@ function parseYamlScalar(raw: string): YamlValue {
     if (inner === "") return [];
     return inner.split(",").map((item) => parseYamlScalar(item.trim()));
   }
-  const quoted =
-    (raw.startsWith('"') && raw.endsWith('"')) ||
-    (raw.startsWith("'") && raw.endsWith("'"));
-  if (quoted && raw.length >= 2) return raw.slice(1, -1);
+  const unquoted = unquoteYaml(raw);
+  if (unquoted !== raw) return unquoted;
   if (raw === "true") return true;
   if (raw === "false") return false;
   return raw;
@@ -146,7 +486,7 @@ function parseYamlMap(
     const colon = line.text.indexOf(":");
     if (colon === -1)
       throw new Error(`expected "key: value" at "${line.text}"`);
-    const key = line.text.slice(0, colon).trim();
+    const key = unquoteYaml(line.text.slice(0, colon).trim());
     const inlineValue = line.text.slice(colon + 1).trim();
     i++;
     if (inlineValue !== "") {
@@ -184,7 +524,6 @@ const KNOWN_KEYS = [
   "fields",
   "defaults",
   "exclude",
-  "deployFiles",
   "renames",
   "host",
   "git",
@@ -204,11 +543,17 @@ const REQUIRED_KEYS = [
   "workspaceWarning",
 ];
 const TARGET_KEYS = ["mode", "path"];
-const HOST_KEYS = ["packageJsonScripts", "gitignore", "minimalPackageJson"];
+const HOST_KEYS = [
+  "packageJsonScripts",
+  "devDependencies",
+  "gitignore",
+  "minimalPackageJson",
+  "pnpmWorkspace",
+];
 const GIT_KEYS = ["init"];
 
 function fail(templateName: string, message: string): never {
-  throw new Error(`${templateName}/${MANIFEST_FILE}: ${message}`);
+  throw new SetupError(`${templateName}/${MANIFEST_FILE}: ${message}`);
 }
 
 function rejectUnknownKeys(
@@ -305,6 +650,68 @@ function asDefaults(
   return out;
 }
 
+function checkFields(templateName: string, fields: string[]): void {
+  for (const key of fields) {
+    if (findField(key)) continue;
+    fail(
+      templateName,
+      `"fields" lists "${key}", which is not a wizard field.\n` +
+        `  Known fields: ${FIELD_CATALOG.map((field) => field.key).join(", ")}`,
+    );
+  }
+}
+
+/**
+ * A `defaults:` entry is only reachable through its field, and it bypasses the
+ * flag path, so it needs the same checks a flag value gets.
+ */
+function checkDefaults(
+  templateName: string,
+  fields: string[],
+  defaults: Record<string, string | boolean>,
+): void {
+  for (const [key, value] of Object.entries(defaults)) {
+    if (!fields.includes(key)) {
+      fail(
+        templateName,
+        `"defaults.${key}" is not listed in "fields", so it has no effect`,
+      );
+    }
+    const field = findField(key)!;
+    const wantsBoolean = field.type === "confirm";
+    if (wantsBoolean !== (typeof value === "boolean")) {
+      fail(
+        templateName,
+        `"defaults.${key}" must be ${wantsBoolean ? "true or false" : "a string"}`,
+      );
+    }
+    if (typeof value !== "string") continue;
+
+    // A default may interpolate a placeholder a field resolved before it fills,
+    // so the value can carry something derived from the project name. Fields are
+    // resolved in catalog order, whatever order "fields" lists them in.
+    const earlier = FIELD_CATALOG.slice(
+      0,
+      FIELD_CATALOG.findIndex((candidate) => candidate.key === key),
+    ).filter((candidate) => fields.includes(candidate.key));
+    const fillable = new Set(earlier.flatMap(fieldPlaceholders));
+    const tokens = value.match(/__[A-Z0-9_]+__/g) ?? [];
+    for (const token of tokens) {
+      if (fillable.has(token)) continue;
+      fail(
+        templateName,
+        `"defaults.${key}" uses ${token}, which no field resolved before "${key}" fills`,
+      );
+    }
+    // An interpolating value has no final form yet; `resolveManifestDefault`
+    // checks it against the field once the answers are in.
+    if (tokens.length > 0) continue;
+
+    const problem = checkFieldValue(field, value);
+    if (problem) fail(templateName, `"defaults.${key}" is invalid: ${problem}`);
+  }
+}
+
 /**
  * `copyDir` filters excluded entries only at the root of each source, so a
  * nested path would silently copy anyway. Reject it instead.
@@ -383,18 +790,12 @@ export function parseTemplateManifest(
   rejectUnknownKeys(templateName, "git.", git, GIT_KEYS);
 
   const exclude = asStringList(templateName, "exclude", raw.exclude);
-  const deployFiles = asStringList(
-    templateName,
-    "deployFiles",
-    raw.deployFiles,
-  );
   checkBoilerplateEntries(templateName, "exclude", exclude, boilerplateDir);
-  checkBoilerplateEntries(
-    templateName,
-    "deployFiles",
-    deployFiles,
-    boilerplateDir,
-  );
+
+  const fields = asStringList(templateName, "fields", raw.fields);
+  checkFields(templateName, fields);
+  const defaults = asDefaults(templateName, raw.defaults);
+  checkDefaults(templateName, fields, defaults);
 
   const renames = asStringMap(templateName, "renames", raw.renames);
   for (const from of Object.keys(renames)) {
@@ -412,10 +813,9 @@ export function parseTemplateManifest(
     target: { mode: mode as (typeof TARGET_MODES)[number], path: targetPath },
     base: asString(templateName, "base", raw.base),
     sectionNav: asBoolean(templateName, "sectionNav", raw.sectionNav),
-    fields: asStringList(templateName, "fields", raw.fields),
-    defaults: asDefaults(templateName, raw.defaults),
+    fields,
+    defaults,
     exclude,
-    deployFiles,
     renames,
     host: {
       packageJsonScripts: asBoolean(
@@ -423,11 +823,21 @@ export function parseTemplateManifest(
         "host.packageJsonScripts",
         host.packageJsonScripts,
       ),
+      devDependencies: asBoolean(
+        templateName,
+        "host.devDependencies",
+        host.devDependencies,
+      ),
       gitignore: asBoolean(templateName, "host.gitignore", host.gitignore),
       minimalPackageJson: asBoolean(
         templateName,
         "host.minimalPackageJson",
         host.minimalPackageJson,
+      ),
+      pnpmWorkspace: asBoolean(
+        templateName,
+        "host.pnpmWorkspace",
+        host.pnpmWorkspace,
       ),
     },
     git: { init: asBoolean(templateName, "git.init", git.init) },
@@ -447,29 +857,55 @@ export interface ScaffoldDirs {
   boilerplateDir: string;
 }
 
-/** Source of truth for the available templates. */
-export function listTemplates(
-  dirs: ScaffoldDirs = defaultDirs(),
-): TemplateManifest[] {
-  const names = fs
-    .readdirSync(dirs.templatesDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .sort();
+export interface UnavailableTemplate {
+  name: string;
+  reason: string;
+}
 
-  return names.map((name) => {
+export interface TemplateScan {
+  templates: TemplateManifest[];
+  unavailable: UnavailableTemplate[];
+}
+
+/**
+ * Source of truth for the available templates. One broken folder is reported as
+ * unavailable rather than thrown, so it cannot take `--help` and every healthy
+ * template down with it.
+ */
+export function scanTemplates(
+  dirs: ScaffoldDirs = defaultDirs(),
+): TemplateScan {
+  let names: string[];
+  try {
+    names = fs
+      .readdirSync(dirs.templatesDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort();
+  } catch {
+    return { templates: [], unavailable: [] };
+  }
+
+  const templates: TemplateManifest[] = [];
+  const unavailable: UnavailableTemplate[] = [];
+  for (const name of names) {
     const dir = path.join(dirs.templatesDir, name);
     const manifestPath = path.join(dir, MANIFEST_FILE);
-    if (!fs.existsSync(manifestPath)) {
-      fail(name, "missing manifest file");
+    try {
+      if (!fs.existsSync(manifestPath)) fail(name, "missing manifest file");
+      templates.push(
+        parseTemplateManifest(
+          fs.readFileSync(manifestPath, "utf-8"),
+          name,
+          dir,
+          dirs.boilerplateDir,
+        ),
+      );
+    } catch (error) {
+      unavailable.push({ name, reason: (error as Error).message });
     }
-    return parseTemplateManifest(
-      fs.readFileSync(manifestPath, "utf-8"),
-      name,
-      dir,
-      dirs.boilerplateDir,
-    );
-  });
+  }
+  return { templates, unavailable };
 }
 
 function defaultDirs(): ScaffoldDirs {
@@ -485,7 +921,6 @@ export function resolveCopyPlan(
   const boilerplateDir = ctx.boilerplateDir ?? BOILERPLATE_DIR;
 
   const exclude = [MANIFEST_FILE, ...manifest.exclude];
-  if (!answers[DEPLOY_FILES_FIELD]) exclude.push(...manifest.deployFiles);
 
   let target: string;
   if (manifest.target.mode === "subfolder") {
@@ -493,7 +928,7 @@ export function resolveCopyPlan(
   } else {
     const name = answers.name;
     if (typeof name !== "string" || name === "") {
-      throw new Error(`Template "${manifest.name}" needs a project name.`);
+      throw new SetupError(`Template "${manifest.name}" needs a project name.`);
     }
     target = path.resolve(cwd, name);
   }
@@ -502,23 +937,74 @@ export function resolveCopyPlan(
     sources: [boilerplateDir, manifest.dir],
     exclude,
     renames: { ...manifest.renames },
-    placeholders: {
-      __DOCS_BASE__: manifest.base,
-      __SECTION_NAV__: String(manifest.sectionNav),
-    },
     target,
   };
 }
 
 /**
- * `npm pack` strips `.npmrc` and `.gitignore` from published packages, so the
- * boilerplate ships them as `_npmrc` / `_gitignore` and renames them on copy.
+ * `npm pack` strips dotfiles and files npm treats as its own config, so the
+ * boilerplate ships them prefixed and the scaffolder renames them on copy. One
+ * table serves both directions, because `sync` resolves a consumer file back to
+ * its baseline through the inverse and the two have to agree entry for entry.
  */
+const SCAFFOLD_RENAMES: Record<string, string> = {
+  _npmrc: ".npmrc",
+  _gitignore: ".gitignore",
+  "_pnpm-workspace.yaml": "pnpm-workspace.yaml",
+};
+
+const WORKSPACE_SOURCE = "_pnpm-workspace.yaml";
+
+export interface WorkspaceSettings {
+  publicHoistPattern: string[];
+  allowBuilds: Record<string, boolean>;
+}
+
+/**
+ * The pnpm settings a documentation site cannot boot without, read from the
+ * boilerplate's own workspace file so a host repo receives exactly what a
+ * standalone scaffold ships. Mermaid's transitive dependencies are CJS: without
+ * the hoist patterns Vite pre-bundles them wrong and the page renders blank with
+ * a dayjs default-export SyntaxError.
+ */
+export function boilerplateWorkspaceSettings(
+  boilerplateDir: string = BOILERPLATE_DIR,
+): WorkspaceSettings {
+  const file = path.join(boilerplateDir, WORKSPACE_SOURCE);
+  const raw = parseYamlMap(
+    tokenizeYaml(fs.readFileSync(file, "utf-8")),
+    0,
+    0,
+  )[0];
+  const patterns = raw.publicHoistPattern;
+  const builds = raw.allowBuilds;
+  if (
+    !Array.isArray(patterns) ||
+    !patterns.every((item) => typeof item === "string") ||
+    typeof builds !== "object" ||
+    Array.isArray(builds)
+  ) {
+    throw new SetupError(
+      `${WORKSPACE_SOURCE}: expected a publicHoistPattern list of strings and an allowBuilds mapping.`,
+    );
+  }
+  return {
+    publicHoistPattern: patterns,
+    allowBuilds: Object.fromEntries(
+      Object.entries(builds).map(([name, value]) => [name, value === true]),
+    ),
+  };
+}
+
 export function consumerName(boilerplateEntry: string): string {
-  if (boilerplateEntry === "_npmrc") return ".npmrc";
-  if (boilerplateEntry === "_gitignore") return ".gitignore";
-  if (boilerplateEntry === "_pnpm-workspace.yaml") return "pnpm-workspace.yaml";
-  return boilerplateEntry;
+  return SCAFFOLD_RENAMES[boilerplateEntry] ?? boilerplateEntry;
+}
+
+export function boilerplateName(consumerEntry: string): string {
+  for (const [source, target] of Object.entries(SCAFFOLD_RENAMES)) {
+    if (target === consumerEntry) return source;
+  }
+  return consumerEntry;
 }
 
 /**
@@ -541,7 +1027,9 @@ export function applyCopyPlan(plan: CopyPlan): CopyDirResult {
     for (const [from, to] of Object.entries(plan.renames)) {
       const fromPath = path.join(staging, from);
       if (!fs.existsSync(fromPath)) {
-        throw new Error(`Cannot rename "${from}": the copy plan excluded it.`);
+        throw new SetupError(
+          `Cannot rename "${from}": the copy plan excluded it.`,
+        );
       }
       const toPath = path.join(staging, to);
       fs.mkdirSync(path.dirname(toPath), { recursive: true });
@@ -565,6 +1053,20 @@ function packageVersion(): string {
   } catch {
     return "0.1.0";
   }
+}
+
+/**
+ * The documentation dependencies a scaffold needs, read from this package's own
+ * `peerDependencies` so the ranges written into a host repo cannot drift from
+ * the ones this package is built and tested against.
+ */
+export function packagePeerDependencies(
+  packageDir: string = PACKAGE_DIR,
+): Record<string, string> {
+  const pkg = JSON.parse(
+    fs.readFileSync(path.join(packageDir, "package.json"), "utf-8"),
+  ) as { peerDependencies?: Record<string, string> };
+  return pkg.peerDependencies ?? {};
 }
 
 export function resolveSource(flags: ParsedArgs["flags"]): string {
@@ -606,8 +1108,9 @@ export function resolveDependencyValue(
       return `file:${target}`;
     }
     default:
-      console.error(`✗ Invalid --source: ${source}. Use npm | git | file.`);
-      process.exit(1);
+      throw new SetupError(
+        `Invalid --source: ${source}. Use npm | git | file.`,
+      );
   }
 }
 
