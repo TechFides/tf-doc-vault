@@ -1,9 +1,6 @@
 /**
- * Minimal structured logger for the CLI tools.
- *
- * Consistent leveled output (→ step, ✓ success, ⚠ warning, ✗ error), aligned
- * key/value fields, and a transient progress line for long loops. Colour is
- * applied only on a TTY and honours NO_COLOR, so piped / CI output stays plain.
+ * Minimal structured logger for the CLI tools. Colour is applied only on a TTY
+ * and honours NO_COLOR, so piped and CI output stays plain.
  */
 
 const COLOR = Boolean(process.stdout.isTTY) && !process.env["NO_COLOR"];
@@ -20,15 +17,12 @@ const red = (s: string): string => paint("31", s);
 const cyan = (s: string): string => paint("36", s);
 
 export const logger = {
-  /** Bold section title, preceded by a blank line. */
   heading(title: string): void {
     console.log(`\n${bold(title)}`);
   },
-  /** Aligned `key   value` line for a small config block. */
   field(key: string, value: string): void {
     console.log(`  ${dim(key.padEnd(7))} ${value}`);
   },
-  /** A phase / action that is starting. */
   step(message: string): void {
     console.log(`${cyan("→")} ${message}`);
   },
@@ -41,17 +35,13 @@ export const logger = {
   error(message: string): void {
     console.error(`${red("✗")} ${message}`);
   },
-  /** Dimmed, indented secondary line. */
   detail(message: string): void {
     console.log(`  ${dim(message)}`);
   },
   blank(): void {
     console.log();
   },
-  /**
-   * Transient single-line progress, only on a TTY (no-op when piped/CI so logs
-   * stay clean). Call `endProgress` before printing anything else.
-   */
+  /** No-op off a TTY. Call `endProgress` before printing anything else. */
   progress(current: number, total: number, label: string): void {
     if (!process.stdout.isTTY) return;
     const line = `  [${current}/${total}] ${label}`;

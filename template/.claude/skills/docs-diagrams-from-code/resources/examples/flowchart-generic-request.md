@@ -1,4 +1,4 @@
-# Example — Flowchart: Generic request with retry
+# Example: Flowchart: Generic request with retry
 
 Reference template for `flowchart-<name>`, `decision-<name>`,
 `business-logic-<sc-id>` anchors.

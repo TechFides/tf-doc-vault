@@ -1,19 +1,8 @@
 /**
- * sync-template.ts
- *
- * Compare a consumer repo's "infrastructure" files (Dockerfile, CI, configs,
- * Terraform, …) against the bundled `template/` baseline and report drift.
- * Useful after upgrading @techfides/tf-doc-vault to pull in fixes that ship in the
- * template.
- *
- * Usage:
- *   tf-doc-vault sync                    show unified diff per drifted file
- *   tf-doc-vault sync --apply            overwrite consumer files with rendered template
- *   tf-doc-vault sync --files=a,b,c      restrict to specific paths
- *
- * Placeholders (`__PROJECT__`, `__PROJECT_DASHED__`, `__GCP_PROJECT__`,
- * `__SERVER_TYPE__`, `__VITEPRESS_COMMON_DEP__`) are auto-detected from the
- * consumer repo (directory name, package.json scripts, terraform.tfvars).
+ * Compares a consumer repo's infrastructure files (Dockerfile, CI, configs,
+ * Terraform) against the bundled `template/` baseline and reports drift.
+ * Placeholders such as `__PROJECT__` are auto-detected from the consumer repo:
+ * directory name, package.json scripts and terraform.tfvars.
  */
 
 import fs from "node:fs";
@@ -105,12 +94,12 @@ function detectPlaceholders(): Record<string, string> {
         break;
       }
     } catch {
-      // file missing — try next candidate
+      // file missing, try the next candidate
     }
   }
 
-  // Basic auth credentials live in consumer's .gitlab-ci.yml — sync must
-  // preserve them across runs, otherwise sync:apply blasts production auth.
+  // Basic-auth credentials live in the consumer's .gitlab-ci.yml, so sync has to
+  // carry them across runs or `sync --apply` blasts production auth.
   let basicAuthUser = "";
   let basicAuthPass = "";
   try {
@@ -123,7 +112,7 @@ function detectPlaceholders(): Record<string, string> {
     if (u?.[1] && !u[1].startsWith("__")) basicAuthUser = u[1];
     if (p?.[1] && !p[1].startsWith("__")) basicAuthPass = p[1];
   } catch {
-    // fresh repo — no consumer CI yet
+    // fresh repo, no consumer CI yet
   }
 
   return {

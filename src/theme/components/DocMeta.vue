@@ -12,9 +12,9 @@ function statusLabel(status: string): string {
   return te(key) ? t(key) : status;
 }
 
-// Format in UTC and build dates with Date.UTC so the rendered string is
-// identical on the server and the client — authored wall-clock values show
-// verbatim, with no timezone shift and no SSR/hydration mismatch.
+// Format in UTC and build dates with Date.UTC so server and client render the
+// same string: authored wall-clock values show verbatim, with no timezone shift
+// and no hydration mismatch.
 const dateFormat = computed(
   () =>
     new Intl.DateTimeFormat(lang.value, {

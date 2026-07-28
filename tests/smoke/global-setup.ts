@@ -25,10 +25,8 @@ interface RunOptions {
 }
 
 /**
- * Run a scaffold command silently on success — only its output is dumped if it
- * fails. The smoke logger prints a one-liner per command so the test output
- * stays scannable; the raw Czech / English scaffold chatter only surfaces when
- * something is actually broken.
+ * Run a scaffold command and print only a one-line summary, so the test output
+ * stays scannable. The raw scaffold output is dumped only on failure.
  */
 function run(cmd: string, args: string[], cwd: string, opts: RunOptions): void {
   logger.step(opts.label);
@@ -156,9 +154,8 @@ function scaffoldAna(tgz: string): string {
   }
   logger.success("hoist patterns in place");
 
-  // Read-only verifications. We deliberately skip `pnpm fix` here because it
-  // invokes the (separately-tracked) normalize bug; once that's fixed, fix can
-  // be added back to widen coverage.
+  // Read-only verifications only. `pnpm fix` is left out because it triggers
+  // the normalize bug that is tracked separately.
   run("pnpm", ["docs:validate"], dir, { label: "pnpm docs:validate" });
   run("pnpm", ["docs:build"], dir, { label: "pnpm docs:build" });
   run("pnpm", ["sync"], dir, { label: "pnpm sync" });
@@ -304,7 +301,7 @@ e.listen(${port}, () => console.log("listening"));
 `;
 }
 
-// -------------- tiny filesystem helpers (don't depend on src/cli/utils.ts) ----
+// ─── filesystem helpers, kept independent of src/cli/utils.ts ────────────────
 
 function copyDir(src: string, dest: string): void {
   fs.mkdirSync(dest, { recursive: true });
@@ -363,7 +360,7 @@ function substitutePlaceholders(
   }
 }
 
-// -------------- entry point ---------------------------------------------
+// ─── entry point ─────────────────────────────────────────────────────────────
 
 async function globalSetup(): Promise<void> {
   logger.heading(`Smoke sandbox: ${SMOKE_ROOT}`);
@@ -385,7 +382,7 @@ async function globalSetup(): Promise<void> {
     JSON.stringify(sandboxes, null, 2),
   );
 
-  logger.heading("Sandboxes ready — handing off to spec files");
+  logger.heading("Sandboxes ready, handing off to spec files");
 }
 
 export default globalSetup;

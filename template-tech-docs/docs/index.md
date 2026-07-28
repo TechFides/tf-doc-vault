@@ -1,5 +1,5 @@
 ---
-title: __SERVICE_ID__ — technical documentation
+title: __SERVICE_ID__ (technical documentation)
 status: published
 updated_at: __DATE__
 layout: home

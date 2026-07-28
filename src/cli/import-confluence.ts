@@ -1,19 +1,9 @@
 #!/usr/bin/env node
 /**
- * import-confluence — download a Confluence page tree and convert it to
- * VitePress-compatible Markdown files in the output directory.
- *
- * Usage:
- *   import-confluence --site=<host> --root-page-id=<id> --output=<dir> [--space=<KEY>] [--verbose]
- *
- * Env vars:
- *   CONFLUENCE_USER_EMAIL   Atlassian account e-mail
- *   CONFLUENCE_API_TOKEN    Atlassian API token
- *
- * ADF → Markdown conversion lives in src/confluence/convert.ts; the REST client
- * (pagination, retry, concurrency, tree building) in src/confluence/client.ts;
- * image resolution in src/confluence/resolve-media.ts. This file is the thin CLI
- * orchestrator: arg parsing, attachment download, link rewriting, file output.
+ * import-confluence: thin CLI orchestrator for the Confluence importer (arg
+ * parsing, attachment download, link rewriting, file output). ADF conversion
+ * lives in src/confluence/convert.ts, the REST client in client.ts and image
+ * resolution in resolve-media.ts.
  */
 
 import fs from "node:fs";
@@ -60,13 +50,13 @@ interface PageWarning {
   detail: string;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function plural(n: number): string {
   return n === 1 ? "" : "s";
 }
 
-/** Quote a string for YAML only when needed; uses single quotes to avoid escaping. */
+/** Quote for YAML only when needed; single quotes keep escaping out of it. */
 function yamlString(value: string): string {
   if (
     /[[\]{}:#*!|>"%@`,]/.test(value) ||
@@ -94,9 +84,8 @@ function parseAdf(value: string): AdfNode | null {
 }
 
 /**
- * Download all image attachments of a page into publicDir. Returns the
- * attachments that landed on disk plus any per-file download failures (so the
- * caller can fold them into the run summary instead of logging inline).
+ * Download a page's image attachments into publicDir. Per-file failures come
+ * back to the caller so they land in the run summary instead of inline logs.
  */
 async function downloadImages(
   pageId: string,
@@ -129,7 +118,7 @@ async function downloadImages(
   return { downloaded, failures };
 }
 
-// ─── Writer ───────────────────────────────────────────────────────────────────
+// ─── Writer ──────────────────────────────────────────────────────────────────
 
 async function writePage(
   node: TreeNode,
@@ -216,7 +205,7 @@ ${markdown}
   }
 }
 
-// ─── Summary ────────────────────────────────────────────────────────────────
+// ─── Summary ─────────────────────────────────────────────────────────────────
 
 const MAX_LISTED = 10;
 
@@ -282,7 +271,7 @@ function reportWarnings(warnings: PageWarning[], verbose: boolean): void {
       `${download.length} attachment download failure${plural(download.length)}`,
     );
     if (verbose) {
-      for (const w of download) logger.detail(`    • ${w.page} — ${w.detail}`);
+      for (const w of download) logger.detail(`    • ${w.page}: ${w.detail}`);
     }
   }
 
@@ -299,7 +288,7 @@ function reportErrors(errors: ImportError[]): void {
     logger.detail(`  • ${e.title ?? e.pageId}: ${e.error}`);
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+// ─── Main ────────────────────────────────────────────────────────────────────
 
 function usage(exitCode = 0): never {
   console.log(`

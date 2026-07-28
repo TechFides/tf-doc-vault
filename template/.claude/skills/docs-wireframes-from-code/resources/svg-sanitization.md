@@ -2,14 +2,14 @@
 
 Hard rules enforced by `scripts/validate-svg.sh` and by Step 2 item 6 of
 `docs-wireframes-from-code`. Wireframes are static visual assets served
-from the docs site — they must NEVER carry executable or side-effecting
+from the docs site, so they must NEVER carry executable or side-effecting
 content. This document explains **what is forbidden**, **why**, and
 **how to rewrite** unsafe constructs so the intent survives.
 
 ## Forbidden constructs (hard fail)
 
 The validator rejects any SVG that contains any of the following. If you
-encounter one, remove it before saving — there is no `--allow` flag.
+encounter one, remove it before saving; there is no `--allow` flag.
 
 ### 1. `<script>` elements
 
@@ -22,7 +22,7 @@ encounter one, remove it before saving — there is no `--allow` flag.
 
 **Rewrite**: delete. If the original screenshot shows an animation or
 dynamic behavior, capture it in the textual summary above the figure
-reference instead — wireframes describe _layout_, not behavior.
+reference instead; wireframes describe _layout_, not behavior.
 
 ### 2. Event-handler attributes (`on*`)
 
@@ -55,7 +55,7 @@ are illustrative; real navigation is described in the scenario page.
 ### 4. `<foreignObject>` with executable HTML/JS
 
 **Why**: HTML inside `<foreignObject>` can contain `<script>`, event
-handlers, or `javascript:` URIs — same attack surface as the above, just
+handlers, or `javascript:` URIs; the same attack surface as the above, just
 tunneled through SVG.
 
 ```xml
@@ -68,7 +68,7 @@ tunneled through SVG.
 **Rewrite**: convert the HTML to native SVG primitives (`<text>`,
 `<rect>`, `<g>`). A `foreignObject` with pure static HTML (no scripts,
 no handlers) MAY pass the validator, but the house preference is to
-avoid it entirely — static SVG renders consistently across viewers.
+avoid it entirely; static SVG renders consistently across viewers.
 
 ### 5. External references to non-whitelisted origins
 
@@ -88,7 +88,7 @@ download it into `docs/public/` first and reference it by relative path.
 ### 6. Unresolved placeholders
 
 **Why**: an `<!-- param-name -->` comment left in the final SVG signals
-a bug in substitution — the fragment author expected a value.
+a bug in substitution; the fragment author expected a value.
 
 ```xml
 <!-- NEVER survive to the final file -->
@@ -104,11 +104,11 @@ parameter name as an error.
 
 These pass the validator but the skill should self-correct:
 
-- **Mixed namespaces without declaration** — if using `xhtml:` or
+- **Mixed namespaces without declaration**: if using `xhtml:` or
   `xlink:` prefixes, declare the namespace on the root `<svg>`.
-- **Unreferenced `id` attributes** — clutter; remove or reference.
-- **Inline `style` with `expression()`** (legacy IE) — strip.
-- **Comments containing `-->` inside CDATA-like tricks** — normalize
+- **Unreferenced `id` attributes**: clutter; remove or reference.
+- **Inline `style` with `expression()`** (legacy IE): strip.
+- **Comments containing `-->` inside CDATA-like tricks**: normalize
   comment syntax.
 
 ## XML well-formedness
@@ -141,22 +141,22 @@ rejects malformed documents:
 
 ## Sanitization procedure (when validator fails)
 
-1. Read the validator output — it names the offending line and
+1. Read the validator output; it names the offending line and
    construct.
 2. Remove or rewrite the construct using the guidance above. Do not add
    an exception list.
 3. Re-run the validator. Repeat until clean.
 4. If the offending construct came from a fragment, the fragment itself
-   is broken — fix it in `wf-fragments/` and add a regression note in
+   is broken; fix it in `wf-fragments/` and add a regression note in
    `wf-fragments/README.md`.
 
 ## Rules
 
 - **NEVER** ship an SVG that fails `scripts/validate-svg.sh`.
 - **NEVER** add executable or side-effecting content to a fragment "for
-  convenience" — the fragment lives in the docs tree and will reach
+  convenience"; the fragment lives in the docs tree and will reach
   every consumer.
-- **NEVER** rely on soft warnings going away on their own — fix them
+- **NEVER** rely on soft warnings going away on their own; fix them
   before the run completes.
 - **ALWAYS** prefer native SVG primitives over `<foreignObject>`.
 - **ALWAYS** keep the accessibility pair (`<title>` + `<desc>`) in

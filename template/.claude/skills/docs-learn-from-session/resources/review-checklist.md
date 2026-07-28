@@ -2,12 +2,12 @@
 
 Run this checklist:
 
-- **Inline** — after each entry is applied in Step 2 (over the single
+- **Inline**: after each entry is applied in Step 2 (over the single
   edited file).
-- **Final** — over every touched file at the end of the run (Step 5),
+- **Final**: over every touched file at the end of the run (Step 5),
   and present the result as a compact table.
 
-## Checklist — edited skill or command files
+## Checklist: edited skill or command files
 
 For each `.claude/skills/**/SKILL.md`, `.claude/skills/**/resources/*.md`,
 or `.claude/commands/*.md` touched this run:
@@ -31,7 +31,7 @@ or `.claude/commands/*.md` touched this run:
 - [ ] If the edit introduced a `⚠️ TODO` marker, the marker is listed
       in the finish report.
 
-## Checklist — updated session-notes files
+## Checklist: updated session-notes files
 
 For each `.claude/session-notes/*.md` this run updated:
 
@@ -60,7 +60,7 @@ Re-read this skill's `SKILL.md` and confirm:
 
 - Every numbered step in `## Workflow` was executed (or explicitly
   skipped with user confirmation).
-- Every bullet in `## Safety rules` was applied — in particular:
+- Every bullet in `## Safety rules` was applied, in particular:
   out-of-tree guard, no silent overwrite, verbatim user edits, no
   `CLAUDE.md` edits, ambiguity marked as TODO.
 - Every resource listed in `## Resources` was loaded **only** when

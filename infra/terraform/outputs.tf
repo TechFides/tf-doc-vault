@@ -14,7 +14,7 @@ output "ci_service_account_email" {
 }
 
 output "ci_service_account_key" {
-  description = "Base64-encoded JSON key for the CI/CD service account — store as secret GCP_SA_KEY"
+  description = "Base64-encoded JSON key for the CI/CD service account; store as secret GCP_SA_KEY"
   value       = google_service_account_key.ci.private_key
   sensitive   = true
 }
@@ -34,7 +34,7 @@ output "setup_instructions" {
        GCP_REGION     = ${var.region}
        SERVICE_NAME   = ${var.service_name}
 
-    3. Push to default branch — the pipeline will deploy the image to Cloud Run.
+    3. Push to the default branch; the pipeline deploys the image to Cloud Run.
 
     4. Service URL:
        ${google_cloud_run_v2_service.docs.uri}

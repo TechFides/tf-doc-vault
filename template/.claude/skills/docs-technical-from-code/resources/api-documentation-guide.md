@@ -4,11 +4,11 @@ Reference patterns for documenting **REST APIs** inside the technical
 section. Applies whenever a page is produced in one of the three API
 groups:
 
-- `technical/consumed-apis/<api>.md` — third-party / upstream APIs the
+- `technical/consumed-apis/<api>.md`: third-party / upstream APIs the
   system calls.
-- `technical/exposed-public-apis/<api>.md` — APIs the system exposes to
+- `technical/exposed-public-apis/<api>.md`: APIs the system exposes to
   external consumers.
-- `technical/exposed-internal-apis/<api>.md` — APIs the system exposes to
+- `technical/exposed-internal-apis/<api>.md`: APIs the system exposes to
   other internal services / teams.
 
 ## When to invoke this resource
@@ -16,14 +16,14 @@ groups:
 Load this file **every time** a new or existing API page is being
 generated or updated. That covers:
 
-- Step 1 planning — when the scan lists an API row in the plan, this
+- Step 1 planning: when the scan lists an API row in the plan, this
   resource governs the expected page shape.
-- Step 2 generation — structural templates for endpoints, errors, auth,
+- Step 2 generation: structural templates for endpoints, errors, auth,
   rate limits, versioning, examples, webhooks.
-- Step 3 index check — only the API group index; the guide does not
+- Step 3 index check: only the API group index; the guide does not
   apply to non-API technical pages.
 
-One file per API. **NEVER** bundle multiple APIs into a single page —
+One file per API. **NEVER** bundle multiple APIs into a single page;
 one consumer / one exposed API = one `.md` file.
 
 ## Project-specific rules (inherit from CLAUDE.md)
@@ -33,7 +33,7 @@ conflict:
 
 - **Evidence-first** (§1 CLAUDE.md). Every endpoint, field, code,
   status, and rate-limit value must be traceable to code / OpenAPI
-  spec / config. Values that cannot be cited get `⚠️ TODO: …` — never
+  spec / config. Values that cannot be cited get `⚠️ TODO: …`; never
   invented.
 - **Czech body text, original technical identifiers** (§7). Method
   names, HTTP verbs, status codes, field names, header names, error
@@ -47,24 +47,24 @@ conflict:
 ## Page structure (per API)
 
 Every API page (regardless of consumed / exposed-public /
-exposed-internal) follows this outline. Empty sections are omitted —
+exposed-internal) follows this outline. Empty sections are omitted;
 but every relevant section is present.
 
-1. **Info blok** — base URL(s), version, environment, owner team,
+1. **Info blok**: base URL(s), version, environment, owner team,
    Confluence / SLA / support contact.
-2. **Authentication** — how to obtain credentials, how to pass them,
+2. **Authentication**: how to obtain credentials, how to pass them,
    token lifetime / rotation.
-3. **Rate limiting & quotas** — limits per plan / consumer, relevant
+3. **Rate limiting & quotas**: limits per plan / consumer, relevant
    response headers, back-off strategy.
-4. **Endpoints** — one sub-section per endpoint, in CRUD order (List,
+4. **Endpoints**: one sub-section per endpoint, in CRUD order (List,
    Get, Create, Update, Delete).
-5. **Error responses** — common error envelope + catalog of codes.
-6. **Webhooks / callbacks** — if the API supports them.
-7. **Versioning** — current version, deprecation policy, migration
+5. **Error responses**: common error envelope + catalog of codes.
+6. **Webhooks / callbacks**: if the API supports them.
+7. **Versioning**: current version, deprecation policy, migration
    links.
-8. **Code examples** — cURL + one or two languages actually used in the
+8. **Code examples**: cURL + one or two languages actually used in the
    codebase (JS/TS, Python, Go, …).
-9. **Related documents** — links to scenarios that consume this API,
+9. **Related documents**: links to scenarios that consume this API,
    `integrations/api-authorization.md`, `error-codes.md`, etc.
 
 ## Per-endpoint documentation pattern
@@ -239,10 +239,10 @@ security:
 ### Tooling
 
 ```bash
-# Redocly — statické HTML
+# Redocly: statické HTML
 npx @redocly/cli build-docs openapi.yaml -o docs/api.html
 
-# Swagger UI — interaktivní
+# Swagger UI: interaktivní
 docker run -p 80:8080 \
   -e SWAGGER_JSON=/spec/openapi.yaml \
   -v ./openapi.yaml:/spec/openapi.yaml \
@@ -262,7 +262,7 @@ npx @redocly/cli lint openapi.yaml
 **Use realistic values** (with PII substituted):
 
 ```json
-// ✅ Good — realistic
+// ✅ Good, realistic
 {
   "email": "jana.novakova@example.com",
   "name": "Jana Nováková",
@@ -271,7 +271,7 @@ npx @redocly/cli lint openapi.yaml
 ```
 
 ```json
-// ❌ Bad — placeholder
+// ❌ Bad, placeholder
 {
   "email": "string",
   "name": "string",
@@ -443,7 +443,7 @@ https://api.example.com/v2/users
 
 ### Migrace
 
-[v1 → v2 Migration](./migration-v1-v2.md) — breaking changes a
+[v1 → v2 Migration](./migration-v1-v2.md): breaking changes a
 postup přechodu.
 
 ### Deprecation policy
@@ -458,7 +458,7 @@ postup přechodu.
 Include cURL always, plus **one language that actually appears in the
 repo** (TypeScript if FE/Node, Python if services, Go if services,
 etc.). Do NOT copy-paste three languages "for completeness" if the code
-base uses only one — it bloats the doc and rots faster.
+base uses only one; it bloats the doc and rots faster.
 
 ### cURL
 
@@ -547,7 +547,7 @@ return `sha256=${expected}` === signature;
 \`\`\`
 ```
 
-## Consumed vs. exposed — what differs
+## Consumed vs. exposed: what differs
 
 The page outline is the same, but emphasis shifts:
 
@@ -585,7 +585,7 @@ spec.
       `proposed-structure.md` (e.g. `2.8.3 Billing API`).
 - [ ] Frontmatter + Confluence mark present.
 - [ ] Every anchor for a future diagram is inserted as
-      `<!-- diagram-anchor: <name> -->` (not a Mermaid block — this
+      `<!-- diagram-anchor: <name> -->` (not a Mermaid block; this
       phase is text-only).
 
 ## Rules
@@ -593,11 +593,11 @@ spec.
 - **NEVER** invent endpoints, fields, codes, headers, or limits. Cite
   or TODO.
 - **NEVER** bundle multiple APIs into one page.
-- **NEVER** inline the whole OpenAPI spec — link to it.
+- **NEVER** inline the whole OpenAPI spec; link to it.
 - **ALWAYS** use realistic values, with PII substituted.
 - **ALWAYS** differentiate consumed vs. exposed sections per the table
   above.
 - **ALWAYS** keep this guide in sync with
   `integrations/error-codes.md` and
-  `integrations/api-authorization.md` — those are the cross-API
+  `integrations/api-authorization.md`; those are the cross-API
   canonical sources.

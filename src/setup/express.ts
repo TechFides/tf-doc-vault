@@ -5,9 +5,8 @@ import type { RequestHandler } from "express";
 
 export interface SetupTechDocsOptions {
   /**
-   * Base path where the docs are mounted (e.g., "/tech-docs").
-   * Used to derive default distDir if not provided.
-   * Default: "/tech-docs"
+   * Base path where the docs are mounted, and the source of the default
+   * `distDir`. Default: `"/tech-docs"`.
    */
   basePath?: string;
   /** Absolute path to the built VitePress dist directory. Default: `<cwd>/<basePath>/.vitepress/dist`. */
@@ -22,8 +21,8 @@ export interface SetupTechDocsOptions {
 }
 
 /**
- * Creates an Express router that serves the VitePress dist behind Basic auth.
- * Returns null when the endpoint should be disabled (no password, or dist not built yet).
+ * Express router serving the VitePress dist behind Basic auth. Returns null
+ * when there is no password or the dist has not been built.
  */
 export async function createTechDocsHandler(
   opts: SetupTechDocsOptions = {},
@@ -73,9 +72,8 @@ export async function createTechDocsHandler(
     res.status(401).end("Authentication required");
   });
 
-  // VitePress relies on inline scripts and styles (window.__VP_SITE_DATA__ etc.).
-  // Strip any upstream CSP headers (e.g. from helmet) for this sub-path only.
-  // The Basic-auth gate above already protects the route.
+  // VitePress relies on inline scripts and styles, so strip upstream CSP headers
+  // (helmet, for instance) on this sub-path. The Basic-auth gate above guards it.
   router.use((_req, res, next) => {
     res.removeHeader("content-security-policy");
     res.removeHeader("content-security-policy-report-only");

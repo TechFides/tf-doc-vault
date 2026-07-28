@@ -1,4 +1,4 @@
-# Example — Use-case: Passwordless login module
+# Example: Use-case: Passwordless login module
 
 Reference template for `use-case-all` / `use-case-<module>` anchors.
 

@@ -17,15 +17,15 @@ confluence:
 
 ## Přehled
 
-<1–2 věty — o čem tato stránka je, proč je v technické dokumentaci.>
+<1–2 věty o tom, čemu se stránka věnuje a proč je v technické dokumentaci.>
 
 ## Kontext v kódu
 
 <Kde v repo se téma nachází (cesty, moduly). Každé tvrzení s citací
 `path:line`.>
 
-- `<path/to/file>` — <co se tam nachází>.
-- `<path/to/file:N>` — <konkrétní definice>.
+- `<path/to/file>`: <co se tam nachází>.
+- `<path/to/file:N>`: <konkrétní definice>.
 
 ## Hlavní fakta
 
@@ -39,17 +39,17 @@ tabulku, pokud je to seznam (např. konfigurace, hodnoty).>
 
 ## Diagram
 
-<Volitelné — zařaď, pokud stránka popisuje strukturu, sekvenční tok,
+<Volitelné: zařaď, pokud stránka popisuje strukturu, sekvenční tok,
 stav nebo datový model. Anchor naplní diagramová fáze:>
 
 <!-- diagram-anchor: <name> -->
 
-<Krátký textový popis toho, co diagram znázorňuje — slouží i jako
+<Krátký textový popis toho, co diagram znázorňuje; slouží i jako
 fallback, kdyby se diagram nevykreslil.>
 
 ## Příklad
 
-<Konkrétní příklad z kódu — snippet, request/response, config excerpt,
+<Konkrétní příklad z kódu: snippet, request/response, config excerpt,
 nebo reálný scénář. VŽDY aspoň jeden. §7 CLAUDE.md.>
 
 ```text

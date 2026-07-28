@@ -15,7 +15,7 @@ updated_at: 2026-06-11 # YYYY-MM-DD
 ---
 ```
 
-Both fields are optional and independent — you can set either one alone.
+Both fields are optional and independent; you can set either one alone.
 
 ---
 
@@ -37,7 +37,7 @@ status: published
 <span class="doc-status-badge" data-status="draft">Draft</span>
 
 Work in progress. Content may be incomplete, inaccurate, or not yet reviewed.
-Use during initial authoring — before anyone else relies on the page.
+Use during initial authoring, before anyone else relies on the page.
 
 ```md
 status: draft

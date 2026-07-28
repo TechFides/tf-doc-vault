@@ -2,7 +2,7 @@
 
 # Analytical documentation (`*_ana` repos)
 
-Standalone documentation repositories for business analysis, functional specs, and technical design — the `*_ana` pattern. Suited for projects where the
+Standalone documentation repositories for business analysis, functional specs, and technical design: the `*_ana` pattern. Suited for projects where the
 documentation has its own lifecycle and deployment, and needs to be accessible outside the application itself (e.g. for stakeholders or external reviewers).
 
 Each repo gets a complete VitePress site with versioned content, a multi-stage Docker image deployed to GCP Cloud Run via Terraform, a full GitLab CI/CD
@@ -33,14 +33,14 @@ pnpm dlx @techfides/tf-doc-vault@latest create my_analysis \
 | `--ref=<git-ref>`    | `v<package version>`                                  | Tag/branch/SHA for `--source=git` (ignored for `npm`/`file`).                                                                                                                                                                                                  |
 | `--git-url=<url>`    | `git+ssh://git@github.com/techfides/tf-doc-vault.git` | Override git URL for `--source=git`.                                                                                                                                                                                                                           |
 | `--file-path=<path>` | relative path to the package                          | Override `file:` path for `--source=file`.                                                                                                                                                                                                                     |
-| `--no-git`           | _(false)_                                             | Skip `git init` + first commit. Use when embedding the docs inside an existing repo — all infrastructure is still generated.                                                                                                                                   |
+| `--no-git`           | _(false)_                                             | Skip `git init` + first commit. Use when embedding the docs inside an existing repo; all infrastructure is still generated.                                                                                                                                    |
 
 ### Dedicated repository
 
-The standard setup — the analytical docs live in their own git repository and are deployed independently. The scaffolder runs `git init` and makes the first
+The standard setup: the analytical docs live in their own git repository and are deployed independently. The scaffolder runs `git init` and makes the first
 commit automatically.
 
-The GitLab repository **does not need to be created in advance** — GitLab
+The GitLab repository **does not need to be created in advance**; GitLab
 supports [push-to-create](https://docs.gitlab.com/topics/git/project/#create-a-project-using-git-push). Just add the remote and push:
 
 ```bash
@@ -53,14 +53,14 @@ git push -u origin master   # GitLab creates the project automatically
 ```
 
 Prerequisite: at least `Developer` rights in `techfides/tf-analysis`. After the first push, set the CI/CD variables (`GCP_SA_KEY`, `GCP_PROJECT`, `GCP_REGION`,
-`SERVICE_NAME`) in the newly created GitLab project — without them the `🐳 build:docs` job will fail.
+`SERVICE_NAME`) in the newly created GitLab project; without them the `🐳 build:docs` job will fail.
 
 Deployment: `terraform apply` in `infra/` provisions Cloud Run + Artifact Registry on first run. Subsequent deploys happen automatically via CI on every push to
 `master`.
 
 ### Embedded in an existing repo (`--no-git`)
 
-When the analytical docs belong inside an existing service or project repo, add `--no-git`. The full structure — VitePress site, Dockerfile, CI, Terraform — is
+When the analytical docs belong inside an existing service or project repo, add `--no-git`. The full structure (VitePress site, Dockerfile, CI, Terraform) is
 still generated, but `git init` is skipped so the output is committed as part of the parent repo:
 
 ```bash
@@ -83,7 +83,7 @@ The docs can still be deployed to Cloud Run independently using their own CI/CD 
 
 ### Embedding inside an existing pnpm workspace
 
-If the parent repo is itself a **pnpm workspace** (it has a `pnpm-workspace.yaml` at its root), `create` will print a warning telling you to merge a small config block into the parent file. This is necessary because **pnpm only honors workspace configuration at the workspace root** — the scaffolded `pnpm-workspace.yaml` and `.npmrc` inside `<your-folder>/` are silently ignored when pnpm sees an ancestor workspace.
+If the parent repo is itself a **pnpm workspace** (it has a `pnpm-workspace.yaml` at its root), `create` will print a warning telling you to merge a small config block into the parent file. This is necessary because **pnpm only honors workspace configuration at the workspace root**, so the scaffolded `pnpm-workspace.yaml` and `.npmrc` inside `<your-folder>/` are silently ignored when pnpm sees an ancestor workspace.
 
 Without this step, `pnpm docs:dev` will render a blank page and the browser console will show:
 
@@ -136,7 +136,7 @@ settings, and has isolated stages with no naming conflicts. `strategy: depend` m
 ## Auth (`nginx-auth`)
 
 The `nginx-auth` runtime protects the application with HTTP Basic auth. Username and password are set **at build time** via Docker build-args `BASIC_AUTH_USER` /
-`BASIC_AUTH_PASS` — the `Dockerfile` generates `/etc/nginx/.htpasswd` from them. If they are empty, the build fails fast.
+`BASIC_AUTH_PASS`; the `Dockerfile` generates `/etc/nginx/.htpasswd` from them. If they are empty, the build fails fast.
 
 The values are stored directly in the repo, in the top-level `variables:` block of `.gitlab-ci.yml`:
 
@@ -147,7 +147,7 @@ variables:
   BASIC_AUTH_PASS: "anadocsTF"
 ```
 
-This is not a secret — anyone with repo access has application access. The `🐳 build:docs` job conditionally passes them to `docker build` only when non-empty,
+This is not a secret: anyone with repo access has application access. The `🐳 build:docs` job conditionally passes them to `docker build` only when non-empty,
 so projects without auth (runtime `nginx`) just leave them blank.
 
 Local build:
@@ -163,18 +163,18 @@ Password rotation = update `variables:` + commit + redeploy (the htpasswd hash i
 
 ### Switching an existing project from `nginx` to `nginx-auth`
 
-`__SERVER_TYPE__` is baked into two places during scaffolding — switching requires updating both:
+`__SERVER_TYPE__` is baked into two places during scaffolding, so switching requires updating both:
 
-1. **`.gitlab-ci.yml`** — in `BUILD_ARGS` (job `🐳 build:docs`) change `SERVER_TYPE=nginx` to `SERVER_TYPE=nginx-auth`.
-2. **`Dockerfile`** — `ARG SERVER_TYPE=nginx` → `ARG SERVER_TYPE=nginx-auth` (default for local builds without a build-arg; CI always overrides it).
-3. **`.gitlab-ci.yml`** `variables:` — fill in `BASIC_AUTH_USER` / `BASIC_AUTH_PASS` (otherwise the build fails on the fail-fast check in `Dockerfile`).
+1. **`.gitlab-ci.yml`**: in `BUILD_ARGS` (job `🐳 build:docs`) change `SERVER_TYPE=nginx` to `SERVER_TYPE=nginx-auth`.
+2. **`Dockerfile`**: `ARG SERVER_TYPE=nginx` → `ARG SERVER_TYPE=nginx-auth` (default for local builds without a build-arg; CI always overrides it).
+3. **`.gitlab-ci.yml`** `variables:`: fill in `BASIC_AUTH_USER` / `BASIC_AUTH_PASS` (otherwise the build fails on the fail-fast check in `Dockerfile`).
 4. Commit + push → CI builds a new image, Cloud Run rolls out a new revision.
 
 Back to `nginx` = the same steps in reverse + clear both `BASIC_AUTH_*` values.
 
 ## Syncing the template to an existing repo
 
-When the package adds or fixes something in `template/` (Dockerfile, CI, configs, Terraform), consumer repos don't receive the update automatically — those
+When the package adds or fixes something in `template/` (Dockerfile, CI, configs, Terraform), consumer repos don't receive the update automatically; those
 files belong to them. To inspect or apply the diff:
 
 ```bash

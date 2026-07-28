@@ -1,9 +1,9 @@
 ---
 name: docs-wireframes-from-code
-description: Generates SVG wireframes for already-generated documentation pages. Attaches wireframes at the `<!-- wireframe-anchor: <id> -->` markers placed by the functional phase (typically inside scenario files) — it does NOT invent wireframes for pages without anchors. Inputs include the codebase, already-generated docs, shared SVG fragments from `wf-fragments/`, and optional user-provided screenshots used as layout reference. ALWAYS runs as the last phase, AFTER text and diagrams are confirmed stable. Invoked by the docs-from-code orchestrator or by /docs-wireframes. DO NOT trigger for text generation, diagrams, sales, or pre-code design. Always inherits rules from CLAUDE.md.
+description: Generates SVG wireframes for already-generated documentation pages. Attaches wireframes at the `<!-- wireframe-anchor: <id> -->` markers placed by the functional phase (typically inside scenario files); it does NOT invent wireframes for pages without anchors. Inputs include the codebase, already-generated docs, shared SVG fragments from `wf-fragments/`, and optional user-provided screenshots used as layout reference. ALWAYS runs as the last phase, AFTER text and diagrams are confirmed stable. Invoked by the docs-from-code orchestrator or by /docs-wireframes. DO NOT trigger for text generation, diagrams, sales, or pre-code design. Always inherits rules from CLAUDE.md.
 ---
 
-# docs-wireframes-from-code — Wireframes phase
+# docs-wireframes-from-code: Wireframes phase
 
 ## When to use
 
@@ -18,7 +18,7 @@ Invoked by the `docs-from-code` orchestrator when the run scope is
 3. The user has been asked whether screenshots are available to use as
    layout reference (see Source hierarchy).
 
-Wireframes are the **most expensive to fix** — do not run this phase on
+Wireframes are the **most expensive to fix**, so do not run this phase on
 unstable content.
 
 Do **NOT** use this skill for:
@@ -32,35 +32,35 @@ Do **NOT** use this skill for:
 
 This skill uses up to **four** sources:
 
-1. **Codebase (primary, source of truth)** — `source_path`. Route
+1. **Codebase (primary, source of truth)**: `source_path`. Route
    definitions, page components, form schemas, UI strings.
-2. **Already-generated docs (secondary, digested)** —
+2. **Already-generated docs (secondary, digested)**:
    `docs/<version>/`. Scenario pages describe what screens do; scenario
    I/O data tables describe fields.
-3. **Shared SVG fragments** — `wf-fragments/` at repo root. Canonical
+3. **Shared SVG fragments**: `wf-fragments/` at repo root. Canonical
    snippets for shells, avatars, buttons, inputs, conversation rows,
    etc. (§9 of CLAUDE.md).
-4. **User-provided screenshots (optional, temporary)** — when supplied,
+4. **User-provided screenshots (optional, temporary)**: when supplied,
    they are the **layout reference**: the SVG must reflect the
    screenshot's layout and content, and **NEVER** add elements not
    visible on it. Screenshots are input-only and are **NOT** stored in
-   `wf-fragments/` — they are discarded after the run.
+   `wf-fragments/`; they are discarded after the run.
 
 Ask for screenshots at the start of the run. If none are provided,
 layout is derived from the code and the corresponding scenario page.
 
 ## Inputs (run context from orchestrator)
 
-- `source_path` — repository root.
-- `version_folder` — e.g. `docs/v1/`.
-- `source_version` — git tag or `package.json`.
-- `current_date` — from system context.
-- `auto_mode` — boolean; default `false`.
-- `anchors_report` — list of `<!-- wireframe-anchor: <id> -->` markers
+- `source_path`: repository root.
+- `version_folder`: e.g. `docs/v1/`.
+- `source_version`: git tag or `package.json`.
+- `current_date`: from system context.
+- `auto_mode`: boolean; default `false`.
+- `anchors_report`: list of `<!-- wireframe-anchor: <id> -->` markers
   collected from the functional phase. Each entry:
   `{ file, anchor_id }`. If unavailable, this skill scans the docs tree
   itself in Step 1.
-- `screenshots` — optional list of paths to user-provided screenshots,
+- `screenshots`: optional list of paths to user-provided screenshots,
   tagged by anchor ID (e.g. `{ "sc-01-login": "./shots/login.png" }`).
 
 If invoked directly, collect these inputs from the user first.
@@ -80,7 +80,7 @@ short textual summary, with the anchor comment kept for traceability:
 ```markdown
 <!-- wireframe-anchor: sc-01-login -->
 
-**Obrázek 1** — Wireframe obrazovky přihlášení.
+**Obrázek 1**: Wireframe obrazovky přihlášení.
 
 Stručné textové shrnutí obrazovky pro případ, že se SVG nenačte.
 
@@ -89,7 +89,7 @@ Stručné textové shrnutí obrazovky pro případ, že se SVG nenačte.
 
 ## Workflow
 
-### Step 1 — Collect anchors, screenshots, and plan
+### Step 1: Collect anchors, screenshots, and plan
 
 - If `anchors_report` is provided, use it; otherwise scan
   `docs/<version>/` for `<!-- wireframe-anchor: <id> -->` markers.
@@ -121,7 +121,7 @@ Produce a **wireframe plan** as a table:
 Present to the user. **NEVER** start writing before confirmation (or
 explicit `auto_mode`).
 
-### Step 2 — Generate wireframe-by-wireframe
+### Step 2: Generate wireframe-by-wireframe
 
 For every planned wireframe:
 
@@ -149,7 +149,7 @@ For every planned wireframe:
    **in the host page** (NOT inside the SVG):
 
    ```markdown
-   > ⚠️ TODO: wireframe gap — <what is missing, where>.
+   > ⚠️ TODO: wireframe gap: <what is missing, where>.
    ```
 
    Wireframes themselves are static assets and must never contain TODO
@@ -167,17 +167,17 @@ For every planned wireframe:
      - `<foreignObject>` containing executable HTML/JS,
      - external references to non-whitelisted origins.
    - Additionally validate that the SVG parses as XML.
-   - If validation fails, fix and re-validate — never leave an
+   - If validation fails, fix and re-validate; never leave an
      unvalidated SVG behind.
 
-### Step 3 — Consistency check (wireframe vs. host text)
+### Step 3: Consistency check (wireframe vs. host text)
 
 After a wireframe is generated and validated, **compare it against the
 host scenario page text** before saving the host page.
 
 Procedure (analogous to diagrams Step 3):
 
-1. Re-read the scenario page around the anchor — main flow, I/O data
+1. Re-read the scenario page around the anchor: main flow, I/O data
    table, field labels, required/optional flags, error hints.
 2. List the claims the text makes about the screen (which fields, which
    buttons, which states).
@@ -189,18 +189,18 @@ Procedure (analogous to diagrams Step 3):
      reference:
 
      ```markdown
-     > ⚠️ TODO: wireframe–text contradiction — <short description>.
+     > ⚠️ TODO: wireframe–text contradiction: <short description>.
      > Wireframe shows: <X>. Scenario says: <Y>.
      ```
 
-5. Do **NOT** silently change text or wireframe to match — the
+5. Do **NOT** silently change text or wireframe to match; the
    contradiction must reach the user through the orchestrator's
    TODO-resolution step.
 
-Reuse the standard `⚠️ TODO:` marker — do **not** introduce new marker
-types. The prefix `wireframe–text contradiction —` is the classifier.
+Reuse the standard `⚠️ TODO:` marker; do **not** introduce new marker
+types. The prefix `wireframe–text contradiction:` is the classifier.
 
-### Step 4 — Insert figure reference into host page and save
+### Step 4: Insert figure reference into host page and save
 
 - Replace nothing; insert the figure reference (Obrázek N, caption,
   textual summary, `![…](…)`) **below** the anchor comment. Keep the
@@ -210,7 +210,7 @@ types. The prefix `wireframe–text contradiction —` is the classifier.
   > "Wireframe `<anchor>` inserted into `<host file>`. Review and
   > confirm to continue (y / edit / stop)."
 
-### Step 5 — Cross-reference, fragment hygiene, and retrospective fragment update
+### Step 5: Cross-reference, fragment hygiene, and retrospective fragment update
 
 After all anchors have been processed and the user has approved the
 wireframes in Step 4:
@@ -230,7 +230,7 @@ wireframes in Step 4:
    component that:
    - was composed inline (not sourced from an existing fragment), AND
    - is a recognizable reusable UI block (e.g. a card, a header, a form
-     row, a modal) — regardless of whether it repeated in this run —
+     row, a modal), regardless of whether it repeated in this run,
 
    propose adding it to `wf-fragments/` as a new fragment. The user's
    approval in Step 4 is the quality signal that justifies promotion to
@@ -253,7 +253,7 @@ wireframes in Step 4:
 Report the result to the user: the cross-reference list, proposed
 fragment additions and updates, and any backfill diffs.
 
-### Step 6 — Handoff to orchestrator
+### Step 6: Handoff to orchestrator
 
 Return:
 
@@ -273,7 +273,7 @@ Return:
 - **Anchor-driven**: only generate wireframes where an anchor exists.
   Do **NOT** invent wireframes for scenario pages without anchors.
 - **Fragment-first**: always start from shared fragments. Introduce new
-  fragments when a block repeats — do not duplicate inline.
+  fragments when a block repeats; do not duplicate inline.
 - **No JavaScript / executable content** in SVG: per §9 of CLAUDE.md
   and Step 2 item 6. This rule is hard-enforced by the validator.
 - **Reflect reality**: screenshots, scenario page, and code are the only
@@ -286,44 +286,44 @@ Return:
 
 Load each resource only when its trigger applies (progressive disclosure).
 
-- [`resources/wf-fragments-index.md`](resources/wf-fragments-index.md) —
+- [`resources/wf-fragments-index.md`](resources/wf-fragments-index.md):
   mirrored index of `wf-fragments/` with a decision matrix (situation →
   fragment), updated alongside `wf-fragments/README.md`.
   **Invoke when**: running Step 1 (planning) or picking fragments in
   Step 2.
 
-- [`resources/svg-sanitization.md`](resources/svg-sanitization.md) — the
+- [`resources/svg-sanitization.md`](resources/svg-sanitization.md): the
   full list of forbidden constructs and how to rewrite them safely.
   **Invoke when**: the validator in Step 2 item 6 rejects an SVG, or
   when composing something beyond the known fragments.
 
-- [`resources/avatar-rules.md`](resources/avatar-rules.md) — detailed
+- [`resources/avatar-rules.md`](resources/avatar-rules.md): detailed
   rules for avatar rendering (`dominant-baseline`, `y == cy`, label
   placement).
   **Invoke when**: any wireframe contains avatars.
 
 - [`resources/layout-from-screenshot.md`](resources/layout-from-screenshot.md)
-  — procedure for deriving SVG layout from a screenshot without adding
+  procedure for deriving SVG layout from a screenshot without adding
   invented elements; how to handle partial / low-resolution
   screenshots.
   **Invoke when**: `layout source = screenshot` for the current
   wireframe.
 
 - [`resources/layout-from-scenario.md`](resources/layout-from-scenario.md)
-  — procedure for deriving layout from a scenario page's I/O data
+  procedure for deriving layout from a scenario page's I/O data
   table and main flow.
   **Invoke when**: `layout source = scenario-page`.
 
-- [`resources/consistency-check.md`](resources/consistency-check.md) —
+- [`resources/consistency-check.md`](resources/consistency-check.md):
   checklist for Step 3: what to extract from the scenario text and how
   to compare it against the wireframe.
   **Invoke when**: running Step 3.
 
-- [`scripts/validate-svg.sh`](scripts/validate-svg.sh) — hard validator
+- [`scripts/validate-svg.sh`](scripts/validate-svg.sh): hard validator
   for forbidden executable content and XML well-formedness.
   **Invoke when**: Step 2 item 6 (before leaving the step).
 
-- [`resources/examples/`](resources/examples/) — canonical wireframes,
+- [`resources/examples/`](resources/examples/): canonical wireframes,
   populated incrementally (e.g. `mobile-login-light.svg`,
   `desktop-dashboard-dark.svg`).
   **Invoke when**: a concrete reference is needed while drafting a
@@ -331,9 +331,9 @@ Load each resource only when its trigger applies (progressive disclosure).
 
 ## Out of scope
 
-- Generating Markdown text pages — `docs-technical-from-code`,
+- Generating Markdown text pages: `docs-technical-from-code`,
   `docs-functional-from-code`.
-- Diagrams — `docs-diagrams-from-code`.
+- Diagrams: `docs-diagrams-from-code`.
 - Any code changes outside `docs/`.
-- Modifying or publishing screenshots — they are read-only, input-only,
+- Modifying or publishing screenshots; they are read-only, input-only,
   and discarded after the run.

@@ -132,7 +132,7 @@ export const test = base.extend<Fixtures>({
 
     await use(spawnServer);
 
-    // Teardown — kill every server the test spawned.
+    // Teardown: kill every server the test spawned.
     for (const s of servers) {
       s.proc.kill("SIGTERM");
       await new Promise((r) => setTimeout(r, 100));
@@ -166,7 +166,7 @@ export const test = base.extend<Fixtures>({
       const failures: string[] = [];
       if (bodyText.length < minChars) {
         failures.push(
-          `body too short (${bodyText.length} chars, expected ≥ ${minChars}) — blank page after hydration?`,
+          `body too short (${bodyText.length} chars, expected ≥ ${minChars}): blank page after hydration?`,
         );
       }
       for (const s of opts.expectedStrings ?? []) {

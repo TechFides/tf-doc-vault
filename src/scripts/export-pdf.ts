@@ -1,10 +1,7 @@
 /**
- * export-pdf.ts
- *
- * Generates artifacts/docs-full.pdf from the /print page of the built VitePress site.
- *
- * Prerequisites: run `tf-doc-vault print` and `vitepress build docs` first,
- * or use `tf-doc-vault pdf` which chains all three steps.
+ * Renders artifacts/docs-full.pdf from the /print page of a built VitePress
+ * site. Needs `tf-doc-vault print` and `vitepress build docs` first, or use
+ * `tf-doc-vault pdf`, which chains all three.
  */
 
 import { chromium } from "playwright";
@@ -28,7 +25,7 @@ async function waitForServer(url: string, timeoutMs: number): Promise<void> {
       const res = await fetch(url);
       if (res.ok) return;
     } catch {
-      // not ready yet — keep polling
+      // not ready yet, keep polling
     }
     await new Promise((r) => setTimeout(r, 300));
   }

@@ -4,7 +4,7 @@ import type { DefaultTheme } from "vitepress";
 
 const IGNORE = new Set([".vitepress", "node_modules", "public"]);
 
-/** Extract the `title` field from a file's YAML frontmatter, fallback to filename. */
+/** `title` from the YAML frontmatter, falling back to the filename. */
 function extractTitle(filePath: string): string {
   const content = fs.readFileSync(filePath, "utf-8");
   const match = content.match(/^---\s*\n([\s\S]*?)\n---/);
@@ -41,12 +41,12 @@ function subDirs(dir: string): string[] {
     .sort((a: string, b: string) => a.localeCompare(b, "cs"));
 }
 
-/** Top-level directories in `docs/` — each is a documentation version. */
+/** Each top-level directory in `docs/` is a documentation version. */
 export function getVersions(docsRoot: string): string[] {
   return subDirs(docsRoot);
 }
 
-/** Top-level dirs in `docs/<version>/` → navbar items. */
+/** Top-level dirs in `docs/<version>/` become navbar items. */
 export function generateNav(
   docsRoot: string,
   version: string,
@@ -77,9 +77,8 @@ export function generateNav(
 }
 
 /**
- * Recursively build sidebar items for a directory.
- * Files become leaf items; subdirectories become collapsible groups
- * linked to their index.md (if present).
+ * Files become leaf items; subdirectories become collapsed groups linked to
+ * their index.md when one exists.
  */
 function buildSidebarItems(
   dir: string,

@@ -6,7 +6,7 @@ Every block below is meant to be validated by the script referenced in
 
 > This document is intentionally kept short and structural. **Canonical
 > examples live in `resources/examples/`** and carry the authoritative
-> styling (theme blocks, `classDef` palettes, `subgraph` grouping) —
+> styling (theme blocks, `classDef` palettes, `subgraph` grouping);
 > each diagram-type section below links to its example. When in doubt,
 > copy from the example and adapt, don't reinvent styling.
 
@@ -14,12 +14,12 @@ Every block below is meant to be validated by the script referenced in
 
 - Mermaid blocks are fenced as ` ```mermaid `.
 - VitePress renders Mermaid when Mermaid support/plugin is enabled. If
-  it is missing, the block falls back to a code listing — therefore a
+  it is missing, the block falls back to a code listing, therefore a
   **textual summary above the diagram is mandatory** (`SKILL.md`, Step 2
   item 3).
 - Keep node identifiers short and stable (same identifier across
   related diagrams) so the diff is readable.
-- Do NOT use HTML in node labels unless strictly necessary — it breaks
+- Do NOT use HTML in node labels unless strictly necessary; it breaks
   the validator in older Mermaid versions.
 - Avoid placeholder labels that look like HTML tags, for example
   `<action>` or `<Scenario>`. Prefer plain placeholder text such as
@@ -47,13 +47,13 @@ sequenceDiagram
 
 Key syntax:
 
-- `autonumber` — adds step numbers matching the text's numbered list.
+- `autonumber`: adds step numbers matching the text's numbered list.
 - `->>` solid request/call arrow, `-->>` dotted response arrow,
   `->>+` / `-->>-` for activation boxes. Use `-)` / `--)` only when
   an async/open-arrow notation is intentional.
 - `Note over X,Y: ...` for contextual notes drawn from the code.
 - `alt / else / end`, `opt / end`, `loop / end`, `par / and / end` for
-  branching / optional paths / loops / parallel steps — only when the
+  branching / optional paths / loops / parallel steps, only when the
   host text also describes them.
 
 Canonical example: [`examples/sequence-passwordless-login.md`](examples/sequence-passwordless-login.md).
@@ -82,7 +82,7 @@ flowchart LR
 ```
 
 For richer use-case semantics (include / extend), fall back to
-PlantUML — see `plantuml-fallback.md`.
+PlantUML; see `plantuml-fallback.md`.
 
 Canonical example: [`examples/use-case-passwordless-login.md`](examples/use-case-passwordless-login.md).
 
@@ -121,7 +121,7 @@ Key choices:
   `((...))` only as visual conventions, not as Mermaid-enforced
   package/service semantics.
 
-No canonical component example yet — derive from the C4 Container
+No canonical component example yet; derive from the C4 Container
 level of [`examples/c4-passwordless-login.md`](examples/c4-passwordless-login.md)
 when needed.
 
@@ -208,7 +208,7 @@ Key syntax:
 - `<<abstract>>`, `<<interface>>`, `<<enumeration>>` stereotypes.
 - Cardinality labels on associations: `"1" --> "*"`, `"1" --> "0..1"`.
 
-### Functional vs. technical domain diagram — level of detail
+### Functional vs. technical domain diagram: level of detail
 
 A domain diagram appears in **two** places with **different audiences**,
 and the level of detail differs:
@@ -219,12 +219,12 @@ and the level of detail differs:
 | Technical documentation (§2)  | yes             | yes                          | yes          | yes                          |
 
 **Functional** domain diagrams describe _what the business concepts
-look like_ — product / analyst audience. They MUST omit visibility
+look like_, for a product / analyst audience. They MUST omit visibility
 modifiers and method signatures: those are implementation details that
 add noise without business value.
 
 **Technical** domain diagrams describe _how the classes are shaped in
-code_ — engineering audience. They include full visibility and method
+code_, for an engineering audience. They include full visibility and method
 signatures, as in the canonical example below.
 
 Functional variant of the same class (strip `+`/`-`/`#`/`~` and methods):
@@ -253,7 +253,7 @@ classDiagram
 
 Do **NOT** duplicate methods into the functional diagram "for
 completeness" and do **NOT** strip them from the technical diagram "to
-match the functional one" — the two live side by side on purpose.
+match the functional one"; the two live side by side on purpose.
 
 Canonical example (technical detail): [`examples/class-passwordless-login.md`](examples/class-passwordless-login.md).
 
@@ -281,13 +281,13 @@ erDiagram
 - Use `--` for identifying relationships and `..` for non-identifying
   relationships when that distinction matters.
 - Column annotations: `PK`, `FK`, `UK`.
-- Use the **actual DB column types** from migrations / schema — not
+- Use the **actual DB column types** from migrations / schema, not
   language-level types.
 - For logical ERDs, prefer singular entity names. For physical data
   models, use the actual table names from the database schema, even if
   they are plural.
 
-No canonical ERD example yet — follow the cheatsheet block above; use the
+No canonical ERD example yet; follow the cheatsheet block above and use the
 `entity` / `datastore` palette from the class-diagram example for
 consistency.
 
@@ -318,7 +318,7 @@ stateDiagram-v2
   end note
 ```
 
-No canonical state example yet — follow the cheatsheet block above.
+No canonical state example yet; follow the cheatsheet block above.
 
 ## 8. Flowchart (decision / process)
 
@@ -340,15 +340,15 @@ flowchart TD
 Canonical example (generic request with retry loop):
 [`examples/flowchart-generic-request.md`](examples/flowchart-generic-request.md).
 
-## 9. Deployment — prefer PlantUML
+## 9. Deployment: prefer PlantUML
 
 Mermaid's flowchart is too coarse for realistic deployment diagrams
-(nodes, clusters, load balancers, regions). **Fall back to PlantUML**
-— see `plantuml-fallback.md`.
+(nodes, clusters, load balancers, regions). **Fall back to PlantUML**;
+see `plantuml-fallback.md`.
 
 ## Rules
 
-- **ALWAYS** open each block with the exact fence ` ```mermaid ` —
+- **ALWAYS** open each block with the exact fence ` ```mermaid `;
   the validator relies on it.
 - **NEVER** emit a node or edge without a source in the code or the
   host page's text.
@@ -358,7 +358,7 @@ Mermaid's flowchart is too coarse for realistic deployment diagrams
 - Avoid lowercase `end` as a node label, and avoid flowchart target IDs
   that begin with lowercase `o` or `x` immediately after an edge. Use
   `End`, quote the label, add spacing, or capitalize the target ID.
-- **ALWAYS** caption the diagram above the block (`**Obrázek N** — <Czech caption>`) and include a one-line textual summary for the
+- **ALWAYS** caption the diagram above the block (`**Obrázek N**: <Czech caption>`) and include a one-line textual summary for the
   rendering-failure case (`SKILL.md` Step 2).
 
 ## 10. Shared color palette across documentation
@@ -388,5 +388,5 @@ The files above in `resources/examples/` are the source of truth for
 styling and structure. Before drafting a new diagram, open the matching
 example, copy its fenced block, and adapt labels and nodes to the
 scenario. Do not reinvent `classDef` palettes, theme blocks, or
-`subgraph` grouping — consistency across the documentation set depends
+`subgraph` grouping; consistency across the documentation set depends
 on reusing them.

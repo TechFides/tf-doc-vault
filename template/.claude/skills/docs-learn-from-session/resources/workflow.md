@@ -1,4 +1,4 @@
-# docs-learn-from-session — detailed walkthrough
+# docs-learn-from-session: detailed walkthrough
 
 Use this walkthrough when starting a run or when the user asks how the
 workflow proceeds. It expands the 5 steps in `SKILL.md` with concrete
@@ -9,7 +9,7 @@ prompts and transitions.
 Preflight (inputs) → Load & group notes → Per-entry dialog + apply →
 Update session-notes status → Small review + skill self-check → Finish.
 
-## Step 0 — Preflight
+## Step 0: Preflight
 
 Collect and confirm the four inputs listed in `SKILL.md`:
 
@@ -23,7 +23,7 @@ current_date:         <from system>
 
 Show the summary and wait for `y / edit / cancel`.
 
-## Step 1 — Load and group notes
+## Step 1: Load and group notes
 
 1. Resolve the scope filter to a concrete list of `.md` files.
 2. For each file:
@@ -42,7 +42,7 @@ Example prompt:
 
 **NEVER** proceed past this step without explicit `y`.
 
-## Step 2 — Per-entry dialog + apply
+## Step 2: Per-entry dialog + apply
 
 For each entry (in the order shown in the plan):
 
@@ -58,17 +58,17 @@ For each entry (in the order shown in the plan):
 
 Example dialog header:
 
-> "Entry 3 / 6 — session note `2026-04-23-1405.md`
+> "Entry 3 / 6, session note `2026-04-23-1405.md`
 > Target: `.claude/skills/docs-technical-from-code/SKILL.md`
 > Kind: preference
 > Excerpt: \"ALWAYS ask the user which groups to skip before writing.\"
 >
 > Proposed change: insert a new bullet under §Workflow → Step 1, after
-> the existing `skip — no evidence` rule (see diff below).
+> the existing `skip: no evidence` rule (see diff below).
 >
 > (y / edit / skip / defer)?"
 
-## Step 3 — Contradictions and duplicates
+## Step 3: Contradictions and duplicates
 
 - Two entries → same block → contradictory guidance: surface both
   excerpts; ask which to apply or how to combine. Do **NOT** auto-pick.
@@ -77,7 +77,7 @@ Example dialog header:
 - Target block not found: ask the user to point to the correct
   location; if they cannot, `skip` with a note.
 
-## Step 4 — Update session-notes status
+## Step 4: Update session-notes status
 
 Once every entry in a given session-notes file has been processed,
 rewrite its frontmatter:
@@ -97,7 +97,7 @@ last_error: "" # only when status == error
 
 **NEVER** delete the file.
 
-## Step 5 — Small review + skill self-check
+## Step 5: Small review + skill self-check
 
 - Run `review-checklist.md` over every file this run touched.
 - Present the table to the user.

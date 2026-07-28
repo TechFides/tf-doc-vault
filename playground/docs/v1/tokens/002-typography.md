@@ -21,7 +21,7 @@ Open Sans is loaded by default (`branding.fonts: "google"`); switch to
 ## Scale
 
 The theme applies this scale automatically to `.vp-doc` headings and body
-text — there are no per-size tokens to set, you just write Markdown:
+text, so there are no per-size tokens to set. You just write Markdown:
 
 | Element | Size  | Weight | Line-height |
 | ------- | ----- | ------ | ----------- |

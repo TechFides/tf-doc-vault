@@ -4,7 +4,7 @@
 Sans, footer style), but every default is overridable from your consumer
 config. This document shows what you can swap and how.
 
-## TL;DR — minimum viable rebrand
+## TL;DR: minimum viable rebrand
 
 Two files in your consumer repo, no fork of the package required:
 
@@ -42,7 +42,7 @@ export default makeConfig({
 ```
 
 `custom.css` is already imported by the scaffolded theme entry
-(`docs/.vitepress/theme/index.ts` — see [`template/`](./template/)).
+(`docs/.vitepress/theme/index.ts`, see [`template/`](./template/)).
 
 ---
 
@@ -70,7 +70,7 @@ interface BrandingFooter {
 }
 ```
 
-If you don't pass `footer`, no footer is rendered — there are **no
+If you don't pass `footer`, no footer is rendered; there are **no
 TechFides defaults that leak through**. Same for `navLinks`.
 
 ---
@@ -106,7 +106,7 @@ them in `docs/.vitepress/theme/custom.css`.
 | `--brand-info`/`-bg`     | `#0074c8`   | "                                                    |
 
 `DocMeta` status badges read `--brand-badge-{published,draft,review,archived}-{bg,text,border}`
-(separate light/dark values in `base.css`) — override those to recolor the
+(separate light/dark values in `base.css`); override those to recolor the
 status pills.
 
 ### Layout tokens
@@ -224,8 +224,8 @@ default would render it.
 
 ## Component copy (i18n)
 
-Built-in component strings — DocMeta status badges, the 404 page, the
-lightbox close label, the feature-card CTA — live in the theme's
+Built-in component strings (DocMeta status badges, the 404 page, the
+lightbox close label, the feature-card CTA) live in the theme's
 [vue-i18n](https://vue-i18n.intlify.dev/) catalogs (`cs` default, `en`
 fallback). The active locale follows `site.lang` (`en-*` → English, else
 Czech). Override any string from your theme entry:
@@ -252,15 +252,15 @@ Items below are **not** cleanly rebrandable today without patching the
 package itself. They are tracked but not yet exposed as `branding`
 knobs:
 
-- **NotFound logo** — the 404 page renders `LogoSymbol`, the
+- **NotFound logo**: the 404 page renders `LogoSymbol`, the
   TechFides mark, directly. There is no slot or prop. To replace it,
   re-implement `NotFound` in your own theme and substitute it via
   VitePress' `not-found` slot.
-- **`create-ana` scaffolder** (`src/cli/create-ana.ts`) — generates a TechFides-branded
+- **`create-ana` scaffolder** (`src/cli/create-ana.ts`) generates a TechFides-branded
   project by default. There is no `--brand-preset` flag yet. After
   scaffolding, edit `docs/.vitepress/config.ts` to add your `branding:
 {...}` block manually.
-- **Navbar logo fill is baked at build** — the navbar logo renders as
+- **Navbar logo fill is baked at build**: the navbar logo renders as
   an `<img>` whose fill is inlined into a data URL at build time
   (mirroring `--brand-primary`). An `<img>` cannot inherit
   `currentColor`, so overriding `--brand-primary` in `custom.css`
@@ -333,6 +333,6 @@ Place `logo.svg` and `favicon.svg` under `docs/public/`. Run
 
 - Navbar shows Acme logo + title
 - Buttons, links, sidebar active items use the orange brand color
-- Footer shows `acme.example` and the contact email — no `techfides.cz`
+- Footer shows `acme.example` and the contact email, no `techfides.cz`
 - Mermaid diagrams use the orange brand color in both light and dark mode
   (they read the `--brand-*` tokens)

@@ -57,13 +57,13 @@ Default tip panel without a custom title.
 
 ::: tip Recommendation
 Tip panel with a custom title. Use for best practices and recommended
-approaches — not for required steps.
+approaches, not for required steps.
 :::
 
 ```md
 ::: tip Recommendation
 Tip panel with a custom title. Use for best practices and recommended
-approaches — not for required steps.
+approaches, not for required steps.
 :::
 ```
 
@@ -108,28 +108,28 @@ Default danger panel without a custom title.
 ```
 
 ::: danger Irreversible action
-Danger panel with a custom title. Reserve for truly critical warnings —
+Danger panel with a custom title. Reserve for truly critical warnings:
 data deletion, irreversible migrations, production-only risks.
 :::
 
 ```md
 ::: danger Irreversible action
-Danger panel with a custom title. Reserve for truly critical warnings —
+Danger panel with a custom title. Reserve for truly critical warnings:
 data deletion, irreversible migrations, production-only risks.
 :::
 ```
 
 ---
 
-## details — collapsible panel
+## details: collapsible panel
 
 ::: details
-Default collapsible panel without a custom title — click to expand.
+Default collapsible panel without a custom title; click to expand.
 :::
 
 ```md
 ::: details
-Default collapsible panel without a custom title — click to expand.
+Default collapsible panel without a custom title; click to expand.
 :::
 ```
 

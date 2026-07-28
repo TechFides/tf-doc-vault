@@ -2,8 +2,8 @@ image: node:24@sha256:392e1e23f34da768d8d1f4e502b64f200d3be3465934d4b7930f57d7e2
 
 variables:
   PNPM_STORE: "$CI_PROJECT_DIR/.pnpm-store"
-  # By filling in we automatically enable runtime `nginx-auth` (otherwise leave blank).
-  # Not a secret — access to repo = access to the app.
+  # Filling these in switches the runtime to `nginx-auth`; leave blank otherwise.
+  # Not a secret: access to the repo already means access to the app.
   BASIC_AUTH_USER: "__BASIC_AUTH_USER__"
   BASIC_AUTH_PASS: "__BASIC_AUTH_PASS__"
 

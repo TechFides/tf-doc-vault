@@ -1,9 +1,8 @@
 /*
- * Project-specific CSS overrides.
- *
- * Base styles (sidebar width, layout-wide/max, scroll-spy, lightbox cursor)
- * live in @techfides/tf-doc-vault/theme/styles/base.css. Override only
- * colors / typography / small details here.
+ * Project-specific CSS overrides. The base styles (sidebar width, layout
+ * widths, scroll-spy, lightbox cursor) live in
+ * @techfides/tf-doc-vault/theme/styles/base.css; override colours and
+ * typography here.
  */
 
 /* :root {

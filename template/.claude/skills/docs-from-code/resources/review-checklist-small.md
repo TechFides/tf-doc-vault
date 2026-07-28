@@ -2,9 +2,9 @@
 
 Used in two places by the orchestrator:
 
-- **Step 4** — small review (§10 of `CLAUDE.md`) over files touched in
+- **Step 4**: small review (§10 of `CLAUDE.md`) over files touched in
   the run.
-- **Step 5** — the skill self-check.
+- **Step 5**: the skill self-check.
 
 A **comprehensive review** (`/docs-review`, planned) is out of scope.
 
@@ -52,8 +52,8 @@ For every skill that ran during the session:
 ```
 | Skill                       | Step / Rule                       | Applied | Note                |
 | --------------------------- | --------------------------------- | ------- | ------------------- |
-| docs-technical-from-code    | Step 3 — group/section indexes    | yes     |                     |
-| docs-functional-from-code   | Step 4 — cross-links to technical | no      | 2 links not emitted |
+| docs-technical-from-code    | Step 3: group/section indexes     | yes     |                     |
+| docs-functional-from-code   | Step 4: cross-links to technical  | no      | 2 links not emitted |
 ```
 
 If any row says `no`, surface it in the finish report and ask the user
@@ -61,7 +61,7 @@ whether to fix now or defer.
 
 ## Rules
 
-- **NEVER** mark a row `ok` without actually checking — no heuristics.
+- **NEVER** mark a row `ok` without actually checking; no heuristics.
 - **ALWAYS** report unresolved TODOs, even if small in count.
-- The review is lightweight — **NEVER** attempt semantic checks (e.g.
+- The review is lightweight; **NEVER** attempt semantic checks (e.g.
   "is this diagram useful?"). That belongs to `/docs-review`.

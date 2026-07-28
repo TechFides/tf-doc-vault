@@ -18,9 +18,9 @@ const FRONTMATTER = [
 let workdirs: string[] = [];
 
 /**
- * validate-docs is a CLI script, not an exported function. Each test builds
- * its own temp `docs/` tree (the script validates the whole tree, so trees
- * can't be shared across tests) and invokes the script as a subprocess.
+ * validate-docs is a CLI script, not an exported function. It validates a whole
+ * tree at once, so each test builds its own temp `docs/` tree and runs the
+ * script as a subprocess.
  */
 function runValidate(files: Record<string, string>): {
   exitCode: number;
@@ -60,9 +60,8 @@ afterEach(() => {
 });
 
 /**
- * Regression tests for the missing-images check — external http(s) image
- * URLs used to be resolved as local filesystem paths and were always
- * reported as "missing image".
+ * The missing-images check must skip external http(s) URLs; only local paths
+ * can be resolved on disk.
  */
 describe("validate-docs (missing images)", () => {
   test("does not flag external http(s) images", () => {

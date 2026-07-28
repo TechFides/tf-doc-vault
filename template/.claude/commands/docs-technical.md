@@ -1,12 +1,12 @@
 ---
-description: Generate only the technical documentation phase from an existing codebase (tech stack, infrastructure, CI/CD, architecture, security, integrations, tests, monitoring, …). Text only — no diagrams, no wireframes. Pauses after each generated file.
+description: Generate only the technical documentation phase from an existing codebase (tech stack, infrastructure, CI/CD, architecture, security, integrations, tests, monitoring, …). Text only, no diagrams and no wireframes. Pauses after each generated file.
 argument-hint: [auto] # optional: pass 'auto' to reduce file-by-file pausing (opt-in only)
 ---
 
 # /docs-technical
 
 You are running the **technical documentation phase** from an existing
-codebase — as a single phase, without the other phases. Follow the rules
+codebase, as a single phase without the other phases. Follow the rules
 in `CLAUDE.md` at project root (they override any conflicting defaults).
 
 This command is appropriate when:
@@ -17,7 +17,7 @@ This command is appropriate when:
 - You want to iterate on the technical phase before starting functional.
 
 Do **NOT** use this command for functional docs, diagrams, wireframes,
-pre-code analyses, or reviews — those have their own commands.
+pre-code analyses, or reviews; those have their own commands.
 
 ## Argument
 
@@ -32,12 +32,12 @@ pre-code analyses, or reviews — those have their own commands.
 
 1. Load the `docs-technical-from-code` skill.
 2. Collect and confirm the inputs from its "Inputs" section:
-   a. `source_path` — repository or folder with the code.
-   b. `version_folder` — `docs/vN/` (create `docs/v1/` if none exist).
-   c. `source_version` — resolve from git tag → `package.json`; mark
+   a. `source_path`: repository or folder with the code.
+   b. `version_folder`: `docs/vN/` (create `docs/v1/` if none exist).
+   c. `source_version`: resolve from git tag → `package.json`; mark
    `⚠️ TODO: source version` if neither exists.
-   d. `current_date` — from system context.
-   e. `auto_mode` — from the argument, with the safety rule above.
+   d. `current_date`: from system context.
+   e. `auto_mode`: from the argument, with the safety rule above.
 3. Detect the current state of `docs/<version>/technical/`. If files
    would be overwritten, list them and ask per §11 of CLAUDE.md.
 4. Produce a **run context** summary:
@@ -59,14 +59,14 @@ pre-code analyses, or reviews — those have their own commands.
 
 Follow the workflow in `docs-technical-from-code/SKILL.md`:
 
-- **Step 1** — Comprehensive scan and plan. Use
+- **Step 1**: Comprehensive scan and plan. Use
   `resources/scan-checklist.md` and `resources/proposed-structure.md`.
   Present the generation plan as a table and wait for user confirmation
   (or `auto_mode`).
-- **Step 2** — Generate file-by-file, pausing after each unless
+- **Step 2**: Generate file-by-file, pausing after each unless
   `auto_mode` is on.
-- **Step 3** — Section and group `index.md` files.
-- **Step 4** — Prepare the handoff payload (file list, per-file TODOs,
+- **Step 3**: Section and group `index.md` files.
+- **Step 4**: Prepare the handoff payload (file list, per-file TODOs,
   skipped groups, non-proposed groups created).
 
 ## TODO resolution (always run at the end)
@@ -74,7 +74,7 @@ Follow the workflow in `docs-technical-from-code/SKILL.md`:
 Execute the TODO resolution flow from §2 of CLAUDE.md:
 
 1. Collect every `⚠️ TODO` marker produced in this run, grouped by kind
-   (for a single-phase run, typically `missing-evidence` only — any
+   (for a single-phase run, typically `missing-evidence` only; any
    other kind is unexpected and worth reporting).
 2. For each item ask `a) skip / b) user input / c) keep TODO`.
 3. Apply the chosen action.
@@ -95,7 +95,7 @@ skill learning"). Scope the collection to feedback about
 with frontmatter `consumed_by: docs-learn-from-session` and
 `status: unprocessed`. Ask the user to keep / discard / open to review.
 
-**Do NOT update skill files** from this command — that is reserved for
+**Do NOT update skill files** from this command; that is reserved for
 the planned skill `docs-learn-from-session`.
 
 ## Finish

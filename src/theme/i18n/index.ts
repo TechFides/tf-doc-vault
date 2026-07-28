@@ -2,11 +2,10 @@ import { createI18n } from "vue-i18n";
 import cs from "./cs.json" with { type: "json" };
 import en from "./en.json" with { type: "json" };
 
-// vue-i18n's esm-bundler build reads these as bare globals, expecting the host
-// bundler to define them. VitePress externalizes vue-i18n for SSR, so define
-// never reaches it and the bare references throw. Set sane defaults on
-// globalThis before createI18n runs (member access, so Vite's define won't
-// rewrite these assignments). Member reads in vue-i18n resolve to them.
+// vue-i18n's esm-bundler build reads these as bare globals and expects the host
+// bundler to define them, but VitePress externalizes vue-i18n for SSR so the
+// bare references throw. Assign the defaults through member access, which Vite's
+// define does not rewrite.
 const flags = globalThis as Record<string, unknown>;
 flags.__VUE_I18N_FULL_INSTALL__ ??= true;
 flags.__VUE_I18N_LEGACY_API__ ??= false;

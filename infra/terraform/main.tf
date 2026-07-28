@@ -40,7 +40,7 @@ resource "google_artifact_registry_repository" "docs" {
 resource "google_service_account" "ci" {
   account_id   = "${var.service_name}-ci"
   display_name = "${var.service_name} CI/CD"
-  description  = "Service account for the build pipeline — push image + deploy Cloud Run"
+  description  = "Service account for the build pipeline: push image, deploy Cloud Run"
 }
 
 resource "google_artifact_registry_repository_iam_member" "ci_writer" {
@@ -108,7 +108,7 @@ resource "google_cloud_run_v2_service" "docs" {
   }
 }
 
-# ── Access — public ───────────────────────────────────────────────────────────
+# ── Public access ─────────────────────────────────────────────────────────────
 
 resource "google_cloud_run_v2_service_iam_member" "public" {
   count    = var.public ? 1 : 0

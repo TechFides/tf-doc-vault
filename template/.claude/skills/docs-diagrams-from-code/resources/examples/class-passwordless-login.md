@@ -1,4 +1,4 @@
-# Example — Class diagram: Passwordless login domain model
+# Example: Class diagram: Passwordless login domain model
 
 Reference template for `domain-model` anchor.
 

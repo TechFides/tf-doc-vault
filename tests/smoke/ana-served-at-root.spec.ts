@@ -58,8 +58,8 @@ test("built ana dist renders cleanly when served at the domain root", async ({
   const distDir = path.join(sandboxes.anaDir, "docs", ".vitepress", "dist");
   expect(fs.existsSync(distDir), `dist not found at ${distDir}`).toBe(true);
 
-  // Assets load before page.goto resolves, so the listener must be attached
-  // before goto — assertCleanRender's own listeners run after and miss them.
+  // Assets load before page.goto resolves, so the listener has to be attached
+  // beforehand; assertCleanRender attaches its own later and misses them.
   const badResponses: string[] = [];
   page.on("response", (res) => {
     if (res.status() >= 400) badResponses.push(`${res.status()} ${res.url()}`);
@@ -73,7 +73,7 @@ test("built ana dist renders cleanly when served at the domain root", async ({
 
     expect(
       badResponses,
-      `requests failed — the built base does not match the root serving layout:\n${badResponses.join("\n")}`,
+      `requests failed; the built base does not match the root serving layout:\n${badResponses.join("\n")}`,
     ).toEqual([]);
 
     await assertCleanRender(page, {

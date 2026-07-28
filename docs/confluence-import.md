@@ -29,7 +29,7 @@ pnpm exec tf-doc-vault import-confluence \
 | `--site=<host>`       | _(required)_ | Confluence hostname, e.g. `myorg.atlassian.net`.                                                |
 | `--root-page-id=<id>` | _(required)_ | ID of the root Confluence page to import. Found in the page URL: `.../pages/**123456789**/...`. |
 | `--output=<dir>`      | _(required)_ | Output directory for generated Markdown files.                                                  |
-| `--space=<KEY>`       | _(none)_     | Confluence space key — informational only, not used during import.                              |
+| `--space=<KEY>`       | _(none)_     | Confluence space key, informational only and not used during import.                            |
 | `--verbose`           | _(false)_    | List every page affected by a warning, instead of the grouped summary.                          |
 
 ## Next steps
@@ -47,8 +47,8 @@ Detailed page-authoring guide: [`template-tech-docs/import-confluence.md`](../te
 
 The importer reports everything it skips in a grouped summary at the end of the run (use `--verbose` for the per-page list). Things to be aware of:
 
-- **Dynamic Confluence macros** (`extension` nodes — table of contents, includes, drawio/gliffy diagrams, excerpts) can't become static Markdown and are dropped with a per-page warning.
-- **Merged table cells** (colspan/rowspan) are flattened — GFM tables can't represent them.
+- **Dynamic Confluence macros** (`extension` nodes: table of contents, includes, drawio/gliffy diagrams, excerpts) can't become static Markdown and are dropped with a per-page warning.
+- **Merged table cells** (colspan/rowspan) are flattened, because GFM tables can't represent them.
 - **Anchors to sub-headings** within a linked page are dropped (the link still resolves to the page); Confluence "tiny links" (`/wiki/x/…`) are left as Confluence URLs.
 - **External (URL) images** are turned into links rather than embedded.
 - An **API token** is required for image downloads via the REST attachment endpoint; conversion of a single page can also be sanity-checked offline.

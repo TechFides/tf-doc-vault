@@ -1,7 +1,7 @@
 # PlantUML fallback
 
 Mermaid is the primary diagram language in this project (§8 of
-`CLAUDE.md`). PlantUML is a **fallback** — only used when Mermaid
+`CLAUDE.md`). PlantUML is a **fallback**, used only when Mermaid
 cannot express a specific diagram cleanly. Every PlantUML block must
 carry a one-line comment above it explaining _why_ Mermaid was
 insufficient, so future maintainers can re-evaluate.
@@ -35,7 +35,7 @@ languages.
 ```
 ````
 
-- The HTML comment with the fallback reason is **mandatory** — it is
+- The HTML comment with the fallback reason is **mandatory**; it is
   the contract for why we broke the "Mermaid first" rule.
 - `@startuml` / `@enduml` are required for the validator.
 
@@ -127,9 +127,9 @@ stop
 - Not all VitePress setups render PlantUML in-page. If rendering is
   unreliable, generate a PNG via `plantuml` CLI into
   `docs/images-diagrams/diagrams/` and link it **below** the fenced
-  block — keep both (source + image) per `SKILL.md` "Output" section.
+  block; keep both (source + image) per `SKILL.md` "Output" section.
 - PNG filename: `<anchor-name>.png` (e.g. `deployment-prod.png`).
-- Never drop the fenced source in favor of the image — text-first
+- Never drop the fenced source in favor of the image; text-first
   maintenance requires the source.
 
 ## Evidence and consistency
@@ -145,7 +145,7 @@ PlantUML blocks are subject to the same rules as Mermaid:
 
 ## Rules
 
-- **NEVER** use PlantUML "because you prefer it" — use it only when
+- **NEVER** use PlantUML "because you prefer it"; use it only when
   Mermaid genuinely cannot express the diagram.
 - **ALWAYS** state the fallback reason in the HTML comment above the
   block.

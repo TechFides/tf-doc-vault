@@ -1,7 +1,6 @@
-// SVG Wireframe Generator
-// Generates modern, visually attractive wireframes with navigation connections
-//
-// Run from consumer project root (cwd). Output → <cwd>/docs/public/images/wireframes.
+// SVG wireframe generator, including the navigation-map wireframe.
+// Run from the consumer project root; output goes to
+// <cwd>/docs/public/images/wireframes.
 const fs = require("fs");
 const path = require("path");
 

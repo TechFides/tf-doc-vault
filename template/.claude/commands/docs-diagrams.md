@@ -19,7 +19,7 @@ This command is appropriate when:
   contradictions flagged in a previous run.
 
 Do **NOT** use this command for text generation, wireframes, pre-code,
-sales, or reviews — those have their own commands.
+sales, or reviews; those have their own commands.
 
 ## Precondition check (ALWAYS)
 
@@ -28,7 +28,7 @@ Before anything else:
 1. Ask the user: "Is the textual content (technical and functional)
    stable enough to attach diagrams? (y / no, run text phases first)".
 2. If the user says no, stop and point them to `/docs-technical` and
-   `/docs-functional`. Diagrams are expensive to fix — do not proceed
+   `/docs-functional`. Diagrams are expensive to fix, so do not proceed
    on unstable text.
 
 ## Argument
@@ -44,14 +44,14 @@ Before anything else:
 
 1. Load the `docs-diagrams-from-code` skill.
 2. Collect and confirm the inputs from its "Inputs" section:
-   a. `source_path` — repository or folder with the code.
-   b. `version_folder` — `docs/vN/` (must already contain text pages;
+   a. `source_path`: repository or folder with the code.
+   b. `version_folder`: `docs/vN/` (must already contain text pages;
    if empty, refuse and point the user to `/docs-technical` /
    `/docs-functional`).
-   c. `source_version` — resolve from git tag → `package.json`.
-   d. `current_date` — from system context.
-   e. `auto_mode` — from the argument, with the safety rule above.
-   f. `anchors_report` — if not handed over by an orchestrator, scan
+   c. `source_version`: resolve from git tag → `package.json`.
+   d. `current_date`: from system context.
+   e. `auto_mode`: from the argument, with the safety rule above.
+   f. `anchors_report`: if not handed over by an orchestrator, scan
    `docs/<version>/` yourself for every
    `<!-- diagram-anchor: <name> -->`. If none are found, stop and
    tell the user: "No diagram anchors found. Either insert anchors
@@ -77,21 +77,21 @@ Before anything else:
 
 Follow the workflow in `docs-diagrams-from-code/SKILL.md`:
 
-- **Step 1** — Collect anchors and plan. Classify each anchor by type
+- **Step 1**: Collect anchors and plan. Classify each anchor by type
   using `resources/diagram-type-decision.md`. Present the diagram plan
   (anchor, host file, type, source evidence) and wait for user
   confirmation.
-- **Step 2** — Generate diagram-by-diagram. Mermaid first, PlantUML
+- **Step 2**: Generate diagram-by-diagram. Mermaid first, PlantUML
   fallback only when Mermaid cannot express it. **ALWAYS validate
   syntax** via `scripts/validate-diagram.sh` before leaving the step.
-- **Step 3** — Consistency check (diagram vs. host text). Mark
-  contradictions with `⚠️ TODO: diagram–text contradiction — ...` in
+- **Step 3**: Consistency check (diagram vs. host text). Mark
+  contradictions with `⚠️ TODO: diagram–text contradiction: ...` in
   the host page. Do **NOT** silently change text or diagram to match.
-- **Step 4** — Insert into host page and save. Pause after each unless
+- **Step 4**: Insert into host page and save. Pause after each unless
   `auto_mode` is on.
-- **Step 5** — Cross-reference check. List unmatched anchors and
+- **Step 5**: Cross-reference check. List unmatched anchors and
   orphan diagrams.
-- **Step 6** — Prepare the handoff payload.
+- **Step 6**: Prepare the handoff payload.
 
 ## TODO resolution (always run at the end)
 
@@ -103,7 +103,7 @@ Execute the TODO resolution flow from §2 of CLAUDE.md:
    - `diagram-text-contradiction` (Step 3 of the skill).
 2. For each item ask `a) skip / b) user input / c) keep TODO`.
    For `diagram-text-contradiction`, the user's decision MUST also
-   specify **which side (diagram or text)** should change — Claude then
+   specify **which side (diagram or text)** should change; Claude then
    applies that edit and re-validates the affected diagram.
 3. Apply the chosen actions.
 4. Re-run the small review on any files changed during resolution.
@@ -123,7 +123,7 @@ skill learning"). Scope the collection to feedback about
 with frontmatter `consumed_by: docs-learn-from-session` and
 `status: unprocessed`. Ask the user to keep / discard / open to review.
 
-**Do NOT update skill files** from this command — that is reserved for
+**Do NOT update skill files** from this command; that is reserved for
 the planned skill `docs-learn-from-session`.
 
 ## Finish

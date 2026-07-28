@@ -23,7 +23,6 @@ function bundledFaviconLink(faviconPath: string): HeadConfig | null {
 // an <img>, which cannot inherit currentColor, so the data URL bakes a fill.
 const LOGO_FILL = "#0074c8";
 
-/** Build the bundled logo as a data URL for themeConfig.logo. */
 function bundledLogoUrl(): string {
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${LOGO_VIEW_BOX}" ` +
@@ -34,7 +33,7 @@ function bundledLogoUrl(): string {
 /**
  * Site-level copy consumed directly by VitePress config. Built-in component
  * labels (status badges, 404, lightbox, feature CTA) live in the theme's
- * vue-i18n catalogs — override those via `i18n.global.mergeLocaleMessage`.
+ * vue-i18n catalogs; override those via `i18n.global.mergeLocaleMessage`.
  */
 export interface Strings {
   title: string;
@@ -106,8 +105,8 @@ export interface Branding {
   /**
    * How to load Open Sans.
    * - `"google"` (default): bundled `<link>` tags to fonts.googleapis.com.
-   * - `"none"`: skip injection — consumer is responsible (e.g. self-hosted
-   *   `@fontsource/open-sans` imported from their own config).
+   * - `"none"`: skip injection; the consumer self-hosts, e.g. with
+   *   `@fontsource/open-sans` imported from their own config.
    */
   fonts?: "google" | "none";
 }
@@ -116,7 +115,6 @@ export interface MakeConfigOptions {
   configDir: string;
   project?: string;
   strings?: Partial<Strings>;
-  /** Branding overrides — title, logo, navbar links, footer. */
   branding?: Branding;
   analytics?: UmamiAnalytics;
   editLink?: EditLink;
@@ -240,11 +238,10 @@ interface DevServerLike {
   watcher: { on: (event: string, listener: (file: string) => void) => unknown };
 }
 
-/* Sidebar/nav are generated from the docs tree when the config is evaluated.
-   On a .md add/delete VitePress refreshes its page list (so the new route
-   resolves) but does NOT re-run the user config, so the sidebar stays stale.
-   Touching the config file triggers VitePress' own config-reload, which
-   re-runs makeConfig and regenerates the sidebar. */
+/* Sidebar and nav are generated when the config is evaluated. On a .md add or
+   delete VitePress refreshes its page list but does not re-run the user config,
+   so the sidebar goes stale. Touching the config file triggers VitePress' own
+   config reload, which re-runs makeConfig. */
 function dynamicNavReload(
   docsRoot: string,
   configFile: string | undefined,
@@ -328,9 +325,8 @@ export function makeConfig(
     ...Object.fromEntries(versions.slice(1).map((v) => [v, localeFor(v)])),
   };
 
-  /* If the consumer overrides `base` (e.g. site served at `/` instead of
-     `/docs/`), the logo link must follow — otherwise clicking the logo
-     sends the user to a 404. */
+  /* When the consumer overrides `base` (site served at `/` instead of
+     `/docs/`), the logo link has to follow it or the logo lands on a 404. */
   const effectiveBase =
     typeof opts.override?.base === "string" ? opts.override.base : base;
 
@@ -370,15 +366,14 @@ export function makeConfig(
       docFooter: { prev: strings.footerPrev, next: strings.footerNext },
       lastUpdated: { text: strings.lastUpdatedText },
       ...(opts.editLink && { editLink: buildEditLink(opts.editLink) }),
-      // Custom theme data — BrandFooter reads this via
-      // useData().theme.value.docVault. Component copy lives in vue-i18n.
+      // BrandFooter reads this via useData().theme.value.docVault. Component
+      // copy lives in vue-i18n.
       docVault: {
         footer,
       },
     },
-    // GFM task lists (`- [x]`) — markdown-it has no built-in support, so the
-    // Confluence importer's checkboxes would render as literal `[x]` text.
-    // tableWrapper wraps every table in a horizontally scrollable container.
+    // markdown-it has no GFM task lists, so the Confluence importer's checkboxes
+    // would render as literal `[x]`. tableWrapper adds the scroll container.
     markdown: {
       config(md) {
         taskLists(md);
@@ -393,11 +388,10 @@ export function makeConfig(
       ...overrideVite,
     },
     ignoreDeadLinks: [/^https?:\/\/localhost/],
-    /* Mermaid diagram colors are driven entirely by CSS (`.mermaid` and
-       `.dark .mermaid` in theme/styles/base.css) off the --brand-* tokens, so
-       overriding a brand token recolors diagrams in both light and dark mode.
-       We deliberately don't set `themeVariables`: vitepress-plugin-mermaid
-       forces theme="dark" when <html>.dark and would ignore them anyway. */
+    /* Mermaid colors come from CSS (`.mermaid` in theme/styles/base.css) off the
+       --brand-* tokens, so overriding a token recolors diagrams in both modes.
+       `themeVariables` stays unset: vitepress-plugin-mermaid forces
+       theme="dark" under <html>.dark and would ignore it. */
     mermaid: {
       theme: "base",
       flowchart: {

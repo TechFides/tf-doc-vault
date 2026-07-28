@@ -2,7 +2,7 @@
 
 Derived from the project-wide `documentation-structure.md`. This is the
 **proposal** the `docs-technical-from-code` skill uses in Step 1. It is
-NOT a fixed set — see `SKILL.md` rules for skipping proposed groups
+NOT a fixed set; see `SKILL.md` rules for skipping proposed groups
 without evidence and for adding non-proposed groups found in the code.
 
 All folders live under `docs/<version>/technical/`.
@@ -11,10 +11,10 @@ All folders live under `docs/<version>/technical/`.
 
 The menu is at most **three levels deep**:
 
-1. **Section** — `technical/`.
-2. **Skupina** — a folder directly under the section (e.g.
+1. **Section**: `technical/`.
+2. **Skupina**: a folder directly under the section (e.g.
    `architecture/`, `security/`, `consumed-apis/`).
-3. **Stránka** — a `.md` file directly under a skupina, or a
+3. **Stránka**: a `.md` file directly under a skupina, or a
    top-level page directly under the section.
 
 Do **NOT** nest groups inside groups. Repeating collections (ADRs, APIs)
@@ -23,17 +23,17 @@ sit at section level as their own skupiny.
 ## Numbering
 
 Titles use the hierarchical numbering from the tables below. The
-section itself carries **no numeric prefix** — its `title` is simply
+section itself carries **no numeric prefix**; its `title` is simply
 `Technická dokumentace`. Skupiny and stránky carry prefixes like
 `2.4 Architektura systému` and `2.4.1 Komponentový diagram`.
 
-Numbering uses a single space separator — **no hyphen** — between the
+Numbering uses a single space separator (**no hyphen**) between the
 number and the Czech label (e.g. `2.4.1 Komponentový diagram`, not
-`2.4.1 — Komponentový diagram`).
+`2.4.1 - Komponentový diagram`).
 
 ## Section index
 
-- `technical/index.md` — `title: Technická dokumentace`, `order: 2`.
+- `technical/index.md`: `title: Technická dokumentace`, `order: 2`.
   No numeric prefix.
 
 ## Top-level pages and groups
@@ -75,7 +75,7 @@ number and the Czech label (e.g. `2.4.1 Komponentový diagram`, not
 | 2.4.5  | `architecture/runtime.md`          | 2.4.5 Runtime              |
 | 2.4.6  | `architecture/state-management.md` | 2.4.6 State management     |
 
-## Group: `adr/` (2.5) — Architecture Decision Records
+## Group: `adr/` (2.5): Architecture Decision Records
 
 ADR pages live flat under `adr/NNNN-<slug>.md` (e.g.
 `adr/0001-use-postgres.md`). Their `title` uses the chain `2.5.N <name>`,
@@ -106,30 +106,30 @@ e.g. `2.5.1 Use PostgreSQL`.
 
 ## Group: `consumed-apis/` (2.8)
 
-Flat — one page per consumed API.
+Flat: one page per consumed API.
 
 | Number | File                     | Czech label (title) (example)   |
 | ------ | ------------------------ | ------------------------------- |
-| 2.8.1  | `consumed-apis/<api>.md` | 2.8.1 Konzumované API — `<api>` |
-| 2.8.2  | `consumed-apis/<api>.md` | 2.8.2 Konzumované API — `<api>` |
+| 2.8.1  | `consumed-apis/<api>.md` | 2.8.1 Konzumované API `<api>`   |
+| 2.8.2  | `consumed-apis/<api>.md` | 2.8.2 Konzumované API `<api>`   |
 | …      | …                        | …                               |
 
 ## Group: `exposed-public-apis/` (2.9)
 
-Flat — one page per exposed public API.
+Flat: one page per exposed public API.
 
 | Number | File                           | Czech label (title) (example) |
 | ------ | ------------------------------ | ----------------------------- |
-| 2.9.1  | `exposed-public-apis/<api>.md` | 2.9.1 Veřejné API — `<api>`   |
+| 2.9.1  | `exposed-public-apis/<api>.md` | 2.9.1 Veřejné API `<api>`     |
 | …      | …                              | …                             |
 
 ## Group: `exposed-internal-apis/` (2.10)
 
-Flat — one page per exposed internal API.
+Flat: one page per exposed internal API.
 
 | Number | File                             | Czech label (title) (example) |
 | ------ | -------------------------------- | ----------------------------- |
-| 2.10.1 | `exposed-internal-apis/<api>.md` | 2.10.1 Interní API — `<api>`  |
+| 2.10.1 | `exposed-internal-apis/<api>.md` | 2.10.1 Interní API `<api>`    |
 | …      | …                                | …                             |
 
 ## Group: `tests/` (2.13)
@@ -160,7 +160,7 @@ content.
 ## Skip rules
 
 - If a proposed group has no code evidence, list it in the plan as
-  `skip — no evidence` and confirm with the user.
+  `skip: no evidence` and confirm with the user.
 - If the codebase suggests a group not in this proposal (e.g. a
   project-specific `data-pipeline/`), propose it to the user in Step 1
   and agree on a Czech label, numbering (next free `2.X` or inserted
@@ -175,7 +175,7 @@ content.
   hyphen (e.g. `2.4.1 Komponentový diagram`).
 - Section-level `index.md` carries **no** numeric prefix in its
   `title`.
-- `order` values above are a suggested default — the user may override.
+- `order` values above are a suggested default; the user may override.
 - New (non-proposed) groups get an `order` at the end of the list and
   a numbering prefix agreed with the user.
 - **Depth cap**: no group inside a group. Repeating collections get

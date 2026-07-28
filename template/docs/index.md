@@ -1,5 +1,5 @@
 ---
-title: __PROJECT__ — dokumentační portál
+title: __PROJECT__ (dokumentační portál)
 status: published
 updated_at: __DATE__
 aside: false
@@ -13,7 +13,7 @@ features:
     linkText: Otevřít
   - icon: functional
     title: Funkční specifikace
-    description: Co systém umí — uživatelské role, scénáře, vstupy a výstupy.
+    description: Uživatelské role, scénáře, vstupy a výstupy.
     link: /v1/funkcni-specifikace/
     linkText: Otevřít
   - icon: technical

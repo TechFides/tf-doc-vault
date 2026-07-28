@@ -1,9 +1,6 @@
 /**
- * fix.ts
- *
- * Runs the full project polish: LF conversion, frontmatter normalize, format,
- * lint --fix, then re-runs typecheck + validate + format/lint check to
- * verify everything passes.
+ * Full project polish: LF conversion, frontmatter normalize, format, lint --fix,
+ * then typecheck, validate and a format/lint check to confirm the result passes.
  */
 
 import { spawnSync } from "node:child_process";

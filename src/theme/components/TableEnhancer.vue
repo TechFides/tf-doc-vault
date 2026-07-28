@@ -18,9 +18,8 @@ const router = useRouter();
 const decimal = getDecimalSeparator(lang.value || undefined);
 
 // Authored row order per <tbody>, captured before the first sort so a third
-// click can restore it. Scroll containers already wired for shadow updates;
-// tables already given a filter toolbar. rowText caches each row's normalised
-// text so live filtering doesn't re-normalise on every keystroke.
+// click can restore it. rowText caches each row's normalised text so live
+// filtering doesn't re-normalise on every keystroke.
 const originalOrder = new WeakMap<
   HTMLTableSectionElement,
   HTMLTableRowElement[]
@@ -29,7 +28,7 @@ const shadowWired = new WeakSet<HTMLElement>();
 const filterWired = new WeakSet<HTMLElement>();
 const rowText = new WeakMap<HTMLTableRowElement, string>();
 
-// Real data rows only — excludes the injected "no results" row.
+// Data rows only, skipping the injected "no results" row.
 function dataRows(tbody: HTMLTableSectionElement): HTMLTableRowElement[] {
   return [...tbody.rows].filter((r) => !r.classList.contains("tf-no-results"));
 }
@@ -42,9 +41,9 @@ function normalize(s: string): string {
     .replace(/\p{Diacritic}/gu, "");
 }
 
-// Stripe every 2nd VISIBLE data row via a class. Class-driven rather than CSS
-// nth-child because after sort/filter the visible set changes and nth-child
-// can't retrack it reliably (parity shift + buggy hidden-row invalidation).
+// Stripe every 2nd visible row with a class rather than CSS nth-child: after a
+// sort or filter the visible set changes and nth-child cannot retrack it
+// (parity shift plus buggy hidden-row invalidation).
 function restripe(tbody: HTMLTableSectionElement): void {
   let visible = 0;
   for (const row of dataRows(tbody)) {
@@ -58,10 +57,10 @@ function restripe(tbody: HTMLTableSectionElement): void {
   }
 }
 
-/* ----------------------------- click-to-sort ----------------------------- */
+// ─── click-to-sort ───────────────────────────────────────────────────────────
 
 function headerFromEvent(target: HTMLElement): HTMLTableCellElement | null {
-  // Ignore clicks on links inside a header cell — let them navigate.
+  // Clicks on links inside a header cell should navigate, not sort.
   if (target.closest("a")) return null;
   const th = target.closest<HTMLTableCellElement>(".vp-doc thead th");
   if (!th || !th.closest("table")?.tBodies.length) return null;
@@ -86,7 +85,7 @@ function sortByHeader(th: HTMLTableCellElement): void {
   const rows = dataRows(tbody);
   if (rows.length < 2) return;
 
-  // Capture a COPY of the authored order once, so "none" can restore it — the
+  // Capture a copy of the authored order once so "none" can restore it; the
   // sort below mutates `rows` in place.
   if (!originalOrder.has(tbody)) originalOrder.set(tbody, [...rows]);
 
@@ -130,7 +129,7 @@ function onKeydown(e: KeyboardEvent): void {
   sortByHeader(th);
 }
 
-/* -------------------------- per-render decoration ------------------------- */
+// ─── per-render decoration ───────────────────────────────────────────────────
 
 // Right-align auto-detected numeric columns, unless the author aligned them
 // explicitly in Markdown (`:---:`), in which case leave them alone.
@@ -155,11 +154,9 @@ function alignNumericColumns(table: HTMLTableElement): void {
   }
 }
 
-// Only show a filter on tables large enough to warrant one.
 const FILTER_MIN_ROWS = 15;
 
-// Inject a right-aligned filter box above the table (once per table) and a
-// hidden "no results" row used when the query matches nothing.
+// Filter box above the table plus a hidden "no results" row, once per table.
 function injectFilter(outer: HTMLElement, table: HTMLTableElement): void {
   if (filterWired.has(outer)) return;
   const tbody = table.tBodies[0];
@@ -242,8 +239,6 @@ function enhanceTables(): void {
 
     injectFilter(outer, table);
     alignNumericColumns(table);
-
-    // Class-driven striping (survives sort/filter, unlike CSS nth-child).
     if (table.tBodies[0]) restripe(table.tBodies[0]);
 
     if (!shadowWired.has(scroller)) {
@@ -267,7 +262,7 @@ function onResize(): void {
   }
 }
 
-/* -------------------------------- lifecycle ------------------------------- */
+// ─── lifecycle ───────────────────────────────────────────────────────────────
 
 const prevAfterRouteChanged = router.onAfterRouteChanged;
 
@@ -291,5 +286,5 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- behavior-only: enhances .vp-doc tables (sort, numeric align, scroll shadows) -->
+  <!-- Behaviour only: the script enhances .vp-doc tables in place. -->
 </template>

@@ -1,12 +1,6 @@
 /**
- * build-print-page.ts
- *
- * Generates docs/print.md by merging all docs in sidebar order:
- *   1. Title page (project name + generated date)
- *   2. Table of contents
- *   3. All page content in sidebar order, stripped of frontmatter
- *
- * Run from the project root: `tf-doc-vault print`.
+ * Generates docs/print.md: a title page, a table of contents, and every page's
+ * content in sidebar order with frontmatter stripped.
  */
 
 import fs from "node:fs";
@@ -119,7 +113,7 @@ const pages = collectPages();
 const parts: string[] = [];
 
 parts.push(
-  `---\ntitle: Dokumentace — kompletní výstup\nlayout: PrintLayout\n---\n`,
+  `---\ntitle: Dokumentace (kompletní výstup)\nlayout: PrintLayout\n---\n`,
 );
 parts.push(`# Dokumentační portál\n`);
 parts.push(`**Generováno:** ${PRAGUE_DATE}\n`);

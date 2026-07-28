@@ -1,15 +1,11 @@
 import { defineBuildConfig } from "unbuild";
 
 /**
- * Dual ESM + CJS build for the two NestJS/Express tech-docs entry points.
- * Everything else in the package (theme/, config/, sidebar/, scripts/) is built
- * by tsc + scripts/build.mjs because it ships .vue/.css that consumer Vite has
- * to compile at build time — bundling those through rollup would break SFC
- * handling.
- *
- * tsc has src/setup/** excluded in tsconfig.json so unbuild owns these outputs
- * cleanly. `clean: false` so unbuild doesn't wipe tsc's earlier contribution
- * to dist/.
+ * Dual ESM + CJS build for the two tech-docs entry points. The rest of the
+ * package goes through tsc + scripts/build.mjs because it ships .vue/.css that
+ * the consumer's Vite compiles at build time; running those through rollup
+ * would break SFC handling. tsconfig.json excludes src/setup/**, so unbuild
+ * owns these outputs, and `clean: false` keeps tsc's earlier work in dist/.
  */
 export default defineBuildConfig({
   entries: ["src/setup/express", "src/setup/nest"],

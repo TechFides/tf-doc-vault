@@ -1,9 +1,7 @@
 /**
- * Single source of truth for the logo-symbol geometry.
- *
- * Consumed by `LogoSymbol.vue` (renders with `currentColor` so CSS can tint it)
- * and by `makeConfig` (bakes a brand-colored data URL for `themeConfig.logo`,
- * which VitePress renders as an `<img>` that cannot inherit `currentColor`).
+ * Single source of truth for the logo-symbol geometry. `LogoSymbol.vue` renders
+ * it with `currentColor`; `makeConfig` bakes a brand-colored data URL, because
+ * `themeConfig.logo` becomes an `<img>` that cannot inherit `currentColor`.
  */
 export const LOGO_VIEW_BOX = "173 108 89 103";
 

@@ -3,7 +3,7 @@ node_modules/
 dist/
 *.tsbuildinfo
 
-# pnpm pack output for local pre-publish testing — never commit
+# pnpm pack output for local pre-publish testing; never commit
 *.tgz
 .pnpm-store/
 
@@ -18,6 +18,6 @@ dist/
 # Claude Code worktrees (created on demand)
 /.claude/worktrees
 
-# Playground — only ignore VitePress generated artifacts, not config sources
+# Playground: ignore VitePress generated artifacts, not config sources
 /playground/docs/.vitepress/cache/
 /playground/docs/.vitepress/dist/

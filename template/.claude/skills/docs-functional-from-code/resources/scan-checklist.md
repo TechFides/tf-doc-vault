@@ -1,13 +1,13 @@
 # Functional scan checklist
 
 Detection targets per aspect for Step 1 of `docs-functional-from-code`.
-Each row says _what_ to look for in the codebase and — if present — in
+Each row says _what_ to look for in the codebase and, if present, in
 the already-generated technical section, and _which proposed page_ the
-evidence populates. Nothing here claims the artifact exists — if
+evidence populates. Nothing here claims the artifact exists; if
 nothing matches, the page is **marked for skipping** in the plan and
 the user confirms.
 
-This list is **inclusive, not exclusive** — it defines the minimum
+This list is **inclusive, not exclusive**; it defines the minimum
 scan surface. Always scan beyond it: if the code suggests a page not
 listed (e.g. a project-specific report type, an onboarding flow, a
 partner-facing integration), **propose** it to the user and add it to
@@ -15,9 +15,9 @@ the generation plan with cited evidence.
 
 ## Source hierarchy reminder
 
-- **Code** is primary — source of truth for behavior.
+- **Code** is primary: the source of truth for behavior.
 - **`docs/<version>/technical/`** is secondary (only if already
-  generated) — a faster, digested lookup. **ALWAYS** cross-check
+  generated) is a faster, digested lookup. **ALWAYS** cross-check
   against code when a detail is behavior-critical.
 
 When the technical section is not available in this run, rely on code
@@ -47,20 +47,20 @@ only; cross-links to technical pages become
    secondary) and record what you find.
 2. Include the page in the Step 1 plan with evidence cited as
    `path` or `path:line` (prefer line where possible).
-3. If neither source has evidence, mark the page as `skip — no
+3. If neither source has evidence, mark the page as `skip: no
 evidence` in the plan and confirm skipping with the user.
 4. For aspects not in the rows above, propose a new page with a
    Czech label, suggested numbering, and the evidence you found.
 
 ## Rules
 
-- **NEVER** assume evidence exists — verify by opening the file.
+- **NEVER** assume evidence exists; verify by opening the file.
 - **NEVER** copy a claim from the technical section without cross-
   checking the code when the claim is behavior-critical (validation
   rules, permissions, state transitions, error codes).
 - **ALWAYS** prefer `path:line` over `path` for specific claims.
 - **ALWAYS** mark `⚠️ TODO: [missing detail]` rather than inventing.
-- **ALWAYS** record which source each claim came from — code or
-  `technical/<page>` — to make later review traceable.
-- This checklist is the **floor, not the ceiling** — new pages beyond
+- **ALWAYS** record which source each claim came from, code or
+  `technical/<page>`, to make later review traceable.
+- This checklist is the **floor, not the ceiling**; new pages beyond
   it are expected and should be proposed with evidence.

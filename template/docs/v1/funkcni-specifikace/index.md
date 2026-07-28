@@ -6,7 +6,7 @@ updated_at: 2026-04-27
 
 # Funkční specifikace
 
-Co systém umí — z pohledu uživatele.
+Co systém umí z pohledu uživatele.
 
 ## Uživatelské role
 

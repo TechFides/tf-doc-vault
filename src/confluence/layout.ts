@@ -1,13 +1,12 @@
 /**
  * Pure helpers for where imported pages land on disk and how their links are
- * rewritten. No I/O and no side effects — kept out of the CLI entrypoint
- * (which runs on import) so they can be unit-tested directly.
+ * rewritten. Kept out of the CLI entrypoint, which runs on import, so they stay
+ * unit-testable.
  */
 
 import path from "node:path";
 import { type TreeNode } from "./types.js";
 
-/** Title → URL-safe slug (strips a leading `[PREFIX]`, diacritics, etc.). */
 export function slugify(title: string): string {
   return title
     .toLowerCase()
@@ -20,7 +19,10 @@ export function slugify(title: string): string {
     .replace(/-+/g, "-");
 }
 
-/** On-disk path for a page: root and parents-with-children → `index.md`, leaves → `slug.md`. */
+/**
+ * On-disk path for a page: the root and any parent with children get
+ * `index.md`, leaves get `slug.md`.
+ */
 export function pageFilePath(
   node: TreeNode,
   parentPath: string,
@@ -32,7 +34,6 @@ export function pageFilePath(
     : path.join(parentPath, `${node.slug}.md`);
 }
 
-/** Directory that a page's children are written under. */
 export function childBasePath(
   node: TreeNode,
   parentPath: string,
@@ -44,7 +45,6 @@ export function childBasePath(
     : parentPath;
 }
 
-/** Map every page id → on-disk path, mirroring the index.md / leaf.md layout. */
 export function buildPathMap(
   node: TreeNode,
   parentPath: string,
@@ -56,7 +56,7 @@ export function buildPathMap(
   for (const child of node.children) buildPathMap(child, childBase, false, map);
 }
 
-/** Pre-order flatten so callers can iterate pages with a progress counter. */
+/** Pre-order flatten; the import progress counter relies on that order. */
 export function flattenTree(node: TreeNode, acc: TreeNode[] = []): TreeNode[] {
   acc.push(node);
   for (const child of node.children) flattenTree(child, acc);
@@ -64,14 +64,10 @@ export function flattenTree(node: TreeNode, acc: TreeNode[] = []): TreeNode[] {
 }
 
 /**
- * Rewrite Confluence page links to absolute VitePress paths (e.g. `/v1/page`;
- * VitePress prepends the site `base` to absolute markdown links at render time).
- * Only links whose target page was part of the import (present in `pagePathMap`)
- * are rewritten; everything else is left as the original URL.
- *
- * When the link's visible text is just the raw Confluence URL (Confluence stores
- * a bare-link paste that way), it is replaced with the target page's title from
- * `pageTitleMap` so the reader sees a label, not a page id.
+ * Rewrite Confluence page links to absolute VitePress paths such as `/v1/page`;
+ * VitePress prepends the site `base` at render time. Links to pages outside the
+ * import keep their original URL. A link whose visible text is the raw
+ * Confluence URL gets the target page's title, so the reader sees a label.
  */
 export function rewriteConfluenceLinks(
   markdown: string,

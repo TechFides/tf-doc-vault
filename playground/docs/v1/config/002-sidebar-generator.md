@@ -6,7 +6,7 @@ updated_at: 2026-05-22
 
 `generateSidebar()` and `generateNav()` walk the `docs/<version>/`
 tree and produce the VitePress sidebar / nav structures automatically.
-No manual config needed — file system layout is the source of truth.
+No manual config needed; the file system layout is the source of truth.
 
 ## Layout
 

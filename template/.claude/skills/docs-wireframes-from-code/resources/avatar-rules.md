@@ -5,7 +5,7 @@ to every fragment in the `avatar-*` family (`avatar-sm`, `avatar-md`,
 `avatar-lg`) and to any inline avatar composed outside a fragment.
 
 The rules exist because avatars are the single most frequent source of
-layout regressions in SVG wireframes — a one-pixel offset on the text
+layout regressions in SVG wireframes; a one-pixel offset on the text
 baseline or a label drawn inside the circle breaks the visual.
 
 ## Shape and sizing
@@ -13,14 +13,14 @@ baseline or a label drawn inside the circle breaks the visual.
 - Avatar is **always** a `<circle>`. Never a rounded `<rect>`, never an
   ellipse.
 - Canonical diameters:
-  - `avatar-sm` — 32 px (r = 16).
-  - `avatar-md` — 48 px (r = 24).
-  - `avatar-lg` — 96 px (r = 48).
+  - `avatar-sm`: 32 px (r = 16).
+  - `avatar-md`: 48 px (r = 24).
+  - `avatar-lg`: 96 px (r = 48).
 - Stroke (if used): 1 px, inside the circle (`stroke-alignment` is not
-  universally supported — use a slightly smaller `r` and overlay a thin
+  universally supported; use a slightly smaller `r` and overlay a thin
   border circle if needed).
 
-## Positioning rule — `y == cy`
+## Positioning rule: `y == cy`
 
 Text inside the circle (initials, icon) MUST satisfy:
 
@@ -31,11 +31,11 @@ Text inside the circle (initials, icon) MUST satisfy:
 </text>
 ```
 
-- `y` on the `<text>` element **equals** `cy` on the `<circle>` — do
+- `y` on the `<text>` element **equals** `cy` on the `<circle>`; do
   NOT pre-compensate for baseline yourself.
-- `dominant-baseline="central"` is mandatory — without it the initials
+- `dominant-baseline="central"` is mandatory; without it the initials
   drift downward in Firefox and Safari.
-- `text-anchor="middle"` is mandatory — keeps the initials horizontally
+- `text-anchor="middle"` is mandatory; it keeps the initials horizontally
   centered.
 
 ### Why
@@ -46,7 +46,7 @@ center. `dominant-baseline="central"` re-centers the text vertically on
 circle's center. Pre-compensating (`y = cy + 4`) breaks fonts that have
 different metrics.
 
-## Label placement — below the circle
+## Label placement: below the circle
 
 Name / label / caption associated with an avatar is rendered **below** the
 circle, outside the colored area:
@@ -67,7 +67,7 @@ circle, outside the colored area:
 - Label color is the **foreground text color** of the canvas, never the
   avatar fill color.
 - Long names wrap to a second line using a second `<text>` element at
-  `y + 14` — do NOT use `<foreignObject>` for wrapping.
+  `y + 14`; do NOT use `<foreignObject>` for wrapping.
 
 ### Why not inside
 
@@ -97,7 +97,7 @@ Labels inside the circle:
   - Light-theme avatars use white (`#FFFFFF`) initials on saturated
     fills.
   - Dark-theme avatars use `#F9FAFB` initials on slightly darker fills.
-- Never use pure red (`#FF0000`) — reserve red for destructive UI.
+- Never use pure red (`#FF0000`); reserve red for destructive UI.
 
 ## Image-backed avatars
 
@@ -116,11 +116,11 @@ initials:
        clip-path="url(#avatar-clip-<id>)" />
 ```
 
-- `href` must be a **local** path (`../assets/…`) or a data URI — never
+- `href` must be a **local** path (`../assets/…`) or a data URI, never
   an external URL (`svg-sanitization.md` §5).
 - Clip the image to a circle via `clipPath`; never rely on CSS
   `border-radius` inside `<foreignObject>`.
-- If the avatar image is not available, fall back to initials — do NOT
+- If the avatar image is not available, fall back to initials; do NOT
   leave a blank circle.
 
 ## Accessibility
@@ -140,16 +140,16 @@ accessible label identical (avoid abbreviating).
 
 ## Common mistakes to avoid
 
-- `y = cy + 4` — pre-compensation. Use `dominant-baseline="central"`
+- `y = cy + 4`: pre-compensation. Use `dominant-baseline="central"`
   instead.
-- `dominant-baseline="middle"` — not equivalent to `central`, renders
+- `dominant-baseline="middle"`: not equivalent to `central`, renders
   differently across browsers.
-- Label inside the circle — breaks the visual identifier role.
-- External image URL — forbidden by the sanitizer.
-- Rounded rectangle instead of circle — use `<circle>` only.
-- Missing `text-anchor="middle"` — initials drift to the right of the
+- Label inside the circle; breaks the visual identifier role.
+- External image URL; forbidden by the sanitizer.
+- Rounded rectangle instead of circle; use `<circle>` only.
+- Missing `text-anchor="middle"`; initials drift to the right of the
   circle's center.
-- Stroke drawn outside the circle — looks inconsistent at small sizes;
+- Stroke drawn outside the circle; looks inconsistent at small sizes,
   prefer inside-stroke or a separate thinner border circle.
 
 ## Rules
@@ -159,6 +159,6 @@ accessible label identical (avoid abbreviating).
 - **ALWAYS** render labels **below** the circle, with ≥ 12 px breathing
   room.
 - **ALWAYS** keep initials uppercase, 1–2 glyphs, diacritics preserved.
-- **NEVER** reference external image URLs — local paths or data URIs
+- **NEVER** reference external image URLs; local paths or data URIs
   only.
 - **NEVER** use `<foreignObject>` for avatar wrapping or labels.

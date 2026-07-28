@@ -119,7 +119,7 @@ describe("makeConfig base", () => {
     expect(baseOf({ configDir })).toBe(expected);
   });
 
-  // Regression: the ana template serves at "/", so the folder-derived "/docs/" must be overridable.
+  // The ana template serves at "/", so the folder-derived "/docs/" stays overridable.
   test("override.base wins so the ana site can be served at the root", () => {
     expect(baseOf({ configDir, override: { base: "/" } })).toBe("/");
   });

@@ -11,9 +11,8 @@ let workdir: string;
 let docsRoot: string;
 
 /**
- * normalize-docs is a CLI script, not an exported function. We invoke it as
- * a subprocess against a temp `docs/` tree, then read the file back to
- * inspect what it did to the frontmatter.
+ * normalize-docs is a CLI script, not an exported function, so each test runs
+ * it as a subprocess against a temp `docs/` tree and reads the file back.
  */
 function runNormalize(): { exitCode: number; stdout: string; stderr: string } {
   const r = spawnSync("node", [SCRIPT, "--root=docs"], {
@@ -94,10 +93,8 @@ describe("normalize-docs (flat frontmatter)", () => {
 });
 
 /**
- * Regression test for the YAML-flattening bug — the original line-based
- * frontmatter parser collapsed nested YAML (hero / features blocks in vitepress
- * home pages) and truncated list entries past the first. The block-based parser
- * preserves indentation and every list entry.
+ * Nested YAML (the hero / features blocks of a VitePress home page) has to
+ * survive normalization with its indentation and every list entry intact.
  */
 describe("normalize-docs (nested frontmatter)", () => {
   test("preserves nested hero block and full features list", () => {

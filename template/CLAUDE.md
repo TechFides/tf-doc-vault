@@ -1,8 +1,8 @@
-# CLAUDE.md — Documentation Generation Rules
+# CLAUDE.md: documentation generation rules
 
 Binding rules for **all documentation generation** in this project
-(regardless of source — code, screenshots, sales input, pre-code design, …).
-Every documentation skill and command inherits these rules automatically —
+(whatever the source: code, screenshots, sales input, pre-code design, …).
+Every documentation skill and command inherits these rules automatically, so
 do not repeat them in individual skill files.
 
 The **scope** of a run (which documentation type is generated and in which
@@ -10,7 +10,7 @@ order) is decided by the **command**, not by this file.
 
 ---
 
-## 1. Core principle — Reflect Reality
+## 1. Core principle: reflect reality
 
 - **NEVER** invent behavior, fields, endpoints, states, flows, or UI that are
   not present in the source provided by the user (code, config files,
@@ -31,10 +31,10 @@ At the **end of each generation run** (one command = one run), Claude must:
 
 1. Collect every `⚠️ TODO` marker produced in that run.
 2. Present the list to the user and for each item ask which action to take:
-   - **a)** Skip — remove the TODO block and the surrounding section if empty.
-   - **b)** User input — user provides the missing information; Claude
+   - **a)** Skip: remove the TODO block and the surrounding section if empty.
+   - **b)** User input: the user provides the missing information and Claude
      inserts it verbatim and removes the TODO marker.
-   - **c)** Keep TODO — leave the `⚠️ TODO` block in the file as-is.
+   - **c)** Keep TODO: leave the `⚠️ TODO` block in the file as-is.
 3. Apply the chosen action, then re-run the small review checklist (§10)
    for that phase before finishing.
 
@@ -45,7 +45,7 @@ At the **end of each generation run** (one command = one run), Claude must:
   explicitly opt-in to reduced pausing (e.g. `--auto` flag or confirmation
   in chat). **NEVER** reduce pausing without explicit user opt-in.
 - Diagrams and wireframes are always generated **after** the textual content
-  they describe is confirmed stable by the user — but the exact phase order
+  they describe is confirmed stable by the user, but the exact phase order
   is defined by the command, not here.
 
 ## 4. Output structure
@@ -54,23 +54,23 @@ At the **end of each generation run** (one command = one run), Claude must:
 docs/
   v1/                          ← documentation version
     <section>/                 ← top-menu item (e.g. functional-documentation)
-      index.md                 ← section index — Czech menu label + order
+      index.md                 ← section index: Czech menu label + order
       <group>/                 ← collapsible group in left menu (e.g. use-cases)
-        index.md               ← group index — Czech label, not listed as page
+        index.md               ← group index: Czech label, not listed as page
         <page>.md              ← content page (e.g. use-case-1.md)
   v2/                          ← next version
 ```
 
 - A new documentation version lives in its own `vN/` folder; VitePress adds
   it to the version dropdown automatically.
-- `<section>/index.md` and `<group>/index.md` are **mandatory** — they
+- `<section>/index.md` and `<group>/index.md` are **mandatory**; they
   provide the Czech menu label and explicit ordering (`order:` in
   frontmatter). They are not rendered as regular pages.
 - Folder and file names: `kebab-case`.
 - Alphabetical order by default; use `order:` in `index.md` frontmatter or
   `01-`, `02-` prefixes when a fixed order is required.
 - Shared images: `docs/public/images/`. Local images: next to the `.md` file.
-- `print.md` is generated — do not edit, not versioned.
+- `print.md` is generated: do not edit it, and it is not versioned.
 
 ## 5. Mandatory frontmatter
 
@@ -114,7 +114,7 @@ right after the frontmatter describing the target location:
 <!--
 confluence:
   space: CNG
-  title: Use case — Login
+  title: Use case (Login)
   parent: Functional documentation
 -->
 ```
@@ -128,7 +128,7 @@ to a Confluence-synced section.
 - Technical terms (class names, method names, endpoint paths, attribute
   names, enum values) stay in the original language (usually English).
 - Writing style: technical, concise, no filler.
-- **ALWAYS include examples**, not only descriptions — for every non-trivial
+- **ALWAYS include examples**, not only descriptions: for every non-trivial
   concept add a code snippet, request/response example, or concrete scenario.
 - Use emphasis keywords in Czech inside the generated docs:
   `NIKDY` (NEVER), `VŽDY` (ALWAYS), `DŮLEŽITÉ` (IMPORTANT).
@@ -158,7 +158,7 @@ to a Confluence-synced section.
   it in `wf-fragments/README.md`.
 - **Screenshots as temporary input**: when the user provides screenshots,
   they serve as the reference for SVG layout and content. The generated SVG
-  must reflect the screenshot — **NEVER** add elements not visible on it.
+  must reflect the screenshot, so **NEVER** add elements not visible on it.
   Screenshots are input-only and are not stored in `wf-fragments/`.
 
 ## 10. Small in-run review
@@ -195,8 +195,8 @@ A **comprehensive review** is handled by a separate command/skill
 | `/docs-generate-from-code` | Orchestrator for the "docs from code" workflow |
 | `/docs-technical`          | Incremental technical documentation            |
 | `/docs-functional`         | Incremental functional documentation           |
-| `/docs-diagrams`           | Diagrams — run after textual content is stable |
-| `/docs-wireframes`         | SVG wireframes — last step                     |
+| `/docs-diagrams`           | Diagrams; run after textual content is stable  |
+| `/docs-wireframes`         | SVG wireframes; the last step                  |
 
 Build and validation (run before commit):
 

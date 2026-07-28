@@ -1,25 +1,8 @@
 #!/usr/bin/env node
 /**
- * tf-doc-vault — CLI dispatcher for documentation tooling.
- *
- * Subcommands:
- *   create            scaffold a new analysis docs repo (delegates to create-ana)
- *   init-tech-docs    initialise tech-docs/ in an existing service repo
- *   import-confluence import pages from Confluence into tech-docs/v1/
- *   print             generate docs/print.md (build-print-page.ts)
- *   export-pdf        render artifacts/docs-full.pdf from /print
- *   pdf               shortcut: print → vitepress build → export-pdf
- *   validate          frontmatter + links + images + markdown lint
- *   normalize         canonical frontmatter ordering
- *   ensure-lf         convert CRLF → LF
- *   fix               full pipeline (LF, normalize, format, lint --fix, typecheck, validate)
- *   sync              diff infra/CI/config files against bundled template
- *   gen-diagrams      generate business/technical analysis SVG diagrams
- *   gen-wireframes    generate wireframe SVGs
- *   replace-wireframes replace ASCII wireframe code blocks in docs/v1/index.md with SVG image refs
- *
- * `create`, `init-tech-docs` and `import-confluence` are sibling CLI scripts in
- * dist/cli/; all others run from dist/scripts/.
+ * tf-doc-vault: CLI dispatcher for documentation tooling. `create`,
+ * `init-tech-docs` and `import-confluence` are sibling CLI scripts in dist/cli/;
+ * every other subcommand runs from dist/scripts/.
  */
 
 import { spawnSync } from "node:child_process";

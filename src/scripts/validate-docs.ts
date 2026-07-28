@@ -1,13 +1,6 @@
 /**
- * validate-docs.ts
- *
- * Checks all .md files in docs/ for:
- *   1. Required frontmatter fields (title, status, updated_at)
- *   2. Valid status values
- *   3. Broken internal links (relative + absolute, with .md / index.md fallback)
- *   4. Missing images
- *   5. Duplicate slugs
- *   6. Markdown lint rules
+ * Checks every .md file under docs/: frontmatter fields and status values,
+ * internal links, images, duplicate slugs and markdown lint rules.
  */
 
 import fs from "node:fs";
@@ -159,7 +152,7 @@ function checkBrokenLinks(files: string[]): Issue[] {
 }
 
 function checkMissingImages(files: string[]): Issue[] {
-  // External http(s) images are excluded — only local paths can be checked on disk
+  // Only local paths can be checked on disk, so http(s) images are skipped.
   const imgRe =
     /!\[.*?\]\((?!https?:\/\/)([^)]+\.(svg|png|jpg|jpeg|gif|webp))\)/gi;
   const issues: Issue[] = [];

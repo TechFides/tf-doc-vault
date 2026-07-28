@@ -32,5 +32,5 @@ COPY --chown=node:node --from=docs-build \
 
 - The docs-build stage runs in parallel with the app build stage (Buildkit). Editing
   `tech-docs/architecture.md` invalidates only the docs cache, not the app cache.
-- No `GH_NPM_TOKEN` or `.npmrc` registry override — `@techfides/tf-doc-vault`
-  is publicly available from npmjs.com.
+- No `GH_NPM_TOKEN` or `.npmrc` registry override is needed;
+  `@techfides/tf-doc-vault` is publicly available from npmjs.com.

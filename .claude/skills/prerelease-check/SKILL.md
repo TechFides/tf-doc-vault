@@ -5,11 +5,11 @@ description: >-
   Confirms the external API / CLI surface is unchanged since the last release,
   runs the full quality gate (lint, typecheck, format, build, unit) plus the
   Playwright smoke suite, and does VISUAL BROWSER checks of the playground, the
-  ana (create-ana) site and the tech-docs (init-tech-docs) site — verifying
+  ana (create-ana) site and the tech-docs (init-tech-docs) site, verifying
   base-path correctness and a clean browser console. Use this whenever the user
   is about to publish or release a new version, cut a release, bump the version,
   run `pnpm release`/`npm publish`, or asks for a "prerelease check", "sanity
-  check before publishing", "release readiness", or "is it safe to publish" —
+  check before publishing", "release readiness", or "is it safe to publish",
   even if they don't spell out every step. Run it BEFORE the release.
 ---
 
@@ -35,7 +35,7 @@ being published. The working tree must be clean at the end.
 
 ---
 
-## Step 0 — Establish the baseline
+## Step 0: Establish the baseline
 
 Know what is being published and against what to compare.
 
@@ -48,7 +48,7 @@ node -e "console.log(require('./package.json').version)"
 
 The publishable artifact is the current branch's `src/` (compiled to `dist/` on
 publish). `renovate.json`, tests, `.claude/`, `playground/` are **not** in the
-npm `files` list, so changes there never affect the release — note this if the
+npm `files` list, so changes there never affect the release; note this if the
 user worries about uncommitted tooling changes.
 
 If there are open PRs with behaviour fixes the user expects in the release,
@@ -57,7 +57,7 @@ shows the `git merge-base --is-ancestor` pattern).
 
 ---
 
-## Step 1 — External API / commands unchanged
+## Step 1: External API / commands unchanged
 
 A patch/minor release must not change the public surface. Verify it two ways.
 
@@ -91,20 +91,20 @@ Confirm specifically:
 - `exports` still includes `.`, `./config`, `./sidebar`, `./theme`,
   `./setup/express`, `./setup/nest`, the config/template/docker subpaths.
 - `src/index.ts` still exports `makeConfig`, `createTheme`, the sidebar
-  generators — and **`setupTechDocs` is still NOT re-exported from the root**
-  (it's built separately by unbuild; a root re-export dangles at runtime — this
+  generators, and **`setupTechDocs` is still NOT re-exported from the root**
+  (it's built separately by unbuild; a root re-export dangles at runtime; this
   is a hard limit in AGENTS.md).
 - Dispatcher subcommands unchanged: `create`, `init-tech-docs`,
   `import-confluence`, `export-pdf`, `pdf`, `validate`, `normalize`, `fix`.
 
 CLI flags and env-var names (`--site`, `--root-page-id`, `--output`, `--space`,
 `--verbose`; `CONFLUENCE_USER_EMAIL`, `CONFLUENCE_API_TOKEN`) live inside the
-individual `src/cli/*.ts` entrypoints — if `git diff` flagged any of those, read
+individual `src/cli/*.ts` entrypoints; if `git diff` flagged any of those, read
 the change to confirm flags weren't renamed/removed.
 
 ---
 
-## Step 2 — Quality gate
+## Step 2: Quality gate
 
 ```bash
 pnpm lint
@@ -116,12 +116,12 @@ pnpm test:unit
 
 All must pass. `build` matters here because the smoke suite and the browser
 checks run against the freshly-built `dist/`. Unit tests should report **0
-skipped** — a lingering `.skip` is a regression test that isn't actually
+skipped**: a lingering `.skip` is a regression test that isn't actually
 guarding anything; investigate before publishing.
 
 ---
 
-## Step 3 — Smoke suite (all use cases, automated)
+## Step 3: Smoke suite (all use cases, automated)
 
 ```bash
 pnpm test:smoke
@@ -143,12 +143,12 @@ ls -d "$SMOKE"/ana-parent/ana_test/docs/.vitepress/dist "$SMOKE"/tech-docs/docs/
 
 ---
 
-## Step 4 — Visual browser checks
+## Step 4: Visual browser checks
 
 Smoke already asserts the sites render without console errors, but a human-style
 visual pass catches what assertions miss (broken layout, literal markdown,
 wrong-base links that still 200). Check **all three** sites: playground, ana,
-tech-docs. ana is the most important — it's where the home-page theme
+tech-docs. ana is the most important; it's where the home-page theme
 (`BrandHero`, `FeatureCards`) and the `/docs/` base both live.
 
 These are the sites and their **base paths** (the base is baked into each build,
@@ -165,9 +165,9 @@ If the smoke sandboxes were cleaned up, re-run `pnpm test:smoke` to rebuild them
 
 ### Serving + viewing
 
-Use the `Claude_Preview` MCP tools (own headless browser — this is "your
+Use the `Claude_Preview` MCP tools (own headless browser; this is "your
 browser"). It starts servers from `.claude/launch.json`, so write a temporary
-config, use it, then **delete it** — `.claude/` is not gitignored in this repo
+config, use it, then **delete it**, because `.claude/` is not gitignored in this repo
 and a stray file would dirty the tree right before publish.
 
 1. Write `.claude/launch.json` with one configuration per site you'll view. Each
@@ -218,7 +218,7 @@ and a stray file would dirty the tree right before publish.
    `preview_console_logs` (level `warn`, then `error`).
 
    A full-page navigation closes the eval context (you'll see "Inspected target
-   navigated or closed") — that's expected; just take the screenshot next.
+   navigated or closed"). That's expected; just take the screenshot next.
 
 ### What to verify on each site
 
@@ -226,20 +226,20 @@ and a stray file would dirty the tree right before publish.
   Vue-compiler crash, no empty body.
 - **Console is clean.** `preview_console_logs` at `warn` and `error` should
   return nothing. Mermaid/Vue-compile errors show up here.
-- **Base paths are correct.** This is the high-value check — links that omit the
+- **Base paths are correct.** This is the high-value check: links that omit the
   base still return 200 in dev but 404 for real users. Assert internal links
   carry the base:
 
   ```js
-  // ana — feature cards must point at /docs/v1/...
+  // ana: feature cards must point at /docs/v1/...
   [...document.querySelectorAll('.feature-card')].map(a => a.getAttribute('href'))
-  // tech-docs — every internal link under /tech-docs/
+  // tech-docs: every internal link under /tech-docs/
   [...document.querySelectorAll('a')].map(a=>a.getAttribute('href'))
      .filter(h=>h&&h.startsWith('/')).every(h=>h.startsWith('/tech-docs'))
   ```
 
   (Background: VitePress base-prefixes markdown links and nav items, but **not**
-  raw `:href` bindings in custom Vue components — that class of bug is invisible
+  raw `:href` bindings in custom Vue components; that class of bug is invisible
   to a build and only shows up here.)
 
 - **No literal markdown.** Component slot text (e.g. `BrandHero`'s subtitle) is
@@ -264,7 +264,7 @@ The tree must be clean afterwards.
 
 ---
 
-## Step 5 — Confirm what's actually in the release
+## Step 5: Confirm what's actually in the release
 
 If behaviour fixes were spread across branches/PRs, confirm each is on the branch
 being published, so the report tells the user exactly what ships:
@@ -280,7 +280,7 @@ done
 ## Report template
 
 ```
-Pre-release check — <branch> @ <short-sha> (current version <x.y.z>)
+Pre-release check: <branch> @ <short-sha> (current version <x.y.z>)
 
 API/commands ........ unchanged ✓   (bin, exports, src/index.ts, dispatcher all identical; setup not re-exported)
 Quality gate ........ lint / typecheck / format / build / unit (<N> passed, 0 skipped) ✓

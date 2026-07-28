@@ -1,4 +1,4 @@
-# Project Dockerfile — multi-stage builder + selectable runtime.
+# Project Dockerfile: multi-stage builder with a selectable runtime.
 # SERVER_TYPE selects the runtime stage: nginx | nginx-auth.
 # Default for this project is set below; override at build with --build-arg.
 
@@ -15,9 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends git ca-certific
 RUN corepack enable
 
 # Optional CI job token used to fetch git+ssh dependencies over HTTPS in CI.
-# Empty in local builds (deps are then expected to be pre-fetched or accessible
-# via the developer's SSH agent — but Docker doesn't forward that, so prefer
-# the GitLab npm registry for non-CI builds).
+# Empty in local builds, where deps have to be pre-fetched: Docker does not
+# forward the developer's SSH agent, so use the GitLab npm registry instead.
 ARG GITLAB_CI_TOKEN=""
 
 # pnpm-workspace.yaml carries allowBuilds (esbuild); without it the build stage

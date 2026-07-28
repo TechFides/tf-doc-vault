@@ -1,11 +1,7 @@
 /**
- * Confluence REST client used by import-confluence.
- *
- * Built for large spaces: every HTTP request goes through a small concurrency
- * pool (so a deep page tree doesn't open hundreds of sockets at once) and is
- * retried with backoff on 429/5xx/transient network errors. Page and attachment
- * listings are fully paginated, and `buildTree` isolates per-page failures so a
- * single bad page can't abort the whole import.
+ * Confluence REST client used by import-confluence. Built for large spaces:
+ * requests go through a bounded concurrency pool, are retried with backoff on
+ * 429/5xx/transient network errors, and listings are fully paginated.
  */
 
 import fs from "node:fs";
@@ -122,8 +118,8 @@ function downloadRaw(
 ): Promise<void> {
   if (depth > 5) return Promise.reject(new Error(`Too many redirects: ${url}`));
   return new Promise<void>((resolve, reject) => {
-    // Confluence attachment links 302 → signed S3 URL. Follow Location, but drop
-    // the Authorization header on cross-origin hops so we don't leak the token.
+    // Confluence attachment links 302 to a signed S3 URL. Follow Location, but
+    // drop Authorization on cross-origin hops so the token stays with Atlassian.
     const headers: Record<string, string> =
       depth === 0 && authHeader ? { Authorization: authHeader } : {};
     const req = https.get(url, { headers }, (res) => {
@@ -235,8 +231,8 @@ export async function fetchAttachments(
 }
 
 /**
- * Fetch the Confluence emoji-title-published page property (stored as a hex
- * Unicode code point, e.g. "1f680"). Returns null if unset / request fails.
+ * The `emoji-title-published` page property, stored as a hex code point such as
+ * "1f680". Returns null when the property is unset or the request fails.
  */
 export async function fetchPageEmoji(
   site: string,
@@ -259,9 +255,8 @@ export async function fetchPageEmoji(
 // ─── tree ────────────────────────────────────────────────────────────────────
 
 /**
- * Recursively fetch a page and its descendants. Per-page failures are collected
- * into `errors` and the subtree is skipped (returns null) rather than aborting
- * the whole import. HTTP concurrency is bounded by the module-level pool.
+ * Recursively fetch a page and its descendants. A failing page lands in
+ * `errors` and skips its subtree instead of aborting the whole import.
  */
 export async function buildTree(
   site: string,

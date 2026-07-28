@@ -1,4 +1,4 @@
-# __PROJECT__ — documentation portal
+# __PROJECT__ documentation portal
 
 Documentation for the **__PROJECT__** project, generated with VitePress + the shared [`@techfides/tf-doc-vault`](https://github.com/techfides/tf-doc-vault) tooling.
 
@@ -27,7 +27,7 @@ GCP Cloud Run, image in Artifact Registry, deployed via GitLab CI/CD on every pu
 
 ### First deployment
 
-The GitLab repository does not need to be created in advance — push-to-create sets it up under `techfides/tf-analysis` on the first push. Add the remote and push:
+The GitLab repository does not need to exist in advance; push-to-create sets it up under `techfides/tf-analysis` on the first push. Add the remote and push:
 
 ```bash
 git remote add origin git@gitlab.com:techfides/tf-analysis/__PROJECT__.git
@@ -40,7 +40,7 @@ Then, in the newly created project, set up infra and the CI/CD variables:
 
 ```bash
 pnpm install                                       # the Terraform module is read from node_modules/
-gcloud auth application-default login              # one-time — for Terraform (GCS backend + provider)
+gcloud auth application-default login              # one-time, for Terraform (GCS backend + provider)
 
 cd infra
 cp terraform.tfvars.example terraform.tfvars     # fill in project_id
@@ -56,7 +56,7 @@ terraform output -raw ci_service_account_key | base64 -d > /tmp/sa-key.json
 # Put the contents of /tmp/sa-key.json into GitLab CI/CD Variables as GCP_SA_KEY.
 # Also set: GCP_PROJECT, GCP_REGION, SERVICE_NAME.
 # If you use the nginx-auth runtime, fill in BASIC_AUTH_USER / BASIC_AUTH_PASS
-# directly in the `variables:` block of .gitlab-ci.yml (not secret — repo access = app access).
+# directly in the `variables:` block of .gitlab-ci.yml (not secret: repo access = app access).
 ```
 
 The next push (or a pipeline retry) then passes both build and deploy.

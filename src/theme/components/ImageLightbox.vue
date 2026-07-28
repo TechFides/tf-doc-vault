@@ -74,10 +74,9 @@ function svgToDataUrl(svgEl: SVGSVGElement): string {
   if (!clone.getAttribute("height"))
     clone.setAttribute("height", String(bbox.height));
 
-  // CSS rules on `.mermaid` and `.dark .mermaid` are not part of the SVG
-  // itself — once serialized to a data URL that scope is gone. Copy the
-  // computed styles onto the clone so the lightbox renders the same colors
-  // in both light and dark mode.
+  // CSS rules on `.mermaid` live outside the SVG, so that scope is gone once it
+  // is serialized to a data URL. Copy the computed styles onto the clone so the
+  // lightbox keeps its colors in both light and dark mode.
   const liveEls = [
     svgEl,
     ...Array.from(svgEl.querySelectorAll<SVGElement>("*")),
@@ -142,8 +141,8 @@ function handleClick(e: MouseEvent) {
     return;
   }
 
-  // Only mermaid SVGs (and anything explicitly opted-in) become lightbox
-  // candidates — inline icons would otherwise blow up to full screen.
+  // Only mermaid SVGs and explicit opt-ins are lightbox candidates; inline icons
+  // would otherwise blow up to full screen.
   const mermaidSvg = target.closest(
     ".mermaid svg, [data-zoomable] svg, svg[data-zoomable]",
   ) as SVGSVGElement | null;

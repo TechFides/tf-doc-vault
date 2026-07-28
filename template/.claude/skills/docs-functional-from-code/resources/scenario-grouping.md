@@ -2,7 +2,7 @@
 
 Scenarios in this project live **flat** under `functional/scenarios/`
 (per the three-level depth rule in `proposed-structure.md`). Logical
-grouping — by module, context, or axis — is expressed in **metadata**
+grouping (by module, context, or axis) is expressed in **metadata**
 and in how scenarios are **ordered and listed**, not by nested folders.
 
 This document is the decision guide used in Step 1 when proposing
@@ -25,12 +25,12 @@ scenarios to the user.
 
 3. **Pick the grouping axis**
    - **Primary axis**: module / bounded context.
-   - **Fallback axis** (when the module split is too coarse — one
+   - **Fallback axis** (when the module split is too coarse, e.g. one
      module has 40 scenarios, another has 2):
      - `admin` vs. `user` (actor-based).
      - `read` vs. `write` (read-only queries vs. mutations).
      - `internal` vs. `external` (in-cluster vs. partner / public API).
-     - Project-specific — agreed with the user.
+     - Project-specific: agreed with the user.
 
 4. **Record the choice in the Step 1 plan**
    - Module list with count of scenarios per module.
@@ -51,8 +51,8 @@ axis: user
 ---
 ```
 
-- `module` — mandatory. The logical module the scenario belongs to.
-- `axis` — optional. The fallback axis value when used (e.g. `admin`,
+- `module`: mandatory. The logical module the scenario belongs to.
+- `axis`: optional. The fallback axis value when used (e.g. `admin`,
   `write`, `internal`).
 
 ### `scenarios-list.md` sections
@@ -60,7 +60,7 @@ axis: user
 The master list groups scenarios by module (H2 headings) and,
 optionally, by axis (H3). The table inside each section links to the
 individual scenario pages. The use-case diagram anchor (per module or
-overall) sits here — see `proposed-structure.md`.
+overall) sits here; see `proposed-structure.md`.
 
 ### `order` in scenario files
 
@@ -70,7 +70,7 @@ Step 1 plan. Within a module, scenarios are ordered by their
 
 ## Numbering reset rules
 
-- Scenarios share one numbering space under `1.11` — the `N` in
+- Scenarios share one numbering space under `1.11`; the `N` in
   `1.11.N` **does not reset per module**. The stable SC-NN identifier
   is what ties a scenario to its module.
 - Reordering module A's scenarios does not renumber module B's
@@ -85,11 +85,11 @@ the Step 1 plan so they can provide a module taxonomy if desired.
 
 ## Rules
 
-- **NEVER** invent a module name — take it from the code (package,
+- **NEVER** invent a module name; take it from the code (package,
   folder, service name) or from the technical section.
 - **NEVER** create a scenario subfolder under `scenarios/`.
 - **ALWAYS** list the grouping choice in the Step 1 plan and confirm
   with the user before writing scenario files.
 - **ALWAYS** re-use the same module name the code uses (lowercase
-  kebab) — do not translate to Czech in the `module` field. Czech
+  kebab); do not translate to Czech in the `module` field. Czech
   labels belong in `title`, not in metadata.

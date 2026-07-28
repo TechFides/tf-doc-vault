@@ -1,7 +1,3 @@
-/**
- * Shared utilities for the CLI scaffolding scripts (src/cli/*).
- */
-
 import fs from "node:fs";
 import path from "node:path";
 
@@ -10,7 +6,6 @@ export interface ParsedArgs {
   flags: Record<string, string | boolean>;
 }
 
-/** Argument parser shared by all CLI scripts. */
 export function parseArgs(argv: string[]): ParsedArgs {
   const args: ParsedArgs = { positional: [], flags: {} };
   for (const a of argv) {
@@ -28,7 +23,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
   return args;
 }
 
-// Binary extensions to skip — everything else is treated as text.
+// Everything not listed here is read as text and gets placeholder replacement.
 export const BINARY_EXTENSIONS = new Set<string>([
   ".png",
   ".jpg",
@@ -62,9 +57,6 @@ export interface CopyDirResult {
   skipped: number;
 }
 
-/**
- * Copy a directory tree.
- */
 export function copyDir(
   src: string,
   dest: string,
@@ -97,19 +89,9 @@ export function copyDir(
 }
 
 /**
- * Walk up from `startDir` looking for a file named `fileName`.
- * Stops at the filesystem root. Returns the absolute path or null.
- *
- * Used by create-ana to detect an ancestor `pnpm-workspace.yaml` — pnpm only
- * honors workspace config at the workspace root, so a scaffolded
- * `pnpm-workspace.yaml` inside a subdirectory of an existing workspace is
- * silently ignored.
- *
- * @param startDir Directory to begin the walk from. The walk begins at
- *                 `startDir`'s PARENT (the scaffold target's own workspace file
- *                 is never the answer).
- * @param fileName Bare filename to look for at each level.
- * @returns Absolute path of the first match, or null.
+ * Walk up from `startDir`'s parent looking for `fileName`, stopping at the
+ * filesystem root. The walk skips `startDir` itself so a scaffold target cannot
+ * match its own file. Returns the absolute path or null.
  */
 export function findAncestorFile(
   startDir: string,
@@ -136,9 +118,6 @@ export function findDocsRoot(outputDir: string): string {
   return path.resolve(outputDir, "..");
 }
 
-/**
- * Replace all placeholder strings in text files under a directory tree.
- */
 export function replacePlaceholders(
   dir: string,
   replacements: Record<string, string>,
