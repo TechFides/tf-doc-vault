@@ -1,4 +1,4 @@
-# Tech Docs — instructions for Claude Code / AI agents
+# Tech Docs: instructions for Claude Code and AI agents
 
 This folder contains the technical documentation for the **__SERVICE_ID__** service of the **__PROJECT__** project.
 
@@ -39,7 +39,7 @@ updated_at: 2026-04-30
 
 - When editing any `.md` file, update its `updated_at` to today's date.
 - When changing the structure (adding/removing files), update the links in `index.md`.
-- Don't touch `docs/.vitepress/config.ts` without an explicit instruction — the sidebar is generated automatically.
+- Don't touch `docs/.vitepress/config.ts` without an explicit instruction; the sidebar is generated automatically.
 - Run `pnpm docs:fix` before committing.
 
 ## Local preview

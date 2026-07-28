@@ -7,10 +7,10 @@
 # just runs the same container on port 8080, which this script exercises).
 #
 # It scaffolds with the default npm source, so the scaffolded site consumes the
-# PUBLISHED @techfides/tf-doc-vault library — this branch's template and CLI are
-# exercised locally, but the shipped library code is not. Run it on a clean
-# checkout while package.json still points at the published version, i.e. BEFORE
-# the release version bump, otherwise the pinned version can't resolve from npm.
+# PUBLISHED @techfides/tf-doc-vault library: this branch's template and CLI run
+# locally, but the shipped library code does not. Run it on a clean checkout
+# while package.json still points at the published version, i.e. BEFORE the
+# release version bump, otherwise the pinned version cannot resolve from npm.
 #
 # Requires: docker (daemon running), pnpm, node, git, curl.
 # Env overrides: PORT (default 8099), BASIC_AUTH_USER, BASIC_AUTH_PASS.
@@ -74,7 +74,7 @@ pnpm run lint          >/dev/null 2>&1 && pass "lint"          || fail "lint"
 pnpm run format:check  >/dev/null 2>&1 && pass "format:check"  || fail "format:check"
 pnpm run docs:validate >/dev/null 2>&1 && pass "docs:validate" || fail "docs:validate"
 
-step "3. Docker build — real multi-stage build (SERVER_TYPE=nginx-auth)"
+step "3. Docker build: real multi-stage build (SERVER_TYPE=nginx-auth)"
 cd "$WORK/demo_ana"
 docker build \
   --build-arg SERVER_TYPE=nginx-auth \
@@ -109,7 +109,7 @@ asset=$(printf '%s' "$html" | grep -oE '(href|src)="[^"]*/assets/[^"]+\.(css|js)
 if [ -n "$asset" ]; then
   code=$(curl -s -u "$BUSER:$BPASS" -o /dev/null -w '%{http_code}' "http://127.0.0.1:$PORT$asset")
   [ "$code" = "200" ] && pass "asset $asset -> 200" || fail "asset $asset -> $code (base/serving mismatch)"
-  # Correct base serves at root, so refs are /assets/… — not /<base>/assets/… .
+  # A correct base serves at root, so refs read /assets/… not /<base>/assets/… .
   case "$asset" in
     /assets/*) pass "asset referenced at root ($asset)" ;;
     *) fail "asset referenced under a base prefix: $asset (base-path regression)" ;;

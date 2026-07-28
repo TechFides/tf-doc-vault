@@ -1,7 +1,7 @@
 # Per-entry approval dialog
 
 Use this exact template for Step 2 of the workflow. One block per
-entry — **NEVER** batch.
+entry; **NEVER** batch.
 
 ## Template
 
@@ -47,16 +47,16 @@ Choice? (y / edit / skip / defer)
 
 Append a one-line flag under the diff when any of these hold:
 
-- `⚠ target block not found` — ask the user to point to the correct
+- `⚠ target block not found`: ask the user to point to the correct
   location before offering `y`.
-- `⚠ already-present` — the proposed text already exists verbatim in
+- `⚠ already-present`: the proposed text already exists verbatim in
   the target file; default to `skip`.
-- `⚠ out-of-tree target` — the file is outside `.claude/skills/` and
+- `⚠ out-of-tree target`: the file is outside `.claude/skills/` and
   `.claude/commands/`; require an explicit `y` acknowledging the
   out-of-tree write (§11 of CLAUDE.md).
-- `⚠ contradicts entry <j>` — another entry earlier in the plan
+- `⚠ contradicts entry <j>`: another entry earlier in the plan
   proposed the opposite change; show both excerpts before asking.
-- `⚠ implies CLAUDE.md change` — the excerpt targets project-wide
+- `⚠ implies CLAUDE.md change`: the excerpt targets project-wide
   rules; default to `defer`, never `y`.
 
 ## After the user replies

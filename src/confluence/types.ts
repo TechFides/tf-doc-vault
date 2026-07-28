@@ -1,9 +1,7 @@
 /**
- * Shared types for the Confluence import pipeline.
- *
- * The ADF (Atlassian Document Format) types here are intentionally loose — we
- * walk arbitrary Confluence ADF whose exact shape we don't control, so every
- * field is optional and an index signature keeps unknown attributes around.
+ * Shared types for the Confluence import pipeline. The ADF types are loose on
+ * purpose: the importer walks arbitrary Confluence documents, so every field is
+ * optional and an index signature keeps unknown attributes around.
  */
 
 export type AdfValue =

@@ -1,8 +1,6 @@
 /**
- * Replaces ASCII wireframe code blocks in index.md
- * with SVG image references. Handles both ```text and bare ``` fences.
- *
- * Run from consumer project root (cwd). Targets <cwd>/docs/v1/index.md.
+ * Replaces ASCII wireframe code blocks in <cwd>/docs/v1/index.md with SVG image
+ * references. Handles both ```text and bare ``` fences.
  */
 const fs = require("fs");
 const path = require("path");
@@ -134,19 +132,17 @@ const wireframes = [
 let replacedCount = 0;
 
 for (const [labelPrefix, _endSection, svg, alt] of wireframes) {
-  // Find the label in the content
   const labelIdx = content.indexOf(labelPrefix);
   if (labelIdx === -1) {
     console.log(`⚠ Could not find label for ${svg}`);
     continue;
   }
 
-  // The code fence ``` starts at the end of labelPrefix
+  // labelPrefix ends with the opening ```, so back up three characters.
   const fenceStartIdx = labelIdx + labelPrefix.length - 3;
 
-  // Find closing ``` on its own line
   let searchFrom = fenceStartIdx + 3;
-  // Skip the rest of opening fence line (handles ```text or ```)
+  // Skip the rest of the opening fence line, which may read ```text or ```.
   const newlineAfterOpen = content.indexOf("\n", searchFrom);
   if (newlineAfterOpen === -1) {
     console.log(`⚠ No newline after opening fence for ${svg}`);

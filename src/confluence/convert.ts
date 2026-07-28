@@ -1,19 +1,8 @@
 /**
- * ADF → VitePress-Markdown conversion.
- *
- * The heavy lifting is done by `extended-markdown-adf-parser`. Around it we add:
- *   - PRE-processing of the ADF tree, turning nodes the library would otherwise
- *     dump as raw-JSON "unknown" fragments (blockCard/embedCard/inlineCard,
- *     mention, status, mediaInline, taskList, decisionList, layoutSection,
- *     external media) into nodes it renders cleanly, and promoting header-less
- *     tables so they emit a separator row (and therefore render as tables).
- *   - POST-processing of the markdown: stripping the library's round-trip
- *     `<!-- adf:* -->` comments, turning `~~~panel~~~` / `~~~expand~~~` fences
- *     into VitePress containers, mapping Atlassian emoji shortnames to Unicode,
- *     and escaping the few sequences that break VitePress' Vue compiler.
- *
- * `convertAdf` is pure (no I/O). Media is left as `adf:media:<id>` placeholders
- * for the caller to resolve against the page's attachments — see resolve-media.
+ * ADF to VitePress-Markdown conversion. `extended-markdown-adf-parser` does the
+ * heavy lifting; a pre-processing pass rewrites the ADF nodes it would otherwise
+ * dump as raw-JSON "unknown" fragments, and a post-processing pass reshapes the
+ * markdown for VitePress. `convertAdf` is pure.
  */
 
 import { Parser, type ADFDocument } from "extended-markdown-adf-parser";
@@ -22,9 +11,8 @@ import { type AdfNode, type AdfValue, isAdfNode } from "./types.js";
 const parser = new Parser();
 
 /**
- * Atlassian emoji shortnames → Unicode. `atlassian-*` emojis carry their
- * shortname (e.g. `:check_mark:`) in the ADF instead of a Unicode character,
- * so without this map they survive as literal `:check_mark:` text.
+ * `atlassian-*` emojis carry their shortname (`:check_mark:`) in the ADF rather
+ * than a Unicode character, so without this map they survive as literal text.
  */
 export const ATLASSIAN_EMOJI: Record<string, string> = {
   ":check_mark:": "✅",
@@ -127,10 +115,9 @@ function mediaInlineToMedia(node: AdfNode): AdfNode {
 }
 
 /**
- * Normalise a media container (mediaSingle/mediaGroup):
- *   - external (URL) media → a link (the library can't resolve `adf:media:`);
- *   - a `caption` child → lifted out as a following paragraph (the library
- *     treats `caption` as an unknown node and would otherwise drop it).
+ * Normalise a media container (mediaSingle/mediaGroup): external URL media
+ * becomes a link, and a `caption` child is lifted out into a following
+ * paragraph, which the library would otherwise drop as an unknown node.
  */
 function mediaContainer(node: AdfNode): AdfValue | AdfValue[] {
   const children = asNodes(node.content);
@@ -213,7 +200,7 @@ function decisionListToBulletList(node: AdfNode): AdfNode {
   return { type: "bulletList", content: items };
 }
 
-/** Markdown has no columns — flatten a layout into stacked blocks. */
+/** Markdown has no columns, so a layout flattens into stacked blocks. */
 function flattenLayout(node: AdfNode): AdfNode[] {
   return asNodes(node.content).flatMap((column) => asNodes(column.content));
 }
@@ -226,10 +213,9 @@ function isSimpleCell(cell: AdfNode): boolean {
 }
 
 /**
- * GFM table cells only render inline content, so a `heading` inside a cell is
- * emitted as literal `### …` text. Demote every heading inside a cell to a
- * paragraph (its inline marks — e.g. bold — are preserved), so the title stays
- * emphasised without leaking the `#` markup into the rendered cell.
+ * GFM table cells render inline content only, so a `heading` inside a cell comes
+ * out as literal `### …` text. Demote it to a paragraph; the inline marks such
+ * as bold survive, so the title stays emphasised without leaking the `#` markup.
  */
 function demoteCellHeadings(table: AdfNode): AdfNode {
   const rows = asNodes(table.content).map((row): AdfNode => {
@@ -252,12 +238,11 @@ function demoteCellHeadings(table: AdfNode): AdfNode {
 }
 
 /**
- * GFM tables need a header row to emit a separator (and thus render at all).
- * Confluence tables whose first row is plain `tableCell` produce no separator,
- * so we promote that first row to `tableHeader` — but only when its cells are
- * simple. Promoting a row with block content (e.g. a list) makes the library
- * emit a literal newline that breaks the pipe table, so such tables are left
- * as-is (the library renders their block cells with `<br>` instead).
+ * GFM tables need a header row to emit a separator and render at all, but a
+ * Confluence table whose first row is plain `tableCell` has none. Promote that
+ * row to `tableHeader`, but only when its cells are simple: promoting a row with
+ * block content makes the library emit a newline that breaks the pipe table.
+ * Those tables stay as they are and the library renders their cells with `<br>`.
  */
 function ensureTableHeader(node: AdfNode): AdfNode {
   const rows = asNodes(node.content);
@@ -382,10 +367,7 @@ function expandsToContainers(md: string): string {
   );
 }
 
-/**
- * Apply `fn` to every part of `md` that is NOT inside a fenced code block or an
- * inline code span, so we never rewrite code content.
- */
+/** Apply `fn` only outside fenced code blocks and inline code spans. */
 function transformOutsideCode(md: string, fn: (s: string) => string): string {
   const CODE = /```[\s\S]*?```|~~~[\s\S]*?~~~|`[^`\n]*`/g;
   let result = "";
@@ -399,12 +381,10 @@ function transformOutsideCode(md: string, fn: (s: string) => string): string {
 }
 
 /**
- * Confluence applies a bold mark to the text *including* its surrounding spaces,
- * so the parser emits `**text **` / `** text**`. Markdown only treats `**` as a
- * delimiter when it hugs a non-space character, so those render as literal
- * asterisks. Move any whitespace that sits just inside the markers to the
- * outside (`**text **` → `**text** `); drop the emphasis entirely when it wraps
- * nothing but whitespace (`** **`).
+ * Confluence applies a bold mark to the text including its surrounding spaces,
+ * so the parser emits `**text **`. Markdown treats `**` as a delimiter only when
+ * it hugs a non-space character, so that renders as literal asterisks. Move the
+ * inner whitespace outside the markers, and drop emphasis that wraps only space.
  */
 function fixEmphasisWhitespace(md: string): string {
   return transformOutsideCode(md, (s) =>
@@ -427,9 +407,9 @@ function applyEmoji(md: string): string {
 }
 
 /**
- * Escape sequences that break VitePress' Vue compiler — stray `<`/`>` (parsed
- * as components → "element is missing end tag") and `{{` (interpolation) — while
- * preserving the `<br>` tags the converter intentionally emits in table cells.
+ * Escape the sequences that break VitePress' Vue compiler: stray `<`/`>` (parsed
+ * as components, failing with "element is missing end tag") and `{{`. The `<br>`
+ * tags the converter emits in table cells are preserved.
  */
 function escapeForVue(md: string): string {
   return transformOutsideCode(md, (s) => {
@@ -453,7 +433,7 @@ export interface ConvertResult {
 }
 
 /**
- * Convert an ADF document node to VitePress-flavoured Markdown. Media is left as
+ * Convert an ADF document to VitePress-flavoured Markdown. Media stays as
  * `adf:media:<id>` placeholders for the caller to resolve against attachments.
  */
 export function convertAdf(adf: AdfNode): ConvertResult {

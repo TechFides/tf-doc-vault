@@ -1,14 +1,12 @@
 /**
  * Resolve the `adf:media:<id>` placeholders left by the converter against a
- * page's attachment list, rewriting them to `/images/<filename>` references.
- *
- * Pure (no I/O) so it can be unit-tested without the network. The caller is
- * responsible for actually downloading the resolved files into `public/images`.
+ * page's attachment list, rewriting them to `/images/<filename>`. Pure: the
+ * caller downloads the resolved files into `public/images`.
  */
 
 import { type Attachment } from "./types.js";
 
-/** Matches `![alt](adf:media:<id>)` image references emitted by the converter. */
+/** Matches the `![alt](adf:media:<id>)` refs the converter emits. */
 const MEDIA_REF = /!\[([^\]]*)\]\(adf:media:([^)]+)\)/g;
 
 export interface MediaRef {
@@ -23,7 +21,6 @@ export interface AttachmentIndex {
   byTitle: Map<string, string>;
 }
 
-/** Collect every `adf:media:<id>` reference present in the markdown. */
 export function parseMediaRefs(markdown: string): MediaRef[] {
   const refs: MediaRef[] = [];
   for (const m of markdown.matchAll(MEDIA_REF)) {
@@ -52,10 +49,9 @@ export interface ResolveResult {
 }
 
 /**
- * Rewrite `adf:media:<id>` placeholders to `/images/<filename>`.
- * Resolution order: attachment fileId (authoritative) → alt/filename fallback.
- * Unresolved references are dropped (and reported) so no broken `adf:media:` URL
- * leaks into the published docs.
+ * Rewrite `adf:media:<id>` placeholders to `/images/<filename>`, resolving by
+ * attachment fileId first and falling back to the alt/filename. Unresolved
+ * references are dropped so no broken `adf:media:` URL reaches the docs.
  */
 export function resolveMediaInMarkdown(
   markdown: string,

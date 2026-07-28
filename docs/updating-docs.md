@@ -21,7 +21,7 @@ updated_at: 2026-05-12
 npm run docs:dev   # http://localhost:5173/tech-docs/
 ```
 
-VitePress reloads automatically on file save — no restart needed.
+VitePress reloads automatically on file save, no restart needed.
 
 **Before committing**, optionally validate and auto-fix common issues:
 

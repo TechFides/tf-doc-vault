@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 /**
- * Build the package:
- *   1. tsc compiles src/**\/*.ts → dist/**\/*.js (+ .d.ts)
- *   2. Copy non-TS assets (.vue, .css, .json, .d.ts type augmentations) into dist/
- *      so compiled .js can resolve their relative imports.
+ * Build the package: tsc compiles src/ into dist/, then the non-TS assets
+ * (.vue, .css, .json, ambient .d.ts) are copied across so the emitted .js can
+ * resolve their relative imports.
  */
 
 import { spawn, spawnSync } from "node:child_process";
@@ -34,8 +33,6 @@ function rmrf(p) {
 }
 
 function isAmbientDts(name) {
-  // Standalone ambient declarations (no matching .ts source) — copy them.
-  // tsc emits .d.ts for compiled .ts files; those we leave alone.
   return name.endsWith(".d.ts");
 }
 
@@ -51,7 +48,8 @@ function copyStaticFiles(srcDir, destDir) {
     const isStatic = STATIC_EXTENSIONS.has(path.extname(entry.name));
     const isAmbient =
       isAmbientDts(entry.name) &&
-      // skip if there's a matching compiled .ts source — tsc owns that .d.ts
+      // tsc owns the .d.ts of any compiled .ts source; only standalone
+      // ambient declarations get copied.
       !fs.existsSync(path.join(srcDir, entry.name.replace(/\.d\.ts$/, ".ts")));
     if (isStatic || isAmbient) {
       fs.copyFileSync(s, d);
@@ -64,7 +62,6 @@ rmrf(DIST);
 
 if (WATCH) {
   console.log("→ tsc --watch + static asset watcher");
-  // tsc in watch mode (long-running, prints diagnostics on each rebuild)
   const tsc = spawn(
     "tsc",
     [
@@ -80,8 +77,9 @@ if (WATCH) {
     },
   );
 
-  // initial copy + watch for static asset changes (.vue/.css/.json/.ico/...)
   copyStaticFiles(SRC, DIST);
+  // Same rule as copyStaticFiles: tsc owns the .d.ts of any compiled .ts source,
+  // so only standalone ambient declarations get copied.
   const isStaticOrAmbient = (name) =>
     STATIC_EXTENSIONS.has(path.extname(name)) ||
     (isAmbientDts(name) &&

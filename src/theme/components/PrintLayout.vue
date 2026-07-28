@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useData } from "vitepress";
-// @ts-expect-error — VitePress virtual module
+// @ts-expect-error VitePress virtual module
 import { Content } from "vitepress/dist/client/app/components/Content.js";
 
 const { site } = useData();
@@ -18,14 +18,12 @@ const { site } = useData();
 </template>
 
 <style>
-/* ── Reset ── */
 .print-layout *,
 .print-layout *::before,
 .print-layout *::after {
   box-sizing: border-box;
 }
 
-/* ── Page shell ── */
 .print-layout {
   font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
   font-size: 9pt;
@@ -37,7 +35,6 @@ const { site } = useData();
   padding: 0 1.25rem 1.5rem;
 }
 
-/* ── Header ── */
 .print-header {
   padding: 0.75rem 0 0.55rem;
   border-bottom: 1.5px solid #1a1a1a;
@@ -52,7 +49,6 @@ const { site } = useData();
   color: #666;
 }
 
-/* ── Headings ── */
 .print-layout h1 {
   font-size: 18pt;
   font-weight: 700;
@@ -84,12 +80,10 @@ const { site } = useData();
   color: #444;
 }
 
-/* ── Body text ── */
 .print-layout p {
   margin: 0 0 0.4rem;
 }
 
-/* ── Code ── */
 .print-layout code {
   font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
   font-size: 7.5pt;
@@ -117,7 +111,6 @@ const { site } = useData();
   font-size: inherit;
 }
 
-/* ── Tables ── */
 .print-layout table {
   width: 100%;
   border-collapse: collapse;
@@ -143,7 +136,6 @@ const { site } = useData();
   background: #fafafa;
 }
 
-/* ── Lists ── */
 .print-layout ul,
 .print-layout ol {
   padding-left: 1.1rem;
@@ -154,7 +146,6 @@ const { site } = useData();
   margin-bottom: 0.05rem;
 }
 
-/* ── Blockquote ── */
 .print-layout blockquote {
   margin: 0.4rem 0;
   padding: 0.2rem 0.65rem;
@@ -163,20 +154,18 @@ const { site } = useData();
   font-style: italic;
 }
 
-/* ── Links ── */
 .print-layout a {
   color: #1a56db;
   text-decoration: none;
 }
 
-/* ── Inline dividers ── */
 .print-layout hr {
   border: none;
   border-top: 1px solid #e8e8e8;
   margin: 0.75rem 0;
 }
 
-/* ── Page breaks — works in both screen (Playwright) and @media print ── */
+/* Both properties: Playwright renders on screen, real printing uses @media print. */
 .print-layout .page-break {
   break-after: page;
   page-break-after: always;
@@ -184,12 +173,11 @@ const { site } = useData();
   margin: 0;
 }
 
-/* ── Page break anchors ── */
+/* Page-break anchors. */
 .print-layout a[id] {
   display: block;
 }
 
-/* ── Keep headings and blocks together ── */
 .print-layout h1,
 .print-layout h2,
 .print-layout h3 {
@@ -203,7 +191,6 @@ const { site } = useData();
   page-break-inside: avoid;
 }
 
-/* ── Print-specific overrides ── */
 @media print {
   .print-layout {
     max-width: 100%;

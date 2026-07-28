@@ -21,8 +21,8 @@ export interface CreateThemeOptions {
   widthToggle?: boolean;
   /**
    * Allow mounting BrandFooter. Default: true. The footer only renders when
-   * `branding.footer` is configured in makeConfig, so leaving this on is
-   * harmless — set it to `false` to force the footer off regardless.
+   * `branding.footer` is configured in makeConfig; set this to `false` to force
+   * it off regardless.
    */
   brandFooter?: boolean;
 }
@@ -33,9 +33,8 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
   return {
     extends: DefaultTheme,
     Layout(): VNode {
-      // Only mount BrandFooter when a footer is actually configured, so a fresh
-      // scaffold with no `branding.footer` doesn't leave an empty node on every
-      // page.
+      // Mount BrandFooter only when a footer is configured, so a fresh scaffold
+      // doesn't carry an empty node on every page.
       const { theme } = useData();
       const footerConfigured = !!(
         theme.value as { docVault?: { footer?: unknown } }

@@ -1,10 +1,6 @@
 /**
- * normalize-docs.ts
- *
- * Normalizes frontmatter across all .md files in docs/:
- *   - Reorders fields to canonical order: title → status → updated_at → rest
- *   - Trims whitespace from values
- *   - Reports what was changed
+ * Rewrites frontmatter across docs/ into the canonical field order (title,
+ * status, updated_at, then the rest) and trims whitespace from values.
  */
 
 import fs from "node:fs";

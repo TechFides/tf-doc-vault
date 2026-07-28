@@ -1,12 +1,8 @@
 #!/usr/bin/env node
 /**
- * init-tech-docs — scaffold a tech-docs/ directory inside an existing service
- * repo from the bundled template. Replaces __SERVICE_ID__, __PROJECT__,
- * __REPO__, __DATE__ placeholders, then idempotently updates package.json
- * scripts and .gitignore.
- *
- * Usage:
- *   init-tech-docs --service-id=<ID> [--project=<name>] [--repo=<org/repo>]
+ * init-tech-docs: scaffold a tech-docs/ directory inside an existing service
+ * repo from the bundled template, then idempotently add the docs:* scripts to
+ * package.json and the build outputs to .gitignore.
  */
 
 import fs from "node:fs";
@@ -34,8 +30,6 @@ Example:
 `);
   process.exit(exitCode);
 }
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const SCRIPTS_TO_ADD: Record<string, string> = {
   "docs:dev": "vitepress dev tech-docs/docs",
@@ -67,7 +61,7 @@ function updatePackageJson(dir: string): void {
     }
   }
   if (added === 0) {
-    console.log("  package.json — scripts already present; skipped.");
+    console.log("  package.json: scripts already present; skipped.");
     return;
   }
   pkg.scripts = scripts;
@@ -95,8 +89,6 @@ function updateGitignore(dir: string): void {
   );
   console.log(`  .gitignore updated (+${missing.length} entries)`);
 }
-
-// ─── Main ────────────────────────────────────────────────────────────────────
 
 const { flags } = parseArgs(process.argv.slice(2));
 
@@ -145,7 +137,7 @@ console.log(`
        "vitepress-plugin-mermaid": "^2.0.17",
        "mermaid": "^11.14.0"
 
-  2) If you use pnpm v11+, allow esbuild's build script —
+  2) If you use pnpm v11+, allow esbuild's build script:
      create (or extend) pnpm-workspace.yaml at the service root:
        allowBuilds:
          esbuild: true

@@ -1,4 +1,4 @@
-# Consistency check — diagram vs. host text
+# Consistency check: diagram vs. host text
 
 Step 3 of `docs-diagrams-from-code`. After a diagram is generated and
 validated, compare it against the surrounding host-page text **before**
@@ -7,10 +7,10 @@ diagram, and every element in the diagram must be supported by the
 text (or by code, if the text under-describes it).
 
 If the two sides disagree and the disagreement cannot be resolved by
-re-reading the code, mark the contradiction as a TODO — **never**
+re-reading the code, mark the contradiction as a TODO; **never**
 silently change the text or the diagram.
 
-## Extraction step — what to pull from the host text
+## Extraction step: what to pull from the host text
 
 Read the host page section around the anchor and list the concrete
 claims it makes. The checklist below is a per-type starter; add
@@ -38,7 +38,7 @@ claims that are specific to the page.
 
 ### Component / C4 diagrams
 
-- **Modules as the first level** — the top-level subgraph grouping must
+- **Modules as the first level**: the top-level subgraph grouping must
   reflect the modules enumerated in the host page's overview (or in
   `components.md`). One subgraph per module; do NOT flatten multiple
   modules into a single cluster, and do NOT invent a module the text
@@ -104,24 +104,24 @@ For each claim extracted above:
      one-line mention and cite the code.
    - If code does not confirm it, either remove it from the diagram
      (it's a hallucination) or mark
-     `⚠️ TODO: diagram–text contradiction — <popis>`.
+     `⚠️ TODO: diagram–text contradiction: <popis>`.
 
 ## Contradiction TODO format
 
 Place directly below the diagram fenced block:
 
 ```markdown
-> ⚠️ TODO: diagram–text contradiction — <short description>.
+> ⚠️ TODO: diagram–text contradiction: <short description>.
 > Diagram says: <X>. Text says: <Y>.
 ```
 
-Keep the wording stable — the orchestrator's TODO-resolution step
+Keep the wording stable; the orchestrator's TODO-resolution step
 groups contradictions by this exact prefix.
 
 ### Example
 
 ```markdown
-> ⚠️ TODO: diagram–text contradiction — pořadí validace vs. volání IDM.
+> ⚠️ TODO: diagram–text contradiction: pořadí validace vs. volání IDM.
 > Diagram says: BE → IDM → validate. Text says: BE validuje lokálně
 > nejprve, teprve pak volá IDM.
 ```
@@ -153,11 +153,11 @@ to Step 4 (Insert & save).
 
 - **NEVER** silently rewrite the host text to match the diagram or
   vice versa.
-- **NEVER** skip the extraction step — a diagram without a list of
+- **NEVER** skip the extraction step: a diagram without a list of
   extracted claims has not been consistency-checked.
 - **ALWAYS** cite the code when resolving a contradiction; if the
   code is not available (orphan `integrations/*.md` with no source),
   leave the TODO open.
 - **ALWAYS** keep the contradiction-TODO prefix
-  `diagram–text contradiction —` exactly as shown, so the orchestrator
+  `diagram–text contradiction:` exactly as shown, so the orchestrator
   can group them.

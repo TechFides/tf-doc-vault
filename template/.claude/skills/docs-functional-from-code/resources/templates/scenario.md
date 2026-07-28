@@ -1,9 +1,9 @@
 ---
-title: <1.11.N Czech scenario name — e.g. 1.11.1 Přihlášení uživatele>
+title: <1.11.N Czech scenario name, e.g. 1.11.1 Přihlášení uživatele>
 status: draft
 updated_at: <YYYY-MM-DD>
-module: <module — e.g. auth, billing, core>
-axis: <optional fallback axis — e.g. admin, user, read, write>
+module: <module, e.g. auth, billing, core>
+axis: <optional fallback axis, e.g. admin, user, read, write>
 ---
 
 <!--
@@ -21,10 +21,10 @@ confluence:
 | ----------------- | ---------------------------------------------------------------- |
 | SC-ID             | `SC-NN` <stable identifier, e.g. `SC-01`>                        |
 | Cíl scénáře       | <Jedna věta popisující cíl scénáře z business pohledu.>          |
-| Aktéři / role     | <Seznam rolí, např. `user`, `admin` — s odkazem na roles matrix> |
+| Aktéři / role     | <Seznam rolí, např. `user`, `admin`, s odkazem na roles matrix> |
 | Vstupní podmínky  | <Stav systému / uživatele, který musí platit před scénářem.>     |
 | Výstupní podmínky | <Stav po úspěšném průchodu scénářem.>                            |
-| NFRs (pokud jsou) | <Latency, availability, throughput — pokud definované.>          |
+| NFRs (pokud jsou) | <Latency, availability, throughput, pokud definované.>          |
 | Modul             | `<module>` (viz frontmatter)                                     |
 
 **Zdroj:**
@@ -44,7 +44,7 @@ confluence:
 
 ## Hlavní flow
 
-1. <Krok 1 — co udělá uživatel, co systém reaguje.>
+1. <Krok 1: co udělá uživatel, jak systém reaguje.>
 2. <Krok 2 …>
 3. <Krok N.>
 
@@ -64,13 +64,13 @@ confluence:
 
 | Pole v UI / atribut | Typ      | Mandatornost             | Validace         | Zdroj vstupu                                  | Mapping na DB      |
 | ------------------- | -------- | ------------------------ | ---------------- | --------------------------------------------- | ------------------ |
-| `<field>`           | `<type>` | `required` \| `optional` | `<regex / rule>` | uživatel \| systém — `<scenario-or-API-link>` | `<table>.<column>` |
+| `<field>`           | `<type>` | `required` \| `optional` | `<regex / rule>` | uživatel \| systém: `<scenario-or-API-link>` | `<table>.<column>` |
 
 ### Výstup
 
 | Pole / atribut | Typ      | Zdroj v kódu       | Využití v dalších scénářích | API (název + atribut)        | Mapping na DB      |
 | -------------- | -------- | ------------------ | --------------------------- | ---------------------------- | ------------------ |
-| `<field>`      | `<type>` | `<path/to/dto:LL>` | `<next-scenario-link>`      | `<api-name>` — `<attribute>` | `<table>.<column>` |
+| `<field>`      | `<type>` | `<path/to/dto:LL>` | `<next-scenario-link>`      | `<api-name>`: `<attribute>` | `<table>.<column>` |
 
 **Zdroj:**
 
@@ -95,9 +95,9 @@ validací, větvení, business výjimek a chování při systémových
 chybách.>
 
 - **Validace**:
-  - `<pravidlo>` — `<path/to/validator:LL>`
+  - `<pravidlo>`: `<path/to/validator:LL>`
 - **Business chyby (rainy scenarios)**:
-  - `<business-error-code>` — `<path/to/error-definition:LL>` → detail
+  - `<business-error-code>`: `<path/to/error-definition:LL>` → detail
     v [technical/integrations/error-codes.md](../technical/integrations/error-codes.md)
 - **Chování při systémové chybě**: <popis, zdroj>
 
@@ -110,7 +110,7 @@ chybách.>
 
 <Pokud na scénář působí nějaký feature toggle. Jinak sekci odstraň.>
 
-- `<toggle-name>` — zdroj: `<path/to/toggle-usage:LL>`,
+- `<toggle-name>`: zdroj: `<path/to/toggle-usage:LL>`,
   detail v [technical/feature-toggles.md](../technical/feature-toggles.md).
 - Chování při `ON`: <popis>
 - Chování při `OFF`: <popis>
@@ -119,7 +119,7 @@ chybách.>
 
 <Pokud scénář emituje metriky. Jinak sekci odstraň.>
 
-- `<metric-name>` — zdroj: `<path/to/metric-emission:LL>`,
+- `<metric-name>`: zdroj: `<path/to/metric-emission:LL>`,
   popis a dashboard v [technical/monitoring-logging.md](../technical/monitoring-logging.md).
 
 ## Odkazy

@@ -17,7 +17,7 @@ confluence:
 
 Master seznam všech scénářů napříč produktem. Scénáře jsou seskupeny
 podle **modulu** (primární osa), případně dále podle **axis** (fallback
-osa — např. `admin` vs. `user`), pokud to zvolený grouping vyžaduje —
+osa, např. `admin` vs. `user`), pokud to zvolený grouping vyžaduje;
 viz `scenario-grouping.md`.
 
 Jednotlivé scénáře žijí jako samostatné stránky pod
@@ -25,7 +25,7 @@ Jednotlivé scénáře žijí jako samostatné stránky pod
 pořadí v rámci celé skupiny `1.11 Scénáře`, **ne** resetovanému
 číslování v rámci modulu.
 
-## Use-case diagram — celkový pohled
+## Use-case diagram: celkový pohled
 
 <!-- diagram-anchor: use-case-all -->
 
@@ -41,12 +41,12 @@ stránkách (sekce "Spuštění výstupních procesů").>
 
 ## Scénáře podle modulů
 
-### Modul `<module-1>` — <Český popis modulu>
+### Modul `<module-1>`: <Český popis modulu>
 
 <!-- diagram-anchor: use-case-<module-1> -->
 
 > Use-case diagram pro modul `<module-1>` doplní
-> `docs-diagrams-from-code` (volitelné — pouze pokud modul má dost
+> `docs-diagrams-from-code` (volitelné, pouze pokud modul má dost
 > scénářů, aby samostatný diagram dával smysl).
 
 | Číslo  | SC-ID | Název scénáře        | Role / aktér | Odkaz                                                                                |
@@ -55,7 +55,7 @@ stránkách (sekce "Spuštění výstupních procesů").>
 | 1.11.2 | SC-02 | Registrace uživatele | `user`       | [scenarios/sc-02-registrace-uzivatele.md](./scenarios/sc-02-registrace-uzivatele.md) |
 | …      | …     | …                    | …            | …                                                                                    |
 
-### Modul `<module-2>` — <Český popis modulu>
+### Modul `<module-2>`: <Český popis modulu>
 
 <!-- diagram-anchor: use-case-<module-2> -->
 
@@ -81,5 +81,5 @@ BPMN diagramů a jejich scénářů. Jinak sekci odstraň.>
 ## Poznámky
 
 > ⚠️ TODO: <případné mezery v mapování scénářů na moduly, které uživatel
-> musí potvrdit — např. "scénář `SC-17` nemá jasný modul, kandidát
+> musí potvrdit, např. "scénář `SC-17` nemá jasný modul, kandidát
 > `billing` vs. `reporting`">

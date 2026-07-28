@@ -5,15 +5,15 @@ write content vs. a TODO. Applies to every page this skill generates.
 
 ## The rule, in one sentence
 
-If you cannot cite it — from **code** (primary) or **already-generated
-technical docs** (secondary) — you cannot claim it. Mark `⚠️ TODO:
+If you cannot cite it, from **code** (primary) or **already-generated
+technical docs** (secondary), you cannot claim it. Mark `⚠️ TODO:
 [what is missing]` instead.
 
 ## Two sources, clear hierarchy
 
-1. **Code (primary)** — source of truth for what the system actually
+1. **Code (primary)**: source of truth for what the system actually
    does. **ALWAYS** the final authority on behavior.
-2. **`docs/<version>/technical/` (secondary, if present)** — a
+2. **`docs/<version>/technical/` (secondary, if present)**: a
    pre-digested view of the same code. Use it as a **fast lookup** for
    already-documented facts (API shapes, roles, feature toggles, event
    names, metric names, error codes). **ALWAYS** cross-check against
@@ -38,7 +38,7 @@ used; references to technical pages become TODOs of kind
 | A feature toggle                           | SDK call `path:line` + `technical/feature-toggles.md`            |
 | A metric                                   | metric emission `path:line` + `technical/monitoring-logging.md`  |
 
-A claim without a concrete citation is not evidence — it is an
+A claim without a concrete citation is not evidence; it is an
 assumption. Assumptions become TODOs.
 
 ## When to write content
@@ -52,7 +52,7 @@ Write the content when **all** of the following are true:
 3. The citation is in the `source_path` / `docs/<version>/technical/`
    tree you were given (not imagined, not copied from a similar
    project).
-4. The fact is stable — it reflects the main branch / tagged source
+4. The fact is stable; it reflects the main branch / tagged source
    version, not a stale branch.
 
 ## When to write `⚠️ TODO`
@@ -63,21 +63,21 @@ Write `⚠️ TODO: [what is missing]` when:
    found in either source (`personas.md`, `reports.md` are common
    cases).
 2. A specific value cannot be derived (e.g. the input validation says
-   "string, required" but the business meaning — minimum length, format
-   — is not expressed in code).
-3. The code disagrees with the technical section — cite both and ask
+   "string, required" but the business meaning (minimum length, format)
+   is not expressed in code).
+3. The code disagrees with the technical section; cite both and ask
    the user to reconcile. Use TODO kind
    `diagram-text-contradiction` (if a diagram in technical is the
    conflicting side) or plain `missing-evidence`.
-4. A cross-link points to a technical page that does not exist yet —
+4. A cross-link points to a technical page that does not exist yet;
    insert `⚠️ TODO: link to technical/<expected-path>` and keep the
    surrounding prose.
 5. The scenario includes a wireframe placeholder but no screenshot /
-   UI evidence is available — mark `⚠️ TODO: wireframe-gap`.
+   UI evidence is available; mark `⚠️ TODO: wireframe-gap`.
 
 ## Examples
 
-### Good — concrete dual-source evidence
+### Good: concrete dual-source evidence
 
 > Po úspěšném přihlášení systém vydá access token s platností 15 minut
 > a refresh token s platností 30 dnů.
@@ -86,7 +86,7 @@ Write `⚠️ TODO: [what is missing]` when:
 > `REFRESH_TTL_DAYS`); cross-check: `technical/security/authn-authz.md`
 > (sekce "Token TTL").
 
-### Good — code-only (technical not yet generated)
+### Good: code-only (technical not yet generated)
 
 > Scénář vyžaduje roli `admin` nebo `billing-manager`.
 >
@@ -94,23 +94,23 @@ Write `⚠️ TODO: [what is missing]` when:
 > (`@Roles('admin', 'billing-manager')`).
 >
 > > ⚠️ TODO: link to technical/roles-matrix.md (technická sekce ještě
-> > nebyla vygenerována — doplnit odkaz po jejím dokončení).
+> > nebyla vygenerována, doplnit odkaz po jejím dokončení).
 
-### Bad — invented
+### Bad: invented
 
 > Po přihlášení dostane uživatel standardní session s typickou
 > platností několik hodin.
 
-("standardní", "typicky" = hallucination flag — no citation.)
+("standardní", "typicky" = hallucination flag, no citation.)
 
-### Good — TODO for a known gap
+### Good: TODO for a known gap
 
 > Notifikace o zaplacené faktuře je odeslána e-mailem na fakturační
 > adresu.
 >
 > Zdroj: `src/billing/notification.service.ts:65`.
 >
-> > ⚠️ TODO: šablona e-mailu — v kódu se odkazuje na
+> > ⚠️ TODO: šablona e-mailu: v kódu se odkazuje na
 > > `templates/invoice-paid.mjml`, ale soubor není v repozitáři (nebo
 > > je generován při buildu). Ověřit s produktem.
 
@@ -118,13 +118,13 @@ Write `⚠️ TODO: [what is missing]` when:
 
 - **Code vs. technical**: if the technical section describes behavior
   differently from the code, the code wins. Write the code-backed
-  claim, and raise the discrepancy as `⚠️ TODO: text vs. technical —
+  claim, and raise the discrepancy as `⚠️ TODO: text vs. technical:
 <technical path>:<location> říká X, kód říká Y`.
 - **Code vs. UI screenshot** (when screenshots are provided as
   reference for scenario wireframes): the code wins for behavior;
   the screenshot wins for visual layout. If they contradict on
   behavior (screenshot shows a field the code does not handle),
-  raise `⚠️ TODO: wireframe-text-contradiction — screenshot ukazuje
+  raise `⚠️ TODO: wireframe-text-contradiction: screenshot ukazuje
 pole X, kód ho nezpracovává`.
 
 ## Rules (recap)

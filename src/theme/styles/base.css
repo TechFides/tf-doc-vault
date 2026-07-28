@@ -73,12 +73,11 @@
   --vp-sidebar-width: 360px;
   --vp-sidebar-bg-color: #f4f6fb;
 
-  /* VitePress `locales` config is used here for versions (v1, v2), not
-     languages — hide the language switcher VitePress would otherwise
-     render. */
+  /* The `locales` config carries versions (v1, v2), not languages, so hide the
+     language switcher VitePress would otherwise render. */
   --vp-nav-translations-display: none;
 
-  /* Custom blocks — remap VitePress colour vars to brand tokens */
+  /* Custom blocks: remap VitePress colour vars to brand tokens. */
   --vp-c-warning-1: var(--brand-warning);
   --vp-c-warning-2: rgba(224, 136, 0, 0.35);
   --vp-c-warning-soft: var(--brand-warning-bg);
@@ -129,12 +128,10 @@
   --brand-tip-bg: rgba(74, 222, 128, 0.1);
 }
 
-/* Dark-mode navbar chrome — targets VitePress' internal DOM:
-   `.VPNavBar > .wrapper > .container > ...`. These selectors are not
-   public VitePress API; a minor upgrade can rename them and break this
-   block silently. Verified against VitePress 1.6.x — see
-   `tests/smoke/playground-dark-mode.spec.ts` which asserts the
-   computed navbar background in dark mode against the playground. */
+/* Dark-mode navbar chrome. These reach into VitePress' internal DOM
+   (`.VPNavBar > .wrapper > .container > ...`), which is not public API: a minor
+   upgrade can rename it and break this block silently. Verified against
+   VitePress 1.6.x by `tests/smoke/playground-dark-mode.spec.ts`. */
 .dark .VPNav,
 .dark .VPNavBar,
 .dark .VPNavBar > .wrapper,
@@ -164,12 +161,10 @@
   border-right: 1px solid var(--vp-c-border);
 }
 
-/* Sidebar right border for visual separation */
 .VPSidebar {
   border-right: 1px solid var(--vp-c-border);
 }
 
-/* Sidebar custom scrollbar */
 .VPSidebar::-webkit-scrollbar {
   width: 4px;
 }
@@ -205,7 +200,6 @@
   border-radius: 0 !important;
 }
 
-/* Inline code keeps a gentle radius (block code fences stay square). */
 .vp-doc :not(pre) > code {
   border-radius: 4px;
 }
@@ -219,7 +213,6 @@ html {
   scrollbar-gutter: stable;
 }
 
-/* Custom block (info panel) — left accent border + brand background */
 .custom-block {
   color: var(--brand-text-default);
 }
@@ -228,7 +221,6 @@ html {
   color: rgba(255, 255, 255, 0.85);
 }
 
-/* Strip full border, replace with 3px left accent */
 .custom-block.info,
 .custom-block.tip,
 .custom-block.warning,
@@ -268,7 +260,6 @@ html {
   border-left-color: var(--brand-border-strong) !important;
 }
 
-/* Dark mode adjustments */
 .dark .custom-block.info {
   background-color: rgba(0, 116, 200, 0.1);
   border-left-color: var(--brand-secondary) !important;
@@ -295,7 +286,7 @@ html {
   cursor: zoom-in;
 }
 
-/* VPDoc.vue is <style scoped> (specificity 0,4,0) — overrides need !important */
+/* VPDoc.vue is <style scoped> (specificity 0,4,0), so overrides need !important. */
 .VPDoc.has-aside .content-container {
   max-width: 826px !important;
 }
@@ -367,7 +358,7 @@ html.layout-max .VPContent {
   margin-bottom: 4px;
 }
 
-/* H3 directly under H2 belongs to it — pull it closer */
+/* An H3 directly under an H2 belongs to it, so pull it closer. */
 .vp-doc h2 + h3 {
   margin-top: 12px;
 }
@@ -378,14 +369,12 @@ html.layout-max .VPContent {
   line-height: 1.6;
 }
 
-/* Zebra striping. The nth-child rules are the static / pre-hydration / no-JS
-   fallback (brand colour). Once TableEnhancer.vue hydrates it tags every data
-   row `.tf-row` and every 2nd VISIBLE row `.tf-stripe`, reassigned fresh on
-   load / sort / filter — those class rules follow these and `.tf-row` carries
-   a `.dark` variant, so they outrank the nth-child rules in both themes. This
-   matters because nth-child paint goes stale when the filter hides rows or
-   sort reorders them (parity shifts, and this engine doesn't re-invalidate);
-   the class rules never do, so live striping stays correct. */
+/* Zebra striping. These nth-child rules are the pre-hydration and no-JS
+   fallback; their paint goes stale once a sort or filter shifts the parity.
+   TableEnhancer.vue therefore tags rows `.tf-row` / `.tf-stripe` and reassigns
+   them on every sort and filter. Those class rules follow here and each needs
+   its own `.dark` variant to outrank `.dark ... :nth-child(even)`, which is why
+   the dark rules below are not redundant duplicates. */
 .vp-doc table tr:nth-child(even) {
   background-color: var(--brand-surface);
 }
@@ -486,11 +475,10 @@ html.layout-max .VPContent {
   color: #7cc4f5;
 }
 
-/* Table wrapper (injected by the tableWrapper markdown-it rule in
-   config/tableWrapper.ts). The outer .tf-table holds the frame + scroll-shadow
-   pseudo-elements and does NOT scroll, so the shadows stay pinned to its edges;
-   the inner .tf-table-scroll owns the horizontal scroll. A wide table scrolls
-   inside this box instead of overflowing the content column. */
+/* Table wrapper injected by the tableWrapper rule in config/tableWrapper.ts.
+   The outer .tf-table holds the frame and the scroll-shadow pseudo-elements and
+   does not scroll, so the shadows stay pinned to its edges; the inner
+   .tf-table-scroll owns the horizontal scroll. */
 .vp-doc .tf-table {
   /* Block spacing lives on the wrapper; the table's own margin is zeroed
      below so it doesn't push an empty strip inside this bordered frame. */
@@ -592,7 +580,6 @@ html.layout-max .VPContent {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* "No results" row shown when the filter matches nothing. */
 .vp-doc .tf-no-results td {
   text-align: center;
   color: var(--vp-c-text-2);
@@ -615,7 +602,7 @@ html.layout-max .VPContent {
   border-top: none !important;
 }
 
-/* Interior grid: right + bottom only — outer frame comes from table border */
+/* Interior grid is right + bottom only; the frame comes from the table border. */
 .vp-doc th,
 .vp-doc td {
   border: none !important;
@@ -773,11 +760,10 @@ html.layout-max .VPContent {
   color: var(--brand-secondary) !important;
 }
 
-/* Mermaid is themed entirely here off the --brand-* tokens (no JS
-   themeVariables), so overriding a brand token recolors diagrams in both
-   light and dark mode. Light mode rules first; dark mode needs the extra
-   `.dark` prefix to win because vitepress-plugin-mermaid hard-forces
-   theme="dark" on <html>.dark and ignores anything we pass in config. */
+/* Mermaid is themed here off the --brand-* tokens, so overriding a token
+   recolors diagrams in both modes. Dark mode needs the extra `.dark` prefix to
+   win: vitepress-plugin-mermaid hard-forces theme="dark" on <html>.dark and
+   ignores anything passed through config. */
 .mermaid .node rect,
 .mermaid .node polygon,
 .mermaid .node circle,
@@ -999,7 +985,7 @@ html.layout-max .VPContent {
   stroke: var(--brand-text-muted) !important;
 }
 
-/* Page status badge — global mirror of DocMeta scoped styles, for use in markdown */
+/* Global mirror of DocMeta's scoped status badge, usable straight from markdown. */
 .doc-status-badge {
   display: inline-block;
   padding: 2px 10px;
@@ -1032,7 +1018,6 @@ html.layout-max .VPContent {
   border: 1px solid var(--brand-badge-archived-border);
 }
 
-/* Code block subtle border */
 .vp-doc div[class*="language-"] {
   border: 1px solid var(--brand-border-default);
 }

@@ -1,4 +1,4 @@
-# Kind playbook — how to translate each entry `kind` into an edit
+# Kind playbook: how to translate each entry `kind` into an edit
 
 The orchestrator collects feedback under six `kind` labels
 (see `/docs-generate-from-code`). This playbook defines how to turn each
@@ -24,7 +24,7 @@ The user confirmed that an existing behavior is correct.
 **Upgrade rule:** if the approved behavior is only _implied_ in the
 target file (e.g. mentioned in prose but not listed as a hard rule),
 propose promoting it to an explicit rule under a **Rules** or
-**Workflow** heading — but only with user approval (`y`). Never
+**Workflow** heading, but only with user approval (`y`). Never
 auto-promote.
 
 ## `correction`
@@ -35,12 +35,12 @@ The skill did the wrong thing; the user corrected it.
 section governing that behavior. Typical locations:
 
 - `## Workflow` → the specific step that produced the wrong output;
-- `## Rules` / `## Safety rules` — for cross-cutting corrections;
-- a per-group template under `resources/templates/` — when the
+- `## Rules` / `## Safety rules`: for cross-cutting corrections;
+- a per-group template under `resources/templates/`: when the
   correction is content-shaped.
 
 Phrasing convention: use the project's Czech emphasis keywords where
-they already appear in the target file (`NIKDY`, `VŽDY`, `DŮLEŽITÉ`) —
+they already appear in the target file (`NIKDY`, `VŽDY`, `DŮLEŽITÉ`);
 in English skill files, use `NEVER` / `ALWAYS` / `IMPORTANT` as in the
 existing style.
 
@@ -66,7 +66,7 @@ Include the excerpt as justification so a future reader knows why the
 step exists.
 
 If the missed step belongs to a resource file (e.g. a checklist), add
-it there instead — do not duplicate between `SKILL.md` and the
+it there instead; do not duplicate between `SKILL.md` and the
 resource.
 
 ## `rename`
@@ -74,12 +74,12 @@ resource.
 The user wants a term, path, heading, field, or file renamed.
 
 **Default action:** produce a find-and-replace diff across the single
-target file only. Do **NOT** cascade to sibling files automatically —
+target file only. Do **NOT** cascade to sibling files automatically;
 list them in the rationale and ask whether to extend the rename
 (`y / expand to listed files / skip`).
 
 If the rename affects a frontmatter field or a path that other skills
-reference, surface it to the user and defer — a rename of shared
+reference, surface it to the user and defer; a rename of shared
 identifiers should be a deliberate, multi-file decision.
 
 ## `other`

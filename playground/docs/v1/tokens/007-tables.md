@@ -5,12 +5,12 @@ updated_at: 2026-07-15
 ---
 
 Layout playground for data-heavy Markdown tables. Tables are plain
-Markdown rendered into `.vp-doc` — all styling lives in
+Markdown rendered into `.vp-doc`; all styling lives in
 `src/theme/styles/base.css`. This page exists to stress the table layout
 (long tables, wide tables, mixed content) against realistic spec-style
 data.
 
-## Long table — requirements
+## Long table: requirements
 
 Vertical rhythm, zebra striping and row density under many rows.
 
@@ -37,7 +37,7 @@ Vertical rhythm, zebra striping and row density under many rows.
 | FR-019 | Webhooks retry with exponential backoff         | Should   | Done        | Integrations | Yes      |
 | FR-020 | Webhook payloads are HMAC-signed                | Must     | Done        | Integrations | Yes      |
 
-## Wide table — service inventory
+## Wide table: service inventory
 
 Many columns to test horizontal overflow, `overflow-wrap`, and whether
 the table stays inside the content column or scrolls.
@@ -53,7 +53,7 @@ the table stays inside the content column or scrolls.
 | srvc-billing | Finance      | Java       | JDK 21  | github/srvc-bill   | Jenkins    | GKE eu-west3  | 99.95% | Finance      | 2026-07-08  |
 | srvc-report  | Analytics    | Python     | 3.12    | github/srvc-report | GH Actions | GKE eu-west3  | 99.0%  | Analytics    | 2026-07-07  |
 
-## Narrow table — version history
+## Narrow table: version history
 
 A compact table with prose-length cells and a mix of short and long
 values.

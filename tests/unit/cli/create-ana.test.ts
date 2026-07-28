@@ -10,7 +10,7 @@ import {
 
 const CTX = { version: "9.9.9", packageDir: "/abs/pkg" };
 
-/** Root package.json version — what the production `ctx` default resolves to. */
+/** Root package.json version, which the production `ctx` default resolves to. */
 const REPO_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../../..",
@@ -36,7 +36,7 @@ describe("resolveSource", () => {
 });
 
 describe("resolveDependencyValue", () => {
-  // Regression: the old git+ssh://github default was unfetchable from GitLab CI.
+  // The default has to be npm: a git+ssh GitHub URL is unfetchable from GitLab CI.
   test("npm default resolves to the published version", () => {
     expect(resolveDependencyValue({}, "/tmp/proj", CTX)).toBe("9.9.9");
   });
@@ -82,7 +82,7 @@ describe("resolveDependencyValue", () => {
 });
 
 describe("originUrl", () => {
-  // Regression: the epilogue used to print a non-existent git@github.com:... path.
+  // The epilogue must print the GitLab origin; no git@github.com path exists.
   test("points at the GitLab analysis group, not GitHub", () => {
     expect(originUrl("lapa_ana")).toBe(
       "git@gitlab.com:techfides/tf-analysis/lapa_ana.git",

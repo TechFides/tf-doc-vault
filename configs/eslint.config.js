@@ -3,16 +3,9 @@ import tsParser from "@typescript-eslint/parser";
 import prettier from "eslint-config-prettier";
 
 /**
- * Shared ESLint config for TFSA analysis docs repos.
- * Consumers extend this from their own `eslint.config.js`:
- *
- *   import baseConfig from "@techfides/tf-doc-vault/eslint";
- *   export default baseConfig;
- *
- * Or spread + override:
- *
- *   import baseConfig from "@techfides/tf-doc-vault/eslint";
- *   export default [...baseConfig, { rules: { ... } }];
+ * Shared ESLint config for TFSA analysis docs repos. Consumers either re-export
+ * it from their own `eslint.config.js` or spread and override it:
+ * `export default [...baseConfig, { rules: { … } }]`.
  */
 export default [
   {

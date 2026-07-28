@@ -1,4 +1,4 @@
-# Example — C4 multi-level (zoom): Passwordless login
+# Example: C4 multi-level (zoom): Passwordless login
 
 Reference template for `c4` anchor (all four levels on one page).
 

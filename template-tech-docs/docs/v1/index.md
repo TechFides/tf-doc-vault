@@ -6,7 +6,7 @@ updated_at: __DATE__
 
 # Technical specification
 
-How it's built — architecture, integrations, deployment.
+How it's built: architecture, integrations, deployment.
 
 ## Architecture
 

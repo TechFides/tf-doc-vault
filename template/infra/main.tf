@@ -1,11 +1,11 @@
-# Infrastructure for the docs site — wraps the shared module from
-# @techfides/tf-doc-vault (Cloud Run + Artifact Registry + IAM).
+# Infrastructure for the docs site. Wraps the shared module from
+# @techfides/tf-doc-vault (Cloud Run, Artifact Registry, IAM).
 
 terraform {
   required_version = ">= 1.5"
 
-  # tfstate v GCS — bucket je per-projekt (`<gcp-project>-tfstate`).
-  # Bootstrap (jednorázově před `terraform init`):
+  # tfstate lives in GCS, one bucket per project (`<gcp-project>-tfstate`).
+  # Bootstrap it once before `terraform init`:
   #   gcloud storage buckets create gs://__GCP_PROJECT__-tfstate \
   #     --project=__GCP_PROJECT__ --location=europe-west1 \
   #     --uniform-bucket-level-access

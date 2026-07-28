@@ -1,4 +1,4 @@
-# Example — Sequence: Passwordless login (magic link)
+# Example: Sequence: Passwordless login (magic link)
 
 Reference template for `flow-<sc-id>` / `sequence-<name>` anchors.
 

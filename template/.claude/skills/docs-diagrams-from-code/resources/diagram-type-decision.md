@@ -27,13 +27,13 @@ the decision tree below.
 | `deployment-<name>`                   | Deployment       | `technical/infrastructure.md`                      |
 | anything else                         | **ask the user** | —                                                  |
 
-The mapping is a **starting point**, not a gate — a project may use
+The mapping is a **starting point**, not a gate; a project may use
 non-standard anchor names; always cross-check against the host page
 context before accepting the default type.
 
 ## Decision tree for ambiguous anchors
 
-If the name alone is unclear, ask these questions in order — the first
+If the name alone is unclear, ask these questions in order; the first
 "yes" wins:
 
 1. **Does the host page describe static structure (what exists, how
@@ -50,7 +50,7 @@ If the name alone is unclear, ask these questions in order — the first
    between actors and use cases?**
    → Use-case diagram.
 
-4. **Does the host page describe a lifecycle — the same entity moves
+4. **Does the host page describe a lifecycle, where the same entity moves
    through a finite set of named states?**
    → State diagram.
 
@@ -61,21 +61,21 @@ If the name alone is unclear, ask these questions in order — the first
 
 6. **Does the project use BPMN for process modeling, and does the host
    page correspond to a documented BPMN process or subprocess?**
-   → BPMN (PlantUML fallback likely — see `plantuml-fallback.md`).
+   → BPMN (PlantUML fallback likely; see `plantuml-fallback.md`).
 
 7. **None of the above?** → Ask the user. Record the anchor in the
-   Step 1 plan row with `type: ambiguous — user to decide`.
+   Step 1 plan row with `type: ambiguous, user to decide`.
 
 ## Multi-diagram anchors
 
-Some pages expect more than one diagram — the anchor names disambiguate:
+Some pages expect more than one diagram; the anchor names disambiguate:
 
 - `technical/architecture/runtime.md` can host multiple
   `sequence-<name>` anchors (different runtime flows).
 - `scenarios-list.md` hosts both `use-case-all` and per-module
   `use-case-<module>` anchors.
 - A scenario page hosts `flow-<sc-id>` (sequence) **and**
-  `business-logic-<sc-id>` (flowchart) — they are complementary, not
+  `business-logic-<sc-id>` (flowchart); they are complementary, not
   alternatives.
 
 **NEVER** merge two anchors into one diagram block. Every anchor gets
@@ -90,7 +90,7 @@ its own Mermaid/PlantUML fenced block.
 - If the detected type is **C4** but there is no evidence of more than
   one level (only container names, no context actors), draw **C4
   Container** only and leave the Context anchor with
-  `⚠️ TODO: C4 Context — chybí vnější aktéři v kódu / docs`.
+  `⚠️ TODO: C4 Context: chybí vnější aktéři v kódu / docs`.
 
 ## Rules
 
@@ -100,5 +100,5 @@ its own Mermaid/PlantUML fenced block.
   row for each anchor, so the user reviews the classification before
   generation.
 - **ALWAYS** prefer the simpler type when in doubt (flowchart over
-  sequence, component over C4, class over domain-specific notations) —
+  sequence, component over C4, class over domain-specific notations);
   simpler diagrams are cheaper to keep consistent.

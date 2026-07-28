@@ -172,8 +172,8 @@ describe("lists that the library treats as unknown", () => {
         ]),
       ),
     );
-    // `~~text ~~` (whitespace before the closing delimiter) renders literal
-    // tildes in GFM — the space must end up outside the mark.
+    // `~~text ~~` renders literal tildes in GFM, so the space has to end up
+    // outside the mark.
     expect(md).toContain("~~Přidání projektu do exporteru~~");
     expect(md).not.toContain("exporteru ~~");
   });

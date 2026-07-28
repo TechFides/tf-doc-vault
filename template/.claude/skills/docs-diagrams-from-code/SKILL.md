@@ -1,9 +1,9 @@
 ---
 name: docs-diagrams-from-code
-description: Generates diagrams (Mermaid primary, PlantUML fallback) for already-generated documentation pages. Attaches diagrams at the `<!-- diagram-anchor: <name> -->` markers placed by the technical and functional phases — it does NOT invent diagrams for pages without anchors. Covers the common diagram types (component, C4, domain-model class, ERD, sequence, use-case, state, flowchart / decision, BPMN where applicable). Runs AFTER textual content is confirmed stable. Uses code and existing docs as evidence sources, and performs a consistency check between each diagram and the host page text. Invoked by the docs-from-code orchestrator or by /docs-diagrams. DO NOT trigger for text generation, wireframes, sales, or pre-code design. Always inherits rules from CLAUDE.md.
+description: "Generates diagrams (Mermaid primary, PlantUML fallback) for already-generated documentation pages. Attaches diagrams at the `<!-- diagram-anchor: <name> -->` markers placed by the technical and functional phases; it does NOT invent diagrams for pages without anchors. Covers the common diagram types (component, C4, domain-model class, ERD, sequence, use-case, state, flowchart / decision, BPMN where applicable). Runs AFTER textual content is confirmed stable. Uses code and existing docs as evidence sources, and performs a consistency check between each diagram and the host page text. Invoked by the docs-from-code orchestrator or by /docs-diagrams. DO NOT trigger for text generation, wireframes, sales, or pre-code design. Always inherits rules from CLAUDE.md."
 ---
 
-# docs-diagrams-from-code — Diagrams phase
+# docs-diagrams-from-code: Diagrams phase
 
 ## When to use
 
@@ -11,7 +11,7 @@ Invoked by the `docs-from-code` orchestrator when the run scope is
 `diagrams` or `full`, or directly via `/docs-diagrams`.
 
 **Precondition**: the textual content this phase will illustrate must be
-confirmed stable by the user. Diagrams are expensive to fix — generating
+confirmed stable by the user. Diagrams are expensive to fix, so generating
 them on unstable content wastes effort. If textual content has not been
 marked stable, ask the user to confirm before proceeding.
 
@@ -24,19 +24,19 @@ Do **NOT** use this skill for:
 
 ## Source hierarchy
 
-1. **Codebase (primary, source of truth)** — `source_path`.
+1. **Codebase (primary, source of truth)**: `source_path`.
 2. **Already-generated docs in the current version folder (secondary,
-   digested)** — `docs/<version>/`. Diagrams reflect what the docs
+   digested)**: `docs/<version>/`. Diagrams reflect what the docs
    already say; contradictions are flagged in Step 3.
 
 ## Inputs (run context from orchestrator)
 
-- `source_path` — repository root.
-- `version_folder` — e.g. `docs/v1/`.
-- `source_version` — git tag or `package.json`.
-- `current_date` — from system context.
-- `auto_mode` — boolean; default `false`.
-- `anchors_report` — list of `<!-- diagram-anchor: <name> -->` markers
+- `source_path`: repository root.
+- `version_folder`: e.g. `docs/v1/`.
+- `source_version`: git tag or `package.json`.
+- `current_date`: from system context.
+- `auto_mode`: boolean; default `false`.
+- `anchors_report`: list of `<!-- diagram-anchor: <name> -->` markers
   collected from the technical and functional phases. Each entry:
   `{ file, anchor_name, suggested_type }`. If unavailable, this skill
   scans the docs tree itself in Step 1.
@@ -46,12 +46,12 @@ If invoked directly, collect these inputs from the user first.
 ## Output
 
 Diagrams are **inlined** into their host Markdown pages at the anchor
-locations — they do **not** become separate pages:
+locations; they do **not** become separate pages:
 
 ````markdown
 <!-- diagram-anchor: flow-login -->
 
-**Obrázek 1** — Přihlašovací tok uživatele.
+**Obrázek 1**: Přihlašovací tok uživatele.
 
 Stručné textové shrnutí diagramu pro případ, že renderování selže.
 
@@ -64,13 +64,13 @@ sequenceDiagram
 ```
 
 Static images (if generated) go to `docs/images-diagrams/diagrams/` and
-are referenced from the host page via a relative link — but **NEVER**
+are referenced from the host page via a relative link, but **NEVER**
 replace the fenced Mermaid/PlantUML block with just an image; keep both
 (source + rendered), so docs remain maintainable.
 
 ## Workflow
 
-### Step 1 — Collect anchors and plan
+### Step 1: Collect anchors and plan
 
 - If `anchors_report` is provided, use it.
 - Otherwise scan `docs/<version>/` for `<!-- diagram-anchor: <name> -->`
@@ -106,7 +106,7 @@ Produce a **diagram plan** as a table:
 Present to the user. **NEVER** start writing before confirmation (or
 explicit `auto_mode`).
 
-### Step 2 — Generate diagram-by-diagram
+### Step 2: Generate diagram-by-diagram
 
 For every planned diagram:
 
@@ -114,20 +114,20 @@ For every planned diagram:
 2. **Fallback: PlantUML** only when Mermaid cannot express the diagram
    (e.g. complex deployment). Use ```` ```plantuml ```` fenced block.
    Record the reason in a single-line comment above the block.
-3. **ALWAYS** include — above the diagram block:
-   - `**Obrázek N** — caption in Czech.`
+3. **ALWAYS** include the following above the diagram block:
+   - `**Obrázek N**: caption in Czech.`
    - A short textual summary (one or two sentences) so the page stays
      readable when rendering fails.
 4. Evidence: every node, relationship, and label in the diagram must be
    traceable to the code or docs. For anything not derivable, mark
-   `⚠️ TODO: [what is missing]` — **NEVER** invent a node, edge, or
+   `⚠️ TODO: [what is missing]`; **NEVER** invent a node, edge, or
    cardinality.
 5. **ALWAYS validate syntax** before moving on: run the fenced content
    through the Mermaid / PlantUML validator script
-   (`scripts/validate-diagram.sh`). If invalid, fix and re-validate —
+   (`scripts/validate-diagram.sh`). If invalid, fix and re-validate;
    never leave an unvalidated block behind.
 
-### Step 3 — Consistency check (diagram vs. host text)
+### Step 3: Consistency check (diagram vs. host text)
 
 After a diagram is generated and validated, **compare it against the
 host page text** before saving the host file. Every node, edge,
@@ -148,7 +148,7 @@ Procedure:
      **mark it with a standard TODO** directly under the diagram:
 
      ```markdown
-     > ⚠️ TODO: diagram–text contradiction — <short description>.
+     > ⚠️ TODO: diagram–text contradiction: <short description>.
      > Diagram says: <X>. Text says: <Y>.
      ```
 
@@ -156,10 +156,10 @@ Procedure:
      versa). The contradiction must reach the user through the
      orchestrator's TODO-resolution step.
 
-Reuse the standard `⚠️ TODO:` marker — do **not** introduce new marker
-types. The prefix `diagram–text contradiction —` is the classifier.
+Reuse the standard `⚠️ TODO:` marker; do **not** introduce new marker
+types. The prefix `diagram–text contradiction:` is the classifier.
 
-### Step 4 — Insert into host page and save
+### Step 4: Insert into host page and save
 
 - Insert the validated diagram block (and any Step 3 contradiction-TODO)
   **at the anchor**, directly below the anchor comment. Leave the
@@ -168,7 +168,7 @@ types. The prefix `diagram–text contradiction —` is the classifier.
   > "Diagram `<name>` inserted into `<host file>`. Review and confirm
   > to continue (y / edit / stop)."
 
-### Step 5 — Cross-reference check
+### Step 5: Cross-reference check
 
 After all anchors have been processed:
 
@@ -179,7 +179,7 @@ After all anchors have been processed:
 
 Report both lists to the user.
 
-### Step 6 — Handoff to orchestrator
+### Step 6: Handoff to orchestrator
 
 Return:
 - list of diagrams generated (anchor, host, type, lines of code),
@@ -190,7 +190,7 @@ Return:
   user to decide),
 - any image assets created and their paths.
 
-**NEVER** resolve TODOs here — the orchestrator owns resolution, and
+**NEVER** resolve TODOs here; the orchestrator owns resolution, and
 contradiction-TODOs in particular require a user decision about which
 side (diagram or text) is wrong.
 
@@ -203,9 +203,9 @@ side (diagram or text) is wrong.
 - **Mermaid first, PlantUML fallback**: per §8 of CLAUDE.md.
 - **Caption + summary mandatory**: a diagram without caption and textual
   summary is incomplete.
-- **Evidence required**: per CLAUDE.md §1 — no invented nodes or edges.
+- **Evidence required**: per CLAUDE.md §1: no invented nodes or edges.
 - **Czech content for captions and summaries**: per §7 of CLAUDE.md.
-  Diagram node labels follow the source — if the code calls it
+  Diagram node labels follow the source; if the code calls it
   `UserService`, the class node is `UserService`, not `SlužbaUživatelů`.
 - **Syntactic validation required** before leaving Step 2.
 - **Consistency with host text required** before leaving Step 3.
@@ -214,38 +214,38 @@ side (diagram or text) is wrong.
 
 Load each resource only when its trigger applies (progressive disclosure).
 
-- [`resources/diagram-type-decision.md`](resources/diagram-type-decision.md)
-  — anchor-name → diagram-type mapping and decision tree for ambiguous
+- [`resources/diagram-type-decision.md`](resources/diagram-type-decision.md):
+  anchor-name → diagram-type mapping and decision tree for ambiguous
   cases (including flowchart vs. sequence vs. state).
   **Invoke when**: running Step 1 and classifying anchors.
 
-- [`resources/mermaid-cheatsheet.md`](resources/mermaid-cheatsheet.md) —
+- [`resources/mermaid-cheatsheet.md`](resources/mermaid-cheatsheet.md):
   idiomatic Mermaid for each diagram type (sequence, class, state, ERD,
   flowchart, C4 via `C4Context`/`C4Container`, etc.).
   **Invoke when**: generating a Mermaid block and the exact syntax needs
   confirmation.
 
-- [`resources/plantuml-fallback.md`](resources/plantuml-fallback.md) —
+- [`resources/plantuml-fallback.md`](resources/plantuml-fallback.md):
   when Mermaid is not enough, and canonical PlantUML templates
   (deployment, advanced C4, complex BPMN).
   **Invoke when**: Mermaid cannot express the diagram and PlantUML
   fallback is needed.
 
-- [`resources/evidence-rules.md`](resources/evidence-rules.md) — how to
+- [`resources/evidence-rules.md`](resources/evidence-rules.md): how to
   trace every node and edge back to code or docs.
   **Invoke when**: unsure whether a node/edge is evidence-backed.
 
-- [`resources/consistency-check.md`](resources/consistency-check.md) —
+- [`resources/consistency-check.md`](resources/consistency-check.md):
   checklist for Step 3: what claims to extract from the host text and
   how to compare them against each diagram type.
   **Invoke when**: running Step 3.
 
-- [`scripts/validate-diagram.sh`](scripts/validate-diagram.sh) —
+- [`scripts/validate-diagram.sh`](scripts/validate-diagram.sh):
   validator for Mermaid / PlantUML fenced blocks; fails the file on
   syntax error.
   **Invoke when**: Step 2, item 5 (before leaving the step).
 
-- [`resources/examples/`](resources/examples/) — canonical examples per
+- [`resources/examples/`](resources/examples/): canonical examples per
   diagram type, populated incrementally (e.g. `sequence-login.md`,
   `erd-users-orders.md`, `c4-context.md`, `flowchart-retry.md`).
   **Invoke when**: a concrete reference is needed while drafting a
@@ -253,8 +253,8 @@ Load each resource only when its trigger applies (progressive disclosure).
 
 ## Out of scope
 
-- Generating Markdown text pages — `docs-technical-from-code`,
+- Generating Markdown text pages: `docs-technical-from-code`,
   `docs-functional-from-code`.
-- SVG wireframes — `docs-wireframes-from-code`.
+- SVG wireframes: `docs-wireframes-from-code`.
 - Any code changes outside `docs/`.
 `````

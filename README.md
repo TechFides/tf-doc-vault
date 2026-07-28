@@ -38,7 +38,7 @@
 </div>
 
 > [!WARNING]
-> **Preview release — `0.x`.** This package is under active development. The public API (CLI commands, exported functions, template structure, and config shape) may change between minor versions until the `1.0.0` release. Pin an exact version in production (`"@techfides/tf-doc-vault": "0.1.5"`, not `"^0.1.5"`) and review the [CHANGELOG](./CHANGELOG.md) before upgrading.
+> **Preview release (`0.x`).** This package is under active development. The public API (CLI commands, exported functions, template structure, and config shape) may change between minor versions until the `1.0.0` release. Pin an exact version in production (`"@techfides/tf-doc-vault": "0.1.5"`, not `"^0.1.5"`) and review the [CHANGELOG](./CHANGELOG.md) before upgrading.
 
 ---
 
@@ -49,26 +49,26 @@ and Terraform infrastructure. Setting all of that up from scratch for each proje
 maintain.
 
 `@techfides/tf-doc-vault` solves this once and shares the solution across all projects. The core idea is **factory functions over copied files**: consumer repos
-call `makeConfig()` and `createTheme()` — the package owns the implementation, so updates propagate automatically.
+call `makeConfig()` and `createTheme()`; the package owns the implementation, so updates propagate automatically.
 
 ## What the package includes
 
-| Module                | Purpose                                                                                                                            |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **`config`**          | `makeConfig()` — complete VitePress config with locales, versioned nav, sidebar, i18n, Mermaid, optional analytics and edit links. |
-| **`theme`**           | `createTheme()` — shared Vue 3 components: DocMeta, ImageLightbox, PrintLayout, VersionSwitcher, optional WidthToggle.             |
-| **`sidebar`**         | Auto-generates nav and sidebar from the `docs/<version>/<section>/<group>/` directory structure — no manual config.                |
-| **`scripts`**         | CLI commands: validate, normalize, build print page, export to PDF, fix line endings, sync template.                               |
-| **`setup/nest`**      | `setupTechDocs()` — NestJS middleware that mounts `tech-docs/dist/` at `/tech-docs` with Basic auth.                               |
-| **`setup/express`**   | `createTechDocsHandler()` — same for plain Express.                                                                                |
-| **`configs`**         | Shared `eslint.config.js`, `prettier.json`, `tsconfig.base.json` for consumer repos to extend.                                     |
-| **`infra/terraform`** | Reusable GCP module: Cloud Run + Artifact Registry + IAM.                                                                          |
-| **`docker`**          | Multi-stage Dockerfile with `nginx` / `nginx-auth` runtime variants.                                                               |
-| **`template`**        | Skeleton repo used by the scaffolder (`create` command).                                                                           |
+| Module                | Purpose                                                                                                                           |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **`config`**          | `makeConfig()`: complete VitePress config with locales, versioned nav, sidebar, i18n, Mermaid, optional analytics and edit links. |
+| **`theme`**           | `createTheme()`: shared Vue 3 components: DocMeta, ImageLightbox, PrintLayout, VersionSwitcher, optional WidthToggle.             |
+| **`sidebar`**         | Auto-generates nav and sidebar from the `docs/<version>/<section>/<group>/` directory structure, with no manual config.           |
+| **`scripts`**         | CLI commands: validate, normalize, build print page, export to PDF, fix line endings, sync template.                              |
+| **`setup/nest`**      | `setupTechDocs()`: NestJS middleware that mounts `tech-docs/dist/` at `/tech-docs` with Basic auth.                               |
+| **`setup/express`**   | `createTechDocsHandler()`: the same for plain Express.                                                                            |
+| **`configs`**         | Shared `eslint.config.js`, `prettier.json`, `tsconfig.base.json` for consumer repos to extend.                                    |
+| **`infra/terraform`** | Reusable GCP module: Cloud Run + Artifact Registry + IAM.                                                                         |
+| **`docker`**          | Multi-stage Dockerfile with `nginx` / `nginx-auth` runtime variants.                                                              |
+| **`template`**        | Skeleton repo used by the scaffolder (`create` command).                                                                          |
 
 ## Quick start
 
-You don't wire this up by hand — **scaffold the flavour you need**, then start writing Markdown:
+You don't wire this up by hand. **Scaffold the flavour you need**, then start writing Markdown:
 
 - **Standalone analysis / spec site** (its own repo, deployed to Cloud Run):
 
@@ -125,13 +125,13 @@ To rebrand (colors, logo, fonts, footer) for a non-TechFides project, see [BRAND
 
 Task-focused guides live in **[`docs/`](./docs/README.md)**:
 
-| Guide                                                        | What it covers                                                                                                            |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| [Technical documentation (`tech-docs`)](./docs/tech-docs.md) | Mount docs inside a service repo, served at `/tech-docs` with Basic auth (`init-tech-docs`).                              |
-| [Analytical documentation (`*_ana`)](./docs/ana-docs.md)     | Standalone analysis docs scaffolded by `create`, deployed to Cloud Run — including `nginx-auth` and syncing the template. |
-| [Import from Confluence](./docs/confluence-import.md)        | Migrate a Confluence space into Markdown (`import-confluence`).                                                           |
-| [Editing &amp; publishing docs](./docs/updating-docs.md)     | The day-to-day edit → preview → validate → publish loop.                                                                  |
-| [Testing](./docs/TESTING.md)                                 | How the package itself is tested (unit + smoke).                                                                          |
+| Guide                                                        | What it covers                                                                                                           |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| [Technical documentation (`tech-docs`)](./docs/tech-docs.md) | Mount docs inside a service repo, served at `/tech-docs` with Basic auth (`init-tech-docs`).                             |
+| [Analytical documentation (`*_ana`)](./docs/ana-docs.md)     | Standalone analysis docs scaffolded by `create`, deployed to Cloud Run, including `nginx-auth` and syncing the template. |
+| [Import from Confluence](./docs/confluence-import.md)        | Migrate a Confluence space into Markdown (`import-confluence`).                                                          |
+| [Editing &amp; publishing docs](./docs/updating-docs.md)     | The day-to-day edit → preview → validate → publish loop.                                                                 |
+| [Testing](./docs/TESTING.md)                                 | How the package itself is tested (unit + smoke).                                                                         |
 
 ## Contributing &amp; local development
 

@@ -1,12 +1,12 @@
 ---
-description: Generate only the functional documentation phase from an existing codebase (overview, glossary, actors, screens, scenarios list, business rules, notifications, reports, and per-scenario detail pages with wireframe anchors). Uses the codebase as primary source and any already-generated technical section as secondary digested source. Text only — no diagrams, no wireframes. Pauses after each generated file.
+description: Generate only the functional documentation phase from an existing codebase (overview, glossary, actors, screens, scenarios list, business rules, notifications, reports, and per-scenario detail pages with wireframe anchors). Uses the codebase as primary source and any already-generated technical section as secondary digested source. Text only, no diagrams and no wireframes. Pauses after each generated file.
 argument-hint: [auto] # optional: pass 'auto' to reduce file-by-file pausing (opt-in only)
 ---
 
 # /docs-functional
 
 You are running the **functional documentation phase** from an existing
-codebase — as a single phase, without the other phases. Follow the rules
+codebase, as a single phase without the other phases. Follow the rules
 in `CLAUDE.md` at project root (they override any conflicting defaults).
 
 This command is appropriate when:
@@ -19,7 +19,7 @@ This command is appropriate when:
   and wireframes.
 
 Do **NOT** use this command for technical docs, diagrams, wireframes,
-pre-code analyses, or reviews — those have their own commands.
+pre-code analyses, or reviews; those have their own commands.
 
 ## Argument
 
@@ -34,13 +34,13 @@ pre-code analyses, or reviews — those have their own commands.
 
 1. Load the `docs-functional-from-code` skill.
 2. Collect and confirm the inputs from its "Inputs" section:
-   a. `source_path` — repository or folder with the code.
-   b. `version_folder` — `docs/vN/` (create `docs/v1/` if none exist).
-   c. `source_version` — resolve from git tag → `package.json`; mark
+   a. `source_path`: repository or folder with the code.
+   b. `version_folder`: `docs/vN/` (create `docs/v1/` if none exist).
+   c. `source_version`: resolve from git tag → `package.json`; mark
    `⚠️ TODO: source version` if neither exists.
-   d. `current_date` — from system context.
-   e. `auto_mode` — from the argument, with the safety rule above.
-   f. `technical_docs_path` — resolve to `docs/<version>/technical/`.
+   d. `current_date`: from system context.
+   e. `auto_mode`: from the argument, with the safety rule above.
+   f. `technical_docs_path`: resolve to `docs/<version>/technical/`.
    Check whether it exists and contains pages:
    - **exists with content** → set `technical_available = true`;
      this skill will use it as the secondary, digested source.
@@ -71,20 +71,20 @@ pre-code analyses, or reviews — those have their own commands.
 
 Follow the workflow in `docs-functional-from-code/SKILL.md`:
 
-- **Step 1** — Scan and plan. Use `resources/proposed-structure.md`,
+- **Step 1**: Scan and plan. Use `resources/proposed-structure.md`,
   `resources/scan-checklist.md`, and `resources/scenario-grouping.md`.
   Present the generation plan as a table with the **chosen scenario
   grouping** highlighted and wait for user confirmation.
-- **Step 2** — Generate file-by-file in the default order (overview →
+- **Step 2**: Generate file-by-file in the default order (overview →
   glossary/actors/personas → screens/scenarios-list → business
   rules/notifications/reports → scenarios), pausing after each file
   unless `auto_mode` is on. Scenario files MUST insert the right
   wireframe and diagram anchors.
-- **Step 3** — Section and group `index.md` files.
-- **Step 4** — Cross-links to the technical section: resolve if the
+- **Step 3**: Section and group `index.md` files.
+- **Step 4**: Cross-links to the technical section: resolve if the
   target exists, otherwise insert `⚠️ TODO: link to technical/...`
   markers per the skill's rules.
-- **Step 5** — Prepare the handoff payload (file list, per-file TODOs,
+- **Step 5**: Prepare the handoff payload (file list, per-file TODOs,
   skipped pages, wireframe / diagram anchors inserted,
   `technical_available` flag used for the run).
 
@@ -98,7 +98,7 @@ Execute the TODO resolution flow from §2 of CLAUDE.md:
    - other (list verbatim).
 2. For each item ask `a) skip / b) user input / c) keep TODO`.
    Default recommendation for `link to technical/...` when
-   `technical_available == false` is **c) keep TODO** — these will
+   `technical_available == false` is **c) keep TODO**; these will
    resolve naturally when `/docs-technical` runs.
 3. Apply the chosen action.
 4. Re-run the small review on any files changed during resolution.
@@ -118,7 +118,7 @@ skill learning"). Scope the collection to feedback about
 with frontmatter `consumed_by: docs-learn-from-session` and
 `status: unprocessed`. Ask the user to keep / discard / open to review.
 
-**Do NOT update skill files** from this command — that is reserved for
+**Do NOT update skill files** from this command; that is reserved for
 the planned skill `docs-learn-from-session`.
 
 ## Finish
@@ -144,7 +144,7 @@ Report:
   and then re-running `/docs-functional` or resolving the link TODOs
   manually.
 - If the user plans to run `/docs-diagrams` next, mention that diagram
-  anchors are already in place — the diagrams phase will pick them up.
+  anchors are already in place; the diagrams phase will pick them up.
 - If the user plans to run `/docs-wireframes` next, mention that
   wireframe anchors are already in place and that the wireframes phase
   will ALWAYS ask for screenshots, so gather them beforehand.

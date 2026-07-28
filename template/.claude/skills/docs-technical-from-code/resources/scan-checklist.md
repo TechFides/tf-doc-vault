@@ -2,11 +2,11 @@
 
 Detection targets per aspect for Step 1 of `docs-technical-from-code`.
 Each row says _what_ to look for in the codebase and _which proposed
-group_ the evidence populates. Nothing here claims the artifact exists —
+group_ the evidence populates. Nothing here claims the artifact exists;
 if nothing matches, the group is **marked for skipping** in the plan
 and the user confirms.
 
-This list is **inclusive, not exclusive** — it defines the minimum
+This list is **inclusive, not exclusive**; it defines the minimum
 scan surface. Always scan beyond it: if the code suggests a group or
 page not listed (e.g. a project-specific pipeline, a custom protocol
 layer, a vendor SDK, a migration runner), **propose** it to the user
@@ -31,7 +31,7 @@ and add it to the generation plan with cited evidence.
 | Authn / authz            | `security/authn-authz.md`                     | `auth/**`, passport/strategies, NextAuth config, `.env.example`, JWT libs                                             |
 | Data protection          | `security/data-protection.md`                 | encryption libs, cloud KMS configs, backup cron jobs, retention policies                                              |
 | Compliance               | `security/compliance.md`                      | `SECURITY.md`, `compliance/` folder, audit reports                                                                    |
-| Integrations — overview  | `integrations/overview.md`                    | high-level HTTP/queue wiring, gateway configs, protocol inventory                                                     |
+| Integrations overview    | `integrations/overview.md`                    | high-level HTTP/queue wiring, gateway configs, protocol inventory                                                     |
 | API authorization (M2M)  | `integrations/api-authorization.md`           | scope definitions, client-credential flows, API gateway config                                                        |
 | Event catalog            | `integrations/events.md`                      | message broker config, topic / queue names, event schemas, `events/**`                                                |
 | Business error codes     | `integrations/error-codes.md`                 | `errors/**`, enum of business errors, i18n error keys                                                                 |
@@ -65,17 +65,17 @@ and add it to the generation plan with cited evidence.
 1. For each row, check whether the indicated paths / files exist.
 2. If they do, include the group in the Step 1 plan with the evidence
    cited (use file paths, `path:line` for specific claims).
-3. If nothing matches, mark the group as `skip — no evidence` in the
-   plan — the user confirms skipping.
+3. If nothing matches, mark the group as `skip: no evidence` in the
+   plan; the user confirms skipping.
 4. For project-specific aspects not covered above, propose a new group
    with evidence, a suggested Czech label, and numbering.
 
 ## Rules
 
-- **NEVER** assume evidence exists — verify by reading the file path.
+- **NEVER** assume evidence exists; verify by reading the file path.
 - **NEVER** claim a detail you cannot cite.
 - **ALWAYS** prefer `path:line` citation over `path` alone for specific
   claims (a function's return type, a config value, a feature flag).
 - **ALWAYS** mark `⚠️ TODO: [missing detail]` rather than inventing.
-- This checklist is the **floor, not the ceiling** — new groups and
+- This checklist is the **floor, not the ceiling**; new groups and
   pages beyond it are expected and should be proposed with evidence.

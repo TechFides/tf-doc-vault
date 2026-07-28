@@ -6,7 +6,7 @@ docs/print.md
 artifacts/
 .idea/
 
-# Terraform — tfstate v GCS, tfvars trackujeme v repu.
+# Terraform: tfstate lives in GCS, tfvars stay tracked in the repo.
 infra/.terraform/
 infra/*.tfplan
 infra/terraform.tfstate*

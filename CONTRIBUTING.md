@@ -30,7 +30,7 @@ pnpm release         # = changelogen --release --no-github
 
 `pnpm release` reads conventional commits since the last `v*` tag, computes the next version, writes it to `package.json`, prepends a section to `CHANGELOG.md`, and creates a commit + annotated tag (`chore(release): v0.x.y` / `v0.x.y`).
 
-> **⚠️ Always pass `--no-github` (the `pnpm release` script already does).** Plain `changelogen --release` has an undocumented default that _also_ creates a GitHub release — and if you don't have a GitHub token in your env, it opens your browser at a pre-filled `releases/new` URL. Clicking "Publish" creates the remote `vX.Y.Z` tag at the _remote's default-branch HEAD_, not at your local release commit. That locks the tag to the wrong commit and a later `git push --follow-tags` will silently reject your correct local tag. **CI is the only thing that should create the GitHub release**, and it does so as the final workflow step (`changelogen gh release`) — after the tag is already on the remote at the right commit.
+> **⚠️ Always pass `--no-github` (the `pnpm release` script already does).** Plain `changelogen --release` has an undocumented default that _also_ creates a GitHub release, and if you don't have a GitHub token in your env, it opens your browser at a pre-filled `releases/new` URL. Clicking "Publish" creates the remote `vX.Y.Z` tag at the _remote's default-branch HEAD_, not at your local release commit. That locks the tag to the wrong commit and a later `git push --follow-tags` will silently reject your correct local tag. **CI is the only thing that should create the GitHub release**, and it does so as the final workflow step (`changelogen gh release`), after the tag is already on the remote at the right commit.
 
 > **Semver note for 0.x versions:** under `0.x.y`, `feat:` bumps the middle digit and `fix:` bumps the last. Standard semver kicks in at `1.0.0`.
 
@@ -44,7 +44,7 @@ pnpm changelogen --release --no-github -r 0.2.0     # pin exact version
 ### 2. Review and push
 
 ```bash
-git show HEAD                # the chore(release) commit — sanity check
+git show HEAD                # the chore(release) commit, sanity check
 git tag --list 'v*' | tail -3
 git push --follow-tags       # pushes the commit AND the tag
 ```
@@ -67,13 +67,13 @@ Until you approve, nothing builds, publishes, or releases.
 
 The tag and `chore(release)` commit are already on `master`. Nothing was published. Two options:
 
-- **Fix forward** (recommended): make the fix, run `pnpm release` again — that cuts the next patch (the failed tag stays in history as a dead tag).
+- **Fix forward** (recommended): make the fix, run `pnpm release` again; that cuts the next patch (the failed tag stays in history as a dead tag).
 - **Clean up the dead tag** (optional, cosmetic): `git push --delete origin vX.Y.Z && git tag -d vX.Y.Z`.
 
 ### Security model
 
 - **Tag push** requires write access to the repo.
-- **`npm-publish` environment** requires manual approval from a named reviewer — a contributor with write access cannot publish on their own.
+- **`npm-publish` environment** requires manual approval from a named reviewer; a contributor with write access cannot publish on their own.
 - **npm trusted publisher** is pinned to this repo, the `publish.yml` workflow, the `release` job, and the `npm-publish` environment. Any drift (e.g. someone edits the workflow to drop the environment) makes npm reject the publish, even if the workflow itself runs.
 - No `NPM_TOKEN` exists in the repo; auth is via OIDC at publish time.
 
@@ -83,7 +83,7 @@ There are two ways to iterate, depending on what you're changing.
 
 ### A. Playground with hot reload (recommended for theme/config work)
 
-The package ships with `playground/docs/` — a minimal VitePress site that imports `makeConfig` and `createTheme` directly from `src/`, not from `dist/`. Editing any
+The package ships with `playground/docs/`, a minimal VitePress site that imports `makeConfig` and `createTheme` directly from `src/`, not from `dist/`. Editing any
 `.vue` / `.css` / `.ts` under `src/theme/` or `src/config/` triggers Vite HMR in the browser instantly. No `pnpm build`, no syncing into a consumer.
 
 ```bash
@@ -91,7 +91,7 @@ pnpm install         # once after cloning
 pnpm dev:docs        # → http://localhost:5173
 ```
 
-Then edit, for example, `src/theme/components/DocMeta.vue` or `src/theme/styles/base.css` — the browser re-renders without restart. Sample content lives in
+Then edit, for example, `src/theme/components/DocMeta.vue` or `src/theme/styles/base.css`; the browser re-renders without restart. Sample content lives in
 `playground/docs/v1/index.md` and covers the common rendering cases (code blocks, tables, DocMeta, outline, inline code).
 
 Production build of the playground (useful for sanity-checking the eventual consumer build):
@@ -113,7 +113,7 @@ For changes that touch sidebar/nav generation, multi-version flows, CLI scripts 
 scaffolded project:
 
 ```bash
-# 1. in the package — once after cloning
+# 1. in the package, once after cloning
 cd tf-doc-vault
 pnpm install                  # deps + "prepare" hook builds dist/
 pnpm dev                      # tsc --watch + auto-copy static assets (.vue/.css/.json/.ico)
@@ -133,18 +133,18 @@ An application repo scaffolded for local development declares the dependency via
 Prerequisite for `file:` install: both directories must be siblings (relative path `../tf-doc-vault`). If the package is elsewhere, `--file-path=/abs/path`
 during scaffolding overrides it.
 
-**Note.** pnpm `file:` dependencies are _copies_ from `dist/` into the consumer's pnpm store — not live symlinks. After each `tsc --watch` rebuild in the package,
+**Note.** pnpm `file:` dependencies are _copies_ from `dist/` into the consumer's pnpm store, not live symlinks. After each `tsc --watch` rebuild in the package,
 refresh the consumer with `pnpm install --force` so it picks up the new `dist/`. Path A above sidesteps this entirely, which is why it's the default for theme work.
 
 ## Local pre-publish testing (tarball flow)
 
 When validating the `tech-docs` use case end-to-end on a service like `srvc-bat`
 **before** tagging a release, use `pnpm pack` so the consumer installs exactly
-what `pnpm publish` would push to npmjs.com — no auth tokens, no registry
+what `pnpm publish` would push to npmjs.com: no auth tokens, no registry
 overrides, identical file layout.
 
 The `*.tgz` produced by `pnpm pack` is gitignored at the repo root, so it can't
-leak into a commit. The snippets below are maintainer-only — they never appear
+leak into a commit. The snippets below are maintainer-only; they never appear
 in `template-tech-docs/` and therefore never propagate to consumer repos via
 `init-tech-docs`.
 
@@ -165,7 +165,7 @@ pnpm add file:./techfides-tf-doc-vault-0.1.0.tgz
 ```
 
 `pnpm exec tf-doc-vault ...` works immediately. Re-packing in `tf-doc-vault`
-and copying a fresh `.tgz` over the old one is enough — pnpm picks up the new
+and copying a fresh `.tgz` over the old one is enough, because pnpm picks up the new
 content hash and reinstalls on the next `pnpm install`.
 
 ### 3. Pre-publish Dockerfile fragment
@@ -204,5 +204,5 @@ so the swap is a clean four-token diff.
 - `template-tech-docs/**/*` contains zero references to `*.tgz` or `file:./`
 - `pnpm pack --dry-run` lists exactly: `dist/`, `bin/`, `src/`, `template/`,
   `template-tech-docs/`, `configs/`, `infra/`, `docker/`, `README.md`,
-  `LICENSE`, `CONTRIBUTING.md`, `SECURITY.md`, `package.json` — and **nothing
+  `LICENSE`, `CONTRIBUTING.md`, `SECURITY.md`, `package.json`, and **nothing
   pre-publish-flavoured**

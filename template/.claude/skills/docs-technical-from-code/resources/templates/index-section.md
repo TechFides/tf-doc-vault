@@ -12,7 +12,7 @@ confluence:
   parent: Dokumentace <vN>
 -->
 
-Tato sekce popisuje technické aspekty systému — technologický stack,
+Tato sekce popisuje technické aspekty systému: technologický stack,
 infrastrukturu, architekturu, bezpečnost, integrace, testování,
 monitoring a provozní postupy. Obsah odráží reálný stav kódu ve verzi
 <vX.Y.Z>.

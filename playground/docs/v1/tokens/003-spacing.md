@@ -4,7 +4,7 @@ status: published
 updated_at: 2026-05-22
 ---
 
-Layout follows an **8-point grid** — paddings, gaps and margins are
+Layout follows an **8-point grid**: paddings, gaps and margins are
 multiples of 8px (with an occasional 4px half-step for tight inline gaps
 like a badge next to its icon).
 
@@ -25,4 +25,4 @@ exposes (in `base.css`). Override them in your `custom.css`:
 ## Whitespace rule
 
 If the layout feels cramped, the **first thing to grow** is card
-padding or section gap — never the font size.
+padding or section gap, never the font size.

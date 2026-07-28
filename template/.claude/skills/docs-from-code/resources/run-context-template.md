@@ -37,7 +37,7 @@ anchors_report:
 - Handed to every phase skill in **Phase dispatch** (Step 2).
 - `anchors_report` is accumulated across phases: technical + functional
   append new anchors; diagrams + wireframes consume them.
-- Not persisted across runs — each `/docs-generate-from-code` invocation
+- Not persisted across runs; each `/docs-generate-from-code` invocation
   rebuilds it from scratch.
 
 ## Rules
@@ -45,7 +45,7 @@ anchors_report:
 - **NEVER** start a phase with a missing required field. If a field is
   not available, mark `⚠️ TODO: <field name>` in the context and show
   it to the user before proceeding.
-- `screenshots` is only relevant when `scope` includes `wireframes` —
+- `screenshots` is only relevant when `scope` includes `wireframes`;
   but the screenshots question is still asked live, not read from a
   file.
 - `auto_mode` must match BOTH the command argument AND the opt-in rule

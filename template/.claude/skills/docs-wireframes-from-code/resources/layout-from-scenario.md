@@ -1,7 +1,7 @@
 # Layout from scenario page
 
 Procedure for Step 2 when `Layout source = scenario-page` (no screenshot
-provided). The scenario page is the canonical contract for a screen —
+provided). The scenario page is the canonical contract for a screen;
 its I/O data table, main flow, and field labels describe **what must be
 on the screen**; the code tells you **how the screen is shaped**.
 
@@ -13,20 +13,20 @@ others in the same run).
 
 For every anchor with `Layout source = scenario-page`:
 
-1. The host scenario page — sections to read in order:
-   - **Info blok** (module, axis, role / aktér) — tells you who the
+1. The host scenario page; sections to read in order:
+   - **Info blok** (module, axis, role / aktér): tells you who the
      screen is for (defines default skin / density).
-   - **Hlavní flow** — numbered steps. Each step that mentions the UI
+   - **Hlavní flow**: numbered steps. Each step that mentions the UI
      (`uživatel vyplní …`, `klikne na …`, `systém zobrazí …`) maps to a
      visible control on the wireframe.
-   - **Přehled vstupních a výstupních dat** — the input table is the
+   - **Přehled vstupních a výstupních dat**: the input table is the
      authoritative list of fields. Columns: field name, type, required,
      validace, výchozí hodnota.
-   - **Popis business logiky** — error hints and branch conditions;
+   - **Popis business logiky**: error hints and branch conditions;
      only those that manifest visually (banner, inline hint) belong on
      the wireframe.
-   - **Feature toggle** — conditionally visible elements.
-2. The code for the screen component — route definition, form schema,
+   - **Feature toggle**: conditionally visible elements.
+2. The code for the screen component: route definition, form schema,
    i18n file. Use it to disambiguate when the scenario text is terse.
 3. Shared fragments index (`wf-fragments-index.md`).
 
@@ -68,7 +68,7 @@ For every row of **Přehled vstupních a výstupních dat → input**:
 | --------------- | ------------------------------------------------ |
 | Name            | Field label in Czech with diacritics             |
 | Type            | Pick `input-text` / `-password` / `-datetime` …  |
-| Required        | Add asterisk or subtle "(povinné)" — per project |
+| Required        | Add asterisk or subtle "(povinné)", per project |
 | Validace        | Sample error hint under the field (optional)     |
 | Výchozí hodnota | Pre-filled value in the input                    |
 
@@ -83,25 +83,25 @@ For every row of **Přehled vstupních a výstupních dat → input**:
 - Primary button label = scenario step wording, verbatim (`Přihlásit
 se`, `Uložit`, `Potvrdit objednávku`).
 - Secondary links (`Zapomněli jste heslo?`) come from the scenario text
-  or i18n resources — never invent labels.
+  or i18n resources; never invent labels.
 - Cancel / close buttons exist only if the step list mentions them; do
   not add a default "Zrušit" button.
 
 ### 5. Derive the empty / loading / error states
 
 A single scenario page typically maps to **one wireframe per anchor**.
-Multi-state anchors are rare — check for anchor-name suffixes:
+Multi-state anchors are rare; check for anchor-name suffixes:
 
 - `wireframe: sc-NN-empty` / `wireframe: sc-NN-error` / `wireframe:
-sc-NN-loading` — separate anchors with their own SVGs.
+sc-NN-loading`; separate anchors with their own SVGs.
 
 If the scenario describes an error as inline hint below a field, render
 the hint on the base wireframe. If it describes a full-screen error or
-empty state, it must have its own anchor — if it doesn't, flag a
+empty state, it must have its own anchor; if it doesn't, flag a
 wireframe-gap TODO in the host page:
 
 ```markdown
-> ⚠️ TODO: wireframe gap — chybová obrazovka popsána v 'Popis business
+> ⚠️ TODO: wireframe gap: chybová obrazovka popsána v 'Popis business
 > logiky' (větev validace IČO), chybí anchor ani SVG.
 ```
 
@@ -110,12 +110,12 @@ wireframe-gap TODO in the host page:
 When the scenario page under-describes the UI, use secondary sources
 (already stable at this point of the run):
 
-- **`technical/architecture/components.md`** — which component owns the
+- **`technical/architecture/components.md`**: which component owns the
   screen, which sub-components it composes.
-- **`technical/integrations/*`** — if the screen triggers a backend
+- **`technical/integrations/*`**: if the screen triggers a backend
   call, reflect the state machine (loading spinner between submit and
   response).
-- **`technical/roles-matrix.md`** — whether admin-only controls should
+- **`technical/roles-matrix.md`**: whether admin-only controls should
   be present for the scenario's role.
 
 Do **NOT** use these as layout sources when they contradict the
@@ -124,7 +124,7 @@ scenario; raise the contradiction as a TODO in the host page
 
 ## Content decisions without a screenshot
 
-Without a screenshot you lack visual cues — lean on project-wide
+Without a screenshot you lack visual cues, so lean on project-wide
 defaults:
 
 - **Density**: mobile = 8 px rhythm, desktop = 12 px rhythm, unless the
@@ -135,7 +135,7 @@ defaults:
   `wf-fragments/README.md`. Do not introduce new colors.
 - **Iconography**: stick to the icons registered in fragments. If an
   icon is needed but not registered, omit it and flag a wireframe gap
-  — do not inline arbitrary SVG icons.
+  and do not inline arbitrary SVG icons.
 
 ## Example walk-through
 
@@ -161,4 +161,4 @@ pod polem`.
 - **NEVER** merge multiple states (empty / error / loading) onto one
   wireframe unless the anchor name says so.
 - **NEVER** let technical-doc secondary sources override a scenario
-  claim — raise a contradiction TODO instead.
+  claim; raise a contradiction TODO instead.

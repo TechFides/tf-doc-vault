@@ -1,9 +1,9 @@
 ---
 name: docs-from-code
-description: Orchestrator skill for generating project documentation from an existing codebase. Drives the full workflow — preflight, phase selection, delegation to phase skills (technical, functional, diagrams, wireframes), TODO resolution, and the small in-run review. Trigger when the user asks to generate documentation from code or from an existing codebase, or invokes /docs-generate-from-code. DO NOT trigger for pre-code design docs, sales or marketing documentation, or documentation/analysis review — those scopes have their own skills. Always inherits rules from CLAUDE.md.
+description: Orchestrator skill for generating project documentation from an existing codebase. Drives the full workflow, from preflight and phase selection through delegation to phase skills (technical, functional, diagrams, wireframes), TODO resolution, and the small in-run review. Trigger when the user asks to generate documentation from code or from an existing codebase, or invokes /docs-generate-from-code. DO NOT trigger for pre-code design docs, sales or marketing documentation, or documentation/analysis review; those scopes have their own skills. Always inherits rules from CLAUDE.md.
 ---
 
-# docs-from-code — Orchestrator
+# docs-from-code: Orchestrator
 
 ## When to use
 
@@ -19,19 +19,19 @@ Do **NOT** use this skill for:
 
 ## Inputs you must confirm before starting
 
-1. **Source location** — the repository or folder with the code to document.
-2. **Output version folder** — which `docs/vN/` to write into. If `v1/` does
+1. **Source location**: the repository or folder with the code to document.
+2. **Output version folder**: which `docs/vN/` to write into. If `v1/` does
    not exist, create it. If a later version is active, ask the user.
-3. **Scope of this run** — one of:
+3. **Scope of this run**: one of:
    - `technical` (e.g. architecture, API, sequences, …),
    - `functional` (e.g. use-cases, functions-overview, …),
    - `diagrams` (only after textual content is stable),
    - `wireframes` (only after diagrams or explicit user OK),
-   - `full` — run phases in order: technical → functional → diagrams →
+   - `full`: run phases in order: technical → functional → diagrams →
      wireframes, pausing between each phase for user confirmation.
-4. **Source version stamp** — resolve from git tag first, `package.json`
+4. **Source version stamp**: resolve from git tag first, `package.json`
    second. If neither is available, mark as `⚠️ TODO: source version`.
-5. **Screenshots** (only for wireframes phase) — ask if the user has
+5. **Screenshots** (only for wireframes phase): ask if the user has
    screenshots to use as reference.
 
 **NEVER** start generation without all five inputs resolved or explicitly
@@ -39,7 +39,7 @@ deferred by the user.
 
 ## Workflow
 
-### Step 1 — Preflight
+### Step 1: Preflight
 
 - Read `CLAUDE.md` at project root. Apply all rules from it.
 - Detect existing `docs/` structure. If files would be overwritten, list them
@@ -47,7 +47,7 @@ deferred by the user.
 - Record current date (`currentDate`) and source version into a run context
   that every generated file's header must use.
 
-### Step 2 — Phase dispatch
+### Step 2: Phase dispatch
 
 Based on the scope chosen in input (3), delegate to the phase skill:
 
@@ -66,13 +66,13 @@ For `full`, pause after each phase and ask the user:
 **NEVER** auto-advance between phases without user confirmation, unless the
 user explicitly activated `--auto` mode for this run (§3 of CLAUDE.md).
 
-### Step 3 — TODO resolution
+### Step 3: TODO resolution
 
 After the last phase of the run completes, perform the TODO resolution flow
-described in §2 of CLAUDE.md. The orchestrator owns this step — phase skills
+described in §2 of CLAUDE.md. The orchestrator owns this step; phase skills
 only produce TODOs, they do not resolve them.
 
-### Step 4 — Small in-run review
+### Step 4: Small in-run review
 
 Run the review checklist from §10 of CLAUDE.md **for every generated file**.
 Report the result as a compact table:
@@ -83,7 +83,7 @@ Report the result as a compact table:
 | docs/v1/technical/api/...md   | ok          | ok    | ok   | 0    |
 ```
 
-### Step 5 — Skill self-check
+### Step 5: Skill self-check
 
 Before reporting the run as finished, re-read the `SKILL.md` of every phase
 skill that ran and verify that all listed rules and steps were applied.
@@ -101,31 +101,31 @@ Every phase skill that this orchestrator delegates to MUST:
 
 ## Resources
 
-Load each resource only when its trigger applies — do **not** read all of
+Load each resource only when its trigger applies; do **not** read all of
 them upfront (progressive disclosure).
 
-- [`resources/workflow.md`](resources/workflow.md) — detailed step-by-step
+- [`resources/workflow.md`](resources/workflow.md): detailed step-by-step
   walkthrough with example prompts.
   **Invoke when**: starting a new run, or when the user asks how the
   workflow proceeds.
 
-- [`resources/run-context-template.md`](resources/run-context-template.md) —
+- [`resources/run-context-template.md`](resources/run-context-template.md):
   the run-context structure passed to phase skills.
   **Invoke when**: preparing the handoff to a phase skill in Step 2 and the
   exact payload shape is needed.
 
-- [`resources/frontmatter-template.md`](resources/frontmatter-template.md) —
+- [`resources/frontmatter-template.md`](resources/frontmatter-template.md):
   canonical frontmatter blocks (content page, section index, group index,
   Confluence mark).
   **Invoke when**: about to create any `.md` file and the exact shape needs
   confirmation.
 
-- [`resources/todo-resolution.md`](resources/todo-resolution.md) — exact
+- [`resources/todo-resolution.md`](resources/todo-resolution.md): exact
   dialog template for the a/b/c TODO resolution flow.
   **Invoke when**: entering Step 3 and at least one TODO is present.
 
-- [`resources/review-checklist-small.md`](resources/review-checklist-small.md)
-  — checklist for the in-run review and skill self-check.
+- [`resources/review-checklist-small.md`](resources/review-checklist-small.md):
+  checklist for the in-run review and skill self-check.
   **Invoke when**: entering Step 4 (small review) or Step 5 (self-check).
 
 ## Out of scope

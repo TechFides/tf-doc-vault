@@ -24,12 +24,12 @@ If `$ARGUMENTS` contains anything else, stop and ask the user to clarify.
 1. Load the `docs-from-code` skill (orchestrator).
 2. Collect and confirm the five inputs from the orchestrator's
    "Inputs you must confirm" section:
-   a. `source_path` — repository or folder with the code.
-   b. `version_folder` — `docs/vN/` (create `docs/v1/` if none exist).
-   c. `scope` — from `$ARGUMENTS` or ask the user.
-   d. `source_version` — resolve from git tag → `package.json`; mark
+   a. `source_path`: repository or folder with the code.
+   b. `version_folder`: `docs/vN/` (create `docs/v1/` if none exist).
+   c. `scope`: from `$ARGUMENTS` or ask the user.
+   d. `source_version`: resolve from git tag → `package.json`; mark
    `⚠️ TODO: source version` if neither exists.
-   e. `screenshots` — only when scope includes `wireframes`: ALWAYS ask
+   e. `screenshots`: only when scope includes `wireframes`: ALWAYS ask
    even if the user did not mention them.
 3. Detect `docs/` state. If files would be overwritten, list them and
    ask per §11 of CLAUDE.md.
@@ -96,7 +96,7 @@ After TODO resolution finishes and **before** reporting the finish,
 gather the feedback the user gave during this run so a later, dedicated
 skill can use it to improve the skills themselves.
 
-1. **What to collect** — every user utterance during this run that is
+1. **What to collect**: every user utterance during this run that is
    feedback about the **skills**, not about the generated content:
    - approvals / rejections of proposed plans,
    - corrections to skill outputs (style, structure, language, scope,
@@ -113,7 +113,7 @@ skill can use it to improve the skills themselves.
      captured in the docs themselves),
    - chit-chat unrelated to the skill behavior.
 
-2. **How to record** — capture the user's words verbatim (no
+2. **How to record**: capture the user's words verbatim (no
    paraphrasing that changes meaning). Tag each excerpt:
 
    ```yaml
@@ -126,7 +126,7 @@ skill can use it to improve the skills themselves.
        Short neutral note on what triggered the feedback.
    ```
 
-3. **Where to save** — write the collection to a run-scoped notes file:
+3. **Where to save**: write the collection to a run-scoped notes file:
 
    ```
    .claude/session-notes/<YYYY-MM-DD-HHMM>.md
@@ -144,7 +144,7 @@ skill can use it to improve the skills themselves.
    ---
    ```
 
-4. **Handoff announcement** — tell the user:
+4. **Handoff announcement**: tell the user:
 
    > "Session notes saved to `<path>` (N entries). They will be fed
    > into the planned skill `docs-learn-from-session` when it is
@@ -168,7 +168,7 @@ Report to the user:
 - path and entry count of the session-notes file, or `discarded` if the
   user chose not to keep it.
 
-Do **NOT** run `/docs-review` from here — comprehensive review is a
+Do **NOT** run `/docs-review` from here; comprehensive review is a
 separate command (planned, not yet implemented).
 
 ## Out of scope for this command

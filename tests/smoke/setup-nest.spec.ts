@@ -8,7 +8,7 @@ const flavors = [
 ] as const;
 
 for (const flavor of flavors) {
-  test(`setup/nest ${flavor.name} — serves docs through basic auth`, async ({
+  test(`setup/nest ${flavor.name}: serves docs through basic auth`, async ({
     sandboxes,
     webServer,
     assertCleanRender,

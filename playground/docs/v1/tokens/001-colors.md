@@ -32,5 +32,5 @@ updated_at: 2026-05-22
 
 ## WCAG note
 
-Body text uses `#333333` (Charcoal) instead of `#7E8890` (Slate) — the
+Body text uses `#333333` (Charcoal) instead of `#7E8890` (Slate); the
 latter only hits 3.58:1 against white and fails WCAG AA (≥ 4.5:1).

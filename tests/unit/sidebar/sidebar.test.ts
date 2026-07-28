@@ -153,15 +153,13 @@ describe("generateSidebar", () => {
 
     const sidebar = generateSidebar(docsRoot);
 
-    // The flat root page is no longer orphaned: it sits under the /v1/ key
-    // next to the version index, instead of disappearing entirely.
+    // The flat root page sits under the /v1/ key next to the version index.
     expect(sidebar["/v1/"]).toEqual([
       { text: "v1 root", link: "/v1/" },
       { text: "Architektura", link: "/v1/architektura" },
     ]);
 
-    // Per-section sidebars are preserved (conservative fix): sections are NOT
-    // merged into /v1/, they keep their own focused keys.
+    // Sections keep their own focused sidebar keys rather than merging into /v1/.
     expect(Object.keys(sidebar).sort()).toEqual([
       "/v1/",
       "/v1/api/",
@@ -188,7 +186,7 @@ describe("generateSidebar", () => {
 
     const sidebar = generateSidebar(docsRoot, { unified: true });
 
-    // A single /v1/ sidebar — no per-section keys.
+    // A single /v1/ sidebar, with no per-section keys.
     expect(Object.keys(sidebar)).toEqual(["/v1/"]);
 
     const v1 = sidebar["/v1/"] ?? [];

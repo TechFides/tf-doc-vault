@@ -1,11 +1,8 @@
 #!/usr/bin/env node
 /**
- * create-ana — scaffold a new TFSA analysis documentation repo from the
- * bundled template. Replaces __PROJECT__, __GCP_PROJECT__, __SERVER_TYPE__
- * placeholders, runs `git init`, and creates the first commit.
- *
- * Usage:
- *   create-ana <project-name> [--gcp-project=<id>] [--server=<serve|nginx|nginx-auth>] [--no-git]
+ * create-ana: scaffold a new TFSA analysis documentation repo from the bundled
+ * template, filling in the __PROJECT__ / __GCP_PROJECT__ / __SERVER_TYPE__
+ * placeholders and creating the first git commit.
  */
 
 import fs from "node:fs";
@@ -40,11 +37,11 @@ Options:
   --gcp-project=<id>      GCP project ID (filled into terraform.tfvars)
   --server=<type>         nginx | nginx-auth   (default: nginx)
   --source=<src>          Where the new repo should pull @techfides/tf-doc-vault from:
-                            npm        — published npm version (default). Installs from
-                                         the public registry — no git credentials needed
-                                         in CI or the Docker build.
-                            git        — git+ssh URL pinned to --ref tag
-                            file       — file:<path> to local checkout (--dev shortcut)
+                            npm    published npm version (default). Installs from the
+                                   public registry, so CI and the Docker build need no
+                                   git credentials.
+                            git    git+ssh URL pinned to --ref tag
+                            file   file:<path> to local checkout (--dev shortcut)
   --dev                   Shortcut for --source=file. Points to the local
                             @techfides/tf-doc-vault checkout (this CLI's package).
                             Use for local development before publishing.
@@ -86,11 +83,8 @@ export function resolveSource(flags: ParsedArgs["flags"]): string {
 
 /**
  * The `@techfides/tf-doc-vault` dependency spec written into the scaffold.
- *
- * Defaults to the published npm version so CI and the Docker build install from
- * the public registry with no git credentials — the old `git+ssh://git@github.com`
- * default was unfetchable from GitLab CI (its token rewrite only covers gitlab.com).
- * `ctx` is injectable for tests.
+ * Defaults to the published npm version so CI and the Docker build need no git
+ * credentials. `ctx` is injectable for tests.
  */
 export function resolveDependencyValue(
   flags: ParsedArgs["flags"],
@@ -132,9 +126,8 @@ export function originUrl(projectName: string): string {
 }
 
 /**
- * Map a template filename to its on-disk consumer name.
- * `npm pack` always strips `.npmrc` and `.gitignore` from published packages,
- * so we ship them as `_npmrc` / `_gitignore` and rename on copy.
+ * `npm pack` strips `.npmrc` and `.gitignore` from published packages, so the
+ * template ships them as `_npmrc` / `_gitignore` and renames them on copy.
  */
 function consumerName(templateName: string): string {
   if (templateName === "_npmrc") return ".npmrc";
@@ -144,14 +137,10 @@ function consumerName(templateName: string): string {
 }
 
 /**
- * Detect an ancestor `pnpm-workspace.yaml` above the scaffold target and, if
- * found, print a copy-pasteable instruction block to stderr explaining that
- * pnpm will silently ignore the scaffolded `pnpm-workspace.yaml`. Without
- * those instructions consumers hit a blank docs page with a cryptic dayjs
- * default-export SyntaxError in the browser console.
- *
- * Read-only with respect to the parent workspace — never patches the
- * ancestor file. The customer applies the diff themselves.
+ * pnpm honors workspace config only at the workspace root, so a scaffold placed
+ * inside an existing workspace silently ignores its own `pnpm-workspace.yaml`
+ * and the docs page renders blank with a dayjs default-export SyntaxError.
+ * Print the merge instructions; the consumer patches the ancestor file.
  */
 function warnIfEmbeddedInWorkspace(
   targetDir: string,
@@ -200,11 +189,9 @@ ${rule}
 }
 
 /**
- * Pre-generate `pnpm-lock.yaml` before the scaffold's own `git commit`, which
- * runs before the user's first `pnpm install`. Without it the pushed repo has no
- * lockfile and CI/Docker `pnpm install --frozen-lockfile` aborts on
- * ERR_PNPM_NO_LOCKFILE. Non-fatal — warn and let the user generate it if pnpm is
- * unavailable or the dependency can't be resolved.
+ * Pre-generate `pnpm-lock.yaml` before the scaffold's own first commit;
+ * otherwise CI and Docker abort on ERR_PNPM_NO_LOCKFILE. Non-fatal: warn and
+ * let the user run `pnpm install` themselves.
  */
 function generateLockfile(dir: string): boolean {
   const r = spawnSync("pnpm", ["install", "--lockfile-only"], {
@@ -214,7 +201,7 @@ function generateLockfile(dir: string): boolean {
   if (r.status !== 0) {
     process.stderr.write(
       "\n⚠  Could not pre-generate pnpm-lock.yaml. Run `pnpm install` and " +
-        "commit the resulting pnpm-lock.yaml before pushing — CI and the " +
+        "commit the resulting pnpm-lock.yaml before pushing: CI and the " +
         "Docker build install with --frozen-lockfile and fail without it.\n",
     );
     return false;
@@ -282,8 +269,8 @@ function main(): void {
     __SERVER_TYPE__: serverType,
     __VITEPRESS_COMMON_DEP__: vitepressCommonDep,
     __DATE__: new Date().toISOString().slice(0, 10),
-    // Basic auth defaults to empty; the user fills it in .gitlab-ci.yml
-    // later as actually needed (only for the nginx-auth runtime).
+    // Basic auth stays empty; the consumer fills it into .gitlab-ci.yml when
+    // they run the nginx-auth flavour.
     __BASIC_AUTH_USER__: "",
     __BASIC_AUTH_PASS__: "",
   });
@@ -295,9 +282,9 @@ function main(): void {
   if (!ancestorWorkspace) generateLockfile(targetDir);
 
   if (!skipGit) {
-    // `-c init.defaultBranch=master`, not `git init -b` (git >= 2.28): version-safe
-    // (older git ignores the unknown config key and defaults to master anyway) and
-    // matches the documented push command / CI default-branch rules / editLink.
+    // `-c init.defaultBranch=master` rather than `git init -b` (git >= 2.28):
+    // older git ignores the unknown key and still lands on master, which is what
+    // the documented push command, the CI branch rules and editLink expect.
     spawnSync("git", ["-c", "init.defaultBranch=master", "init", "-q"], {
       cwd: targetDir,
       stdio: "inherit",
@@ -321,7 +308,7 @@ If @techfides/tf-doc-vault is not built yet, run once:
 
   if (skipGit) {
     console.log(`
-✓ Done (embedded — no standalone git repository).
+✓ Done (embedded, no standalone git repository).
 ${devBootstrap}
 Next steps:
   cd ${projectName}
@@ -334,7 +321,7 @@ Commit it together with your other changes:
   git commit -m "docs: add ${projectName} analytical documentation"
   git push
 
-Deploy (Cloud Run — its own pipeline, independent of the service):
+Deploy (Cloud Run, its own pipeline independent of the service):
   cd ${projectName}/infra
   terraform init && terraform apply
   # set CI/CD variables (GCP_SA_KEY, …) from the terraform outputs

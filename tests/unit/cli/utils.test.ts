@@ -126,7 +126,7 @@ describe("replacePlaceholders", () => {
     const mtimeBefore = fs.statSync(f).mtimeMs;
     replacePlaceholders(dir, { __X__: "Y" });
     expect(fs.readFileSync(f, "utf8")).toBe("no placeholders here");
-    // File should not have been rewritten
+    // mtime proves the file was never rewritten, not merely rewritten identically.
     expect(fs.statSync(f).mtimeMs).toBe(mtimeBefore);
   });
 });

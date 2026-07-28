@@ -1,32 +1,32 @@
 # Layout from screenshot
 
 Procedure for Step 2 when the anchor's `Layout source = screenshot`.
-Screenshots are the highest-fidelity input for a wireframe — but they
+Screenshots are the highest-fidelity input for a wireframe, but they
 are **input-only**: not stored in `wf-fragments/`, discarded after the
 run, and never added to the repository (§9 CLAUDE.md).
 
-## Screenshot kinds — example vs. real app
+## Screenshot kinds: example vs. real app
 
 Before drawing, classify the screenshot. The kind decides how faithfully
 the SVG must copy the original.
 
 | Kind                            | Source                                                                      | Fidelity goal                                                                                       |
 | ------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **Real app screenshot**         | Running production / staging UI of the app being documented                 | **1:1 copy in SVG** — every visible element, label, position, and state (only PII is substituted)   |
-| **Example / mockup screenshot** | Design file, Figma export, competitor app, reference image from another app | **Layout inspiration only** — borrow structure and positions, fill content from the scenario / code |
+| **Real app screenshot**         | Running production / staging UI of the app being documented                 | **1:1 copy in SVG**: every visible element, label, position, and state (only PII is substituted)   |
+| **Example / mockup screenshot** | Design file, Figma export, competitor app, reference image from another app | **Layout inspiration only**: borrow structure and positions, fill content from the scenario / code |
 
-How to tell the two apart — ask the user at Step 1. If unclear, treat
+How to tell the two apart: ask the user at Step 1. If unclear, treat
 it as `example / mockup` (safer default: less risk of shipping
 real-app details the code doesn't back up).
 
-### Real app screenshot — 1:1 fidelity
+### Real app screenshot: 1:1 fidelity
 
 - Copy the visible layout **verbatim**: every input, button, label,
   badge, avatar, helper text appears in the SVG in the same position.
 - Copy the visible text content **verbatim**, including Czech
-  diacritics, exact button wording, placeholder samples — except for
+  diacritics, exact button wording, placeholder samples, except for
   PII (see §"What NOT to transcribe" below).
-- Copy the visible state verbatim — if the screenshot shows a filled
+- Copy the visible state verbatim; if the screenshot shows a filled
   form with validation hint, the SVG shows the same.
 - The SVG is an accurate record of how the app looks **today**. It is
   NOT an idealized re-design.
@@ -35,15 +35,15 @@ real-app details the code doesn't back up).
   different target state. Any deviation gets a TODO:
 
   ```markdown
-  > ⚠️ TODO: wireframe–text contradiction — SVG deviates from
+  > ⚠️ TODO: wireframe–text contradiction: SVG deviates from
   > real-app screenshot. Reason: <why>.
   ```
 
-### Example / mockup screenshot — layout inspiration only
+### Example / mockup screenshot: layout inspiration only
 
 - Use the screenshot to pick the shell, the grid, and the block
   placement.
-- **Do NOT copy the mockup's sample text verbatim** — it may be
+- **Do NOT copy the mockup's sample text verbatim**: it may be
   lorem, unrelated copy, or a competitor's wording. Use labels from
   the scenario page / code instead.
 - **Do NOT copy mockup-only decorations** (illustrations, promo
@@ -56,13 +56,13 @@ real-app details the code doesn't back up).
 1. Confirm with the user: **is this a real-app screenshot or an
    example / mockup?** Record the answer in the Step 1 plan row.
 2. Confirm the mapping `anchor-id → screenshot-path`. If a mapping is
-   ambiguous, ask — never guess.
+   ambiguous, ask; never guess.
 3. Open the screenshot and identify:
-   - **Device class** — mobile / tablet / desktop. Pick the shell
+   - **Device class**: mobile / tablet / desktop. Pick the shell
      fragment accordingly.
-   - **Theme** — light / dark. Pick the corresponding shell fragment
+   - **Theme**: light / dark. Pick the corresponding shell fragment
      variant.
-   - **Canvas size** — derive from the screenshot; round to the nearest
+   - **Canvas size**: derive from the screenshot; round to the nearest
      standard (e.g. 375×812 for iPhone, 1280×800 for desktop).
 4. Read the corresponding scenario page to understand which fields /
    states the wireframe must show. The screenshot may show a different
@@ -78,11 +78,11 @@ real-app details the code doesn't back up).
 
 - Measure (visually is fine) the outer margin, column count, and column
   gap on the screenshot.
-- Project them onto the SVG canvas — keep the same ratios, not the same
+- Project them onto the SVG canvas, keeping the same ratios, not the same
   pixel values. A 24 px margin on a 375 px mobile canvas becomes a 24 px
   margin in the SVG, but if the SVG uses a smaller canvas, scale
   proportionally.
-- Establish a single vertical rhythm (e.g. 8 px) — every element's `y`
+- Establish a single vertical rhythm (e.g. 8 px); every element's `y`
   should be a multiple of it.
 
 ### 2. Identify reusable blocks
@@ -93,7 +93,7 @@ real-app details the code doesn't back up).
   - buttons, inputs, checkboxes,
   - list rows, cards, modals,
   - avatars, badges, banners.
-- For each match, use the fragment — do not re-draw inline.
+- For each match, use the fragment; do not re-draw inline.
 - For elements that do not match any fragment, draft inline and flag
   them for the Step 5 retrospective fragment proposal.
 
@@ -112,7 +112,7 @@ real-app details the code doesn't back up).
     `uzivatel@example.com`).
   - **Example / mockup** → substitute neutral samples aligned with the
     scenario; do not carry mockup's lorem or competitor's copy.
-- **State indicators** (badges, chips) — transcribe the visible label
+- **State indicators** (badges, chips): transcribe the visible label
   verbatim for real-app; use the scenario's wording for mockups.
 
 ### 4. Positioning
@@ -121,7 +121,7 @@ real-app details the code doesn't back up).
   coordinates (screenshots are subject to scaling, status bar variations,
   and cropping).
 - Avatars follow `avatar-rules.md` (`y == cy`, labels below).
-- Vertical order on the SVG **matches** the screenshot — never reorder
+- Vertical order on the SVG **matches** the screenshot; never reorder
   for aesthetics.
 
 ### 5. What NOT to transcribe
@@ -130,18 +130,18 @@ These rules apply **to both kinds** (real app and example / mockup),
 unless a row explicitly says otherwise.
 
 - **Real personal data** (photos of real people, real phone numbers,
-  real e-mails) — ALWAYS replace with a placeholder initials avatar and
+  real e-mails); ALWAYS replace with a placeholder initials avatar and
   neutral sample text. The wireframe must not ship recognizable PII,
   even when the screenshot is a faithful real-app capture.
 - **Time-dependent content** (live notifications, timestamps like "před
   2 min"): keep the textual shape but use a neutral sample
   (`před N min`, `12:34`) so the wireframe doesn't look stale.
   Applies to both kinds.
-- **Decorative elements** — for a **real-app screenshot**, keep them if
+- **Decorative elements**: for a **real-app screenshot**, keep them if
   they are really there (they are part of the app). For an **example /
   mockup**, drop them: if the mockup shows a banner promoting feature X
   but scenario Y is about login, do NOT include the banner.
-- **Error states** — for a **real-app screenshot**, draw the state the
+- **Error states**: for a **real-app screenshot**, draw the state the
   screenshot shows (it is the real state of the app right now); flag a
   `wireframe–text contradiction` if the scenario describes the happy
   path instead. For an **example / mockup**, draw the scenario's state
@@ -150,7 +150,7 @@ unless a row explicitly says otherwise.
 ## Partial / low-resolution screenshots
 
 - **Cropped screenshot** (only the top half visible): draw only what is
-  visible; mark the rest with `⚠️ TODO: wireframe gap —` in the host
+  visible; mark the rest with `⚠️ TODO: wireframe gap:` in the host
   page (Step 2 item 4). Do NOT invent the bottom.
 - **Blurry screenshot**: transcribe what is legible; for illegible text,
   use a Czech placeholder label consistent with the scenario data table
@@ -165,7 +165,7 @@ unless a row explicitly says otherwise.
 - If the screenshot shows a modal overlay, the wireframe reflects the
   modal state only when the scenario describes it. Otherwise draw the
   underlying screen without the modal.
-- For tabbed screens, the active tab matches the scenario — not the
+- For tabbed screens, the active tab matches the scenario, not the
   screenshot's active tab.
 - For popovers / menus, draw the anchor screen closed; popovers get
   their own anchor in the scenario if important.
@@ -174,7 +174,7 @@ unless a row explicitly says otherwise.
 
 After drafting, run the Step 3 consistency check
 (`consistency-check.md`). The screenshot does not exempt the wireframe
-from text-consistency — if the scenario enumerates fields A, B, C and
+from text-consistency: if the scenario enumerates fields A, B, C and
 the screenshot shows A, B, D, the contradiction must be resolved (by
 re-reading the code) or flagged.
 
@@ -188,7 +188,7 @@ re-reading the code) or flagged.
 >
 > **Decision**: the real app has a "Zapamatovat mě" checkbox → keep it
 > in the SVG (SVG = faithful copy). The scenario is incomplete; raise
-> `⚠️ TODO: wireframe–text contradiction — reálná aplikace má
+> `⚠️ TODO: wireframe–text contradiction: reálná aplikace má
 checkbox 'Zapamatovat mě', scénář ho neuvádí.` The fix belongs on
 > the scenario side, not on the SVG.
 
@@ -207,7 +207,7 @@ checkbox 'Zapamatovat mě', scénář ho neuvádí.` The fix belongs on
 ## Rules
 
 - **ALWAYS** classify the screenshot as real-app or example/mockup in
-  Step 1 — the two are governed by different fidelity rules.
+  Step 1; the two are governed by different fidelity rules.
 - **ALWAYS** strip PII and substitute neutral sample values (both
   kinds).
 - **Real-app screenshot** → SVG is a 1:1 copy; any deviation requires a
@@ -216,6 +216,6 @@ checkbox 'Zapamatovat mě', scénář ho neuvádí.` The fix belongs on
   scenario / code.
 - **NEVER** add elements that are on neither the screenshot nor the
   scenario (both kinds).
-- **NEVER** reorder or restyle for aesthetics — match the real app's
+- **NEVER** reorder or restyle for aesthetics; match the real app's
   visible hierarchy, or the scenario-driven order for mockups.
-- **NEVER** store the screenshot in the repository — input-only.
+- **NEVER** store the screenshot in the repository; it is input-only.

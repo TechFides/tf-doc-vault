@@ -7,7 +7,7 @@ updated_at: 2026-05-22
 Three different Mermaid diagram types, all picking up the brand
 palette from the `--brand-*` CSS tokens (light and dark mode).
 
-## Flowchart — process with decisions
+## Flowchart: process with decisions
 
 ```mermaid
 flowchart TD
@@ -22,7 +22,7 @@ flowchart TD
     Read --> End([Done])
 ```
 
-## Sequence — DocMeta rendering
+## Sequence: DocMeta rendering
 
 ```mermaid
 sequenceDiagram
@@ -39,7 +39,7 @@ sequenceDiagram
     DM-->>UI: show "Created by Techfides"
 ```
 
-## Class — theme component tree
+## Class: theme component tree
 
 ```mermaid
 classDiagram

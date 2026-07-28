@@ -1,4 +1,4 @@
-# Consistency check — wireframe vs. host scenario page
+# Consistency check: wireframe vs. host scenario page
 
 Step 3 of `docs-wireframes-from-code`. After a wireframe is generated and
 sanitized, compare it against the host scenario page **before** saving the
@@ -7,10 +7,10 @@ on the wireframe, and every element on the wireframe must be supported by
 the scenario or by code.
 
 If the two sides disagree and the disagreement cannot be resolved by
-re-reading the code, mark the contradiction as a TODO — **never**
+re-reading the code, mark the contradiction as a TODO; **never**
 silently change the scenario text or the wireframe.
 
-## Extraction step — what to pull from the scenario
+## Extraction step: what to pull from the scenario
 
 Re-read the scenario page around the anchor and list the concrete claims
 it makes about the screen. Checklist:
@@ -65,7 +65,7 @@ it makes about the screen. Checklist:
 ### References to other diagrams or screens
 
 - If the scenario links to a sub-screen via another anchor, the current
-  wireframe does not try to cover both — each anchor gets its own SVG.
+  wireframe does not try to cover both; each anchor gets its own SVG.
 
 ## Comparison procedure
 
@@ -85,7 +85,7 @@ For each claim extracted above:
    code:
    - If code confirms the element, extend the scenario with a one-line
      mention and cite the code (scenario text is the canonical
-     description — update it, do not drop the element).
+     description: update it, do not drop the element).
    - If code does not confirm it, remove it from the wireframe.
 
 ## Contradiction TODO format
@@ -93,35 +93,35 @@ For each claim extracted above:
 Place directly below the figure reference:
 
 ```markdown
-> ⚠️ TODO: wireframe–text contradiction — <short description>.
+> ⚠️ TODO: wireframe–text contradiction: <short description>.
 > Wireframe shows: <X>. Scenario says: <Y>.
 ```
 
-Keep the prefix `wireframe–text contradiction —` stable — the
+Keep the prefix `wireframe–text contradiction:` stable; the
 orchestrator groups contradictions by it.
 
 ### Example
 
 ```markdown
-> ⚠️ TODO: wireframe–text contradiction — pořadí polí ve formuláři.
+> ⚠️ TODO: wireframe–text contradiction: pořadí polí ve formuláři.
 > Wireframe shows: e-mail → heslo → tlačítko. Scenario says: heslo →
 > e-mail → tlačítko (krok 2 a 3 v Hlavním flow).
 ```
 
 ## Wireframe-gap vs. contradiction
 
-Two TODO kinds can emerge from Step 3 — use the right one:
+Two TODO kinds can emerge from Step 3; use the right one:
 
-- **`wireframe–text contradiction`** — scenario and wireframe disagree
+- **`wireframe–text contradiction`**: scenario and wireframe disagree
   on an element that both sides describe (different label, different
   position, different state).
-- **`wireframe gap`** — scenario describes an element (or a state) but
+- **`wireframe gap`**: scenario describes an element (or a state) but
   the wireframe does not draw it, and no amount of re-reading code fills
   the blank (e.g. scenario references an error screen with no
   screenshot and no UI component in code). Format:
 
   ```markdown
-  > ⚠️ TODO: wireframe gap — <co chybí, kde>.
+  > ⚠️ TODO: wireframe gap: <co chybí, kde>.
   ```
 
 ## Resolution boundaries
@@ -151,13 +151,13 @@ Step 4 (Insert figure reference into host page and save).
 
 - **NEVER** silently rewrite the scenario text to match the wireframe or
   vice versa.
-- **NEVER** skip the extraction step — a wireframe without a list of
+- **NEVER** skip the extraction step: a wireframe without a list of
   extracted claims has not been consistency-checked.
 - **ALWAYS** cite the code when resolving a contradiction; if the code
   does not settle it, leave the TODO open.
 - **ALWAYS** keep the contradiction-TODO prefix
-  `wireframe–text contradiction —` exactly as shown, so the
+  `wireframe–text contradiction:` exactly as shown, so the
   orchestrator can group them.
-- **ALWAYS** use `wireframe gap —` for missing elements / missing
-  screens, not for disagreements — the orchestrator resolves the two
+- **ALWAYS** use `wireframe gap:` for missing elements / missing
+  screens, not for disagreements; the orchestrator resolves the two
   kinds differently.

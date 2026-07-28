@@ -23,7 +23,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends git \
  && rm -rf /var/lib/apt/lists/*
 
-# Use pnpm via corepack (faster install, deterministic)
+# corepack pins the pnpm version declared in package.json.
 RUN corepack enable
 
 COPY package.json pnpm-lock.yaml* ./
@@ -59,9 +59,9 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends nginx apache2-utils \
  && rm -rf /var/lib/apt/lists/*
 
-# Generate htpasswd from build args. Pokud nejsou nastavené, vytvoří se prázdný
-# soubor — stage se postaví v pohodě (důležité u legacy builderu, který staví
-# všechny stage), ale runtime auth zablokuje všechny požadavky (fail-secure).
+# Generate htpasswd from the build args. With none set the file comes out empty,
+# so the stage still builds (the legacy builder builds every stage) while runtime
+# auth rejects every request, which is fail-secure.
 RUN if [ -n "$BASIC_AUTH_USER" ] && [ -n "$BASIC_AUTH_PASS" ]; then \
       htpasswd -bc /etc/nginx/.htpasswd "$BASIC_AUTH_USER" "$BASIC_AUTH_PASS"; \
     else \
@@ -76,5 +76,5 @@ EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
 
 # ── Final stage selector ──────────────────────────────────────────────────────
-# Resolves SERVER_TYPE → one of the runner-* stages.
+# Resolves SERVER_TYPE to one of the runner-* stages.
 FROM runner-${SERVER_TYPE} AS final

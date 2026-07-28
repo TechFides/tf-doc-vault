@@ -1,9 +1,4 @@
-/**
- * ensure-lf.ts
- *
- * Converts CRLF line endings to LF across the project's text files.
- * Run from the project root.
- */
+/** Converts CRLF line endings to LF across the project's text files. */
 
 import fs from "node:fs";
 import path from "node:path";

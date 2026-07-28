@@ -1,20 +1,14 @@
 /**
- * Pure sorting logic for data tables, kept separate from the DOM wiring in
- * TableEnhancer.vue so it can be unit-tested. The column type is auto-detected:
- * a column whose non-empty cells all parse as numbers sorts numerically,
- * everything else sorts as text (ISO dates included — lexicographic order is
- * chronological, so no separate date handling is needed).
- *
- * Number parsing is locale-aware via the `decimal` separator: in `en` a comma
- * groups thousands and a dot is the decimal point; in `cs` (and most of
- * Europe) it's the reverse. Callers pass the separator resolved from the site
- * locale (see `getDecimalSeparator`).
+ * Pure sorting logic for data tables, kept out of TableEnhancer.vue's DOM wiring
+ * so it can be unit-tested. A column whose non-empty cells all parse as numbers
+ * sorts numerically, everything else as text; ISO dates need no special case
+ * because lexicographic order is already chronological. Number parsing follows
+ * the site locale's decimal separator (`.` in en, `,` in cs).
  */
 
 export type ColumnType = "number" | "text";
 export type SortDirection = "ascending" | "descending";
 
-/** The decimal separator for a locale (e.g. "." for en, "," for cs). */
 export function getDecimalSeparator(locale?: string): string {
   const part = new Intl.NumberFormat(locale)
     .formatToParts(1.1)
@@ -23,10 +17,9 @@ export function getDecimalSeparator(locale?: string): string {
 }
 
 /**
- * Parse a cell into a number, or null if it isn't one. Tolerates a trailing
- * `%`, group separators and surrounding whitespace so columns like `99.95%`,
- * `1,000` (en) or `1 000,5` (cs) still sort numerically. `decimal` is the
- * locale's decimal separator; the other of `.`/`,` is treated as grouping.
+ * Parse a cell into a number, or null. Tolerates a trailing `%`, group
+ * separators and whitespace, so `99.95%`, `1,000` (en) and `1 000,5` (cs) all
+ * sort numerically. Whichever of `.`/`,` is not `decimal` counts as grouping.
  */
 export function parseNumber(raw: string, decimal: string = "."): number | null {
   let s = raw.trim().replace(/\s/g, "");
@@ -53,10 +46,7 @@ export function detectColumnType(
     : "text";
 }
 
-/**
- * Compare two cell values for the given column type and direction. Empty cells
- * always sort last, regardless of direction.
- */
+/** Empty cells always sort last, regardless of direction. */
 export function compareCells(
   a: string,
   b: string,

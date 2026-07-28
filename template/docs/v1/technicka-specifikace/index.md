@@ -6,7 +6,7 @@ updated_at: 2026-04-27
 
 # Technická specifikace
 
-Jak je to postavené — architektura, integrace, deployment.
+Jak je to postavené: architektura, integrace, deployment.
 
 ## Architektura
 

@@ -13,7 +13,7 @@
       height="20"
       aria-hidden="true"
     >
-      <!-- page / background -->
+      <!-- page background -->
       <rect
         x="0"
         y="0"
@@ -23,7 +23,7 @@
         fill="currentColor"
         opacity="0.25"
       />
-      <!-- content column — width changes per mode -->
+      <!-- content column; its width tracks the current mode -->
       <rect
         :x="icon.x"
         y="0"

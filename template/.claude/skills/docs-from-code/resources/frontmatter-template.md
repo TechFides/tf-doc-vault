@@ -1,7 +1,7 @@
 # Frontmatter templates
 
 Canonical frontmatter and HTML-comment blocks for every `.md` file the
-skills generate. All example labels are in Czech with diacritics — as
+skills generate. All example labels are in Czech with diacritics, as
 they will appear in the final docs (§7 of `CLAUDE.md`).
 
 ## Content page (general)
@@ -27,7 +27,7 @@ confluence:
 …
 ```
 
-## Section index — `<section>/index.md`
+## Section index: `<section>/index.md`
 
 ```markdown
 ---
@@ -51,7 +51,7 @@ Krátký úvodní odstavec (1–2 věty).
 
 No `<!-- generated: … -->` stamp on index files (§5 of `CLAUDE.md`).
 
-## Group index — `<section>/<group>/index.md`
+## Group index: `<section>/<group>/index.md`
 
 ```markdown
 ---
@@ -84,9 +84,9 @@ Krátký úvodní odstavec.
 
 ## Confluence mark rules (§6 of CLAUDE.md)
 
-- `space` — Confluence space key (project decides; default `CNG`).
-- `title` — matches the page title for top-level synced pages.
-- `parent` — Czech title of the parent page (use `docs/vN` label at the
+- `space`: Confluence space key (project decides; default `CNG`).
+- `title`: matches the page title for top-level synced pages.
+- `parent`: Czech title of the parent page (use `docs/vN` label at the
   top level).
 - **NEVER** omit the Confluence mark on files that belong to a synced
   section.

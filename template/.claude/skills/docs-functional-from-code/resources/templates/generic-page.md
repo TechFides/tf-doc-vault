@@ -1,5 +1,5 @@
 ---
-title: <1.X Czech page title — e.g. 1.3 Glosář>
+title: <1.X Czech page title, e.g. 1.3 Glosář>
 status: draft
 updated_at: <YYYY-MM-DD>
 ---
@@ -8,7 +8,7 @@ updated_at: <YYYY-MM-DD>
 confluence:
   space: CNG
   title: <Czech page title>
-  parent: <Parent page — section or group>
+  parent: <Parent page, section or group>
 -->
 
 <!-- generated: <YYYY-MM-DD> | source: <vX.Y.Z> -->
@@ -16,7 +16,7 @@ confluence:
 ## Přehled
 
 <Jedna až dvě věty o tom, co tato stránka popisuje a komu je určena
-(z business pohledu). Implementační detaily patří do technické sekce —
+(z business pohledu). Implementační detaily patří do technické sekce,
 odkaž, neopakuj.>
 
 ## Kontext v kódu a v technické dokumentaci
@@ -49,7 +49,7 @@ zdroj. Tento blok je "TL;DR" stránky.>
 
 ## Příklad
 
-<Alespoň jeden konkrétní příklad — reálný scénář, reálný výstup,
+<Alespoň jeden konkrétní příklad: reálný scénář, reálný výstup,
 reálná chybová hláška, reálná obrazovka. Žádné abstraktní popisy bez
 příkladu. VŽDY vychází z kódu nebo technické dokumentace.>
 
@@ -61,14 +61,14 @@ Zdroj příkladu: `<path/to/file:LL>`.
 
 ## Poznámky
 
-<Volitelné — edge cases, známé limity, výjimky, business kontext,
+<Volitelné: edge cases, známé limity, výjimky, business kontext,
 plánované změny s odkazem na issue nebo ADR.>
 
-> ⚠️ TODO: <popis konkrétní mezery, pokud nějaká zůstala — např.
+> ⚠️ TODO: <popis konkrétní mezery, pokud nějaká zůstala, např.
 > "chybí popis retention pro tato data v kódu i v technické sekci">
 
 ## Odkazy
 
 - Související stránky: `functional/<page>.md`, `functional/<page>.md`
 - Technická dokumentace: `technical/<page>.md`
-- Externí: <URL — pouze pokud stabilní>
+- Externí: <URL, pouze pokud stabilní>

@@ -10,9 +10,9 @@ Running `init-tech-docs` does this:
 
 1. **Copies the bundled `template-tech-docs/` scaffold** into a new `tech-docs/` directory inside your service repo. Files that already exist are skipped, so
    re-running the command is safe.
-2. **Substitutes placeholders** throughout the copied files — `__SERVICE_ID__`, `__PROJECT__`, `__DATE__`, and optionally `__REPO__` — so generated frontmatter,
+2. **Substitutes placeholders** throughout the copied files (`__SERVICE_ID__`, `__PROJECT__`, `__DATE__`, and optionally `__REPO__`) so generated frontmatter,
    titles, and edit links already reference your project from the start.
-3. **Patches `package.json` and `.gitignore`** — adds `docs:dev`, `docs:build`, `docs:validate`, `docs:fix`, and other scripts (only those not already present),
+3. **Patches `package.json` and `.gitignore`**: adds `docs:dev`, `docs:build`, `docs:validate`, `docs:fix`, and other scripts (only those not already present),
    and appends the VitePress `dist/` and `cache/` directories to `.gitignore`.
 
 After the command runs, the service repo contains a ready-to-use `tech-docs/docs/` VitePress site. Developers write Markdown, run `docs:dev` for a live preview,
@@ -22,7 +22,7 @@ and `docs:build` produces the `dist/` folder that the application serves at `/te
 pnpm exec tf-doc-vault init-tech-docs \
   --service-id=TST \       # service identifier
   --project=testProject \  # project name
-  --repo=myorg/myrepo      # optional — GitHub/GitLab repo for edit links
+  --repo=myorg/myrepo      # optional: GitHub/GitLab repo for edit links
 ```
 
 ## Options
@@ -61,7 +61,7 @@ pnpm exec tf-doc-vault init-tech-docs \
    npm run docs:dev   # http://localhost:5173/tech-docs/
    ```
 
-4. **Add the `docs-build` stage to the Dockerfile** — see [`template-tech-docs/docs-build-stage.md`](../template-tech-docs/docs-build-stage.md).
+4. **Add the `docs-build` stage to the Dockerfile**, see [`template-tech-docs/docs-build-stage.md`](../template-tech-docs/docs-build-stage.md).
 
 5. **Call `setupTechDocs()` in `main.ts`:**
 
@@ -73,7 +73,7 @@ pnpm exec tf-doc-vault init-tech-docs \
    });
    ```
 
-   If `auth.password` is empty or `dist/` does not exist, `setupTechDocs` does nothing — the middleware is a no-op in production where the env var is unset.
+   If `auth.password` is empty or `dist/` does not exist, `setupTechDocs` does nothing; the middleware is a no-op in production where the env var is unset.
 
 6. **Set the `TECH_DOCS_PASSWORD` env variable** (dev/staging only, not prod).
 

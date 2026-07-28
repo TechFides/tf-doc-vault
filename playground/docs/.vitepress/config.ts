@@ -17,7 +17,7 @@ export default makeConfig({
   project: "playground",
   strings: {
     ...enStrings,
-    title: "tf-doc-vault — playground",
+    title: "tf-doc-vault playground",
     description: "Local theme dev sandbox",
   },
   branding: {

@@ -4,10 +4,7 @@ import { useRoute } from "vitepress";
 
 const ACTIVE_CLASS = "scroll-active";
 
-/**
- * Scroll-spy: highlights sidebar links matching the currently visible heading.
- * Listens for scroll events and picks the topmost heading above the viewport.
- */
+/** Highlights the sidebar link for the heading currently in view. */
 export function useScrollSpy(): void {
   const route = useRoute();
   let headings: HTMLElement[] = [];
@@ -26,7 +23,7 @@ export function useScrollSpy(): void {
     currentActiveId = id;
     clearActive();
 
-    // Find matching sidebar link — match the hash portion at the end of href
+    // Sidebar hrefs carry the full path, so match on the hash suffix.
     const links =
       document.querySelectorAll<HTMLAnchorElement>(".VPSidebar a[href]");
     let link: HTMLAnchorElement | null = null;
@@ -41,7 +38,7 @@ export function useScrollSpy(): void {
 
     link.classList.add(ACTIVE_CLASS);
 
-    // Auto-expand parent collapsed group if needed
+    // A collapsed ancestor group only opens by clicking its caret.
     let parent = link.closest(".VPSidebarItem.collapsed");
     while (parent) {
       const caret = parent.querySelector<HTMLElement>(".caret");
@@ -105,7 +102,7 @@ export function useScrollSpy(): void {
   }
 
   function delayedSetup(): void {
-    // Wait for DOM to stabilize after page transition
+    // VitePress swaps the page asynchronously; 300 ms lets the new DOM settle.
     void nextTick().then(() => {
       setTimeout(setup, 300);
     });
