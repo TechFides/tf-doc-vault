@@ -116,7 +116,7 @@ stages:
 🐳 build:docs:
   stage: build
   needs: ["🧹 lint:typecheck", "🧹 lint:eslint", "🧹 lint:docs"]
-  image: google/cloud-sdk:slim@sha256:a26856716c935af74febff4c5fa16cc00827f1343186ae108a8e6788cd082467
+  image: google/cloud-sdk:slim@sha256:4ff69e21bec9a7d0ed54d0134a9b9682fc8008252cb5f173a23ddd70b8e024a4
   services:
     - name: docker:29.4-dind@sha256:685b91dca8eab7de1dce1c303dbb7a763e4082d6a60db10968adf3295fbd2495
       command: ["--registry-mirror", "https://mirror.gcr.io"]
@@ -153,7 +153,7 @@ stages:
 🚀 deploy:docs:
   stage: deploy
   needs: ["🐳 build:docs"]
-  image: google/cloud-sdk:slim@sha256:a26856716c935af74febff4c5fa16cc00827f1343186ae108a8e6788cd082467
+  image: google/cloud-sdk:slim@sha256:4ff69e21bec9a7d0ed54d0134a9b9682fc8008252cb5f173a23ddd70b8e024a4
   environment:
     name: production
   dependencies: []
