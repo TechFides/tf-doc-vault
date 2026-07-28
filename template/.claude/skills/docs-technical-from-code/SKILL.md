@@ -141,7 +141,7 @@ Return to the orchestrator:
 - **Confluence marks required**: per §6 of CLAUDE.md.
 
 Per-group nuances (what to emphasize for architecture vs. security vs.
-tests vs. guides, etc.) are captured inside the corresponding templates;
+tests vs. guides, etc.) are captured inside the corresponding templates,
 not hard-coded in this file.
 
 ## Resources

@@ -242,6 +242,7 @@ function demoteCellHeadings(table: AdfNode): AdfNode {
  * Confluence table whose first row is plain `tableCell` has none. Promote that
  * row to `tableHeader`, but only when its cells are simple: promoting a row with
  * block content makes the library emit a newline that breaks the pipe table.
+ * Those tables stay as they are and the library renders their cells with `<br>`.
  */
 function ensureTableHeader(node: AdfNode): AdfNode {
   const rows = asNodes(node.content);

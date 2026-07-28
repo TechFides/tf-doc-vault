@@ -78,6 +78,8 @@ if (WATCH) {
   );
 
   copyStaticFiles(SRC, DIST);
+  // Same rule as copyStaticFiles: tsc owns the .d.ts of any compiled .ts source,
+  // so only standalone ambient declarations get copied.
   const isStaticOrAmbient = (name) =>
     STATIC_EXTENSIONS.has(path.extname(name)) ||
     (isAmbientDts(name) &&

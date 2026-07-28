@@ -1,5 +1,5 @@
 ---
-description: Generate diagrams (Mermaid primary, PlantUML fallback) for already-generated documentation pages, by attaching them to `<!-- diagram-anchor: ... -->` markers. Runs AFTER textual content is confirmed stable. Does NOT invent diagrams for pages without anchors. Performs a consistency check between each diagram and the host page text.
+description: "Generate diagrams (Mermaid primary, PlantUML fallback) for already-generated documentation pages, by attaching them to `<!-- diagram-anchor: ... -->` markers. Runs AFTER textual content is confirmed stable. Does NOT invent diagrams for pages without anchors. Performs a consistency check between each diagram and the host page text."
 argument-hint: [auto]   # optional: pass 'auto' to reduce per-diagram pausing (opt-in only)
 ---
 

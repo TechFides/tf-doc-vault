@@ -388,8 +388,9 @@ export function makeConfig(
       ...overrideVite,
     },
     ignoreDeadLinks: [/^https?:\/\/localhost/],
-    /* Mermaid colors come from CSS (`.mermaid` in theme/styles/base.css) off the
-       --brand-* tokens, so overriding a token recolors diagrams in both modes.
+    /* Mermaid colors come from CSS (`.mermaid` and `.dark .mermaid` in
+       theme/styles/base.css) off the --brand-* tokens, so overriding a token
+       recolors diagrams in both modes.
        `themeVariables` stays unset: vitepress-plugin-mermaid forces
        theme="dark" under <html>.dark and would ignore it. */
     mermaid: {

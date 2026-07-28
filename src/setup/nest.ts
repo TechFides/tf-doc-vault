@@ -45,6 +45,9 @@ export async function setupTechDocs(
     opts = (appOrOpts as SetupTechDocsOptions) ?? {};
   }
 
+  // createTechDocsHandler derives its default distDir from basePath, so the
+  // positional form has to hand it down. Note this writes into the caller's
+  // object: reusing one options literal across two mounts pins the first path.
   opts.basePath = opts.basePath ?? basePath;
 
   const handler = await createTechDocsHandler(opts);

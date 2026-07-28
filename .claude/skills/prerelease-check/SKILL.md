@@ -92,8 +92,8 @@ Confirm specifically:
   `./setup/express`, `./setup/nest`, the config/template/docker subpaths.
 - `src/index.ts` still exports `makeConfig`, `createTheme`, the sidebar
   generators, and **`setupTechDocs` is still NOT re-exported from the root**
-  (it's built separately by unbuild; a root re-export dangles at runtime; this
-  is a hard limit in AGENTS.md).
+  (it's built separately by unbuild, so a root re-export dangles at runtime).
+  This is a hard limit in AGENTS.md.
 - Dispatcher subcommands unchanged: `create`, `init-tech-docs`,
   `import-confluence`, `export-pdf`, `pdf`, `validate`, `normalize`, `fix`.
 

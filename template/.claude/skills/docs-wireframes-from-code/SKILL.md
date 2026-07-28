@@ -1,6 +1,6 @@
 ---
 name: docs-wireframes-from-code
-description: Generates SVG wireframes for already-generated documentation pages. Attaches wireframes at the `<!-- wireframe-anchor: <id> -->` markers placed by the functional phase (typically inside scenario files); it does NOT invent wireframes for pages without anchors. Inputs include the codebase, already-generated docs, shared SVG fragments from `wf-fragments/`, and optional user-provided screenshots used as layout reference. ALWAYS runs as the last phase, AFTER text and diagrams are confirmed stable. Invoked by the docs-from-code orchestrator or by /docs-wireframes. DO NOT trigger for text generation, diagrams, sales, or pre-code design. Always inherits rules from CLAUDE.md.
+description: "Generates SVG wireframes for already-generated documentation pages. Attaches wireframes at the `<!-- wireframe-anchor: <id> -->` markers placed by the functional phase (typically inside scenario files); it does NOT invent wireframes for pages without anchors. Inputs include the codebase, already-generated docs, shared SVG fragments from `wf-fragments/`, and optional user-provided screenshots used as layout reference. ALWAYS runs as the last phase, AFTER text and diagrams are confirmed stable. Invoked by the docs-from-code orchestrator or by /docs-wireframes. DO NOT trigger for text generation, diagrams, sales, or pre-code design. Always inherits rules from CLAUDE.md."
 ---
 
 # docs-wireframes-from-code: Wireframes phase

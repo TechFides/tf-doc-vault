@@ -370,9 +370,11 @@ html.layout-max .VPContent {
 }
 
 /* Zebra striping. These nth-child rules are the pre-hydration and no-JS
-   fallback. TableEnhancer.vue then tags rows `.tf-row` / `.tf-stripe` and
-   reassigns them on every sort and filter; those class rules follow here and
-   outrank nth-child, whose paint goes stale once hidden rows shift the parity. */
+   fallback; their paint goes stale once a sort or filter shifts the parity.
+   TableEnhancer.vue therefore tags rows `.tf-row` / `.tf-stripe` and reassigns
+   them on every sort and filter. Those class rules follow here and each needs
+   its own `.dark` variant to outrank `.dark ... :nth-child(even)`, which is why
+   the dark rules below are not redundant duplicates. */
 .vp-doc table tr:nth-child(even) {
   background-color: var(--brand-surface);
 }

@@ -55,7 +55,7 @@ are illustrative; real navigation is described in the scenario page.
 ### 4. `<foreignObject>` with executable HTML/JS
 
 **Why**: HTML inside `<foreignObject>` can contain `<script>`, event
-handlers, or `javascript:` URIs; the same attack surface as the above, just
+handlers, or `javascript:` URIs, the same attack surface as the above, just
 tunneled through SVG.
 
 ```xml

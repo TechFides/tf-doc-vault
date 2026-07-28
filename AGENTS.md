@@ -64,7 +64,7 @@ Applies to every language in the repo, TypeScript, Vue, CSS and shell alike.
 - Aim for one or two lines. Go longer only for genuinely non-trivial context (SSR hydration, bundler quirks, auth traps).
 - English everywhere, including `template/` and `template-tech-docs/`.
 - JSDoc stays on the published surface (`makeConfig` options, `createTheme`, `setupTechDocs`, the sidebar generators) because it is the only documentation a consumer sees in their editor. Keep it short. On internal helpers, write JSDoc only when it explains behaviour that the signature does not.
-- Section banners (`// ─── name ───`) belong only in files over roughly 300 lines. A file header is one to three lines about the module's role, with no `Usage:` block duplicating `--help`.
+- Section banners (`// ─── name ───`) are for long, multi-concern files where they genuinely aid navigation, not a default. Do not use them as decoration in a short file, and never as a label that only repeats the declaration below it. A file header is one to three lines about the module's role, with no `Usage:` block duplicating `--help`.
 - In tests, keep the note about why a test exists, written in the present tense.
 
 ### Prose

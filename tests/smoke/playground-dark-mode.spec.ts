@@ -33,7 +33,7 @@ test("dark-mode navbar chrome paints over VitePress internals", async ({
   await page.waitForLoadState("networkidle");
 
   // VitePress animates the navbar background-color, so measuring right after
-  // the dark-mode toggle would read an intermediate colour.
+  // the dark-mode toggle would read an intermediate color.
   await page.addStyleTag({
     content:
       "*, *::before, *::after { transition: none !important; animation: none !important; }",

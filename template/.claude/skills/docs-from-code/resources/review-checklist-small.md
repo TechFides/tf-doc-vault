@@ -61,7 +61,7 @@ whether to fix now or defer.
 
 ## Rules
 
-- **NEVER** mark a row `ok` without actually checking; no heuristics.
+- **NEVER** mark a row `ok` without actually checking, and never guess.
 - **ALWAYS** report unresolved TODOs, even if small in count.
 - The review is lightweight; **NEVER** attempt semantic checks (e.g.
   "is this diagram useful?"). That belongs to `/docs-review`.

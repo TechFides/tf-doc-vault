@@ -17,7 +17,7 @@ the generation plan with cited evidence.
 
 - **Code** is primary: the source of truth for behavior.
 - **`docs/<version>/technical/`** is secondary (only if already
-  generated) is a faster, digested lookup. **ALWAYS** cross-check
+  generated), a faster and already digested lookup. **ALWAYS** cross-check
   against code when a detail is behavior-critical.
 
 When the technical section is not available in this run, rely on code
