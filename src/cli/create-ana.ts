@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * create-ana: scaffold a new TFSA analysis documentation repo from the bundled
- * template, filling in the __PROJECT__ / __GCP_PROJECT__ / __SERVER_TYPE__
+ * boilerplate, filling in the __PROJECT__ / __GCP_PROJECT__ / __SERVER_TYPE__
  * placeholders and creating the first git commit.
  */
 
@@ -9,22 +9,18 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { parseArgs, replacePlaceholders, findAncestorFile } from "./utils.js";
 import {
-  parseArgs,
-  copyDir,
-  replacePlaceholders,
-  findAncestorFile,
-  type ParsedArgs,
-} from "./utils.js";
+  PACKAGE_DIR,
+  applyCopyPlan,
+  listTemplates,
+  originUrl,
+  resolveCopyPlan,
+  resolveDependencyValue,
+  resolveSource,
+} from "./scaffold.js";
 
-// gitlab, not github: the scaffold's CI token `insteadOf` rewrite only covers gitlab.com.
-const GITLAB_HOST = "gitlab.com";
-const GITLAB_GROUP = "techfides/tf-analysis";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// dist/cli → package root
-const PACKAGE_DIR = path.resolve(__dirname, "..", "..");
-const TEMPLATE_DIR = path.join(PACKAGE_DIR, "template");
+const TEMPLATE_NAME = "ana-docs";
 
 function usage(exitCode = 0): never {
   console.log(`
@@ -63,77 +59,6 @@ Examples:
   create-ana erp_ana  --no-git                                 # embed inside an existing repo
 `);
   process.exit(exitCode);
-}
-
-function packageVersion(): string {
-  try {
-    const pkgPath = path.join(PACKAGE_DIR, "package.json");
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as {
-      version?: string;
-    };
-    return pkg.version ?? "0.1.0";
-  } catch {
-    return "0.1.0";
-  }
-}
-
-export function resolveSource(flags: ParsedArgs["flags"]): string {
-  return String(flags.source ?? (flags.dev ? "file" : "npm"));
-}
-
-/**
- * The `@techfides/tf-doc-vault` dependency spec written into the scaffold.
- * Defaults to the published npm version so CI and the Docker build need no git
- * credentials. `ctx` is injectable for tests.
- */
-export function resolveDependencyValue(
-  flags: ParsedArgs["flags"],
-  targetDir: string,
-  ctx: { version: string; packageDir: string } = {
-    version: packageVersion(),
-    packageDir: PACKAGE_DIR,
-  },
-): string {
-  const source = resolveSource(flags);
-  // typeof, not ??: a bare value-flag (`--ref` with no `=value`) parses as
-  // boolean `true`, which `??` would interpolate as the literal "true".
-  const ref = typeof flags.ref === "string" ? flags.ref : `v${ctx.version}`;
-  const gitUrl =
-    typeof flags["git-url"] === "string"
-      ? flags["git-url"]
-      : "git+ssh://git@github.com/techfides/tf-doc-vault.git";
-
-  switch (source) {
-    case "npm":
-      return ctx.version;
-    case "git":
-      return `${gitUrl}#${ref}`;
-    case "file": {
-      const target =
-        typeof flags["file-path"] === "string"
-          ? flags["file-path"]
-          : path.relative(targetDir, ctx.packageDir);
-      return `file:${target}`;
-    }
-    default:
-      console.error(`✗ Invalid --source: ${source}. Use npm | git | file.`);
-      process.exit(1);
-  }
-}
-
-export function originUrl(projectName: string): string {
-  return `git@${GITLAB_HOST}:${GITLAB_GROUP}/${projectName}.git`;
-}
-
-/**
- * `npm pack` strips `.npmrc` and `.gitignore` from published packages, so the
- * template ships them as `_npmrc` / `_gitignore` and renames them on copy.
- */
-function consumerName(templateName: string): string {
-  if (templateName === "_npmrc") return ".npmrc";
-  if (templateName === "_gitignore") return ".gitignore";
-  if (templateName === "_pnpm-workspace.yaml") return "pnpm-workspace.yaml";
-  return templateName;
 }
 
 /**
@@ -223,6 +148,12 @@ function main(): void {
     process.exit(1);
   }
 
+  const manifest = listTemplates().find((t) => t.name === TEMPLATE_NAME);
+  if (!manifest) {
+    console.error(`✗ Template not found: ${TEMPLATE_NAME}`);
+    process.exit(1);
+  }
+
   const gcpProject = String(
     flags["gcp-project"] ?? `tfsa-${projectName.replace(/_/g, "-")}`,
   );
@@ -243,9 +174,10 @@ function main(): void {
     );
   }
 
-  const targetDir = path.resolve(process.cwd(), projectName);
+  const plan = resolveCopyPlan(manifest, { name: projectName });
+  const targetDir = plan.target;
   const vitepressCommonDep = resolveDependencyValue(flags, targetDir);
-  const skipGit = Boolean(flags["no-git"]);
+  const skipGit = !manifest.git.init || Boolean(flags["no-git"]);
 
   if (fs.existsSync(targetDir)) {
     console.error(`✗ Target already exists: ${targetDir}`);
@@ -260,9 +192,10 @@ function main(): void {
   console.log(`  common    : ${vitepressCommonDep}`);
   console.log(`  git       : ${skipGit ? "no (embedded)" : "yes"}`);
 
-  copyDir(TEMPLATE_DIR, targetDir, { renameEntry: consumerName });
+  applyCopyPlan(plan);
 
   replacePlaceholders(targetDir, {
+    ...plan.placeholders,
     __PROJECT__: projectName,
     __PROJECT_DASHED__: projectName.replace(/_/g, "-"),
     __GCP_PROJECT__: gcpProject,
@@ -276,10 +209,12 @@ function main(): void {
   });
 
   const ancestorWorkspace = findAncestorFile(targetDir, "pnpm-workspace.yaml");
-  warnIfEmbeddedInWorkspace(targetDir, ancestorWorkspace);
+  if (manifest.workspaceWarning) {
+    warnIfEmbeddedInWorkspace(targetDir, ancestorWorkspace);
+  }
 
   // Embedded scaffolds share the parent workspace's lockfile at its root.
-  if (!ancestorWorkspace) generateLockfile(targetDir);
+  if (manifest.lockfile && !ancestorWorkspace) generateLockfile(targetDir);
 
   if (!skipGit) {
     // `-c init.defaultBranch=master` rather than `git init -b` (git >= 2.28):

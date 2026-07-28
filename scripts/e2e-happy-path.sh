@@ -7,7 +7,7 @@
 # just runs the same container on port 8080, which this script exercises).
 #
 # It scaffolds with the default npm source, so the scaffolded site consumes the
-# PUBLISHED @techfides/tf-doc-vault library: this branch's template and CLI run
+# PUBLISHED @techfides/tf-doc-vault library: this branch's boilerplate and CLI run
 # locally, but the shipped library code does not. Run it on a clean checkout
 # while package.json still points at the published version, i.e. BEFORE the
 # release version bump, otherwise the pinned version cannot resolve from npm.
@@ -32,7 +32,7 @@ CT="tf-doc-vault-e2e-$$"
 PORT="${PORT:-8099}"
 BUSER="${BASIC_AUTH_USER:-docs}"
 BPASS="${BASIC_AUTH_PASS:-s3cret-pw}"
-# Guard mktemp: an empty $WORK would make create-ana scaffold into the repo.
+# Guard mktemp: an empty $WORK would make the scaffolder write into the repo.
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/tf-doc-vault-e2e.XXXXXX")" || die "mktemp failed"
 [ -n "$WORK" ] && [ -d "$WORK" ] || die "mktemp did not create a work dir"
 
@@ -45,7 +45,7 @@ trap cleanup EXIT
 
 docker info >/dev/null 2>&1 || die "docker daemon not available"
 
-step "0. build local package (dist/cli + template must be current)"
+step "0. build local package (dist/cli + boilerplate must be current)"
 (cd "$REPO" && pnpm build) >/dev/null 2>&1 || die "pnpm build failed"
 pass "local build ok"
 

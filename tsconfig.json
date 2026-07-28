@@ -19,7 +19,8 @@
   "include": ["src/**/*.ts"],
   "exclude": [
     "node_modules",
-    "template",
+    "boilerplate",
+    "templates",
     "dist",
     "src/**/*.vue",
     "src/**/*.css"

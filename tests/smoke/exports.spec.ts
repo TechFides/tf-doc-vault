@@ -8,6 +8,8 @@ const SUBPATHS = [
   "@techfides/tf-doc-vault/docker/Dockerfile",
   "@techfides/tf-doc-vault/docker/nginx.conf",
   "@techfides/tf-doc-vault/docker/nginx-auth.conf",
+  // Wildcard subpath export: a bare directory export resolves nothing.
+  "@techfides/tf-doc-vault/templates/ana-docs/docs/index.md",
 ];
 
 for (const subpath of SUBPATHS) {

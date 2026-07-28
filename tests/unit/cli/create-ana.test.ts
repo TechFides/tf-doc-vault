@@ -6,7 +6,7 @@ import {
   resolveSource,
   resolveDependencyValue,
   originUrl,
-} from "../../../src/cli/create-ana.js";
+} from "../../../src/cli/scaffold.js";
 
 const CTX = { version: "9.9.9", packageDir: "/abs/pkg" };
 

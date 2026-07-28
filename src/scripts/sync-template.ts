@@ -1,6 +1,6 @@
 /**
  * Compares a consumer repo's infrastructure files (Dockerfile, CI, configs,
- * Terraform) against the bundled `template/` baseline and reports drift.
+ * Terraform) against the bundled `boilerplate/` baseline and reports drift.
  * Placeholders such as `__PROJECT__` are auto-detected from the consumer repo:
  * directory name, package.json scripts and terraform.tfvars.
  */
@@ -13,14 +13,20 @@ import { fileURLToPath } from "node:url";
 
 const PROJECT_ROOT = process.cwd();
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
-// dist/scripts/sync-template.js → package root → template/
-const TEMPLATE_DIR = path.resolve(SCRIPT_DIR, "..", "..", "template");
+// dist/scripts/sync-template.js → package root → boilerplate/
+export const BOILERPLATE_DIR = path.resolve(
+  SCRIPT_DIR,
+  "..",
+  "..",
+  "boilerplate",
+);
 
-const TRACKED_FILES: string[] = [
+// Every entry needs a counterpart in the boilerplate: a missing one counts as
+// an error, so tracking a file the package does not ship fails every sync run.
+export const TRACKED_FILES: string[] = [
   "Dockerfile",
   ".gitlab-ci.yml",
   ".gitignore",
-  ".npmrc",
   ".prettierrc",
   ".prettierignore",
   "eslint.config.js",
@@ -165,28 +171,34 @@ function unifiedDiff(actualPath: string, expected: string): string {
 
 interface Result {
   rel: string;
-  status: "ok" | "missing" | "drift";
+  status: "ok" | "missing" | "drift" | "no-baseline";
   diff?: string;
   expected?: string;
 }
 
-// `npm pack` strips dotfiles, so the template ships .gitignore / .npmrc
+// `npm pack` strips dotfiles, so the boilerplate ships .gitignore / .npmrc
 // under _gitignore / _npmrc and the scaffolder renames on copy. Mirror the
-// same mapping when resolving the template counterpart of a consumer file.
-function templateNameFor(rel: string): string {
+// same mapping when resolving the boilerplate counterpart of a consumer file.
+export function boilerplateNameFor(rel: string): string {
   if (rel === ".gitignore") return "_gitignore";
   if (rel === ".npmrc") return "_npmrc";
   return rel;
 }
 
+export function resolveBoilerplatePath(rel: string): string {
+  return path.join(BOILERPLATE_DIR, boilerplateNameFor(rel));
+}
+
 function inspect(rel: string, placeholders: Record<string, string>): Result {
   const consumerPath = path.join(PROJECT_ROOT, rel);
-  const templatePath = path.join(TEMPLATE_DIR, templateNameFor(rel));
+  const boilerplatePath = resolveBoilerplatePath(rel);
 
-  if (!fs.existsSync(templatePath)) return { rel, status: "ok" };
+  // A tracked file with no counterpart means the package lost it. Reporting
+  // that as "ok" would keep the regression silent.
+  if (!fs.existsSync(boilerplatePath)) return { rel, status: "no-baseline" };
 
   const expected = renderTemplate(
-    fs.readFileSync(templatePath, "utf-8"),
+    fs.readFileSync(boilerplatePath, "utf-8"),
     placeholders,
   );
 
@@ -212,56 +224,82 @@ function applyResult(r: Result): void {
   fs.writeFileSync(consumerPath, r.expected);
 }
 
-const flags = parseFlags(process.argv.slice(2));
-const placeholders = detectPlaceholders();
-const tracked = flags.files ?? TRACKED_FILES;
+function main(): void {
+  const flags = parseFlags(process.argv.slice(2));
+  const placeholders = detectPlaceholders();
+  const tracked = flags.files ?? TRACKED_FILES;
 
-console.log(
-  `Comparing ${tracked.length} file(s) against the @techfides/tf-doc-vault template.`,
-);
-console.log(`  cwd      : ${PROJECT_ROOT}`);
-console.log(`  template : ${TEMPLATE_DIR}`);
-console.log(`  detected : ${JSON.stringify(placeholders)}\n`);
+  console.log(
+    `Comparing ${tracked.length} file(s) against the @techfides/tf-doc-vault boilerplate.`,
+  );
+  console.log(`  cwd         : ${PROJECT_ROOT}`);
+  console.log(`  boilerplate : ${BOILERPLATE_DIR}`);
+  console.log(`  detected    : ${JSON.stringify(placeholders)}\n`);
 
-let drifted = 0;
-let missing = 0;
-let okCount = 0;
+  let drifted = 0;
+  let missing = 0;
+  let noBaseline = 0;
+  let okCount = 0;
 
-for (const rel of tracked) {
-  const r = inspect(rel, placeholders);
-  if (r.status === "ok") {
-    console.log(`  ✓ ${rel}`);
-    okCount++;
-    continue;
-  }
+  for (const rel of tracked) {
+    const r = inspect(rel, placeholders);
+    if (r.status === "ok") {
+      console.log(`  ✓ ${rel}`);
+      okCount++;
+      continue;
+    }
 
-  if (r.status === "missing") {
-    console.log(`  ! missing  ${rel}`);
-    missing++;
+    if (r.status === "no-baseline") {
+      console.log(`  ✗ no baseline  ${rel} (not in the boilerplate)`);
+      noBaseline++;
+      continue;
+    }
+
+    if (r.status === "missing") {
+      console.log(`  ! missing  ${rel}`);
+      missing++;
+      if (flags.apply) {
+        applyResult(r);
+        console.log(`     → created from the boilerplate`);
+      }
+      continue;
+    }
+
+    drifted++;
+    console.log(`\n  ✗ drift    ${rel}`);
+    if (r.diff) console.log(r.diff);
     if (flags.apply) {
       applyResult(r);
-      console.log(`     → created from template`);
+      console.log(`     → overwritten from the boilerplate`);
     }
-    continue;
   }
 
-  drifted++;
-  console.log(`\n  ✗ drift    ${rel}`);
-  if (r.diff) console.log(r.diff);
-  if (flags.apply) {
-    applyResult(r);
-    console.log(`     → overwritten from template`);
+  console.log();
+  if (drifted + missing + noBaseline === 0) {
+    console.log(`✓ all in sync (${okCount} files)`);
+    return;
   }
-}
-
-const total = drifted + missing;
-console.log();
-if (total === 0) {
-  console.log(`✓ all in sync (${okCount} files)`);
-} else if (flags.apply) {
-  console.log(`✓ applied: ${drifted} drift + ${missing} missing → resolved`);
-} else {
-  console.log(`✗ ${drifted} drift, ${missing} missing, ${okCount} ok`);
-  console.log(`  To apply, run: tf-doc-vault sync --apply`);
+  if (flags.apply && noBaseline === 0) {
+    console.log(`✓ applied: ${drifted} drift + ${missing} missing → resolved`);
+    return;
+  }
+  console.log(
+    `✗ ${drifted} drift, ${missing} missing, ${noBaseline} without a baseline, ${okCount} ok`,
+  );
+  if (!flags.apply) console.log(`  To apply, run: tf-doc-vault sync --apply`);
   process.exit(1);
 }
+
+// Run main() only when invoked as a CLI, so a test can import the resolution
+// helpers without diffing the cwd.
+const invokedAsScript = ((): boolean => {
+  const entry = process.argv[1];
+  if (!entry) return false;
+  try {
+    return fs.realpathSync(entry) === fileURLToPath(import.meta.url);
+  } catch {
+    return false;
+  }
+})();
+
+if (invokedAsScript) main();

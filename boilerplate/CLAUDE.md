@@ -66,10 +66,15 @@ docs/
 - `<section>/index.md` and `<group>/index.md` are **mandatory**; they
   provide the Czech menu label and explicit ordering (`order:` in
   frontmatter). They are not rendered as regular pages.
+- The sidebar is generated from the directory structure: a section without
+  subfolders lists its files directly, a section with subfolders groups them
+  into collapsible groups.
 - Folder and file names: `kebab-case`.
 - Alphabetical order by default; use `order:` in `index.md` frontmatter or
   `01-`, `02-` prefixes when a fixed order is required.
-- Shared images: `docs/public/images/`. Local images: next to the `.md` file.
+- When adding or removing files, update the links in the affected `index.md`.
+- Shared images: `docs/public/images/`, referenced absolutely as
+  `/images/foo.png`. Local images: next to the `.md` file.
 - `print.md` is generated: do not edit it, and it is not versioned.
 
 ## 5. Mandatory frontmatter
@@ -92,7 +97,8 @@ updated_at: 2026-04-23
 
 - `index.md` files additionally include `order: <number>` for menu ordering.
 - If the user does not specify `status`, use `draft`.
-- `updated_at` is taken from the system context (`currentDate`).
+- `updated_at` is taken from the system context (`currentDate`) and is
+  refreshed on every content change of the file.
 - The `title` field includes the hierarchical numbering prefix from the
   skill's `proposed-structure.md` (e.g. `2.4 Architektura systému`,
   `2.4.1 Komponentový diagram`). Numbering is authoritative in
@@ -198,9 +204,21 @@ A **comprehensive review** is handled by a separate command/skill
 | `/docs-diagrams`           | Diagrams; run after textual content is stable  |
 | `/docs-wireframes`         | SVG wireframes; the last step                  |
 
+Local preview:
+
+```bash
+pnpm docs:dev   # http://localhost:5173
+```
+
 Build and validation (run before commit):
 
 ```bash
-pnpm run fix
+pnpm run fix          # LF, frontmatter, format, lint, validate (docs:fix inside a service repo)
 pnpm run docs:build
+```
+
+Validation without the fixes:
+
+```bash
+pnpm docs:validate    # frontmatter, broken links, missing images, markdown lint
 ```

@@ -1,5 +1,5 @@
-template/
-template-tech-docs/
+boilerplate/
+templates/
 CHANGELOG.md
 pnpm-lock.yaml
 dist/

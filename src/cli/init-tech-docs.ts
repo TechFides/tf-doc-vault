@@ -1,18 +1,16 @@
 #!/usr/bin/env node
 /**
  * init-tech-docs: scaffold a tech-docs/ directory inside an existing service
- * repo from the bundled template, then idempotently add the docs:* scripts to
- * package.json and the build outputs to .gitignore.
+ * repo from the bundled boilerplate, then idempotently add the docs:* scripts
+ * to package.json and the build outputs to .gitignore.
  */
 
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { parseArgs, copyDir, replacePlaceholders } from "./utils.js";
+import { parseArgs, replacePlaceholders } from "./utils.js";
+import { applyCopyPlan, listTemplates, resolveCopyPlan } from "./scaffold.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// dist/cli → package root
-const TEMPLATE_DIR = path.resolve(__dirname, "..", "..", "template-tech-docs");
+const TEMPLATE_NAME = "tech-docs";
 
 function usage(exitCode = 0): never {
   console.log(`
@@ -69,6 +67,21 @@ function updatePackageJson(dir: string): void {
   console.log(`  package.json updated (+${added} scripts)`);
 }
 
+/**
+ * The docs folder needs `type: module` of its own: the host repo may be CommonJS
+ * and the VitePress config is ESM.
+ */
+function writeMinimalPackageJson(dir: string): void {
+  const pkgPath = path.join(dir, "package.json");
+  if (fs.existsSync(pkgPath)) return;
+  fs.writeFileSync(
+    pkgPath,
+    JSON.stringify({ private: true, type: "module" }, null, 2) + "\n",
+    "utf-8",
+  );
+  console.log(`  ${path.basename(dir)}/package.json created`);
+}
+
 const GITIGNORE_ENTRIES = [
   "tech-docs/docs/.vitepress/dist/",
   "tech-docs/docs/.vitepress/cache/",
@@ -100,10 +113,18 @@ if (!serviceId) {
   usage(1);
 }
 
+const manifest = listTemplates().find((t) => t.name === TEMPLATE_NAME);
+if (!manifest) {
+  console.error(`✗ Template not found: ${TEMPLATE_NAME}`);
+  process.exit(1);
+}
+
 const cwd = process.cwd();
 const project = String(flags.project ?? path.basename(cwd));
 const repo = flags.repo;
-const outputDir = path.join(cwd, "tech-docs");
+// No answers to carry: the manifest defaults decide, so the deploy files stay out.
+const plan = resolveCopyPlan(manifest, {}, { cwd });
+const outputDir = plan.target;
 
 console.log(`\nInitializing tech-docs/`);
 console.log(`  service-id : ${String(serviceId)}`);
@@ -111,23 +132,20 @@ console.log(`  project    : ${project}`);
 if (repo) console.log(`  repo       : ${String(repo)}`);
 console.log();
 
-const { copied, skipped } = copyDir(TEMPLATE_DIR, outputDir, {
-  idempotent: true,
-  // config.ts → config.mts: forces esbuild to treat the file as ESM so it can
-  // import from @techfides/tf-doc-vault which is an ESM-only package.
-  renameEntry: (name) => (name === "config.ts" ? "config.mts" : name),
-});
+const { copied, skipped } = applyCopyPlan(plan);
 console.log(`  copied: ${copied} file(s), skipped: ${skipped} (already exist)`);
 
 replacePlaceholders(outputDir, {
+  ...plan.placeholders,
   __SERVICE_ID__: String(serviceId),
   __PROJECT__: project,
   __DATE__: new Date().toISOString().slice(0, 10),
   ...(repo ? { __REPO__: String(repo) } : {}),
 });
 
-updatePackageJson(cwd);
-updateGitignore(cwd);
+if (manifest.host.minimalPackageJson) writeMinimalPackageJson(outputDir);
+if (manifest.host.packageJsonScripts) updatePackageJson(cwd);
+if (manifest.host.gitignore) updateGitignore(cwd);
 
 console.log(`
 ✓ Done. Next steps:
@@ -146,24 +164,6 @@ console.log(`
   3) Install dependencies and start a local preview:
        npm install && npm run docs:dev
 
-  4) Add a docs-build stage to your Dockerfile:
-       see /tech-docs/docs-build-stage.md
-
-  5) Call setupTechDocs() in main.ts (NestJS):
-       import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
-       await setupTechDocs("tech-docs", app, {
-         auth: { username: "docs", password: process.env.TECH_DOCS_PASSWORD },
-         basePath: '/tech-docs/',
-       });
-
-  6) Set the TECH_DOCS_PASSWORD env variable (dev/staging only, not prod).
-
-  7) Build the documentation locally:
-      npm run docs:build
-
-  8) Start the application (likely \`npm run dev\`):
-      Check that the documentation is served at the /tech-docs/ route
-
-      Username: docs
-      Password: stored in the TECH_DOCS_PASSWORD env variable
+  4) Build the documentation locally:
+       npm run docs:build
 `);

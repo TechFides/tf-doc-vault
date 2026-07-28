@@ -55,10 +55,10 @@ jobs:
           dockerfile: docker/Dockerfile
           failure-threshold: error
 
-      - name: 🐳 Lint template/Dockerfile
+      - name: 🐳 Lint boilerplate/Dockerfile
         uses: hadolint/hadolint-action@2332a7b74a6de0dda2e2221d575162eba76ba5e5 # v3.3.0
         with:
-          dockerfile: template/Dockerfile
+          dockerfile: boilerplate/Dockerfile
           failure-threshold: error
 
   test-unit:
