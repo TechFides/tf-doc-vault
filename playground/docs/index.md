@@ -46,10 +46,10 @@ pnpm dev:docs     # starts the playground at localhost:5173
 
 ### Structure
 
-| Path               | Purpose                                          |
-| ------------------ | ------------------------------------------------ |
-| `src/theme/`       | Vue components, styles, composables              |
-| `src/config/`      | `makeConfig()` factory and VitePress integration |
-| `src/sidebar/`     | Sidebar and nav generator                        |
-| `src/cli/`         | `tf-doc-vault` and `create-ana` CLI entrypoints  |
-| `playground/docs/` | This sandbox, not published                      |
+| Path               | Purpose                                                      |
+| ------------------ | ------------------------------------------------------------ |
+| `src/theme/`       | Vue components, styles, composables                          |
+| `src/config/`      | `makeConfig()` factory and VitePress integration             |
+| `src/sidebar/`     | Sidebar and nav generator                                    |
+| `src/cli/`         | `tf-doc-vault` CLI entrypoints, including the `setup` wizard |
+| `playground/docs/` | This sandbox, not published                                  |

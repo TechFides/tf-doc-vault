@@ -16,6 +16,10 @@ pnpm dev       # watch mode: tsc --watch + asset copy
 - Run `pnpm typecheck && pnpm lint` before submitting a PR.
 - Releases: see [Releasing](#releasing) below.
 
+## Adding a template
+
+A template is a folder under `templates/<name>/`: Markdown content plus a `_template.md` manifest (YAML frontmatter, never copied to a scaffold). The manifest declares the template's label, target location, which fields from the wizard's field catalog to prompt for, which `boilerplate/` files to exclude, and any post-scaffold steps (`git init`, pre-generating `pnpm-lock.yaml`, merging `docs:*` scripts into the host `package.json`, and so on). Adding a template never touches `src/**`: `tf-doc-vault setup` reads `templates/*/_template.md` at startup and lists whatever it finds. A wizard field with no existing entry in the field catalog (`src/cli/setup.ts`) needs that catalog extended first.
+
 ## Releasing
 
 Releases are cut **locally** with `changelogen`, then a tag push triggers a publish workflow that requires manual approval. Anyone with write access can prepare a release, but a designated reviewer must approve before anything reaches npm.
@@ -41,15 +45,41 @@ pnpm changelogen --release --no-github --minor      # force minor bump
 pnpm changelogen --release --no-github -r 0.2.0     # pin exact version
 ```
 
-### 2. Review and push
+### 2. Write the migration notes into `CHANGELOG.md`
+
+`changelogen` lifts commit subjects and nothing else, so a release with breaking
+changes arrives in `CHANGELOG.md` as a handful of one-line entries with no
+instructions. CI turns that same section into the GitHub release body, so
+whatever is missing here is missing for every consumer.
+
+Edit the section `pnpm release` just prepended: under the breaking changes, add a
+short migration summary (what disappeared, what replaces it, the replacement
+command) and a link to the README migration section, for example
+`[Migration to 0.3](https://github.com/TechFides/tf-doc-vault#migration-to-03)`.
+Absolute links, because the release body is rendered outside the repo.
+
+The tag has to end up on the finished text, so fold the edit into the release
+commit and move the tag with it:
+
+```bash
+git add CHANGELOG.md
+git commit --amend --no-edit
+git tag -f -a v0.3.0 -m v0.3.0   # same version changelogen just wrote
+```
+
+Skip this step only for a release whose changelog section is already
+self-explanatory (a plain `fix:` patch).
+
+### 3. Review and push
 
 ```bash
 git show HEAD                # the chore(release) commit, sanity check
 git tag --list 'v*' | tail -3
+git tag --points-at HEAD     # the tag must sit on the amended commit
 git push --follow-tags       # pushes the commit AND the tag
 ```
 
-### 3. Approve the deployment
+### 4. Approve the deployment
 
 Pushing the `v*` tag starts the `Release & Publish` workflow, which **pauses on the `npm-publish` environment** waiting for a required reviewer.
 
@@ -58,7 +88,7 @@ Pushing the `v*` tag starts the `Release & Publish` workflow, which **pauses on 
 
 Until you approve, nothing builds, publishes, or releases.
 
-### 4. Verify
+### 5. Verify
 
 - **npmjs.com**: the new version page shows a **Provenance** badge linking to the workflow run.
 - **GitHub Releases**: a new release exists, body matches the just-added `CHANGELOG.md` section.
@@ -145,14 +175,14 @@ overrides, identical file layout.
 
 The `*.tgz` produced by `pnpm pack` is gitignored at the repo root, so it can't
 leak into a commit. The snippets below are maintainer-only; they never appear
-in `template-tech-docs/` and therefore never propagate to consumer repos via
-`init-tech-docs`.
+in `boilerplate/` or `templates/` and therefore never propagate to consumer
+repos via `tf-doc-vault setup`.
 
 ### 1. Build + pack in this repo
 
 ```bash
 pnpm install
-pnpm build               # tsc + unbuild emits dist/setup/{express,nest}.{mjs,cjs,d.ts}
+pnpm build               # tsc emits dist/
 pnpm pack                # writes ./techfides-tf-doc-vault-0.1.0.tgz
 cp techfides-tf-doc-vault-0.1.0.tgz ../srvc-bat/   # adjust path to your BAT clone
 ```
@@ -168,41 +198,16 @@ pnpm add file:./techfides-tf-doc-vault-0.1.0.tgz
 and copying a fresh `.tgz` over the old one is enough, because pnpm picks up the new
 content hash and reinstalls on the next `pnpm install`.
 
-### 3. Pre-publish Dockerfile fragment
-
-The post-publish fragment in [`template-tech-docs/docs-build-stage.md`](template-tech-docs/docs-build-stage.md)
-assumes the package is on npmjs.com, so it does a vanilla `pnpm install`.
-For pre-publish testing on a service like BAT, copy the tarball into the
-build context and add **one extra line** to the docs-build stage:
-
-```dockerfile
-FROM node:24-alpine AS docs-build
-RUN npm install -g pnpm@10
-WORKDIR /usr/src/app
-
-# Pre-publish only: copy the local tarball alongside lockfile + manifest.
-COPY --chown=node:node techfides-tf-doc-vault-0.1.0.tgz pnpm-lock.yaml package.json ./
-RUN pnpm install --frozen-lockfile --ignore-scripts
-
-COPY --chown=node:node tech-docs ./tech-docs
-RUN pnpm exec vitepress build tech-docs
-```
-
-After v0.1.0 is published to npmjs.com:
-
-- swap `"@techfides/tf-doc-vault": "file:./techfides-tf-doc-vault-0.1.0.tgz"`
-  to `"^0.1.0"` (or the published version range) in BAT's `package.json`,
-- delete the `.tgz`,
-- remove the `*.tgz` token from the Dockerfile `COPY` line.
-
-The result is identical to the post-publish fragment in `docs-build-stage.md`,
-so the swap is a clean four-token diff.
+After v0.1.0 is published to npmjs.com, swap
+`"@techfides/tf-doc-vault": "file:./techfides-tf-doc-vault-0.1.0.tgz"` to
+`"^0.1.0"` (or the published version range) in the consumer's `package.json`
+and delete the `.tgz`.
 
 ### Pre-commit checklist (must hold before merging this branch)
 
 - `git status` shows no `*.tgz` (covered by `.gitignore`, but verify)
-- `template-tech-docs/**/*` contains zero references to `*.tgz` or `file:./`
-- `pnpm pack --dry-run` lists exactly: `dist/`, `bin/`, `src/`, `template/`,
-  `template-tech-docs/`, `configs/`, `infra/`, `docker/`, `README.md`,
-  `LICENSE`, `CONTRIBUTING.md`, `SECURITY.md`, `package.json`, and **nothing
-  pre-publish-flavoured**
+- `boilerplate/**` and `templates/**` contain zero references to `*.tgz` or `file:./`
+- `pnpm pack --dry-run` lists exactly these top-level entries: `dist/`, `src/`,
+  `boilerplate/`, `templates/`, `configs/`, `infra/`, `docker/`, `README.md`,
+  `LICENSE`, `CONTRIBUTING.md`, `SECURITY.md`, `package.json`, and **no
+  `specs/`**

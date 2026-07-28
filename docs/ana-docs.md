@@ -10,20 +10,20 @@ pipeline (install → lint → build → deploy), and optional Basic auth.
 
 ## How it works
 
-1. `pnpm dlx` downloads the tooling from the npm registry and runs `tf-doc-vault create`.
-2. The scaffolder copies `template/` to `./my_analysis/`, substituting placeholders (`__PROJECT__`, `__GCP_PROJECT__`, `__SERVER_TYPE__`,
+1. `pnpm dlx` downloads the tooling from the npm registry and runs `tf-doc-vault setup --template=ana-docs`.
+2. The scaffolder copies the `boilerplate/` VitePress project and the `ana-docs` template's Markdown to `./my_analysis/`, substituting placeholders (`__PROJECT__`, `__GCP_PROJECT__`, `__SERVER_TYPE__`,
    `__VITEPRESS_COMMON_DEP__`).
 3. `git init` + first commit are run automatically (skip with `--no-git` when embedding into an existing repo).
 
 ```bash
-pnpm dlx @techfides/tf-doc-vault@latest create my_analysis \
+pnpm dlx @techfides/tf-doc-vault@latest setup my_analysis --template=ana-docs \
   --gcp-project=tfsa-my-analysis \
   --server=nginx
 ```
 
 ## Options
 
-`tf-doc-vault create <project-name> [options]`:
+`tf-doc-vault setup <project-name> --template=ana-docs [options]`:
 
 | Option               | Default                                               | Description                                                                                                                                                                                                                                                    |
 | -------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -64,7 +64,7 @@ When the analytical docs belong inside an existing service or project repo, add 
 still generated, but `git init` is skipped so the output is committed as part of the parent repo:
 
 ```bash
-pnpm dlx @techfides/tf-doc-vault@latest create ana_project \
+pnpm dlx @techfides/tf-doc-vault@latest setup ana_project --template=ana-docs \
   --gcp-project=ana_project \
   --server=nginx \
   --no-git
@@ -83,7 +83,7 @@ The docs can still be deployed to Cloud Run independently using their own CI/CD 
 
 ### Embedding inside an existing pnpm workspace
 
-If the parent repo is itself a **pnpm workspace** (it has a `pnpm-workspace.yaml` at its root), `create` will print a warning telling you to merge a small config block into the parent file. This is necessary because **pnpm only honors workspace configuration at the workspace root**, so the scaffolded `pnpm-workspace.yaml` and `.npmrc` inside `<your-folder>/` are silently ignored when pnpm sees an ancestor workspace.
+If the parent repo is itself a **pnpm workspace** (it has a `pnpm-workspace.yaml` at its root), `setup` will print a warning telling you to merge a small config block into the parent file. This is necessary because **pnpm only honors workspace configuration at the workspace root**, so the scaffolded `pnpm-workspace.yaml` and `.npmrc` inside `<your-folder>/` are silently ignored when pnpm sees an ancestor workspace.
 
 Without this step, `pnpm docs:dev` will render a blank page and the browser console will show:
 
@@ -172,14 +172,14 @@ Password rotation = update `variables:` + commit + redeploy (the htpasswd hash i
 
 Back to `nginx` = the same steps in reverse + clear both `BASIC_AUTH_*` values.
 
-## Syncing the template to an existing repo
+## Syncing the boilerplate to an existing repo
 
-When the package adds or fixes something in `template/` (Dockerfile, CI, configs, Terraform), consumer repos don't receive the update automatically; those
+When the package adds or fixes something in `boilerplate/` (Dockerfile, CI, configs, Terraform), consumer repos don't receive the update automatically; those
 files belong to them. To inspect or apply the diff:
 
 ```bash
 pnpm sync           # shows a unified diff of all drifted files
-pnpm sync:apply     # overwrites drifted files with the template (placeholders are rendered from the current repo)
+pnpm sync:apply     # overwrites drifted files with the boilerplate (placeholders are rendered from the current repo)
 ```
 
 User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfvars) is excluded from overwriting.

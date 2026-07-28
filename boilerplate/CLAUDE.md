@@ -1,6 +1,10 @@
 # CLAUDE.md: documentation generation rules
 
-Binding rules for **all documentation generation** in this project
+This folder holds the documentation of the **__PROJECT__** project. When it sits
+inside a larger repository, these rules govern this folder only; the
+surrounding repository has its own.
+
+Binding rules for **all documentation generation** here
 (whatever the source: code, screenshots, sales input, pre-code design, …).
 Every documentation skill and command inherits these rules automatically, so
 do not repeat them in individual skill files.
@@ -151,7 +155,8 @@ to a Confluence-synced section.
 
 ## 9. Wireframes (SVG)
 
-- Wireframes use SVG fragments from `wf-fragments/` at the repository root.
+- When this scaffold includes the `.claude/` skills, wireframes are assembled
+  from the shared SVG fragments in `wf-fragments/` at the repository root.
 - **NEVER** include `<script>` elements, `on*` event attributes, `javascript:`
   URIs, or any executable content inside generated SVG. This must be
   validated before writing the file.
@@ -177,8 +182,9 @@ Every skill performs a **lightweight review** at the end of its run:
 - Internal links point to existing files.
 - Language check: Czech diacritics present, technical terms untouched.
 - Diagrams/wireframes: syntactic validation only (no semantics check).
-- All generated `.md` files pass `npx prettier --check` before finish.
-  Formatting config: `.prettierrc.json` at repo root.
+- All generated `.md` files pass `npx prettier --check` before finish, using
+  the Prettier config at the repository root (`.prettierrc` when this scaffold
+  ships one, otherwise the surrounding repository's own config).
 - **Skill self-check**: Claude re-reads the `SKILL.md` of the skill it just
   ran and confirms that every rule and step listed there was applied.
   Any gap found is reported to the user before the run completes.
@@ -195,6 +201,10 @@ A **comprehensive review** is handled by a separate command/skill
 - **NEVER** modify `.vitepress/` configuration without explicit request.
 
 ## 12. Commands cheat-sheet
+
+The slash commands below exist only when this scaffold includes the `.claude/`
+skills; check for `.claude/commands/` before reaching for one. Without them,
+ask for the phase you want directly and follow the rules in this file.
 
 | Command                    | Purpose                                        |
 | -------------------------- | ---------------------------------------------- |

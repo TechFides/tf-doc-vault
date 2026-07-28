@@ -2,36 +2,48 @@
 
 # Technical documentation in a service repo (`tech-docs`)
 
-Technical documentation that lives directly inside an existing backend repo and is served by the application itself at `/tech-docs` with HTTP Basic auth.
+Technical documentation that lives directly inside an existing backend repo, in a `tech-docs/` subfolder, scaffolded from the `tech-docs` template.
 
 ## How it works
 
-Running `init-tech-docs` does this:
+Running `tf-doc-vault setup --template=tech-docs` does this:
 
-1. **Copies the bundled `template-tech-docs/` scaffold** into a new `tech-docs/` directory inside your service repo. Files that already exist are skipped, so
-   re-running the command is safe.
-2. **Substitutes placeholders** throughout the copied files (`__SERVICE_ID__`, `__PROJECT__`, `__DATE__`, and optionally `__REPO__`) so generated frontmatter,
-   titles, and edit links already reference your project from the start.
-3. **Patches `package.json` and `.gitignore`**: adds `docs:dev`, `docs:build`, `docs:validate`, `docs:fix`, and other scripts (only those not already present),
-   and appends the VitePress `dist/` and `cache/` directories to `.gitignore`.
+1. **Copies the `boilerplate/` VitePress project and the `tech-docs` template's Markdown** into a `tech-docs/` directory inside your service repo: `docs/` with the VitePress config and theme wiring, `CLAUDE.md`, `import-confluence.md`, and a minimal `package.json` that marks the folder as ESM. Anything the host repo already owns (its own `README.md`, `package.json`, ESLint / TypeScript / Prettier configs, `.gitignore`) stays out, as do the files that only make sense for a standalone portal (Dockerfile, `.gitlab-ci.yml`, `infra/`). Files that already exist are skipped, so re-running the command is safe.
+2. **Substitutes placeholders** throughout the copied files (`__SERVICE_ID__`, `__PROJECT__`, `__DATE__`, `__REPO__`) so the generated frontmatter and titles reference your project from the start.
+3. **Patches `package.json` and `.gitignore`** in the host repo: adds `docs:dev`, `docs:build`, `docs:validate`, `docs:fix`, and other scripts (only those not already present), and appends the VitePress `dist/` and `cache/` directories to `.gitignore`.
 
-After the command runs, the service repo contains a ready-to-use `tech-docs/docs/` VitePress site. Developers write Markdown, run `docs:dev` for a live preview,
-and `docs:build` produces the `dist/` folder that the application serves at `/tech-docs`.
+After the command runs, the service repo contains a ready-to-use `tech-docs/docs/` VitePress site. Developers write Markdown, run `docs:dev` for a live preview, and `docs:build` produces the `dist/` folder.
+
+`--service-id` is the service identifier, `--project` the project name. `--repo` is optional; it pre-fills the repository path in the commented-out `editLink` block of `docs/.vitepress/config.mts`, so edit links start working once you uncomment that block. Leave it out and the template derives a path from the project name, which you can correct in that block.
 
 ```bash
-pnpm exec tf-doc-vault init-tech-docs \
-  --service-id=TST \       # service identifier
-  --project=testProject \  # project name
-  --repo=myorg/myrepo      # optional: GitHub/GitLab repo for edit links
+tf-doc-vault setup --template=tech-docs \
+  --service-id=TST \
+  --project=testProject \
+  --repo=myorg/myrepo
 ```
+
+Without a TTY (CI, scripts), pass every required flag; `setup` never prompts and exits with an error listing what is missing.
 
 ## Options
 
-| Option              | Default         | Description                                                     |
-| ------------------- | --------------- | --------------------------------------------------------------- |
-| `--service-id=<ID>` | _(required)_    | Service identifier, e.g. `TST`. Used in frontmatter and titles. |
-| `--project=<name>`  | cwd folder name | Project name substituted into templates.                        |
-| `--repo=<org/repo>` | _(none)_        | GitHub/GitLab repo path for edit links, e.g. `myorg/myrepo`.    |
+| Option                 | Default         | Description                                                                      |
+| ---------------------- | --------------- | -------------------------------------------------------------------------------- |
+| `--template=tech-docs` | _(required)_    | Selects this template.                                                           |
+| `--service-id=<ID>`    | _(required)_    | Service identifier, e.g. `TST`. Used in frontmatter and titles.                  |
+| `--project=<name>`     | cwd folder name | Project name substituted into templates.                                         |
+| `--repo=<org/repo>`    | derived         | Repository path pre-filled into the commented-out edit-link block.               |
+| `--base=<path>`        | `/tech-docs/`   | Base path baked into the VitePress build. See "Serving the documentation" below. |
+
+`--base` has to start and end with a slash; the wizard rejects anything else rather than shipping a build whose assets 404.
+
+## Serving the documentation
+
+This package has no deploy story for documentation that lives inside a service repo. The scaffold gives the repo the Markdown sources, the VitePress setup and the `docs:*` scripts merged into the host `package.json`. `docs:build` writes a static site to `tech-docs/docs/.vitepress/dist`; publishing that directory is the host repo's own pipeline, the same one that already ships the service.
+
+What the scaffold does decide is the **base path** baked into the build, `/tech-docs/` unless you pass `--base`. It has to match the path the site is served from: `--base=/tech-docs/` for `https://your-service.example.com/tech-docs/`, `--base=/` for a host that serves the site at the domain root. A mismatch returns 404 for every asset, and neither `docs:build` nor `vitepress preview` will tell you, because preview serves the site under whatever base was configured.
+
+If you want the documentation deployed as a standalone portal (its own image, its own Cloud Run service, its own pipeline), scaffold it that way instead: [Analytical documentation](./ana-docs.md) covers that flavour, Dockerfile, CI and Terraform included.
 
 ## Next steps
 
@@ -61,30 +73,13 @@ pnpm exec tf-doc-vault init-tech-docs \
    npm run docs:dev   # http://localhost:5173/tech-docs/
    ```
 
-4. **Add the `docs-build` stage to the Dockerfile**, see [`template-tech-docs/docs-build-stage.md`](../template-tech-docs/docs-build-stage.md).
-
-5. **Call `setupTechDocs()` in `main.ts`:**
-
-   ```ts
-   import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
-
-   await setupTechDocs(app, {
-     auth: { username: "docs", password: process.env.TECH_DOCS_PASSWORD ?? "" },
-   });
-   ```
-
-   If `auth.password` is empty or `dist/` does not exist, `setupTechDocs` does nothing; the middleware is a no-op in production where the env var is unset.
-
-6. **Set the `TECH_DOCS_PASSWORD` env variable** (dev/staging only, not prod).
-
-7. **Build the docs and verify:**
+4. **Build, then publish with your own pipeline:**
 
    ```bash
    npm run docs:build
-   npm run dev   # or however you start the application
    ```
 
-   The docs will be available at `/tech-docs/` with HTTP Basic auth (**username**: `docs`, **password** from `TECH_DOCS_PASSWORD`).
+   Wire the resulting `tech-docs/docs/.vitepress/dist` into whatever the service already uses to publish static assets, and serve it at the path `--base` was set to.
 
 ---
 

@@ -42,7 +42,7 @@ export default makeConfig({
 ```
 
 `custom.css` is already imported by the scaffolded theme entry
-(`docs/.vitepress/theme/index.ts`, see [`template/`](./template/)).
+(`docs/.vitepress/theme/index.ts`, see [`boilerplate/`](./boilerplate/)).
 
 ---
 
@@ -256,7 +256,7 @@ knobs:
   TechFides mark, directly. There is no slot or prop. To replace it,
   re-implement `NotFound` in your own theme and substitute it via
   VitePress' `not-found` slot.
-- **`create-ana` scaffolder** (`src/cli/create-ana.ts`) generates a TechFides-branded
+- **`setup` wizard** (`src/cli/setup.ts`) generates a TechFides-branded
   project by default. There is no `--brand-preset` flag yet. After
   scaffolding, edit `docs/.vitepress/config.ts` to add your `branding:
 {...}` block manually.

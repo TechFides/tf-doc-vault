@@ -17,8 +17,8 @@ pnpm docs:validate     # frontmatter, broken links, lint
 pnpm docs:normalize    # canonical frontmatter ordering
 pnpm docs:pdf          # export to artifacts/docs-full.pdf
 pnpm fix               # LF, normalize, format, lint --fix, typecheck, validate
-pnpm sync              # diff infra/CI/config files against the @techfides/tf-doc-vault template
-pnpm sync:apply        # overwrite drifted files from the template
+pnpm sync              # diff infra/CI/config files against the @techfides/tf-doc-vault boilerplate
+pnpm sync:apply        # overwrite drifted files from the boilerplate
 ```
 
 ## Deployment

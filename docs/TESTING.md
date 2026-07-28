@@ -7,8 +7,8 @@ Two tiers. Add new tests in the tier whose boundary you crossed.
 Pure-logic tests for code that does not shell out, spawn processes, or build a site. Layout mirrors `src/`:
 
 - `tests/unit/sidebar/`: sidebar/nav generation against in-memory file trees
-- `tests/unit/scripts/`: doc-tooling helpers (e.g. `normalize-docs`)
-- `tests/unit/cli/`: CLI helpers in `src/cli/utils.ts`
+- `tests/unit/scripts/`: doc-tooling helpers (`normalize-docs`, `validate-docs`) and the boilerplate-sync file resolution (`sync-template`)
+- `tests/unit/cli/`: CLI logic that needs neither a real repo nor a TTY. `utils.test.ts` covers the helpers in `src/cli/utils.ts` (arg parsing, `copyDir`, placeholder substitution); `scaffold.test.ts` covers template manifest parsing and validation, the copy plan and its rename and exclude rules; `setup.test.ts` covers the wizard, from flag and answer resolution through a fake prompt layer to the host `package.json` and `.gitignore` integration
 
 Run:
 
@@ -21,12 +21,13 @@ Config: `vitest.config.ts`. Keep these tests deterministic: no real filesystem o
 
 ## Tier 2: Playwright smoke tests (`tests/smoke/`)
 
-End-to-end checks that exercise the published CLI and the Express/Nest setup against a real VitePress site. Existing specs:
+End-to-end checks that exercise the published CLI against a real VitePress site. Existing specs:
 
-- `cli-subcommands.spec.ts`: `tf-doc-vault` / `create-ana` invocation
-- `ana-dev.spec.ts`, `ana-preview.spec.ts`, `tech-docs-preview.spec.ts`: scaffolded site dev/preview servers boot and render
-- `setup-express.spec.ts`, `setup-nest.spec.ts`: `setupTechDocs` mount serves docs behind Basic auth
-- `exports.spec.ts`: PDF/print export flow
+- `cli-subcommands.spec.ts`: `tf-doc-vault` subcommand invocation, plus the assertion that `setup --help` lists the templates found in `templates/` rather than a hardcoded set
+- `ana-dev.spec.ts`, `ana-preview.spec.ts`, `tech-docs-preview.spec.ts`: sites scaffolded by `tf-doc-vault setup` (one fixture per template) boot and render
+- `ana-served-at-root.spec.ts`: the built `ana-docs` site served at the domain root, the layout the Docker image uses. `vitepress dev`/`preview` serve under the configured base and hide a base/nginx mismatch; this spec reproduces the nginx `try_files` layout and fails on any request that 404s
+- `playground-dark-mode.spec.ts`: the theme's dark-mode navbar chrome against `playground/docs`
+- `exports.spec.ts`: every subpath export resolves from a scaffolded repo, and the packed tarball contains `boilerplate/` and `templates/` but no `specs/` path
 
 Run:
 
@@ -42,7 +43,7 @@ Reproduces the full ana deploy chain locally (`scaffold → CI jobs → Docker b
 
 What it asserts: the scaffold commits a `pnpm-lock.yaml` on branch `master` with an npm-versioned dependency; a fresh clone passes `pnpm install --frozen-lockfile` + the lint jobs; the `SERVER_TYPE=nginx-auth` image builds; and the running container returns `401` without creds, `200` with creds, and, probing the **base-prefixed** asset URL from the built HTML, `200` (not `404`) for a hashed asset, so Basic auth works and the site base matches the root serving layout.
 
-Coverage boundary: it scaffolds with the default npm source, so the scaffolded site consumes the **published** `@techfides/tf-doc-vault` library: this branch's `template/` and `create-ana` CLI are exercised, but the shipped library code (`src/config`, `src/theme`, …) is not. Run it while `package.json` still points at the published version (i.e. **before** the release version bump), otherwise the scaffold pins an unpublished version and the frozen install fails.
+Coverage boundary: it scaffolds with the default npm source, so the scaffolded site consumes the **published** `@techfides/tf-doc-vault` library: this branch's `boilerplate/`, `templates/` and `setup` CLI are exercised, but the shipped library code (`src/config`, `src/theme`, …) is not. Run it while `package.json` still points at the published version (i.e. **before** the release version bump), otherwise the scaffold pins an unpublished version and the frozen install fails.
 
 Run before cutting a release:
 
@@ -77,7 +78,7 @@ Good to know:
 ## When to add which
 
 - Touching `src/sidebar`, `src/scripts`, or pure helpers in `src/cli/`: **unit test** in the matching `tests/unit/<area>/` folder.
-- Touching `src/cli/*` user-visible CLI behaviour, `src/setup/**`, or anything that affects how a scaffolded site boots: **smoke test** in `tests/smoke/`.
+- Touching `src/cli/*` user-visible CLI behaviour, or anything that affects how a scaffolded site boots: **smoke test** in `tests/smoke/`.
 - Touching `src/confluence/**` or the Confluence importer: cover it with a `tests/unit/confluence/` spec and follow **Confluence importer verification** above.
 - Fixing a bug: add a regression test in the tier that would have caught it before fixing the code.
 
