@@ -9,7 +9,6 @@
   ],
   "labels": ["dependencies"],
   "schedule": ["before 6am on monday"],
-  "automergeSchedule": ["after 7am and before 11am on monday"],
   "platformAutomerge": false,
   "packageRules": [
     {
