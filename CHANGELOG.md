@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.2.11
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.10...v0.2.11)
+
+### 🚀 Enhancements
+
+- **theme:** Make the BrandHero eyebrow configurable ([a2fc2a9](https://github.com/TechFides/tf-doc-vault/commit/a2fc2a9))
+
+### 🩹 Fixes
+
+- Address review findings from the comment cleanup ([c382f37](https://github.com/TechFides/tf-doc-vault/commit/c382f37))
+
+### 🏡 Chore
+
+- Prune redundant comments and remove em dashes repo-wide ([e927cbc](https://github.com/TechFides/tf-doc-vault/commit/e927cbc))
+
+### 🤖 CI
+
+- **renovate:** Drop the automerge window so green PRs merge on any run ([ed423f1](https://github.com/TechFides/tf-doc-vault/commit/ed423f1))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.2.10
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.9...v0.2.10)
