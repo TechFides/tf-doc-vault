@@ -1,14 +1,19 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useData } from "vitepress";
 
 const { frontmatter } = useData();
+
+const eyebrow = computed(
+  () => frontmatter.value.hero?.eyebrow ?? "Documentation",
+);
 </script>
 
 <template>
   <div v-if="frontmatter.hero" class="brand-hero">
     <div class="brand-hero__glow" aria-hidden="true" />
     <div class="brand-hero__inner">
-      <p class="brand-hero__eyebrow">Documentation</p>
+      <p v-if="eyebrow" class="brand-hero__eyebrow">{{ eyebrow }}</p>
       <h1 class="brand-hero__title">
         {{ frontmatter.hero.title ?? frontmatter.title }}
       </h1>
