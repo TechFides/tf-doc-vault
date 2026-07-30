@@ -6,7 +6,7 @@ target:
   path: tech-docs
 base: /tech-docs/
 sectionNav: false
-fields: [service-id, project, section-nav, base, repo]
+fields: [service-id, project, section-nav, base, repo, source]
 defaults:
   repo: techfides/__PROJECT_DASHED__
 exclude:

@@ -25,7 +25,7 @@ import {
   boilerplateWorkspaceSettings,
   checkFieldValue,
   originUrl,
-  packagePeerDependencies,
+  documentationDependencies,
   placeholderValues,
   resolveCopyPlan,
   resolveDependencyValue,
@@ -1115,7 +1115,7 @@ async function run(): Promise<void> {
   if (manifest.host.minimalPackageJson) writeMinimalPackageJson(targetDir);
   if (manifest.host.packageJsonScripts) updatePackageJson(cwd, docsPath);
   if (manifest.host.devDependencies) {
-    updateDevDependencies(cwd, packagePeerDependencies());
+    updateDevDependencies(cwd, documentationDependencies(depFlags, cwd));
   }
   if (manifest.host.pnpmWorkspace) {
     updatePnpmWorkspace(cwd, boilerplateWorkspaceSettings());

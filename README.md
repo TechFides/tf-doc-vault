@@ -86,7 +86,7 @@ It asks which template to use, then prompts for the fields that template needs. 
 - **Docs inside an existing service** (published by the service repo's own pipeline):
 
   ```bash
-  pnpm exec tf-doc-vault setup --template=tech-docs --service-id=TST --project=my-service
+  pnpm dlx @techfides/tf-doc-vault@latest setup --template=tech-docs --service-id=TST --project=my-service
   ```
 
   Full guide → [Technical documentation](./docs/tech-docs.md)

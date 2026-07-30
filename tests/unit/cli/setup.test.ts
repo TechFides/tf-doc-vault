@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 import {
   FIELD_CATALOG,
   boilerplateWorkspaceSettings,
+  documentationDependencies,
+  packageName,
   packagePeerDependencies,
   resolveSource,
   resolveDependencyValue,
@@ -1425,6 +1427,28 @@ describe("host documentation dependencies", () => {
     );
     expect(packagePeerDependencies(dir)).toEqual({ "made-up": "^0.0.1" });
     fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  // The generated docs:* scripts call this package's binary and the generated
+  // VitePress config imports from it, so a host that only gets the peers has a
+  // scaffold that cannot boot.
+  test("includes this package itself, at the resolved dependency spec", () => {
+    const deps = documentationDependencies({}, tempDir());
+    const self = packageName();
+    expect(Object.keys(deps)).toEqual(
+      expect.arrayContaining([...Object.keys(packagePeerDependencies()), self]),
+    );
+    expect(deps[self]).toBe(
+      JSON.parse(fs.readFileSync(path.join(REPO_ROOT, "package.json"), "utf-8"))
+        .version,
+    );
+  });
+
+  test("points at a local checkout when the source says so", () => {
+    const host = tempDir();
+    const deps = documentationDependencies({ dev: true }, host);
+    expect(deps[packageName()]).toMatch(/^file:/);
+    fs.rmSync(host, { recursive: true, force: true });
   });
 });
 

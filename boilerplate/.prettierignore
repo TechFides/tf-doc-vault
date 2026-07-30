@@ -1,8 +1,6 @@
 node_modules/
 .pnpm-store/
 pnpm-lock.yaml
-# pnpm appends its own entries here on install, single-quoted, which prettier
-# then rewrites; the two would fight on every install.
 pnpm-workspace.yaml
 docs/.vitepress/dist/
 docs/.vitepress/cache/

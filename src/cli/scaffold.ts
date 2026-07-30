@@ -1069,6 +1069,30 @@ export function packagePeerDependencies(
   return pkg.peerDependencies ?? {};
 }
 
+export function packageName(packageDir: string = PACKAGE_DIR): string {
+  const pkg = JSON.parse(
+    fs.readFileSync(path.join(packageDir, "package.json"), "utf-8"),
+  ) as { name?: string };
+  if (!pkg.name) fail("package.json", "has no name");
+  return pkg.name;
+}
+
+/**
+ * Everything a host repo has to declare for the scaffold to run: the peers,
+ * plus this package itself. A package cannot list itself as its own peer, yet
+ * the generated `docs:*` scripts call its binary and the generated VitePress
+ * config imports from it, so leaving it out gives a scaffold that cannot boot.
+ */
+export function documentationDependencies(
+  flags: ParsedArgs["flags"],
+  hostDir: string,
+): Record<string, string> {
+  return {
+    ...packagePeerDependencies(),
+    [packageName()]: resolveDependencyValue(flags, hostDir),
+  };
+}
+
 export function resolveSource(flags: ParsedArgs["flags"]): string {
   return String(flags.source ?? (flags.dev ? "file" : "npm"));
 }
