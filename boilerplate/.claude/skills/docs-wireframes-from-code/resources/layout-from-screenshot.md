@@ -10,8 +10,8 @@ run, and never added to the repository (§9 CLAUDE.md).
 Before drawing, classify the screenshot. The kind decides how faithfully
 the SVG must copy the original.
 
-| Kind                            | Source                                                                      | Fidelity goal                                                                                       |
-| ------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Kind                            | Source                                                                      | Fidelity goal                                                                                      |
+| ------------------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | **Real app screenshot**         | Running production / staging UI of the app being documented                 | **1:1 copy in SVG**: every visible element, label, position, and state (only PII is substituted)   |
 | **Example / mockup screenshot** | Design file, Figma export, competitor app, reference image from another app | **Layout inspiration only**: borrow structure and positions, fill content from the scenario / code |
 

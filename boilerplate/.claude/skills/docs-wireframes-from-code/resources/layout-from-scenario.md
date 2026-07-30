@@ -64,13 +64,13 @@ decorative (don't draw).
 
 For every row of **Přehled vstupních a výstupních dat → input**:
 
-| Column in table | Wireframe decision                               |
-| --------------- | ------------------------------------------------ |
-| Name            | Field label in Czech with diacritics             |
-| Type            | Pick `input-text` / `-password` / `-datetime` …  |
+| Column in table | Wireframe decision                              |
+| --------------- | ----------------------------------------------- |
+| Name            | Field label in Czech with diacritics            |
+| Type            | Pick `input-text` / `-password` / `-datetime` … |
 | Required        | Add asterisk or subtle "(povinné)", per project |
-| Validace        | Sample error hint under the field (optional)     |
-| Výchozí hodnota | Pre-filled value in the input                    |
+| Validace        | Sample error hint under the field (optional)    |
+| Výchozí hodnota | Pre-filled value in the input                   |
 
 - Preserve the **order** of rows as the visual top-to-bottom order
   unless the code groups them differently (e.g. into sections).

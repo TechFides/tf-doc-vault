@@ -1,6 +1,6 @@
 ---
 description: "Generate SVG wireframes for already-generated documentation pages, by attaching them to `<!-- wireframe-anchor: ... -->` markers. Runs LAST (after text and diagrams). Uses the codebase, generated docs, existing `wf-fragments/`, and ALWAYS asks the user for optional screenshots as a temporary hint. Validates every generated SVG (no JavaScript, no event handlers, XML well-formed) and performs a consistency check between each wireframe and the host page text. Retrospectively promotes user-approved inline wireframe blocks to reusable fragments."
-argument-hint: [auto]   # optional: pass 'auto' to reduce per-wireframe pausing (opt-in only)
+argument-hint: [auto] # optional: pass 'auto' to reduce per-wireframe pausing (opt-in only)
 ---
 
 # /docs-wireframes

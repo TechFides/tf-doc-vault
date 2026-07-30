@@ -17,15 +17,15 @@ confluence:
 
 ## Info blok
 
-| Pole              | Hodnota                                                          |
-| ----------------- | ---------------------------------------------------------------- |
-| SC-ID             | `SC-NN` <stable identifier, e.g. `SC-01`>                        |
-| Cíl scénáře       | <Jedna věta popisující cíl scénáře z business pohledu.>          |
+| Pole              | Hodnota                                                         |
+| ----------------- | --------------------------------------------------------------- |
+| SC-ID             | `SC-NN` <stable identifier, e.g. `SC-01`>                       |
+| Cíl scénáře       | <Jedna věta popisující cíl scénáře z business pohledu.>         |
 | Aktéři / role     | <Seznam rolí, např. `user`, `admin`, s odkazem na roles matrix> |
-| Vstupní podmínky  | <Stav systému / uživatele, který musí platit před scénářem.>     |
-| Výstupní podmínky | <Stav po úspěšném průchodu scénářem.>                            |
+| Vstupní podmínky  | <Stav systému / uživatele, který musí platit před scénářem.>    |
+| Výstupní podmínky | <Stav po úspěšném průchodu scénářem.>                           |
 | NFRs (pokud jsou) | <Latency, availability, throughput, pokud definované.>          |
-| Modul             | `<module>` (viz frontmatter)                                     |
+| Modul             | `<module>` (viz frontmatter)                                    |
 
 **Zdroj:**
 
@@ -62,14 +62,14 @@ confluence:
 
 ### Vstup
 
-| Pole v UI / atribut | Typ      | Mandatornost             | Validace         | Zdroj vstupu                                  | Mapping na DB      |
-| ------------------- | -------- | ------------------------ | ---------------- | --------------------------------------------- | ------------------ |
+| Pole v UI / atribut | Typ      | Mandatornost             | Validace         | Zdroj vstupu                                 | Mapping na DB      |
+| ------------------- | -------- | ------------------------ | ---------------- | -------------------------------------------- | ------------------ |
 | `<field>`           | `<type>` | `required` \| `optional` | `<regex / rule>` | uživatel \| systém: `<scenario-or-API-link>` | `<table>.<column>` |
 
 ### Výstup
 
-| Pole / atribut | Typ      | Zdroj v kódu       | Využití v dalších scénářích | API (název + atribut)        | Mapping na DB      |
-| -------------- | -------- | ------------------ | --------------------------- | ---------------------------- | ------------------ |
+| Pole / atribut | Typ      | Zdroj v kódu       | Využití v dalších scénářích | API (název + atribut)       | Mapping na DB      |
+| -------------- | -------- | ------------------ | --------------------------- | --------------------------- | ------------------ |
 | `<field>`      | `<type>` | `<path/to/dto:LL>` | `<next-scenario-link>`      | `<api-name>`: `<attribute>` | `<table>.<column>` |
 
 **Zdroj:**

@@ -5,14 +5,14 @@ The orchestrator runs this once, at the end of a run (§2 of
 
 ## TODO kinds produced across phases
 
-| Kind                           | Emitted by | Marker shape                                                                                |
-| ------------------------------ | ---------- | ------------------------------------------------------------------------------------------- |
-| `missing-evidence`             | all phases | `⚠️ TODO: [what is missing]`                                                                |
-| `link to technical/...`        | functional | `⚠️ TODO: link to technical/<expected-path>`                                                |
+| Kind                           | Emitted by | Marker shape                                                                               |
+| ------------------------------ | ---------- | ------------------------------------------------------------------------------------------ |
+| `missing-evidence`             | all phases | `⚠️ TODO: [what is missing]`                                                               |
+| `link to technical/...`        | functional | `⚠️ TODO: link to technical/<expected-path>`                                               |
 | `diagram-text-contradiction`   | diagrams   | `⚠️ TODO: diagram–text contradiction: <desc>. Diagram says: <X>. Text says: <Y>.`          |
 | `wireframe-text-contradiction` | wireframes | `⚠️ TODO: wireframe–text contradiction: <desc>. Wireframe shows: <X>. Scenario says: <Y>.` |
 | `wireframe-gap`                | wireframes | `⚠️ TODO: wireframe gap: <what is missing, where>.`                                        |
-| other                          | any        | list verbatim                                                                               |
+| other                          | any        | list verbatim                                                                              |
 
 ## Step 1: Collect and group
 

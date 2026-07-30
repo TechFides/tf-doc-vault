@@ -108,11 +108,11 @@ e.g. `2.5.1 Use PostgreSQL`.
 
 Flat: one page per consumed API.
 
-| Number | File                     | Czech label (title) (example)   |
-| ------ | ------------------------ | ------------------------------- |
-| 2.8.1  | `consumed-apis/<api>.md` | 2.8.1 Konzumované API `<api>`   |
-| 2.8.2  | `consumed-apis/<api>.md` | 2.8.2 Konzumované API `<api>`   |
-| …      | …                        | …                               |
+| Number | File                     | Czech label (title) (example) |
+| ------ | ------------------------ | ----------------------------- |
+| 2.8.1  | `consumed-apis/<api>.md` | 2.8.1 Konzumované API `<api>` |
+| 2.8.2  | `consumed-apis/<api>.md` | 2.8.2 Konzumované API `<api>` |
+| …      | …                        | …                             |
 
 ## Group: `exposed-public-apis/` (2.9)
 

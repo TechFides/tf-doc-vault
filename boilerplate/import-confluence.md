@@ -58,6 +58,7 @@ pnpm docs:validate   # frontmatter, broken links, lint
 ```
 
 Go through the generated files and:
+
 1. Set `status: published` on pages that are complete
 2. Manually fill in or fix content where the conversion lost formatting (tables, panels, inline images)
 3. Optionally rename files/folders to match the project convention

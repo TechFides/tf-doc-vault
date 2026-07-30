@@ -18,40 +18,40 @@ The table below maps **what you are drawing** to **which fragment to start
 from**. Fragment names are conventional; the real names come from
 `wf-fragments/README.md`; this table tracks the canonical shape.
 
-| Situation                                | Fragment (suggested name) | Notes                                                               |
-| ---------------------------------------- | ------------------------- | ------------------------------------------------------------------- |
+| Situation                                | Fragment (suggested name) | Notes                                                              |
+| ---------------------------------------- | ------------------------- | ------------------------------------------------------------------ |
 | Mobile shell, light theme                | `shell-mobile-light`      | Base canvas, status bar, safe area; compose child fragments inside |
-| Mobile shell, dark theme                 | `shell-mobile-dark`       | Same structure as light, inverted palette                           |
-| Desktop shell, light theme               | `shell-desktop-light`     | 1280×800 canvas, top bar, optional side nav                         |
-| Desktop shell, dark theme                | `shell-desktop-dark`      | —                                                                   |
-| Top bar with title and back arrow        | `header-back`             | Parametrized title via `<!-- title -->`                             |
-| Top bar with title and right-side action | `header-action`           | Action icon via `<!-- action-icon -->`                              |
-| Bottom tab bar (mobile)                  | `tab-bar`                 | Up to 5 tabs, active-tab index via `<!-- active -->`                |
-| Side navigation (desktop)                | `side-nav`                | Collapsible; item list via repeated block                           |
-| Primary action button                    | `btn-primary`             | Label via `<!-- label -->`                                          |
-| Secondary / ghost button                 | `btn-secondary`           | —                                                                   |
-| Destructive button                       | `btn-destructive`         | Red accent; label via `<!-- label -->`                              |
-| Text input field                         | `input-text`              | Label + input + optional hint via placeholders                      |
-| Password input field                     | `input-password`          | Masked; visibility toggle icon                                      |
-| Date / time input                        | `input-datetime`          | —                                                                   |
-| Select / dropdown                        | `input-select`            | Options list rendered as separate fragment when needed              |
-| Checkbox row                             | `checkbox-row`            | Label via `<!-- label -->`                                          |
-| Radio row                                | `radio-row`               | —                                                                   |
-| Avatar, small (32×32)                    | `avatar-sm`               | Circular; see `avatar-rules.md`                                     |
-| Avatar, medium (48×48)                   | `avatar-md`               | —                                                                   |
-| Avatar, large (96×96)                    | `avatar-lg`               | Profile screens                                                     |
-| Conversation / list row with avatar      | `row-conversation`        | Avatar + primary text + secondary text + timestamp                  |
-| Settings row with right-side value       | `row-settings`            | Label on left, value / chevron on right                             |
-| Card, information                        | `card-info`               | Title + body; icon optional                                         |
-| Card, action                             | `card-action`             | Card with embedded primary button                                   |
-| Modal, confirmation                      | `modal-confirm`           | Title, body, cancel/confirm buttons                                 |
-| Modal, form                              | `modal-form`              | Title + inputs + submit button                                      |
-| Snackbar / toast                         | `snackbar`                | Single-line message + optional action                               |
-| Empty state                              | `empty-state`             | Illustration area + title + subtitle                                |
-| Loading / skeleton row                   | `skeleton-row`            | Used for list placeholders only                                     |
-| Error banner                             | `banner-error`            | Red background, icon + message                                      |
-| Success banner                           | `banner-success`          | Green background                                                    |
-| Validation error under input             | `input-error-hint`        | Used with any `input-*` fragment                                    |
+| Mobile shell, dark theme                 | `shell-mobile-dark`       | Same structure as light, inverted palette                          |
+| Desktop shell, light theme               | `shell-desktop-light`     | 1280×800 canvas, top bar, optional side nav                        |
+| Desktop shell, dark theme                | `shell-desktop-dark`      | —                                                                  |
+| Top bar with title and back arrow        | `header-back`             | Parametrized title via `<!-- title -->`                            |
+| Top bar with title and right-side action | `header-action`           | Action icon via `<!-- action-icon -->`                             |
+| Bottom tab bar (mobile)                  | `tab-bar`                 | Up to 5 tabs, active-tab index via `<!-- active -->`               |
+| Side navigation (desktop)                | `side-nav`                | Collapsible; item list via repeated block                          |
+| Primary action button                    | `btn-primary`             | Label via `<!-- label -->`                                         |
+| Secondary / ghost button                 | `btn-secondary`           | —                                                                  |
+| Destructive button                       | `btn-destructive`         | Red accent; label via `<!-- label -->`                             |
+| Text input field                         | `input-text`              | Label + input + optional hint via placeholders                     |
+| Password input field                     | `input-password`          | Masked; visibility toggle icon                                     |
+| Date / time input                        | `input-datetime`          | —                                                                  |
+| Select / dropdown                        | `input-select`            | Options list rendered as separate fragment when needed             |
+| Checkbox row                             | `checkbox-row`            | Label via `<!-- label -->`                                         |
+| Radio row                                | `radio-row`               | —                                                                  |
+| Avatar, small (32×32)                    | `avatar-sm`               | Circular; see `avatar-rules.md`                                    |
+| Avatar, medium (48×48)                   | `avatar-md`               | —                                                                  |
+| Avatar, large (96×96)                    | `avatar-lg`               | Profile screens                                                    |
+| Conversation / list row with avatar      | `row-conversation`        | Avatar + primary text + secondary text + timestamp                 |
+| Settings row with right-side value       | `row-settings`            | Label on left, value / chevron on right                            |
+| Card, information                        | `card-info`               | Title + body; icon optional                                        |
+| Card, action                             | `card-action`             | Card with embedded primary button                                  |
+| Modal, confirmation                      | `modal-confirm`           | Title, body, cancel/confirm buttons                                |
+| Modal, form                              | `modal-form`              | Title + inputs + submit button                                     |
+| Snackbar / toast                         | `snackbar`                | Single-line message + optional action                              |
+| Empty state                              | `empty-state`             | Illustration area + title + subtitle                               |
+| Loading / skeleton row                   | `skeleton-row`            | Used for list placeholders only                                    |
+| Error banner                             | `banner-error`            | Red background, icon + message                                     |
+| Success banner                           | `banner-success`          | Green background                                                   |
+| Validation error under input             | `input-error-hint`        | Used with any `input-*` fragment                                   |
 
 If the situation is not in the table, fall back to composing inline and
 trigger the Step 5 retrospective fragment proposal; do **NOT** silently
