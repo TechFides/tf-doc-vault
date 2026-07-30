@@ -1,5 +1,44 @@
 # Changelog
 
+## v0.3.0
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.11...v0.3.0)
+
+### 🚀 Enhancements
+
+- ⚠️  Drop the setupTechDocs express/nest integration ([d43c2be](https://github.com/TechFides/tf-doc-vault/commit/d43c2be))
+- ⚠️  Replace create-ana and init-tech-docs with an interactive setup wizard ([c3455d7](https://github.com/TechFides/tf-doc-vault/commit/c3455d7))
+
+### 🩹 Fixes
+
+- **boilerplate:** Make a fresh scaffold pass its own format:check ([04edb3e](https://github.com/TechFides/tf-doc-vault/commit/04edb3e))
+- Add this package to the host repo's documentation dependencies ([863c6c7](https://github.com/TechFides/tf-doc-vault/commit/863c6c7))
+
+### 💅 Refactors
+
+- ⚠️  Merge the scaffolds into one boilerplate and md-only templates ([3043eef](https://github.com/TechFides/tf-doc-vault/commit/3043eef))
+- Prune comments to what the code cannot say itself ([7673f79](https://github.com/TechFides/tf-doc-vault/commit/7673f79))
+
+### 📖 Documentation
+
+- Add the setup wizard refactor plan ([1b3391c](https://github.com/TechFides/tf-doc-vault/commit/1b3391c))
+- Document the setup wizard and consumer migration ([e933b25](https://github.com/TechFides/tf-doc-vault/commit/e933b25))
+- **agents:** Tighten the comment rule and require docs with every change ([61f6d37](https://github.com/TechFides/tf-doc-vault/commit/61f6d37))
+
+### 🤖 CI
+
+- **commitlint:** Validate commit messages with the repo's own commitlint ([f3dba25](https://github.com/TechFides/tf-doc-vault/commit/f3dba25))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️  Drop the setupTechDocs express/nest integration ([d43c2be](https://github.com/TechFides/tf-doc-vault/commit/d43c2be))
+- ⚠️  Replace create-ana and init-tech-docs with an interactive setup wizard ([c3455d7](https://github.com/TechFides/tf-doc-vault/commit/c3455d7))
+- ⚠️  Merge the scaffolds into one boilerplate and md-only templates ([3043eef](https://github.com/TechFides/tf-doc-vault/commit/3043eef))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.2.11
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.10...v0.2.11)
