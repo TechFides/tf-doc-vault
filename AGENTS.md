@@ -56,21 +56,43 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 
 ### Comments
 
-Applies to every language in the repo, TypeScript, Vue, CSS and shell alike.
+Every language in the repo, TypeScript, Vue, CSS, YAML, shell and tests alike. English everywhere, including `boilerplate/` and `templates/`.
 
-- Write a comment only where the code alone is not enough: a framework quirk, a non-obvious constraint, or the reason behind a counter-intuitive choice. If a competent reader already knows it from the code, leave it out.
-- Never restate the code in prose. `/** Copy a directory tree. */` above `copyDir` is noise.
-- Describe the present state. No development history ("the old default was…", "used to"), no notes about what something is not. The one exception is "why not the obvious alternative" when that alternative is a real trap.
-- Aim for one or two lines. Go longer only for genuinely non-trivial context (SSR hydration, bundler quirks, auth traps).
-- English everywhere, including `boilerplate/` and `templates/`.
-- JSDoc stays on the published surface (`makeConfig` options, `createTheme`, the sidebar generators) because it is the only documentation a consumer sees in their editor. Keep it short. On internal helpers, write JSDoc only when it explains behaviour that the signature does not.
-- Section banners (`// ─── name ───`) are for long, multi-concern files where they genuinely aid navigation, not a default. Do not use them as decoration in a short file, and never as a label that only repeats the declaration below it. A file header is one to three lines about the module's role, with no `Usage:` block duplicating `--help`.
-- In tests, keep the note about why a test exists, written in the present tense.
+Comment only what a competent reader could not get from the code. Before writing one, apply both tests: **would a competent reader already know this from the code?** If yes, delete it. **If I delete this comment, could someone plausibly break the code?** If no, delete it.
+
+Never write:
+
+- A translation of the code, or a restatement of the function name. `/** Copy a directory tree. */` above `copyDir` is noise; the non-obvious part (it must not throw) is the comment.
+- Change history or internal notes. No "moved from X", "used to", "would have". Document how the code IS, not how it got here. Git history is the changelog.
+- A defense of the decision. If a choice needs a paragraph, it belongs in the PR description or the docs.
+- A section header, or a summary of the next ten lines.
+
+Do write, one line where possible:
+
+- Framework or library quirks: `reject: false` means the exit code must be checked explicitly.
+- Invariants a reader might undo: an error deliberately left uncaught, a step that must run first.
+- Non-obvious algorithm intent: what the loop converges on, not how.
+- Non-local coupling: "this order is load-bearing because X mutates Y".
+
+Comments are a small minority of any diff. If added comment lines exceed roughly 10 % of added lines, re-audit and cut; prefer a better name or a smaller function over a comment explaining a confusing one.
+
+JSDoc stays on the published surface (`makeConfig` options, `createTheme`, the sidebar generators) because it is the only documentation a consumer sees in their editor. Keep it short. On internal helpers, write it only when it explains behaviour the signature does not.
 
 ### Prose
 
 - No em dash. Use a colon, parentheses, a semicolon, a comma, or two sentences. This holds for English and Czech, in code comments, CLI output, markdown and skill files. A hyphen in compounds and an en dash in numeric ranges are fine, as is a lone `—` used as an empty-value marker in a table cell.
 - Avoid the "not just X, but Y" construction, filler ("it is important to note"), marketing adjectives ("robust", "seamless", "comprehensive solution") and forced three-item lists.
+
+## Always: an implementation change updates the docs
+
+Any change to behaviour, the manifest schema, CLI flags or prompts, the published API, or what the package ships updates the documentation **in the same commit**. Docs describe reality; stale docs are a bug.
+
+1. Find the affected pages: `grep -rn "<flag or concept>" docs README.md CONTRIBUTING.md BRANDING.md`. Where things usually live: wizard flags and prompts in `docs/tech-docs.md` and `docs/ana-docs.md`, the manifest schema and how to add a template in `CONTRIBUTING.md`, the package surface (exports, `bin`, `files`, migration notes) in `README.md`, the test tiers in `docs/TESTING.md`, theme tokens in `BRANDING.md`.
+2. Update the prose, the options tables, and every command a reader could copy-paste. Run each command you changed; a wrong flag in a guide is worse than no guide.
+3. Confirm the relative links you touched resolve. Nothing checks them automatically.
+4. Run `pnpm format:check` from the repo root. It covers `docs/` and the root markdown, but deliberately not `boilerplate/` or `templates/`, whose Prettier config resolves only inside a scaffolded repo.
+
+`docs/`, the root markdown and this file are English. Markdown under `templates/*/docs/` keeps the language it ships to consumers in. Code and identifiers are English everywhere.
 
 ## Architecture
 
