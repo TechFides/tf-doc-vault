@@ -1,9 +1,8 @@
 import { test } from "./fixtures";
 
-// The scaffold into a host repo excludes the boilerplate's pnpm-workspace.yaml,
-// so the hoist patterns reach the host only through the wizard's merge. Without
-// them the dev server still starts and the build still succeeds, while the page
-// hydrates blank with "dayjs.min.js does not provide an export named 'default'".
+// The hoist patterns reach a host repo only through the wizard's merge. Without
+// them the dev server starts and the build succeeds, while the page hydrates
+// blank with "dayjs.min.js does not provide an export named 'default'".
 test("pnpm docs:dev hydrates the tech-docs scaffold without errors", async ({
   page,
   sandboxes,

@@ -86,8 +86,7 @@ describe("copyDir", () => {
   });
 
   // A Dirent reports a symlink as neither directory nor file, so without an
-  // explicit branch it reaches copyFileSync: ENOTSUP for a linked directory, a
-  // silent dereference for a linked file.
+  // explicit branch it reaches copyFileSync and dereferences the target.
   test("recreates a symlinked file instead of dereferencing it", () => {
     fs.symlinkSync("a.txt", path.join(src, "link.txt"));
     const r = copyDir(src, dest);

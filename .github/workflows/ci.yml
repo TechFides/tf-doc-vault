@@ -17,8 +17,7 @@ jobs:
       - name: 🔀 Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          # The commit-message check needs the base commit, so the range
-          # base..head can be resolved.
+          # The commit-message check resolves the range base..head.
           fetch-depth: 0
 
       - name: 🛠 Setup
@@ -27,9 +26,8 @@ jobs:
       - name: ⚖️ Licence check
         run: pnpm licence-check
 
-      # Run the repo's own commitlint rather than an action that bundles its
-      # own: the bundled parser rejects the `type!:` breaking marker that the
-      # local commit-msg hook accepts, so the two disagreed on valid messages.
+      # The repo's own commitlint, not an action that bundles one: the bundled
+      # parser rejects the `type!:` marker the local commit-msg hook accepts.
       - name: 📝 Validate commit messages
         if: github.event_name == 'pull_request'
         run: >-

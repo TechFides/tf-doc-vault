@@ -1,8 +1,7 @@
 /**
- * Template manifests, the wizard's field catalog, and the copy plan: reads the
- * manifests in `templates/*`, works out which `boilerplate/` paths each one
- * wants, and lays the sources down into the target directory. The catalog lives
- * here so the manifest validator can check `fields:` and `defaults:` against it.
+ * Template manifests, the wizard's field catalog, and the copy plan. The
+ * catalog lives here so the manifest validator can check `fields:` and
+ * `defaults:` against it.
  */
 
 import fs from "node:fs";
@@ -26,7 +25,6 @@ export const PACKAGE_DIR = path.resolve(__dirname, "..", "..");
 export const BOILERPLATE_DIR = path.join(PACKAGE_DIR, "boilerplate");
 export const TEMPLATES_DIR = path.join(PACKAGE_DIR, "templates");
 
-/** Carries the manifest, so it is always excluded from the copy. */
 const MANIFEST_FILE = "_template.md";
 
 export type Answer = string | boolean | undefined;
@@ -51,7 +49,6 @@ export interface TemplateManifest {
   git: { init: boolean };
   lockfile: boolean;
   workspaceWarning: boolean;
-  /** Prose body of the manifest file. */
   description: string;
   /** Absolute path of the template folder. */
   dir: string;
@@ -97,32 +94,21 @@ export interface DefaultContext {
 export interface FieldSpec {
   key: string;
   type: FieldType;
-  /** Prompt wording, frozen by the CLI contract. */
   prompt: string;
   /** One line under the prompt saying what the value does. */
   hint?: string;
-  /**
-   * How the value is passed on the command line. Square brackets mark the
-   * positional form, which is the only way to pass a project name.
-   */
+  /** Square brackets mark the positional form. */
   flag: string;
   /** Line printed by `--help`. */
   help: string;
-  /**
-   * Never prompted, only read from the command line: a maintainer or local
-   * development concern that a consumer has no reason to answer. Such a field
-   * needs a `defaultValue`, because there is no dialogue to fall back to.
-   */
+  /** Only read from the command line, so such a field needs a `defaultValue`. */
   flagOnly?: boolean;
   options?: FieldOption[];
   validate?: (value: string) => string | undefined;
   /** Flags that only make sense together with this field. */
   companions?: CompanionFlag[];
   fills?: PlaceholderFill[];
-  /**
-   * Default offered by the prompt and used when the flag is absent. Returning
-   * undefined makes the field required.
-   */
+  /** Returning undefined makes the field required. */
   defaultValue?: (ctx: DefaultContext) => Answer;
 }
 
@@ -137,19 +123,12 @@ function validateName(value: string): string | undefined {
   return "Use lowercase letters, digits, hyphens or underscores; must start with a letter.";
 }
 
-/**
- * An empty value would leave the placeholders it fills blank, which reads as a
- * gap in the rendered prose and as a truncated path in the edit link.
- */
 function validateRequired(value: string): string | undefined {
   if (value.trim() === "") return "This value is required.";
   return undefined;
 }
 
-/**
- * A base path that does not start and end with a slash 404s every asset once
- * the site is deployed, which is the trap the boilerplate config warns about.
- */
+/** A base path without a slash at each end 404s every asset once deployed. */
 export function validateBase(value: string): string | undefined {
   if (!value.startsWith("/") || !value.endsWith("/")) {
     return "A base path has to start and end with a slash, for example /docs/ (or / for the site root).";
@@ -250,9 +229,8 @@ export const FIELD_CATALOG: FieldSpec[] = [
         help: "Override the git URL used with --source=git",
       },
     ],
-    // --dev has to land in the answered source: `source` always ends up
-    // answered, so a flat "npm" default would reach resolveSource first and
-    // shadow the shortcut for good.
+    // `source` always ends up answered, so a flat "npm" default would reach
+    // resolveSource first and shadow --dev for good.
     defaultValue: ({ flags }) => (flags.dev === true ? "file" : "npm"),
   },
   {
@@ -303,9 +281,6 @@ export const FIELD_CATALOG: FieldSpec[] = [
     prompt: "Repository path for edit links, as org/repo (optional)",
     flag: "--repo=<org/repo>",
     help: "Repository path pre-filled into the commented-out edit-link block",
-    // The value only pre-fills a block the reader has to uncomment, so asking
-    // for it in the dialogue buys nothing. The comment in the generated config
-    // explains the block; whoever enables it can fill the path in there.
     flagOnly: true,
     fills: [{ placeholder: "__REPO__" }],
     defaultValue: () => "",
@@ -337,16 +312,14 @@ export function checkFieldValue(
   return field.validate?.(value);
 }
 
-/** Placeholders a field fills, so a manifest default can interpolate them. */
 export function fieldPlaceholders(field: FieldSpec): string[] {
   return (field.fills ?? []).map((fill) => fill.placeholder);
 }
 
 /**
- * What the answers so far fill each placeholder with, walked in catalog order so
- * that the last field of the template filling a shared placeholder wins. Both
- * the interpolated `defaults:` and the scaffolded file contents read this one
- * map, so they cannot disagree on which field a placeholder comes from.
+ * Walked in catalog order, so the last field filling a shared placeholder wins.
+ * The interpolated `defaults:` and the scaffolded file contents both read this
+ * one map, so they cannot disagree on where a placeholder comes from.
  */
 export function placeholderValues(
   fields: string[],
@@ -357,8 +330,7 @@ export function placeholderValues(
     if (!fields.includes(field.key)) continue;
     const answer = answers[field.key];
     if (answer === undefined) continue;
-    // A confirm answer reaches the scaffold as the literal `true` / `false` a
-    // TypeScript config expects.
+    // The generated TypeScript config wants a literal `true` / `false`.
     const value = typeof answer === "boolean" ? String(answer) : answer;
     for (const fill of field.fills ?? []) {
       values[fill.placeholder] = fill.format ? fill.format(value) : value;
@@ -368,10 +340,9 @@ export function placeholderValues(
 }
 
 /**
- * Expand a manifest `defaults:` value against the answers resolved so far, then
- * put the result through the field's own checks. The manifest validator sees
- * only the uninterpolated string, so a value such as `nginx-__PROJECT__` can
- * reach a select field whose option list it does not match.
+ * The manifest validator sees only the uninterpolated string, so a value such
+ * as `nginx-__PROJECT__` can reach a select field whose option list it does not
+ * match. Re-check the expansion here.
  */
 export function resolveManifestDefault(
   manifest: TemplateManifest,
@@ -661,10 +632,7 @@ function checkFields(templateName: string, fields: string[]): void {
   }
 }
 
-/**
- * A `defaults:` entry is only reachable through its field, and it bypasses the
- * flag path, so it needs the same checks a flag value gets.
- */
+/** A `defaults:` entry bypasses the flag path, so re-run the same checks. */
 function checkDefaults(
   templateName: string,
   fields: string[],
@@ -687,9 +655,8 @@ function checkDefaults(
     }
     if (typeof value !== "string") continue;
 
-    // A default may interpolate a placeholder a field resolved before it fills,
-    // so the value can carry something derived from the project name. Fields are
-    // resolved in catalog order, whatever order "fields" lists them in.
+    // A default may interpolate a placeholder that an earlier field fills.
+    // Fields resolve in catalog order, whatever order "fields" lists them in.
     const earlier = FIELD_CATALOG.slice(
       0,
       FIELD_CATALOG.findIndex((candidate) => candidate.key === key),
@@ -703,8 +670,7 @@ function checkDefaults(
         `"defaults.${key}" uses ${token}, which no field resolved before "${key}" fills`,
       );
     }
-    // An interpolating value has no final form yet; `resolveManifestDefault`
-    // checks it against the field once the answers are in.
+    // No final form yet; `resolveManifestDefault` checks it once answers are in.
     if (tokens.length > 0) continue;
 
     const problem = checkFieldValue(field, value);
@@ -712,10 +678,7 @@ function checkDefaults(
   }
 }
 
-/**
- * `copyDir` filters excluded entries only at the root of each source, so a
- * nested path would silently copy anyway. Reject it instead.
- */
+/** `copyDir` filters only at the root of a source, so a nested path would copy. */
 function checkBoilerplateEntries(
   templateName: string,
   key: string,
@@ -868,9 +831,8 @@ export interface TemplateScan {
 }
 
 /**
- * Source of truth for the available templates. One broken folder is reported as
- * unavailable rather than thrown, so it cannot take `--help` and every healthy
- * template down with it.
+ * One broken folder is reported as unavailable rather than thrown, so it cannot
+ * take `--help` and every healthy template down with it.
  */
 export function scanTemplates(
   dirs: ScaffoldDirs = defaultDirs(),
@@ -943,9 +905,8 @@ export function resolveCopyPlan(
 
 /**
  * `npm pack` strips dotfiles and files npm treats as its own config, so the
- * boilerplate ships them prefixed and the scaffolder renames them on copy. One
- * table serves both directions, because `sync` resolves a consumer file back to
- * its baseline through the inverse and the two have to agree entry for entry.
+ * boilerplate ships them prefixed and the scaffolder renames them on copy.
+ * `sync` resolves a baseline through the inverse of this one table.
  */
 const SCAFFOLD_RENAMES: Record<string, string> = {
   _npmrc: ".npmrc",
@@ -961,11 +922,10 @@ export interface WorkspaceSettings {
 }
 
 /**
- * The pnpm settings a documentation site cannot boot without, read from the
- * boilerplate's own workspace file so a host repo receives exactly what a
- * standalone scaffold ships. Mermaid's transitive dependencies are CJS: without
- * the hoist patterns Vite pre-bundles them wrong and the page renders blank with
- * a dayjs default-export SyntaxError.
+ * Read from the boilerplate's own workspace file, so a host repo receives
+ * exactly what a standalone scaffold ships. Mermaid's transitive dependencies
+ * are CJS: without the hoist patterns Vite pre-bundles them wrong and the page
+ * renders blank with a dayjs default-export SyntaxError.
  */
 export function boilerplateWorkspaceSettings(
   boilerplateDir: string = BOILERPLATE_DIR,
@@ -1009,10 +969,9 @@ export function boilerplateName(consumerEntry: string): string {
 
 /**
  * Compose the sources in a staging directory with overwrite, so a later source
- * wins, then copy the result to the target once with `idempotent: true`.
- * Layering idempotent copies straight into the target would give the FIRST
- * source precedence and would count collisions between sources as files that
- * already existed in the consumer repo.
+ * wins, then copy the result to the target once. Layering idempotent copies
+ * straight into the target would give the FIRST source precedence and would
+ * count collisions between sources as pre-existing consumer files.
  */
 export function applyCopyPlan(plan: CopyPlan): CopyDirResult {
   const staging = fs.mkdtempSync(path.join(os.tmpdir(), "tf-doc-vault-"));
@@ -1056,9 +1015,8 @@ function packageVersion(): string {
 }
 
 /**
- * The documentation dependencies a scaffold needs, read from this package's own
- * `peerDependencies` so the ranges written into a host repo cannot drift from
- * the ones this package is built and tested against.
+ * Read from this package's own `peerDependencies`, so the ranges written into a
+ * host repo cannot drift from the ones this package is tested against.
  */
 export function packagePeerDependencies(
   packageDir: string = PACKAGE_DIR,
@@ -1078,10 +1036,9 @@ export function packageName(packageDir: string = PACKAGE_DIR): string {
 }
 
 /**
- * Everything a host repo has to declare for the scaffold to run: the peers,
- * plus this package itself. A package cannot list itself as its own peer, yet
- * the generated `docs:*` scripts call its binary and the generated VitePress
- * config imports from it, so leaving it out gives a scaffold that cannot boot.
+ * A package cannot list itself as its own peer, yet the generated `docs:*`
+ * scripts call its binary and the generated VitePress config imports from it,
+ * so the host repo has to receive the peers plus this package.
  */
 export function documentationDependencies(
   flags: ParsedArgs["flags"],
@@ -1098,9 +1055,8 @@ export function resolveSource(flags: ParsedArgs["flags"]): string {
 }
 
 /**
- * The `@techfides/tf-doc-vault` dependency spec written into the scaffold.
- * Defaults to the published npm version so CI and the Docker build need no git
- * credentials. `ctx` is injectable for tests.
+ * Defaults to the published npm version, so CI and the Docker build of a
+ * scaffold need no git credentials.
  */
 export function resolveDependencyValue(
   flags: ParsedArgs["flags"],

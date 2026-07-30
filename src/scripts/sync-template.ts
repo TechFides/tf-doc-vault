@@ -22,10 +22,8 @@ export const BOILERPLATE_DIR = path.resolve(
   "boilerplate",
 );
 
-// Every entry needs a counterpart in the boilerplate: a missing one counts as
-// an error, so tracking a file the package does not ship fails every sync run.
-// That is why `.npmrc` is absent even though the scaffold renames `_npmrc` to
-// it: the boilerplate carries no `_npmrc` baseline to compare against.
+// A tracked file with no boilerplate counterpart fails every sync run, which is
+// why `.npmrc` is absent: the boilerplate ships no `_npmrc` baseline for it.
 export const TRACKED_FILES: string[] = [
   "Dockerfile",
   ".gitlab-ci.yml",
@@ -180,8 +178,6 @@ interface Result {
 }
 
 export function resolveBoilerplatePath(rel: string): string {
-  // Inverse of the scaffold's own rename table, so every renamed file resolves
-  // to the baseline it was copied from.
   return path.join(BOILERPLATE_DIR, boilerplateName(rel));
 }
 
@@ -189,8 +185,7 @@ function inspect(rel: string, placeholders: Record<string, string>): Result {
   const consumerPath = path.join(PROJECT_ROOT, rel);
   const boilerplatePath = resolveBoilerplatePath(rel);
 
-  // A tracked file with no counterpart means the package lost it. Reporting
-  // that as "ok" would keep the regression silent.
+  // Reporting a lost baseline as "ok" would keep the regression silent.
   if (!fs.existsSync(boilerplatePath)) return { rel, status: "no-baseline" };
 
   const expected = renderTemplate(
@@ -282,8 +277,8 @@ function main(): void {
   console.log(
     `✗ ${drifted} drift, ${missing} missing, ${noBaseline} without a baseline, ${okCount} ok`,
   );
-  // Only drift and missing files are fixable. A file without a baseline is not,
-  // and --apply exits 1 on it regardless, so pointing at --apply would loop.
+  // --apply exits 1 on a file without a baseline too, so pointing the reader at
+  // it for that case alone would loop.
   if (!flags.apply && drifted + missing > 0) {
     console.log(
       `  To overwrite the ${drifted + missing} fixable file(s), run: tf-doc-vault sync --apply`,
@@ -298,8 +293,8 @@ function main(): void {
   process.exit(1);
 }
 
-// Run main() only when invoked as a CLI, so a test can import the resolution
-// helpers without diffing the cwd.
+// Only when invoked as a CLI, so a test can import the resolution helpers
+// without diffing the cwd.
 const invokedAsScript = ((): boolean => {
   const entry = process.argv[1];
   if (!entry) return false;

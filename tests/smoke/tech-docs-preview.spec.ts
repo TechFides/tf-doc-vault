@@ -1,7 +1,6 @@
 import { test } from "./fixtures";
 
-// The host repo owns the scripts and the node_modules, so preview runs from
-// there with the scaffolded folder as the VitePress root.
+// The host repo owns the node_modules, so preview runs from there.
 test("vitepress preview serves tech-docs cleanly", async ({
   page,
   sandboxes,

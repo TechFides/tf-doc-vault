@@ -24,8 +24,7 @@ for (const subpath of SUBPATHS) {
   });
 }
 
-// `specs/` is internal planning material. The `files` whitelist keeps it out of
-// the tarball; this asserts it instead of assuming it.
+// `specs/` is internal planning material kept out of the tarball by `files`.
 test("the packed tarball ships no specs/ paths", ({ sandboxes }) => {
   const r = spawnSync("tar", ["-tzf", sandboxes.tgz], { encoding: "utf-8" });
   expect(r.status, r.stderr).toBe(0);

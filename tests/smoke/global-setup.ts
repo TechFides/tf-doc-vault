@@ -73,8 +73,8 @@ function packRepo(): string {
 
 /**
  * Mermaid's transitive dependencies are CJS, so Vite pre-bundles them wrong
- * unless pnpm hoists them and the page renders blank at runtime. A build still
- * succeeds, which is how a broken dev server shipped once.
+ * unless pnpm hoists them and the page renders blank at runtime. The build
+ * succeeds either way, so nothing else in the suite catches it.
  */
 function verifyHoistPatterns(dir: string): void {
   logger.step("verifying hoist patterns (mermaid, dayjs, debug, cytoscape)");
@@ -91,9 +91,8 @@ function verifyHoistPatterns(dir: string): void {
 }
 
 /**
- * The host repo owns the dependencies, the scripts and the pnpm settings, all of
- * them written by the wizard, so everything here runs from the host root. The
- * scaffolded subfolder is returned as well because that is where `docs/` lives.
+ * The wizard writes the dependencies, the scripts and the pnpm settings into
+ * the host repo, so everything here runs from the host root.
  */
 function scaffoldTechDocs(tgz: string): { host: string; dir: string } {
   logger.heading("Building tech-docs sandbox");
@@ -120,9 +119,7 @@ function scaffoldTechDocs(tgz: string): { host: string; dir: string } {
     { label: "setup --template=tech-docs" },
   );
 
-  // The wizard merged the documentation dependencies into the host package.json
-  // and wrote the hoist patterns into its pnpm-workspace.yaml, so adding the
-  // packed tarball is the only thing left before installing.
+  // The wizard already wrote the dependencies and the hoist patterns.
   run("pnpm", ["add", `file:${tgz}`], host, {
     label: "pnpm add (tech-docs deps)",
     env: { HUSKY: "0" },

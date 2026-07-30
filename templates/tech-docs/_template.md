@@ -39,18 +39,16 @@ workspaceWarning: false
 
 Documentation of one service, living in a subfolder of that service's
 repository. The host repo keeps its own tooling, so the boilerplate configs are
-excluded; what the host `package.json` receives is the `docs:*` scripts and the
+excluded and the host `package.json` receives only the `docs:*` scripts and the
 documentation dependencies it does not declare yet.
 
-`_pnpm-workspace.yaml` is excluded for the same reason (a host repo owns its own
-workspace file), so `host.pnpmWorkspace` merges the pnpm settings the site needs
-into the host's file instead. Without the hoist patterns in there, `docs:dev`
-serves a blank page.
+A host repo owns its own workspace file, so `_pnpm-workspace.yaml` is excluded
+and `host.pnpmWorkspace` merges the pnpm settings into the host's file instead.
+Without the hoist patterns in there, `docs:dev` serves a blank page.
 
-The deploy files (`Dockerfile`, `docker/`, `.gitlab-ci.yml`, `infra/`) are
-excluded as well: the service repo owns building and publishing its
-documentation. Those files assume a standalone repository, and a `.gitlab-ci.yml`
-inside a subfolder is never read by GitLab anyway.
+The deploy files (`Dockerfile`, `docker/`, `.gitlab-ci.yml`, `infra/`) assume a
+standalone repository, and a `.gitlab-ci.yml` inside a subfolder is never read
+by GitLab, so the service repo owns publishing its own documentation.
 
 `config.ts` is renamed to `config.mts` so that esbuild treats the file as ESM,
 which it has to be to import from the ESM-only `@techfides/tf-doc-vault`.

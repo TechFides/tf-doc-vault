@@ -151,8 +151,7 @@ describe("manifest parsing", () => {
     ).toThrow(/missing key "lockfile"/);
   });
 
-  // Every host step is a required boolean, so a template can never end up
-  // touching the host repo (or leaving it alone) by omission.
+  // Required, so a template never touches the host repo by omission.
   test("rejects a missing host key", () => {
     expect(() =>
       fixtureManifest(MANIFEST.replace("  devDependencies: true\n", "")),
@@ -165,8 +164,8 @@ describe("manifest parsing", () => {
     );
   });
 
-  // Every manifest problem is something the maintainer fixes in the manifest, so
-  // it has to reach the CLI as a message rather than as a stack trace.
+  // A manifest problem is the maintainer's to fix, so it reaches them as a
+  // message rather than as a stack trace.
   test("raises the CLI error type, prefixed with the offending file", () => {
     expect(() => fixtureManifest("Just prose.\n")).toThrow(SetupError);
     expect(() => fixtureManifest("Just prose.\n")).toThrow(
@@ -231,8 +230,7 @@ describe("fields and defaults validation", () => {
     ).toThrow(/"defaults.git" must be true or false/);
   });
 
-  // Fields resolve in catalog order, so the message talks about that order
-  // instead of the order "fields" happens to list.
+  // Fields resolve in catalog order, not in the order "fields" lists them.
   test("rejects a placeholder no field resolved before it fills", () => {
     expect(() =>
       fixtureManifest(
@@ -252,8 +250,7 @@ describe("fields and defaults validation", () => {
 });
 
 describe("boilerplateWorkspaceSettings", () => {
-  // The wizard merges these into a host repo, so they have to come from the
-  // boilerplate file rather than from a copy in the code that can go stale.
+  // The wizard merges these into a host repo, so a copy in the code goes stale.
   test("reads the hoist patterns and build approvals the boilerplate ships", () => {
     const settings = boilerplateWorkspaceSettings();
     expect(settings.publicHoistPattern).toContain("*mermaid*");
@@ -264,8 +261,8 @@ describe("boilerplateWorkspaceSettings", () => {
     });
   });
 
-  // Quoted entries and quoted mapping keys are how the real file writes the
-  // patterns YAML would otherwise read as an alias or a reserved indicator.
+  // The real file quotes the patterns YAML would read as an alias or an
+  // indicator, so both forms have to come back as the same value.
   test("reads the boilerplate directory it is given, unquoting entries", () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "scaffold-ws-"));
     write(
@@ -439,9 +436,8 @@ describe("scaffold renames", () => {
     expect(consumerName("Dockerfile")).toBe("Dockerfile");
   });
 
-  // `sync` resolves the baseline through the inverse, so the two must agree on
-  // every entry: a mapping present in one direction only left
-  // pnpm-workspace.yaml without a baseline.
+  // `sync` resolves a baseline through the inverse, so an entry present in one
+  // direction only leaves that file without a baseline.
   test("the inverse covers exactly the same entries", () => {
     for (const source of ["_gitignore", "_npmrc", "_pnpm-workspace.yaml"]) {
       expect(boilerplateName(consumerName(source))).toBe(source);

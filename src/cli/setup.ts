@@ -43,14 +43,12 @@ import {
   type WorkspaceSettings,
 } from "./scaffold.js";
 
-/** Raised when a prompt is dismissed, so `main` can exit without side effects. */
 export class CancelledError extends Error {}
 
 export interface PromptRequest {
   key: string;
   type: FieldType;
   message: string;
-  /** One line under the prompt saying what the value does. */
   hint?: string;
   initialValue?: string | boolean;
   options?: FieldOption[];
@@ -62,7 +60,7 @@ export type PromptFn = (request: PromptRequest) => Promise<Answer>;
 // ─── flags ───
 
 export interface SetupInput {
-  /** Positional project name. There is no `--name` flag. */
+  /** Positional only; there is no `--name` flag. */
   projectName?: string;
   flags: ParsedArgs["flags"];
 }
@@ -114,7 +112,6 @@ function checkSupplied(field: FieldSpec, value: Answer): Answer {
   return value;
 }
 
-/** Every flag key the wizard understands, including the `--no-` companions. */
 export function knownFlagKeys(): Set<string> {
   const keys = new Set(["template", "help"]);
   for (const field of FIELD_CATALOG) {
@@ -125,17 +122,12 @@ export function knownFlagKeys(): Set<string> {
   return keys;
 }
 
-/**
- * A typo such as `--gcp-projct=oops` would otherwise scaffold with the default,
- * which in a non-interactive run means a value nobody asked for.
- */
 export function unknownFlags(flags: ParsedArgs["flags"]): string[] {
   const known = knownFlagKeys();
   return Object.keys(flags).filter((key) => !known.has(key));
 }
 
 function fieldDefault(field: FieldSpec, ctx: DefaultContext): Answer {
-  // A manifest `defaults:` entry outranks the catalog default for any field.
   const override = ctx.manifest.defaults[field.key];
   if (override === undefined) return field.defaultValue?.(ctx);
   if (typeof override !== "string") return override;
@@ -161,8 +153,8 @@ async function ask(
         : undefined,
     options: field.options,
     validate: (value: string): string | undefined => {
-      // A field with its own validator judges the empty answer too: clearing a
-      // prefilled default is how an empty value reaches an optional field.
+      // Clearing a prefilled default is how an empty value reaches an
+      // optional field, so the field's own validator judges "" too.
       if (value === "" && required) return "This value is required.";
       return field.validate?.(value);
     },
@@ -182,10 +174,7 @@ export interface AnswerResult {
   warnings: string[];
 }
 
-/**
- * Turn flags plus the dialogue into the answer set the template asked for.
- * `promptFn` is injected so the whole dialogue runs in tests without a TTY.
- */
+/** `promptFn` is injected so the whole dialogue runs in tests without a TTY. */
 export async function resolveAnswers(
   manifest: TemplateManifest,
   input: SetupInput,
@@ -300,11 +289,10 @@ export async function selectTemplate(
 // ─── placeholders ───
 
 /**
- * Every placeholder the catalog knows about starts empty, so a field the chosen
- * template does not ask about still gets substituted instead of leaving its
- * literal `__NAME__` in the scaffold. The two placeholders that would break the
- * generated config when empty fall back to the manifest, which is where their
- * per-template value lives; an answer overrides it.
+ * Every catalog placeholder starts empty, so a field the chosen template never
+ * asks about is substituted away instead of leaving a literal `__NAME__` in the
+ * scaffold. The two that would break the generated config when empty fall back
+ * to the manifest.
  */
 export function resolvePlaceholders(
   manifest: TemplateManifest,
@@ -320,18 +308,14 @@ export function resolvePlaceholders(
     __DOCS_BASE__: manifest.base,
     __SECTION_NAV__: String(manifest.sectionNav),
     ...placeholderValues(manifest.fields, answers),
-    // Basic auth stays empty; the consumer fills it into .gitlab-ci.yml when
-    // they run the auth-enabled server flavour.
+    // The consumer fills these into .gitlab-ci.yml for the auth-enabled flavour.
     __BASIC_AUTH_USER__: "",
     __BASIC_AUTH_PASS__: "",
     ...extra,
   };
 }
 
-/**
- * Flags that feed `resolveDependencyValue`. A template that does not ask about
- * the dependency source gets the plain published version.
- */
+/** A template that does not ask about the source gets the published version. */
 export function dependencyFlags(
   manifest: TemplateManifest,
   answers: Record<string, Answer>,
@@ -347,10 +331,6 @@ export function dependencyFlags(
   return out;
 }
 
-/**
- * `--ref`, `--git-url` and `--file-path` each belong to one `--source` value, so
- * the wrong combination is reported instead of silently dropped.
- */
 export function sourceWarnings(
   manifest: TemplateManifest,
   source: string,
@@ -426,10 +406,9 @@ export interface HostPackageJson {
 }
 
 /**
- * The peers the host repo does not declare yet, sorted by name. A host may
- * legitimately keep one of them in `dependencies` (an application repo already
- * shipping vue), so both blocks count as declared and an existing range is
- * never rewritten.
+ * A host may legitimately keep a peer in `dependencies` (an application repo
+ * already shipping vue), so both blocks count as declared and an existing range
+ * is never rewritten.
  */
 export function missingDependencies(
   peers: Record<string, string>,
@@ -492,10 +471,7 @@ const WORKSPACE_FILE = "pnpm-workspace.yaml";
 const HOIST_KEY = "publicHoistPattern";
 const BUILDS_KEY = "allowBuilds";
 
-/**
- * A plain scalar starting with a YAML indicator, or carrying a key separator or
- * a comment, has to be quoted: `*mermaid*` would otherwise read as an alias.
- */
+/** Unquoted, `*mermaid*` reads as a YAML alias and `a: b` as a nested key. */
 const PLAIN_SCALAR = /^[A-Za-z0-9_][^:#]*$/;
 
 function yamlScalar(value: string): string {
@@ -516,12 +492,10 @@ export function renderWorkspaceSettings(settings: WorkspaceSettings): string {
   ].join("\n");
 }
 
-/** Index of a top-level key, or -1. */
 function keyLine(lines: string[], key: string): number {
   return lines.findIndex((line) => line.startsWith(`${key}:`));
 }
 
-/** Value written on the key line itself, ignoring a trailing comment. */
 function inlineValue(lines: string[], at: number, key: string): string {
   const rest = lines[at]!.slice(key.length + 1).trim();
   return rest.startsWith("#") ? "" : rest;
@@ -539,7 +513,6 @@ function blockEnd(lines: string[], at: number): number {
   return end;
 }
 
-/** Indentation the block already uses, two spaces when it has no entries yet. */
 function blockIndent(lines: string[], at: number, end: number): string {
   for (let i = at + 1; i < end; i++) {
     const match = /^\s+/.exec(lines[i]!);
@@ -548,7 +521,7 @@ function blockIndent(lines: string[], at: number, end: number): string {
   return "  ";
 }
 
-/** What the block declares already: sequence items, or mapping keys. */
+/** Sequence items or mapping keys, whichever shape the block uses. */
 function declaredEntries(lines: string[], at: number, end: number): string[] {
   const entries: string[] = [];
   for (let i = at + 1; i < end; i++) {
@@ -570,7 +543,6 @@ function declaredIn(lines: string[], key: string): string[] {
   return declaredEntries(lines, at, blockEnd(lines, at));
 }
 
-/** Append to an existing block, or add the whole key when it is absent. */
 function appendEntries(lines: string[], key: string, entries: string[]): void {
   if (entries.length === 0) return;
   const at = keyLine(lines, key);
@@ -585,14 +557,12 @@ function appendEntries(lines: string[], key: string, entries: string[]): void {
 
 export interface WorkspaceMerge {
   content: string;
-  /** Entry names added, in the order they were written. */
   added: string[];
   /** The host writes these keys inline, which this merge cannot extend safely. */
   manual: boolean;
 }
 
 /**
- * Add the pnpm settings a documentation site needs to a host workspace file.
  * Additive only: an entry the host already declares keeps its place and its
  * value, so a second run has nothing left to add.
  */
@@ -697,7 +667,6 @@ export function updateGitignore(dir: string, docsPath: string): void {
  * pnpm honors workspace config only at the workspace root, so a scaffold placed
  * inside an existing workspace silently ignores its own `pnpm-workspace.yaml`
  * and the docs page renders blank with a dayjs default-export SyntaxError.
- * Print the merge instructions; the consumer patches the ancestor file.
  */
 export function warnIfEmbeddedInWorkspace(
   targetDir: string,
@@ -747,8 +716,7 @@ ${rule}
 
 /**
  * Pre-generate `pnpm-lock.yaml` before the scaffold's own first commit;
- * otherwise CI and Docker abort on ERR_PNPM_NO_LOCKFILE. Non-fatal: warn and
- * let the user run `pnpm install` themselves.
+ * otherwise CI and Docker abort on ERR_PNPM_NO_LOCKFILE.
  */
 function generateLockfile(dir: string): void {
   const result = spawnSync("pnpm", ["install", "--lockfile-only"], {
@@ -793,10 +761,7 @@ function posix(value: string): string {
   return value.split(path.sep).join("/");
 }
 
-/**
- * Two-column block sized to its own widest label. A multi-line cell (a manifest
- * error reported as an unavailable template) keeps every line in the column.
- */
+/** A multi-line cell (a manifest error) keeps every line inside the column. */
 export function table(rows: [string, string][]): string[] {
   const width = Math.max(...rows.map(([label]) => label.length)) + 2;
   const indent = " ".repeat(2 + width);
@@ -900,8 +865,8 @@ export function nextSteps(ctx: {
 }): string {
   const relative = posix(path.relative(ctx.cwd, ctx.targetDir)) || ".";
   // The host-driven flavour runs its scripts from the repository root, every
-  // other one is told to cd into the target first, so the paths printed after
-  // that point are relative to whichever directory the reader is standing in.
+  // other one is told to cd into the target first, so every path printed below
+  // is relative to wherever that leaves the reader standing.
   const insideTarget = !ctx.manifest.host.packageJsonScripts;
   const fromHere = (entry: string): string =>
     insideTarget ? entry : posix(path.join(relative, entry));
@@ -940,8 +905,7 @@ Commit it together with your other changes:
   git push`);
   }
 
-  // A template can exclude the deploy files, so the Terraform hint follows what
-  // actually landed in the target.
+  // A template can exclude the deploy files, so the hint follows what landed.
   if (fs.existsSync(path.join(ctx.targetDir, "infra"))) {
     blocks.push(`Deploy (Cloud Run, its own pipeline):
   cd ${fromHere("infra")}
@@ -963,12 +927,11 @@ Commit it together with your other changes:
 const SHOW_CURSOR = "\u001B[?25h";
 
 /**
- * Ctrl+D on an empty answer closes clack's readline rather than producing its
- * cancel symbol, so `isCancel` never fires: the prompt stays pending, the event
- * loop drains and node exits 13 on the unsettled top-level await. An open prompt
- * holds stdin flowing, so reaching `beforeExit` proves nothing can answer it any
- * more; stdin reaching EOF says the same. Either way, cancel and undo the cursor
- * hiding that clack's own cancel path would have undone.
+ * Ctrl+D on an empty answer closes clack's readline instead of producing its
+ * cancel symbol, so `isCancel` never fires: the prompt stays pending and node
+ * exits 13 on the unsettled top-level await. An open prompt holds stdin
+ * flowing, so `beforeExit` or an stdin EOF both prove nothing can answer it any
+ * more. Cancelling here also has to undo clack's cursor hiding.
  */
 function abandonedPrompt(): { abandoned: Promise<never>; release: () => void } {
   let cancel = (): void => {};
@@ -990,9 +953,9 @@ function abandonedPrompt(): { abandoned: Promise<never>; release: () => void } {
 }
 
 /**
- * clack runs a confirm or select message through its guide-prefixing wrapper, so
- * a second line already lands under the bar there. A text prompt writes the
- * message verbatim, so that line has to carry the bar itself.
+ * clack runs a confirm or select message through its guide-prefixing wrapper,
+ * so a second line lands under the bar on its own. A text prompt writes the
+ * message verbatim, so there the line has to carry the bar itself.
  */
 function hinted(request: PromptRequest, ownBar: boolean): string {
   if (!request.hint) return request.message;
@@ -1049,7 +1012,6 @@ async function run(): Promise<void> {
   if (flags.help === true || argv.includes("-h")) usage(0);
 
   const cwd = process.cwd();
-  // A pipe on either side means no prompting: no --yes, no CI sniffing.
   const interactive = Boolean(process.stdin.isTTY && process.stdout.isTTY);
 
   if (interactive) clack.intro("tf-doc-vault setup");
@@ -1057,8 +1019,7 @@ async function run(): Promise<void> {
   const scan = scanTemplates();
   const requested = templateFlag(flags);
   for (const entry of scan.unavailable) {
-    // The requested one is raised as an error below; warning about it here too
-    // would print the same reason twice.
+    // The requested one is raised as an error below, with the same reason.
     if (entry.name === requested) continue;
     process.stderr.write(
       `⚠  Template "${entry.name}" is unavailable: ${entry.reason}\n`,

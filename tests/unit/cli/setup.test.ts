@@ -47,7 +47,6 @@ import {
 
 const CTX = { version: "9.9.9", packageDir: "/abs/pkg" };
 
-/** Root package.json version, which the production `ctx` default resolves to. */
 const REPO_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../../..",
@@ -82,7 +81,7 @@ describe("resolveDependencyValue", () => {
     expect(resolveDependencyValue({}, "/tmp/proj", CTX)).toBe("9.9.9");
   });
 
-  // Covers the real ctx default (packageVersion()/PACKAGE_DIR); every other test injects CTX.
+  // Covers the real ctx default; every other test here injects CTX.
   test("production default arm reads the real package version (no injected ctx)", () => {
     expect(resolveDependencyValue({}, "/tmp/proj")).toBe(REAL_VERSION);
     expect(REAL_VERSION).toMatch(/^\d+\.\d+\.\d+/);
@@ -122,7 +121,6 @@ describe("resolveDependencyValue", () => {
 });
 
 describe("originUrl", () => {
-  // The epilogue must print the GitLab origin; no git@github.com path exists.
   test("points at the GitLab analysis group, not GitHub", () => {
     expect(originUrl("lapa_ana")).toBe(
       "git@gitlab.com:techfides/tf-analysis/lapa_ana.git",
@@ -132,10 +130,7 @@ describe("originUrl", () => {
 
 // ─── wizard fixtures ───
 
-/**
- * Fixture manifests, so the dialogue tests never depend on a template that
- * happens to ship with the package.
- */
+/** A fixture, so the dialogue tests never depend on a shipped template. */
 function manifest(overrides: Partial<TemplateManifest> = {}): TemplateManifest {
   return {
     name: "fixture",
@@ -170,7 +165,6 @@ function scanOf(
   return { templates, unavailable };
 }
 
-/** Prompt layer that replays scripted answers and records what it was asked. */
 function scriptedPrompts(answers: Record<string, Answer>): {
   promptFn: PromptFn;
   asked: PromptRequest[];
@@ -217,7 +211,6 @@ describe("selectTemplate", () => {
     ).rejects.toThrow(/Unknown template: third[\s\S]*first, second/);
   });
 
-  // A broken folder is named with its reason instead of being called unknown.
   test("a template that failed to load reports why", async () => {
     await expect(
       selectTemplate(
@@ -229,7 +222,6 @@ describe("selectTemplate", () => {
     ).rejects.toThrow(/Template "wrecked" is unavailable: missing key/);
   });
 
-  // Without a TTY there is no --yes and no CI detection, only flags.
   test("without a TTY a missing --template is an error, never a prompt", async () => {
     await expect(
       selectTemplate(scanOf(templates), undefined, NO_PROMPTS, {
@@ -268,7 +260,6 @@ describe("resolveAnswers", () => {
     );
     expect(answers).toEqual({
       name: "demo_proj",
-      // Derived from the project name, with underscores turned into hyphens.
       "gcp-project": "tfsa-demo-proj",
       server: "nginx-auth",
       source: "npm",
@@ -316,16 +307,15 @@ describe("resolveAnswers", () => {
     // The GCP default follows the name answered one prompt earlier.
     expect(asked[1]?.initialValue).toBe("tfsa-demo");
     expect(asked[2]?.initialValue).toBe("nginx");
-    // Both come from the manifest, which is where a template's own value lives.
+    // Both come from the manifest.
     expect(asked[3]?.initialValue).toBe(true);
     expect(asked[4]?.initialValue).toBe("/");
     expect(asked[5]?.initialValue).toBe(true);
     expect(answers["gcp-project"]).toBe("tfsa-custom");
   });
 
-  // A prompt without a hint leaves the reader guessing. A select explains itself
-  // through its options, which clack renders next to the active one; every other
-  // type needs the field's own hint line.
+  // A select explains itself through its options, which clack renders next to
+  // the active one; every other type needs the field's own hint line.
   test("every prompted field explains itself in one short line", async () => {
     const prompted = FIELD_CATALOG.filter((field) => !field.flagOnly);
     const answers: Record<string, Answer> = {};
@@ -369,8 +359,7 @@ describe("resolveAnswers", () => {
     expect(server?.options?.[1]?.hint).toMatch(/Basic auth/);
   });
 
-  // The dependency source is a maintainer concern; a consumer always wants the
-  // published version, so the dialogue never brings it up.
+  // A consumer always wants the published version, so it is never asked.
   test("source is never prompted, only read from the flags", async () => {
     const { promptFn, asked } = scriptedPrompts({ name: "demo" });
     const { answers } = await resolveAnswers(
@@ -391,8 +380,7 @@ describe("resolveAnswers", () => {
     expect(withFlag.answers.source).toBe("git");
   });
 
-  // The value only pre-fills a commented-out block, so asking for it in the
-  // dialogue would be a question with no visible effect.
+  // It only pre-fills a commented-out block, so the dialogue would gain nothing.
   test("repo is never prompted, only read from the flags", async () => {
     const { promptFn, asked } = scriptedPrompts({ "service-id": "BAT" });
     const { answers } = await resolveAnswers(
@@ -469,10 +457,9 @@ describe("resolveAnswers", () => {
     expect(answers.repo).toBe("org/tf-analysis/host-repo");
   });
 
-  // The manifest validator sees the uninterpolated string, so the concrete value
-  // is the first thing a select field's option list can be applied to. Left
-  // unchecked, `nginx-demo` reached .gitlab-ci.yml as SERVER_TYPE and the
-  // Dockerfile has no matching runner stage.
+  // The manifest validator sees the uninterpolated string, so the expansion is
+  // the first thing a select field's option list can judge. Unchecked,
+  // `nginx-demo` reaches .gitlab-ci.yml as a SERVER_TYPE with no runner stage.
   test("an interpolating manifest default is checked once it has a value", async () => {
     await expect(
       resolveAnswers(
@@ -502,9 +489,8 @@ describe("resolveAnswers", () => {
     expect(answers.server).toBe("nginx-auth");
   });
 
-  // Both name fields fill __PROJECT__ and __PROJECT_DASHED__, and an
-  // interpolated default used to read the first of them while the scaffolded
-  // files read the last.
+  // Both name fields fill __PROJECT__ and __PROJECT_DASHED__, so an interpolated
+  // default and the scaffolded files have to agree on which one wins.
   test("an interpolated default and the file contents agree on which field wins", async () => {
     const both = manifest({
       fields: ["name", "project", "repo"],
@@ -748,8 +734,7 @@ describe("resolveAnswers", () => {
     ).rejects.toThrow(/--base=<path> needs a value/);
   });
 
-  // Both come from the manifest so a template keeps deciding the sensible value,
-  // and the flag or the prompt only overrides it.
+  // The manifest decides the value; the flag or the prompt only overrides it.
   test("section-nav and base default to the manifest values", async () => {
     const { answers } = await resolveAnswers(
       manifest({
@@ -849,9 +834,8 @@ describe("--dev end to end", () => {
 
 describe("resolvePlaceholders", () => {
   test("a placeholder the template never asks about becomes empty", () => {
-    // Regression: the merged boilerplate config carries __REPO__ inside a
-    // commented editLink block, so a template without a `repo` field would
-    // otherwise ship the literal.
+    // The merged boilerplate config carries __REPO__ inside a commented editLink
+    // block, so a template without a `repo` field would ship the literal.
     const placeholders = resolvePlaceholders(
       manifest({ fields: ["name"] }),
       { name: "demo_proj" },
@@ -972,16 +956,14 @@ describe("sourceWarnings", () => {
     );
   });
 
-  // A template that never asks about the source reports those flags as not
-  // applying at all, so warning twice would only repeat itself.
+  // Those flags are already reported as not applying to such a template.
   test("a template without a source field says nothing here", () => {
     expect(sourceWarnings(manifest(), "npm", { ref: "main" })).toEqual([]);
   });
 });
 
 describe("--help table", () => {
-  // An unavailable template carries a manifest error as its reason, and a
-  // manifest error can span lines.
+  // An unavailable template carries a manifest error, which can span lines.
   test("a multi-line cell stays inside its column", () => {
     expect(
       table([
@@ -1135,8 +1117,7 @@ describe("host pnpm workspace settings", () => {
     allowBuilds: { "@techfides/tf-doc-vault": true, esbuild: true },
   };
 
-  // The rendered block is what a brand-new host file gets, and reproducing the
-  // boilerplate byte for byte is the proof that there is one source of truth.
+  // Reproducing the boilerplate byte for byte is what keeps one source of truth.
   test("renders the boilerplate file it was read from", () => {
     const shipped = fs.readFileSync(
       path.join(REPO_ROOT, "boilerplate/_pnpm-workspace.yaml"),
@@ -1403,8 +1384,8 @@ describe("host documentation dependencies", () => {
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
-  // The ranges must come from this package's own peerDependencies: a hardcoded
-  // copy would go stale on the next bump, and that is how vue went missing.
+  // The ranges come from this package's own peerDependencies; a hardcoded copy
+  // goes stale on the next bump and silently drops a peer.
   test("takes the ranges from the package's peerDependencies", () => {
     const declared = (
       JSON.parse(
@@ -1460,8 +1441,8 @@ describe("nextSteps", () => {
     return { cwd, targetDir };
   }
 
-  // The epilogue told the reader to cd into the target and then printed the
-  // infra path from the cwd again, so copy-pasting landed a level too deep.
+  // Printing the infra path from the cwd after a cd lands the reader a level
+  // too deep when they copy-paste it.
   test("paths after the cd are relative to the target", () => {
     const { cwd, targetDir } = withInfra();
     const epilogue = nextSteps({
@@ -1504,8 +1485,7 @@ describe("nextSteps", () => {
     fs.rmSync(cwd, { recursive: true, force: true });
   });
 
-  // The wizard writes the dependencies and the pnpm settings itself, so the
-  // epilogue no longer asks the reader to paste either into a file by hand.
+  // The wizard writes the dependencies and the pnpm settings itself.
   test("the host flavour is not told to edit files by hand", () => {
     const cwd = tempDir();
     const targetDir = path.join(cwd, "sub");

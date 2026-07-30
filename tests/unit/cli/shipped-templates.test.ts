@@ -29,9 +29,8 @@ const PLACEHOLDER = /__[A-Z0-9_]+__/g;
 const INTENTIONALLY_EMPTY = ["__BASIC_AUTH_USER__", "__BASIC_AUTH_PASS__"];
 
 /**
- * Values for the fields no catalog default covers. A new field without a default
- * makes resolveAnswers report it as missing, which is the signal to add it here
- * rather than to loosen the test.
+ * A new field without a catalog default is reported as missing, which is the
+ * signal to add it here rather than to loosen the test.
  */
 const PROBE_NAME = "probe_proj";
 const PROBE_FLAGS: Record<string, string | boolean> = { "service-id": "PRB" };
@@ -49,7 +48,6 @@ afterAll(() => {
 
 interface Scaffold {
   target: string;
-  /** Every placeholder the wizard hands to replacePlaceholders. */
   placeholders: Record<string, string>;
 }
 
@@ -80,7 +78,7 @@ async function scaffold(manifest: TemplateManifest): Promise<Scaffold> {
   };
 }
 
-/** Placeholder tokens the copied files ask to have filled, with their files. */
+/** Every `__TOKEN__` the copied files still carry, with the files using it. */
 function tokensIn(dir: string): Map<string, string[]> {
   const found = new Map<string, string[]>();
   const walk = (current: string): void => {
@@ -122,9 +120,7 @@ test("the package ships usable templates only", () => {
   expect(scan.templates.length).toBeGreaterThan(0);
 });
 
-// The guard that a template renders completely: it fails when a template's files
-// need a placeholder nothing fills, when a field is wired to a placeholder it
-// never sets, and when a value the files need resolves empty.
+// The guard that a template renders completely, whatever its manifest asks for.
 describe.each(
   scan.templates.map((manifest) => [manifest.name, manifest] as const),
 )("template %s", (_name, manifest) => {
@@ -175,7 +171,7 @@ describe.each(
   });
 
   // The boilerplate is the first copy source, so everything it ships that the
-  // manifest does not exclude has to arrive, and nothing else may.
+  // manifest does not exclude has to arrive.
   test("carries exactly the boilerplate entries the manifest keeps", async () => {
     const { target } = await scaffold(manifest);
     for (const entry of fs.readdirSync(BOILERPLATE_DIR)) {

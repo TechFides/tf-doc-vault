@@ -2,9 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 
 /**
- * A problem the user can fix by changing the command line or a template
- * manifest. The CLI prints the message and exits 1; anything else keeps its
- * stack trace because it is a bug.
+ * A problem the user can fix from the command line or a template manifest. The
+ * CLI prints the message and exits 1; anything else keeps its stack trace.
  */
 export class SetupError extends Error {}
 
@@ -91,8 +90,7 @@ export function copyDir(
     const s = path.join(src, entry.name);
     const d = path.join(dest, renameEntry(entry.name));
     // Dirent reflects lstat, so a symlink is neither a directory nor a file
-    // here. Recreate the link rather than dereferencing it: copyFileSync on a
-    // symlinked directory throws ENOTSUP.
+    // here. Recreate it: copyFileSync on a symlinked directory throws ENOTSUP.
     if (entry.isSymbolicLink()) {
       const occupied = lstatOrNull(d);
       if (occupied) {
@@ -101,7 +99,6 @@ export function copyDir(
           continue;
         }
         // symlinkSync refuses an occupied target, so overwriting means removing.
-        // rmSync would follow a dangling link and silently do nothing.
         if (occupied.isDirectory()) {
           fs.rmSync(d, { recursive: true, force: true });
         } else {

@@ -31,8 +31,7 @@ describe("tracked files", () => {
     expect(TRACKED_FILES).toEqual(EXPECTED_TRACKED_FILES);
   });
 
-  // A tracked file without a counterpart makes every sync run fail, so the
-  // mapping is asserted here instead of only in the smoke suite.
+  // A tracked file without a counterpart makes every sync run fail.
   test("every tracked file resolves to a file inside the boilerplate", () => {
     for (const rel of TRACKED_FILES) {
       const resolved = resolveBoilerplatePath(rel);
@@ -41,9 +40,8 @@ describe("tracked files", () => {
     }
   });
 
-  // The scaffold renames `_gitignore`, `_pnpm-workspace.yaml` and `_npmrc` on
-  // copy; sync has to resolve every one of those back, or it reports a missing
-  // baseline for a file the scaffold does ship.
+  // Unless sync resolves a renamed file back, it reports a missing baseline for
+  // a file the scaffold does ship.
   test("resolves every name the scaffold renames on copy", () => {
     for (const source of ["_gitignore", "_pnpm-workspace.yaml"]) {
       expect(resolveBoilerplatePath(consumerName(source))).toBe(

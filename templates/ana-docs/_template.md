@@ -22,10 +22,9 @@ workspaceWarning: true
 ---
 
 Business, functional and technical specification of a project, served as a
-standalone portal. The scaffold is a whole repository: documentation sources,
-VitePress setup, Dockerfile, CI pipeline and Terraform, so nothing from the
-boilerplate is excluded. It arrives with its own complete `package.json` and
-`pnpm-workspace.yaml`, which is why every `host:` step is off.
+standalone portal. The scaffold is a whole repository, complete with its own
+`package.json` and `pnpm-workspace.yaml`, which is why every `host:` step is
+off: there is no host repo to integrate with.
 
 The `repo` default carries the analysis group these repositories live in, so the
 edit link in `docs/.vitepress/config.ts` arrives pre-filled.
