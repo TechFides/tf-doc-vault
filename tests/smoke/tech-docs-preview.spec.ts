@@ -1,5 +1,6 @@
 import { test } from "./fixtures";
 
+// The host repo owns the node_modules, so preview runs from there.
 test("vitepress preview serves tech-docs cleanly", async ({
   page,
   sandboxes,
@@ -12,13 +13,13 @@ test("vitepress preview serves tech-docs cleanly", async ({
       "exec",
       "vitepress",
       "preview",
-      "docs",
+      "tech-docs/docs",
       "--port",
       "4173",
       "--host",
       "127.0.0.1",
     ],
-    cwd: sandboxes.techDocsDir,
+    cwd: sandboxes.techDocsHostDir,
     readyUrl: "http://127.0.0.1:4173/tech-docs/",
   });
 

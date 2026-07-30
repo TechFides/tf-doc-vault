@@ -41,7 +41,7 @@ npm run docs:normalize   # canonical frontmatter field order
 npm run docs:validate    # check frontmatter, links, images, markdown lint
 ```
 
-Detailed page-authoring guide: [`template-tech-docs/import-confluence.md`](../template-tech-docs/import-confluence.md).
+Detailed page-authoring guide: [`boilerplate/import-confluence.md`](../boilerplate/import-confluence.md).
 
 ## Known limitations
 

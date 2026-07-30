@@ -15,7 +15,6 @@ export default defineConfig({
       include: ["src/**/*.ts"],
       exclude: [
         "src/**/*.d.ts",
-        "src/setup/**", // built separately by unbuild
         "src/index.ts", // public-API re-export barrel (no logic)
         "src/theme/**", // Vue components need a browser runner, not node Vitest
         "src/cli/tf-doc-vault.ts", // process-spawn router, covered by the smoke suite

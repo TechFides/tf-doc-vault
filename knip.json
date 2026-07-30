@@ -4,6 +4,6 @@
   "project": ["src/**/*.{ts,cts,mts,cjs,vue}"],
   "ignore": ["src/theme/components/VersionSwitcher.vue"],
   "ignoreBinaries": ["diff", "tf-doc-vault"],
-  "ignoreDependencies": ["@nestjs/common", "express", "tsx"],
+  "ignoreDependencies": ["tsx"],
   "ignoreExportsUsedInFile": true
 }

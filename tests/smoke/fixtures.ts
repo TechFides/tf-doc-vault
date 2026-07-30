@@ -10,9 +10,9 @@ const SMOKE_ROOT = process.env.SMOKE_ROOT ?? path.join(os.tmpdir(), "tf-smoke");
 
 interface Sandboxes {
   tgz: string;
+  techDocsHostDir: string;
   techDocsDir: string;
   anaDir: string;
-  probeRoot: string;
 }
 
 function loadSandboxes(): Sandboxes {
@@ -30,8 +30,6 @@ export interface WebServerOptions {
   args: string[];
   cwd: string;
   readyUrl: string;
-  /** Optional Basic auth credentials for the ready-check probe. */
-  readyAuth?: { username: string; password: string };
   /** Max seconds to wait for readyUrl to respond 2xx. Default 30. */
   timeoutSec?: number;
   /** Inherit stdio (useful for debugging). Default false (captured). */
@@ -44,19 +42,9 @@ export interface WebServer {
   logs: () => string;
 }
 
-function probe(
-  url: string,
-  auth?: { username: string; password: string },
-): Promise<number> {
+function probe(url: string): Promise<number> {
   return new Promise((resolve) => {
-    const headers: Record<string, string> = {};
-    if (auth) {
-      const enc = Buffer.from(`${auth.username}:${auth.password}`).toString(
-        "base64",
-      );
-      headers["authorization"] = `Basic ${enc}`;
-    }
-    const req = http.get(url, { headers }, (res) => {
+    const req = http.get(url, (res) => {
       res.resume();
       resolve(res.statusCode ?? 0);
     });
@@ -72,8 +60,8 @@ async function waitForReady(opts: WebServerOptions): Promise<void> {
   const timeoutMs = (opts.timeoutSec ?? 30) * 1000;
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
-    const code = await probe(opts.readyUrl, opts.readyAuth);
-    if (code >= 200 && code < 500) return; // 401 is OK for auth-gated probes
+    const code = await probe(opts.readyUrl);
+    if (code >= 200 && code < 500) return;
     await new Promise((r) => setTimeout(r, 250));
   }
   throw new Error(

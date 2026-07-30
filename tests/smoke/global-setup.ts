@@ -12,9 +12,10 @@ const SMOKE_ROOT = process.env.SMOKE_ROOT ?? path.join(os.tmpdir(), "tf-smoke");
 
 interface Sandboxes {
   tgz: string;
+  /** Host repo the tech-docs scaffold landed in; its scripts and deps live here. */
+  techDocsHostDir: string;
   techDocsDir: string;
   anaDir: string;
-  probeRoot: string;
 }
 
 interface RunOptions {
@@ -48,7 +49,7 @@ function run(cmd: string, args: string[], cwd: string, opts: RunOptions): void {
 function killOrphanProbes(): void {
   // Kill anything left on the smoke ports from a previous run so tests don't
   // hit a stale server with stale handler state.
-  for (const port of [3001, 3002, 3003, 3004, 4173, 4174, 5174]) {
+  for (const port of [4173, 4174, 5174, 5175]) {
     spawnSync("sh", [
       "-c",
       `lsof -ti:${port} 2>/dev/null | xargs -r kill -9 2>/dev/null`,
@@ -70,47 +71,66 @@ function packRepo(): string {
   return path.join(packDir, tgz);
 }
 
-function scaffoldTechDocs(tgz: string): string {
+/**
+ * Mermaid's transitive dependencies are CJS, so Vite pre-bundles them wrong
+ * unless pnpm hoists them and the page renders blank at runtime. The build
+ * succeeds either way, so nothing else in the suite catches it.
+ */
+function verifyHoistPatterns(dir: string): void {
+  logger.step("verifying hoist patterns (mermaid, dayjs, debug, cytoscape)");
+  for (const dep of ["mermaid", "dayjs", "debug", "cytoscape"]) {
+    const depPath = path.join(dir, "node_modules", dep);
+    if (!fs.existsSync(depPath)) {
+      logger.error(`hoist regression: ${dep} missing from node_modules root`);
+      throw new Error(
+        `Hoist regression: ${dep} not found at ${depPath}. Check publicHoistPattern in boilerplate/_pnpm-workspace.yaml and the host merge in setup.ts.`,
+      );
+    }
+  }
+  logger.success("hoist patterns in place");
+}
+
+/**
+ * The wizard writes the dependencies, the scripts and the pnpm settings into
+ * the host repo, so everything here runs from the host root.
+ */
+function scaffoldTechDocs(tgz: string): { host: string; dir: string } {
   logger.heading("Building tech-docs sandbox");
-  const dir = path.join(SMOKE_ROOT, "tech-docs");
-  fs.rmSync(dir, { recursive: true, force: true });
-  fs.mkdirSync(dir, { recursive: true });
+  const host = path.join(SMOKE_ROOT, "tech-docs");
+  fs.rmSync(host, { recursive: true, force: true });
+  fs.mkdirSync(host, { recursive: true });
 
-  // Mirror the CI bash heredoc: copy template-tech-docs/, substitute placeholders.
-  const tpl = path.join(REPO_ROOT, "template-tech-docs");
-  copyDir(tpl, dir);
-  substitutePlaceholders(dir, {
-    __SERVICE_ID__: "SMK",
-    __PROJECT__: "smoke",
-    __DATE__: "2026-01-01",
-    __REPO__: "test/test",
-  });
-
+  // A host package.json, so the wizard's docs:* merge runs instead of warning.
   fs.writeFileSync(
-    path.join(dir, "pnpm-workspace.yaml"),
-    "allowBuilds:\n  esbuild: true\n",
+    path.join(host, "package.json"),
+    JSON.stringify({ name: "smoke-host", private: true }, null, 2) + "\n",
   );
 
   run(
-    "pnpm",
+    "node",
     [
-      "add",
-      `file:${tgz}`,
-      "vitepress",
-      "vitepress-plugin-mermaid",
-      "mermaid",
-      "vue",
+      path.join(REPO_ROOT, "dist/cli/setup.js"),
+      "--template=tech-docs",
+      "--service-id=SMK",
+      "--project=smoke",
+      "--repo=test/test",
     ],
-    dir,
-    { label: "pnpm add (tech-docs deps)", env: { HUSKY: "0" } },
+    host,
+    { label: "setup --template=tech-docs" },
   );
 
-  run("pnpm", ["exec", "vitepress", "build", "docs"], dir, {
-    label: "vitepress build docs",
+  // The wizard already wrote the dependencies and the hoist patterns.
+  run("pnpm", ["add", `file:${tgz}`], host, {
+    label: "pnpm add (tech-docs deps)",
+    env: { HUSKY: "0" },
   });
+  verifyHoistPatterns(host);
 
+  run("pnpm", ["docs:build"], host, { label: "pnpm docs:build (tech-docs)" });
+
+  const dir = path.join(host, "tech-docs");
   logger.success(`tech-docs sandbox ready at ${dir}`);
-  return dir;
+  return { host, dir };
 }
 
 function scaffoldAna(tgz: string): string {
@@ -122,18 +142,19 @@ function scaffoldAna(tgz: string): string {
   run(
     "node",
     [
-      // create-ana is compiled to dist/cli/ by the `prepare` build that runs
+      // The wizard is compiled to dist/cli/ by the `prepare` build that runs
       // during `pnpm pack` above, so dist/ is present by the time we get here.
-      path.join(REPO_ROOT, "dist/cli/create-ana.js"),
+      path.join(REPO_ROOT, "dist/cli/setup.js"),
       "ana_test",
+      "--template=ana-docs",
       "--gcp-project=ci",
       "--server=nginx",
       "--source=file",
-      `--file-path=${tgz}`, // create-ana prepends `file:` itself
+      `--file-path=${tgz}`, // the scaffold prepends `file:` itself
       "--no-git",
     ],
     parent,
-    { label: "create-ana ana_test" },
+    { label: "setup --template=ana-docs ana_test" },
   );
 
   const dir = path.join(parent, "ana_test");
@@ -142,17 +163,7 @@ function scaffoldAna(tgz: string): string {
     env: { HUSKY: "0" },
   });
 
-  logger.step("verifying hoist patterns (mermaid, dayjs, debug, cytoscape)");
-  for (const dep of ["mermaid", "dayjs", "debug", "cytoscape"]) {
-    const depPath = path.join(dir, "node_modules", dep);
-    if (!fs.existsSync(depPath)) {
-      logger.error(`hoist regression: ${dep} missing from node_modules root`);
-      throw new Error(
-        `Hoist regression: ${dep} not found at ${depPath}. Check publicHoistPattern in template/_pnpm-workspace.yaml.`,
-      );
-    }
-  }
-  logger.success("hoist patterns in place");
+  verifyHoistPatterns(dir);
 
   // Read-only verifications only. `pnpm fix` is left out because it triggers
   // the normalize bug that is tracked separately.
@@ -162,202 +173,6 @@ function scaffoldAna(tgz: string): string {
 
   logger.success(`ana sandbox ready at ${dir}`);
   return dir;
-}
-
-function scaffoldProbes(tgz: string, techDocsDistDir: string): string {
-  logger.heading("Building setup-helper probes");
-  const probeRoot = path.join(SMOKE_ROOT, "probes");
-  fs.rmSync(probeRoot, { recursive: true, force: true });
-
-  const flavors: {
-    name: string;
-    type: "module" | "commonjs";
-    entry: string;
-    port: number;
-    helper: "express" | "nest";
-  }[] = [
-    {
-      name: "express-esm",
-      type: "module",
-      entry: "app.mjs",
-      port: 3001,
-      helper: "express",
-    },
-    {
-      name: "express-cjs",
-      type: "commonjs",
-      entry: "app.cjs",
-      port: 3002,
-      helper: "express",
-    },
-    {
-      name: "nest-esm",
-      type: "module",
-      entry: "app.mjs",
-      port: 3003,
-      helper: "nest",
-    },
-    {
-      name: "nest-cjs",
-      type: "commonjs",
-      entry: "app.cjs",
-      port: 3004,
-      helper: "nest",
-    },
-  ];
-
-  for (const f of flavors) {
-    const dir = path.join(probeRoot, f.name);
-    fs.mkdirSync(dir, { recursive: true });
-
-    fs.writeFileSync(
-      path.join(dir, "package.json"),
-      JSON.stringify(
-        { name: `probe-${f.name}`, private: true, type: f.type },
-        null,
-        2,
-      ) + "\n",
-    );
-    fs.writeFileSync(
-      path.join(dir, "pnpm-workspace.yaml"),
-      "allowBuilds:\n  esbuild: true\n",
-    );
-
-    run("pnpm", ["add", `file:${tgz}`, "express"], dir, {
-      label: `pnpm add (${f.name})`,
-      env: { HUSKY: "0" },
-    });
-
-    fs.writeFileSync(
-      path.join(dir, f.entry),
-      probeSource(f.helper, f.type, techDocsDistDir, f.port),
-    );
-  }
-
-  logger.success(`probe sandboxes ready at ${probeRoot}`);
-  return probeRoot;
-}
-
-function probeSource(
-  helper: "express" | "nest",
-  type: "module" | "commonjs",
-  distDir: string,
-  port: number,
-): string {
-  if (helper === "express" && type === "module") {
-    return `import express from "express";
-import { createTechDocsHandler } from "@techfides/tf-doc-vault/setup/express";
-const app = express();
-const h = await createTechDocsHandler({
-  basePath: "/tech-docs",
-  distDir: ${JSON.stringify(distDir)},
-  auth: { password: "pw" },
-});
-if (!h) { console.error("FAIL: handler null"); process.exit(1); }
-app.use("/tech-docs", h);
-app.listen(${port}, () => console.log("listening"));
-`;
-  }
-  if (helper === "express" && type === "commonjs") {
-    return `const express = require("express");
-(async () => {
-  const { createTechDocsHandler } = require("@techfides/tf-doc-vault/setup/express");
-  const h = await createTechDocsHandler({
-    basePath: "/tech-docs",
-    distDir: ${JSON.stringify(distDir)},
-    auth: { password: "pw" },
-  });
-  if (!h) { console.error("FAIL: handler null"); process.exit(1); }
-  const app = express();
-  app.use("/tech-docs", h);
-  app.listen(${port}, () => console.log("listening"));
-})();
-`;
-  }
-  if (helper === "nest" && type === "module") {
-    return `import express from "express";
-import { setupTechDocs } from "@techfides/tf-doc-vault/setup/nest";
-const e = express();
-const fakeNestApp = { getHttpAdapter: () => ({ use: (p, h) => e.use(p, h) }) };
-await setupTechDocs("/tech-docs", fakeNestApp, {
-  distDir: ${JSON.stringify(distDir)},
-  auth: { password: "pw" },
-});
-e.listen(${port}, () => console.log("listening"));
-`;
-  }
-  // nest-cjs
-  return `const express = require("express");
-(async () => {
-  const { setupTechDocs } = require("@techfides/tf-doc-vault/setup/nest");
-  const e = express();
-  const fakeNestApp = { getHttpAdapter: () => ({ use: (p, h) => e.use(p, h) }) };
-  await setupTechDocs("/tech-docs", fakeNestApp, {
-    distDir: ${JSON.stringify(distDir)},
-    auth: { password: "pw" },
-  });
-  e.listen(${port}, () => console.log("listening"));
-})();
-`;
-}
-
-// ─── filesystem helpers, kept independent of src/cli/utils.ts ────────────────
-
-function copyDir(src: string, dest: string): void {
-  fs.mkdirSync(dest, { recursive: true });
-  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
-    const s = path.join(src, entry.name);
-    const d = path.join(dest, entry.name);
-    if (entry.isDirectory()) copyDir(s, d);
-    else fs.copyFileSync(s, d);
-  }
-}
-
-const BINARY_EXT = new Set([
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".gif",
-  ".webp",
-  ".ico",
-  ".pdf",
-  ".woff",
-  ".woff2",
-  ".ttf",
-  ".otf",
-  ".eot",
-  ".zip",
-  ".tar",
-  ".gz",
-  ".tgz",
-]);
-
-function substitutePlaceholders(
-  dir: string,
-  replacements: Record<string, string>,
-): void {
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      substitutePlaceholders(full, replacements);
-      continue;
-    }
-    if (BINARY_EXT.has(path.extname(entry.name).toLowerCase())) continue;
-    let content: string;
-    try {
-      content = fs.readFileSync(full, "utf-8");
-    } catch {
-      continue;
-    }
-    let changed = false;
-    for (const [k, v] of Object.entries(replacements)) {
-      if (content.includes(k)) {
-        content = content.split(k).join(v);
-        changed = true;
-      }
-    }
-    if (changed) fs.writeFileSync(full, content);
-  }
 }
 
 // ─── entry point ─────────────────────────────────────────────────────────────
@@ -370,13 +185,15 @@ async function globalSetup(): Promise<void> {
   const tgz = packRepo();
   logger.success(`packed ${path.basename(tgz)}`);
 
-  const techDocsDir = scaffoldTechDocs(tgz);
+  const techDocs = scaffoldTechDocs(tgz);
   const anaDir = scaffoldAna(tgz);
 
-  const techDocsDistDir = path.join(techDocsDir, "docs", ".vitepress", "dist");
-  const probeRoot = scaffoldProbes(tgz, techDocsDistDir);
-
-  const sandboxes: Sandboxes = { tgz, techDocsDir, anaDir, probeRoot };
+  const sandboxes: Sandboxes = {
+    tgz,
+    techDocsHostDir: techDocs.host,
+    techDocsDir: techDocs.dir,
+    anaDir,
+  };
   fs.writeFileSync(
     path.join(SMOKE_ROOT, "sandboxes.json"),
     JSON.stringify(sandboxes, null, 2),

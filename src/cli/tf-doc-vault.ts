@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * tf-doc-vault: CLI dispatcher for documentation tooling. `create`,
- * `init-tech-docs` and `import-confluence` are sibling CLI scripts in dist/cli/;
- * every other subcommand runs from dist/scripts/.
+ * tf-doc-vault: CLI dispatcher for documentation tooling. `setup` and
+ * `import-confluence` are sibling CLI scripts in dist/cli/; every other
+ * subcommand runs from dist/scripts/.
  */
 
 import { spawnSync } from "node:child_process";
@@ -47,16 +47,13 @@ function usage(exitCode = 0): never {
 tf-doc-vault <command>
 
 Commands:
-  create <name>       Scaffold a new analysis docs repo from the bundled template
-                        (see: tf-doc-vault create --help for options)
-  init-tech-docs      Initialise tech-docs/ in an existing service repo
-                        --service-id=<ID>   (required) service identifier, e.g. BAT
-                        --project=<name>    project name (default: cwd folder name)
-                        --repo=<org/repo>   GitHub repo for edit links (optional)
-  import-confluence   Import pages from Confluence into tech-docs/v1/
+  setup [name]        Scaffold documentation from a bundled template
+                        --template=<name>   template to scaffold; run
+                                            "tf-doc-vault setup --help" for the list
+  import-confluence   Import pages from Confluence into a docs folder
                         --site=<host>             e.g. myorg.atlassian.net
                         --root-page-id=<id>       Confluence root page ID
-                        --output=<dir>            output directory (default: ./tech-docs/v1)
+                        --output=<dir>            (required) output directory
   print               Generate docs/print.md from sidebar order
   export-pdf          Render artifacts/docs-full.pdf from the /print page
   pdf                 print → vitepress build docs → export-pdf
@@ -89,12 +86,8 @@ const [, , cmd, ...rest] = process.argv;
 
 if (!cmd || cmd === "--help" || cmd === "-h") usage(0);
 
-if (cmd === "create") {
-  process.exit(runCliScript("create-ana.js", rest));
-}
-
-if (cmd === "init-tech-docs") {
-  process.exit(runCliScript("init-tech-docs.js", rest));
+if (cmd === "setup") {
+  process.exit(runCliScript("setup.js", rest));
 }
 
 if (cmd === "import-confluence") {

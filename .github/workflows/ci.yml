@@ -16,6 +16,9 @@ jobs:
     steps:
       - name: 🔀 Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # The commit-message check resolves the range base..head.
+          fetch-depth: 0
 
       - name: 🛠 Setup
         uses: ./.github/actions/setup
@@ -23,8 +26,15 @@ jobs:
       - name: ⚖️ Licence check
         run: pnpm licence-check
 
+      # The repo's own commitlint, not an action that bundles one: the bundled
+      # parser rejects the `type!:` marker the local commit-msg hook accepts.
       - name: 📝 Validate commit messages
-        uses: wagoid/commitlint-github-action@b948419dd99f3fd78a6548d48f94e3df7f6bf3ed # v6.2.1
+        if: github.event_name == 'pull_request'
+        run: >-
+          pnpm exec commitlint
+          --from ${{ github.event.pull_request.base.sha }}
+          --to ${{ github.event.pull_request.head.sha }}
+          --verbose
 
       - name: 🎨 Format check
         run: pnpm format:check
@@ -55,10 +65,10 @@ jobs:
           dockerfile: docker/Dockerfile
           failure-threshold: error
 
-      - name: 🐳 Lint template/Dockerfile
+      - name: 🐳 Lint boilerplate/Dockerfile
         uses: hadolint/hadolint-action@2332a7b74a6de0dda2e2221d575162eba76ba5e5 # v3.3.0
         with:
-          dockerfile: template/Dockerfile
+          dockerfile: boilerplate/Dockerfile
           failure-threshold: error
 
   test-unit:

@@ -125,16 +125,5 @@ if (WATCH) {
   console.log("→ copying .vue/.css/.json from src/ → dist/");
   copyStaticFiles(SRC, DIST);
 
-  console.log("→ unbuild (setup/express + setup/nest dual-format)");
-  const unbuild = spawnSync("unbuild", [], {
-    stdio: "inherit",
-    cwd: PKG,
-    shell: process.platform === "win32",
-  });
-  if (unbuild.status !== 0) {
-    console.error("✗ unbuild failed");
-    process.exit(unbuild.status ?? 1);
-  }
-
   console.log("✓ build complete: dist/");
 }

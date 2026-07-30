@@ -84,6 +84,46 @@ describe("copyDir", () => {
     expect(fs.existsSync(path.join(dest, "b.md"))).toBe(false);
     expect(fs.existsSync(path.join(dest, "sub", "c.txt"))).toBe(true);
   });
+
+  // A Dirent reports a symlink as neither directory nor file, so without an
+  // explicit branch it reaches copyFileSync and dereferences the target.
+  test("recreates a symlinked file instead of dereferencing it", () => {
+    fs.symlinkSync("a.txt", path.join(src, "link.txt"));
+    const r = copyDir(src, dest);
+    expect(r.copied).toBe(4);
+    expect(fs.lstatSync(path.join(dest, "link.txt")).isSymbolicLink()).toBe(
+      true,
+    );
+    expect(fs.readlinkSync(path.join(dest, "link.txt"))).toBe("a.txt");
+  });
+
+  test("recreates a symlinked directory instead of throwing", () => {
+    fs.symlinkSync("sub", path.join(src, "sublink"));
+    expect(() => copyDir(src, dest)).not.toThrow();
+    expect(fs.lstatSync(path.join(dest, "sublink")).isSymbolicLink()).toBe(
+      true,
+    );
+  });
+
+  test("overwrites an existing link, and keeps it when idempotent", () => {
+    fs.symlinkSync("a.txt", path.join(src, "link.txt"));
+    fs.symlinkSync("elsewhere", path.join(dest, "link.txt"));
+
+    const kept = copyDir(src, dest, { idempotent: true });
+    expect(kept.skipped).toBe(1);
+    expect(fs.readlinkSync(path.join(dest, "link.txt"))).toBe("elsewhere");
+
+    copyDir(src, dest);
+    expect(fs.readlinkSync(path.join(dest, "link.txt"))).toBe("a.txt");
+  });
+
+  test("a dangling link counts as an occupied path", () => {
+    fs.symlinkSync("nowhere", path.join(src, "dangling"));
+    fs.symlinkSync("nowhere-else", path.join(dest, "dangling"));
+    const r = copyDir(src, dest, { idempotent: true });
+    expect(r.skipped).toBe(1);
+    expect(fs.readlinkSync(path.join(dest, "dangling"))).toBe("nowhere-else");
+  });
 });
 
 describe("replacePlaceholders", () => {
@@ -118,6 +158,16 @@ describe("replacePlaceholders", () => {
     fs.writeFileSync(f, "__X__");
     replacePlaceholders(dir, { __X__: "Y" });
     expect(fs.readFileSync(f, "utf8")).toBe("Y");
+  });
+
+  // Rewriting through a link would edit its target, possibly outside `dir`.
+  test("skips symlinks", () => {
+    const real = path.join(dir, "real.md");
+    fs.writeFileSync(real, "__X__");
+    fs.mkdirSync(path.join(dir, "sub"));
+    fs.symlinkSync(real, path.join(dir, "sub", "link.md"));
+    replacePlaceholders(path.join(dir, "sub"), { __X__: "Y" });
+    expect(fs.readFileSync(real, "utf8")).toBe("__X__");
   });
 
   test("leaves files untouched when no placeholder matches", () => {

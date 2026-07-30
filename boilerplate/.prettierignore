@@ -1,0 +1,9 @@
+node_modules/
+.pnpm-store/
+pnpm-lock.yaml
+pnpm-workspace.yaml
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+docs/print.md
+artifacts/
+infra/.terraform/
