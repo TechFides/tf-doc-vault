@@ -42,7 +42,6 @@ export interface Strings {
   searchLabel: string;
   footerPrev: string;
   footerNext: string;
-  lastUpdatedText: string;
 }
 
 export interface UmamiAnalytics {
@@ -368,7 +367,11 @@ export function makeConfig(
         label: strings.searchLabel,
       },
       docFooter: { prev: strings.footerPrev, next: strings.footerNext },
-      lastUpdated: { text: strings.lastUpdatedText },
+      /* No `lastUpdated` here on purpose. VitePress resolves the site-level
+         switch as `userConfig.lastUpdated ?? !!themeConfig.lastUpdated`, so
+         setting it only to translate the label also turns on the git-timestamp
+         footer, which duplicates the `updated_at` date DocMeta already shows at
+         the top of the page. */
       ...(opts.editLink && { editLink: buildEditLink(opts.editLink) }),
       // BrandFooter reads this via useData().theme.value.docVault. Component
       // copy lives in vue-i18n.

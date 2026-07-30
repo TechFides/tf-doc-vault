@@ -151,6 +151,21 @@ describe("makeConfig fonts option", () => {
   });
 });
 
+describe("makeConfig lastUpdated", () => {
+  // VitePress enables the git-timestamp footer via
+  // `userConfig.lastUpdated ?? !!themeConfig.lastUpdated`, so a themeConfig
+  // entry added just to translate the label would duplicate the `updated_at`
+  // date DocMeta renders at the top of the page.
+  test("neither site nor themeConfig turns the footer date on", () => {
+    const config = makeConfig({ configDir, mermaid: false }) as unknown as {
+      lastUpdated?: unknown;
+      themeConfig: { lastUpdated?: unknown };
+    };
+    expect(config.lastUpdated ?? false).toBe(false);
+    expect(config.themeConfig.lastUpdated).toBeUndefined();
+  });
+});
+
 describe("makeConfig markdown options", () => {
   test("registers a markdown config hook (GFM task lists)", () => {
     const config = makeConfig({ configDir, mermaid: false }) as unknown as {
