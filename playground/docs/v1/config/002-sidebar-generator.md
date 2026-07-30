@@ -27,11 +27,23 @@ docs/
 ## Ordering
 
 - `index.md` always comes first inside its folder.
-- Other files sort by their filename (Czech-locale aware).
-- Use `001-`, `002-` prefixes for explicit order.
-- `order:` in frontmatter applies to section/group `index.md` files.
+- Everything else sorts by filename (Czech-locale aware), directories and
+  files in one list.
+- Use `001-`, `002-` prefixes for explicit order. They are the only
+  ordering mechanism: the generator reads nothing from frontmatter except
+  `title:`.
 
 ## Section title
 
 The section's top-nav label is read from `<section>/index.md`'s
 frontmatter `title:`. Same for groups (`<group>/index.md`).
+
+## Groups and their icons
+
+A **subdirectory** becomes a collapsible group (`collapsed: true`) and the
+generator recurses into it; a `.md` file becomes a leaf. That is the whole
+rule, and it is what drives the default sidebar markers: ◼️ on a group, ▪️
+on a leaf, nothing when the `title:` already starts with an emoji.
+
+[Nested group](./003-nested-group/) is the live example, two levels deep,
+with one page overriding the default icon.
