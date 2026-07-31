@@ -42,7 +42,6 @@ export interface Strings {
   searchLabel: string;
   footerPrev: string;
   footerNext: string;
-  lastUpdatedText: string;
 }
 
 export interface UmamiAnalytics {
@@ -103,10 +102,11 @@ export interface Branding {
    */
   favicon?: string | false;
   /**
-   * How to load Open Sans.
+   * How to load Open Sans and Noto Color Emoji.
    * - `"google"` (default): bundled `<link>` tags to fonts.googleapis.com.
    * - `"none"`: skip injection; the consumer self-hosts, e.g. with
-   *   `@fontsource/open-sans` imported from their own config.
+   *   `@fontsource/open-sans` imported from their own config. Emoji then
+   *   fall back to the reader's OS font and stop being platform-neutral.
    */
   fonts?: "google" | "none";
 }
@@ -155,7 +155,7 @@ function buildHead(opts: MakeConfigOptions): HeadConfig[] {
         "link",
         {
           rel: "stylesheet",
-          href: "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&display=swap",
+          href: "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&family=Noto+Color+Emoji&display=swap",
         },
       ],
     );
@@ -364,7 +364,9 @@ export function makeConfig(
         label: strings.searchLabel,
       },
       docFooter: { prev: strings.footerPrev, next: strings.footerNext },
-      lastUpdated: { text: strings.lastUpdatedText },
+      /* No `lastUpdated`: VitePress resolves the footer switch as
+         `userConfig.lastUpdated ?? !!themeConfig.lastUpdated`, so a label-only
+         entry would duplicate the date DocMeta already renders. */
       ...(opts.editLink && { editLink: buildEditLink(opts.editLink) }),
       // BrandFooter reads this via useData().theme.value.docVault. Component
       // copy lives in vue-i18n.
@@ -395,6 +397,12 @@ export function makeConfig(
        theme="dark" under <html>.dark and would ignore it. */
     mermaid: {
       theme: "base",
+      /* Mermaid writes its own `#mermaid-N { font-family: ... }` into the SVG,
+         an ID selector CSS cannot outrank, so the emoji font has to be set
+         here. "Open Sans" must stay ahead of it: Noto carries `0`-`9` for
+         keycaps and would otherwise render digits as emoji. */
+      fontFamily:
+        '"trebuchet ms", verdana, arial, "Open Sans", "Noto Color Emoji", sans-serif',
       flowchart: {
         curve: "basis",
         useMaxWidth: true,

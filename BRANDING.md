@@ -50,14 +50,14 @@ export default makeConfig({
 
 Full type is exported from `@techfides/tf-doc-vault/config` as `Branding`:
 
-| Field       | Type                               | Default                    | Effect                                                               |
-| ----------- | ---------------------------------- | -------------------------- | -------------------------------------------------------------------- |
-| `siteTitle` | `string`                           | resolved `strings.title`   | Navbar title. Pass `""` to hide.                                     |
-| `logo`      | `string \| { src; alt? } \| false` | bundled TechFides SVG mark | Navbar logo. `false` hides it. String is shorthand for `{ src }`.    |
-| `navLinks`  | `{ text: string; link: string }[]` | `[]`                       | Extra nav items at the right end of the navbar.                      |
-| `footer`    | `BrandingFooter \| false`          | nothing rendered           | Bottom-of-page footer (website link, email, address). `false` hides. |
-| `favicon`   | `string \| false`                  | bundled `favicon.ico`      | URL/path to a favicon. `false` injects none. Omit for the default.   |
-| `fonts`     | `"google" \| "none"`               | `"google"`                 | `"google"` injects Open Sans `<link>` tags. `"none"` skips them.     |
+| Field       | Type                               | Default                    | Effect                                                                                  |
+| ----------- | ---------------------------------- | -------------------------- | --------------------------------------------------------------------------------------- |
+| `siteTitle` | `string`                           | resolved `strings.title`   | Navbar title. Pass `""` to hide.                                                        |
+| `logo`      | `string \| { src; alt? } \| false` | bundled TechFides SVG mark | Navbar logo. `false` hides it. String is shorthand for `{ src }`.                       |
+| `navLinks`  | `{ text: string; link: string }[]` | `[]`                       | Extra nav items at the right end of the navbar.                                         |
+| `footer`    | `BrandingFooter \| false`          | nothing rendered           | Bottom-of-page footer (website link, email, address). `false` hides.                    |
+| `favicon`   | `string \| false`                  | bundled `favicon.ico`      | URL/path to a favicon. `false` injects none. Omit for the default.                      |
+| `fonts`     | `"google" \| "none"`               | `"google"`                 | `"google"` injects the Open Sans + Noto Color Emoji `<link>` tags. `"none"` skips them. |
 
 `BrandingFooter`:
 
@@ -122,12 +122,14 @@ status pills.
 
 ```css
 :root {
-  --vp-font-family-base: "Inter", -apple-system, sans-serif;
+  --vp-font-family-base: "Inter", "Noto Color Emoji", -apple-system, sans-serif;
 }
 ```
 
-Override `--vp-font-family-base` to swap the typeface site-wide. See the
-[Font family](#font-family) section for the full self-host flow.
+Override `--vp-font-family-base` to swap the typeface site-wide. Keep
+`"Noto Color Emoji"` in the list unless you want emoji to come from the
+reader's OS. See the [Font family](#font-family-1) section for the full
+self-host flow.
 
 ---
 
@@ -167,8 +169,8 @@ the package's bundled `favicon.ico`.
 ## Font family
 
 `branding.fonts` only controls whether the Google Fonts `<link>` tags
-for Open Sans are injected. The font **family name** lives in CSS. Full
-swap is a three-step flow:
+for Open Sans and Noto Color Emoji are injected. The font **family name**
+lives in CSS. Full swap is a three-step flow:
 
 1. Skip the Google fetch:
 
@@ -194,9 +196,76 @@ swap is a three-step flow:
    /* docs/.vitepress/theme/custom.css */
    :root {
      --vp-font-family-base:
-       "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       "Inter", "Noto Color Emoji", -apple-system, BlinkMacSystemFont,
+       "Segoe UI", sans-serif;
    }
    ```
+
+### Emoji
+
+Emoji render from **Noto Color Emoji** rather than the reader's OS font, so
+a ✅ or a 🚀 in a spec looks the same on Windows, macOS, Linux, Android and
+in the exported PDF. Every surface that declares a font stack lists it:
+
+| Surface                    | Where it is set                      |
+| -------------------------- | ------------------------------------ |
+| Prose, UI chrome, headings | `--vp-font-family-base` (`base.css`) |
+| Code blocks, inline code   | `--vp-font-family-mono` (`base.css`) |
+| Mermaid diagram labels     | `mermaid.fontFamily` (`makeConfig`)  |
+| PDF export                 | `.print-layout` (`PrintLayout.vue`)  |
+
+Mermaid needs its own entry because it writes `#mermaid-N { font-family }`
+into the generated SVG, an ID selector that site CSS cannot outrank.
+
+In every stack the family sits **behind** the text fonts and **ahead** of
+the system fonts. Behind, because Noto Color Emoji also carries `#`, `*`
+and `0`–`9` for keycap sequences: put it first and ordinary digits render
+as emoji glyphs (roughly double width). Ahead, because otherwise Apple
+Color Emoji or Segoe UI Emoji claims the codepoint first and the platform
+difference is back.
+
+Two consequences worth knowing:
+
+- With `fonts: "none"` (or a network that blocks fonts.gstatic.com) emoji
+  degrade to the OS font. Nothing breaks, but cross-platform sameness is
+  gone. Self-host [`@fontsource/noto-color-emoji`](https://fontsource.org/fonts/noto-color-emoji)
+  to keep it offline.
+- Keeping the family name in a custom `--vp-font-family-base` is what
+  preserves the behaviour. Drop it and the OS font takes emoji back.
+
+### Sidebar markers
+
+Every sidebar entry gets a default marker: ◼️ for a collapsible group, ▪️
+for a page. Dark mode swaps in ◻️ / ▫️, because the glyphs carry `U+FE0F`
+and Noto Color Emoji paints them in its own colour, which `color` cannot
+change.
+
+A `title:` that **starts with an emoji** suppresses the default and the
+author's emoji is used instead. This is the per-page escape hatch, no CSS
+needed:
+
+```md
+---
+title: 🚀 Deployment
+---
+```
+
+To change the defaults site-wide, override the four `::before` rules:
+
+```css
+/* docs/.vitepress/theme/custom.css */
+.VPSidebarItem .text.default-emoji-folder::before {
+  content: "📁 " / "";
+}
+.VPSidebarItem .text.default-emoji-file::before {
+  content: "📄 " / "";
+}
+```
+
+Keep the `/ ""`: it blanks the accessible name, otherwise a screen reader
+announces the marker before every label. The markers are `::before`
+content, never characters in the title, so they stay out of the page text,
+the outline, search and the PDF export.
 
 ---
 

@@ -25,7 +25,7 @@ const { site } = useData();
 }
 
 .print-layout {
-  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-family: "Inter", "Noto Color Emoji", "Helvetica Neue", Arial, sans-serif;
   font-size: 9pt;
   line-height: 1.35;
   color: #1a1a1a;
@@ -85,7 +85,8 @@ const { site } = useData();
 }
 
 .print-layout code {
-  font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+  font-family:
+    "JetBrains Mono", "Fira Code", "Courier New", "Noto Color Emoji", monospace;
   font-size: 7.5pt;
   background: #f3f3f3;
   border: 1px solid #e0e0e0;

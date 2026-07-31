@@ -6,17 +6,26 @@ updated_at: 2026-05-22
 
 ## Family
 
-The one typography token the theme exposes is the font family:
+The theme exposes two font-family tokens:
 
 ```css
 --vp-font-family-base:
-  "Open Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-  sans-serif;
+  "Open Sans", "Inter", "Noto Color Emoji", -apple-system, BlinkMacSystemFont,
+  "Segoe UI", sans-serif;
+
+--vp-font-family-mono:
+  ui-monospace, "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New",
+  "Noto Color Emoji", monospace;
 ```
 
-Open Sans is loaded by default (`branding.fonts: "google"`); switch to
-`"none"` and self-host to swap it. Three weights are used: **400** (body),
-**500** (headings), **700** (labels, buttons).
+Open Sans and Noto Color Emoji are both loaded by default
+(`branding.fonts: "google"`); switch to `"none"` and self-host to swap
+them. Three weights are used: **400** (body), **500** (headings), **700**
+(labels, buttons).
+
+Noto Color Emoji sits behind the text fonts so that only emoji reach it,
+and ahead of the system stack so the OS emoji font never wins. See
+[Emoji](./008-emoji.md) for the catalogue and the reasoning.
 
 ## Scale
 

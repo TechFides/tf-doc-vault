@@ -65,9 +65,15 @@
 
   --vp-code-block-bg: var(--brand-bg-subtle);
 
+  /* Noto Color Emoji goes behind the text fonts (they cover the Latin, digits
+     and keycaps it would otherwise claim) but ahead of the system stack. */
   --vp-font-family-base:
-    "Open Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+    "Open Sans", "Inter", "Noto Color Emoji", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+
+  --vp-font-family-mono:
+    ui-monospace, "Menlo", "Monaco", "Consolas", "Liberation Mono",
+    "Courier New", "Noto Color Emoji", monospace;
 
   --vp-layout-max-width: var(--layout-max-width-content);
   --vp-sidebar-width: 360px;
@@ -692,12 +698,24 @@ html.layout-max .VPContent {
   padding-top: 20px;
 }
 
+/* U+FE0F hands these to Noto Color Emoji, which paints its own colour, so dark
+   mode needs the light glyphs rather than a `color` override. The `/ ""` blanks
+   the accessible name: without it a screen reader announces "black small
+   square" before every label. No width / font-size, an emoji needs neither. */
 .VPSidebarItem .text.default-emoji-folder::before {
-  content: "📁 ";
+  content: "◼️ " / "";
 }
 
 .VPSidebarItem .text.default-emoji-file::before {
-  content: "📄 ";
+  content: "▪️ " / "";
+}
+
+.dark .VPSidebarItem .text.default-emoji-folder::before {
+  content: "◻️ " / "";
+}
+
+.dark .VPSidebarItem .text.default-emoji-file::before {
+  content: "▫️ " / "";
 }
 
 .VPSidebarItem .text {

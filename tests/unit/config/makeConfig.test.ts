@@ -129,6 +129,39 @@ describe("makeConfig base", () => {
   });
 });
 
+describe("makeConfig fonts option", () => {
+  function fontHrefs(opts: Parameters<typeof makeConfig>[0]): string[] {
+    const config = makeConfig({ ...opts, mermaid: false }) as unknown as {
+      head: [string, Record<string, string>][];
+    };
+    return config.head
+      .filter(([tag, attrs]) => tag === "link" && attrs["rel"] === "stylesheet")
+      .map(([, attrs]) => attrs["href"] ?? "");
+  }
+
+  test("default loads Open Sans and Noto Color Emoji in one request", () => {
+    const hrefs = fontHrefs({ configDir });
+    expect(hrefs).toHaveLength(1);
+    expect(hrefs[0]).toContain("family=Open+Sans");
+    expect(hrefs[0]).toContain("family=Noto+Color+Emoji");
+  });
+
+  test("fonts: none injects no stylesheet link", () => {
+    expect(fontHrefs({ configDir, branding: { fonts: "none" } })).toEqual([]);
+  });
+});
+
+describe("makeConfig lastUpdated", () => {
+  test("neither site nor themeConfig turns the footer date on", () => {
+    const config = makeConfig({ configDir, mermaid: false }) as unknown as {
+      lastUpdated?: unknown;
+      themeConfig: { lastUpdated?: unknown };
+    };
+    expect(config.lastUpdated ?? false).toBe(false);
+    expect(config.themeConfig.lastUpdated).toBeUndefined();
+  });
+});
+
 describe("makeConfig markdown options", () => {
   test("registers a markdown config hook (GFM task lists)", () => {
     const config = makeConfig({ configDir, mermaid: false }) as unknown as {
