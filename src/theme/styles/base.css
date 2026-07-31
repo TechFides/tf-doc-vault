@@ -65,10 +65,8 @@
 
   --vp-code-block-bg: var(--brand-bg-subtle);
 
-  /* Noto Color Emoji sits behind the text fonts (which cover Latin, digits and
-     the keycap characters it would otherwise claim) but ahead of the system
-     stack, so emoji come from one font instead of Apple Color Emoji / Segoe UI
-     Emoji / whatever the reader's OS ships. */
+  /* Noto Color Emoji goes behind the text fonts (they cover the Latin, digits
+     and keycaps it would otherwise claim) but ahead of the system stack. */
   --vp-font-family-base:
     "Open Sans", "Inter", "Noto Color Emoji", -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
@@ -700,17 +698,24 @@ html.layout-max .VPContent {
   padding-top: 20px;
 }
 
-/* Every Noto Color Emoji glyph has the same advance, so a plain inline prefix
-   at the label's own font-size already lines the markers and the labels up.
-   The trailing space is the whole gap between marker and label: without it
-   they sit 0.3px apart. Do not add width / font-size here, that is what a
-   text symbol would need, not an emoji. */
+/* U+FE0F hands these to Noto Color Emoji, which paints its own colour, so dark
+   mode needs the light glyphs rather than a `color` override. The `/ ""` blanks
+   the accessible name: without it a screen reader announces "black small
+   square" before every label. No width / font-size, an emoji needs neither. */
 .VPSidebarItem .text.default-emoji-folder::before {
-  content: "◼️ ";
+  content: "◼️ " / "";
 }
 
 .VPSidebarItem .text.default-emoji-file::before {
-  content: "▪️ ";
+  content: "▪️ " / "";
+}
+
+.dark .VPSidebarItem .text.default-emoji-folder::before {
+  content: "◻️ " / "";
+}
+
+.dark .VPSidebarItem .text.default-emoji-file::before {
+  content: "▫️ " / "";
 }
 
 .VPSidebarItem .text {

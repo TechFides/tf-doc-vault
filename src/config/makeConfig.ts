@@ -155,9 +155,6 @@ function buildHead(opts: MakeConfigOptions): HeadConfig[] {
         "link",
         {
           rel: "stylesheet",
-          // Noto Color Emoji is served per-browser (COLRv1 vector, bitmap for
-          // older engines) and split by unicode-range, so a page downloads only
-          // the subsets its emoji need.
           href: "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&family=Noto+Color+Emoji&display=swap",
         },
       ],
@@ -367,11 +364,9 @@ export function makeConfig(
         label: strings.searchLabel,
       },
       docFooter: { prev: strings.footerPrev, next: strings.footerNext },
-      /* No `lastUpdated` here on purpose. VitePress resolves the site-level
-         switch as `userConfig.lastUpdated ?? !!themeConfig.lastUpdated`, so
-         setting it only to translate the label also turns on the git-timestamp
-         footer, which duplicates the `updated_at` date DocMeta already shows at
-         the top of the page. */
+      /* No `lastUpdated`: VitePress resolves the footer switch as
+         `userConfig.lastUpdated ?? !!themeConfig.lastUpdated`, so a label-only
+         entry would duplicate the date DocMeta already renders. */
       ...(opts.editLink && { editLink: buildEditLink(opts.editLink) }),
       // BrandFooter reads this via useData().theme.value.docVault. Component
       // copy lives in vue-i18n.
@@ -404,9 +399,8 @@ export function makeConfig(
       theme: "base",
       /* Mermaid writes its own `#mermaid-N { font-family: ... }` into the SVG,
          an ID selector CSS cannot outrank, so the emoji font has to be set
-         here. "Open Sans" precedes it as the digit-covering fallback: on a host
-         with no Trebuchet/Verdana/Arial the next family supplies `0`-`9`, and
-         Noto Color Emoji carries those (for keycaps) in emoji style. */
+         here. "Open Sans" must stay ahead of it: Noto carries `0`-`9` for
+         keycaps and would otherwise render digits as emoji. */
       fontFamily:
         '"trebuchet ms", verdana, arial, "Open Sans", "Noto Color Emoji", sans-serif',
       flowchart: {

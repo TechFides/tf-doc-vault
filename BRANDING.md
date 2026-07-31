@@ -128,7 +128,7 @@ status pills.
 
 Override `--vp-font-family-base` to swap the typeface site-wide. Keep
 `"Noto Color Emoji"` in the list unless you want emoji to come from the
-reader's OS. See the [Font family](#font-family) section for the full
+reader's OS. See the [Font family](#font-family-1) section for the full
 self-host flow.
 
 ---
@@ -232,6 +232,40 @@ Two consequences worth knowing:
   to keep it offline.
 - Keeping the family name in a custom `--vp-font-family-base` is what
   preserves the behaviour. Drop it and the OS font takes emoji back.
+
+### Sidebar markers
+
+Every sidebar entry gets a default marker: ◼️ for a collapsible group, ▪️
+for a page. Dark mode swaps in ◻️ / ▫️, because the glyphs carry `U+FE0F`
+and Noto Color Emoji paints them in its own colour, which `color` cannot
+change.
+
+A `title:` that **starts with an emoji** suppresses the default and the
+author's emoji is used instead. This is the per-page escape hatch, no CSS
+needed:
+
+```md
+---
+title: 🚀 Deployment
+---
+```
+
+To change the defaults site-wide, override the four `::before` rules:
+
+```css
+/* docs/.vitepress/theme/custom.css */
+.VPSidebarItem .text.default-emoji-folder::before {
+  content: "📁 " / "";
+}
+.VPSidebarItem .text.default-emoji-file::before {
+  content: "📄 " / "";
+}
+```
+
+Keep the `/ ""`: it blanks the accessible name, otherwise a screen reader
+announces the marker before every label. The markers are `::before`
+content, never characters in the title, so they stay out of the page text,
+the outline, search and the PDF export.
 
 ---
 
