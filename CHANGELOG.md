@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.3.1
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.3.0...v0.3.1)
+
+### 🚀 Enhancements
+
+- **theme:** Render emoji from Noto Color Emoji on every surface ([5fead3c](https://github.com/TechFides/tf-doc-vault/commit/5fead3c))
+
+### 🩹 Fixes
+
+- **config:** ⚠️  Stop duplicating the updated date in the page footer ([8e41a9c](https://github.com/TechFides/tf-doc-vault/commit/8e41a9c))
+- **theme:** Make sidebar markers legible in dark mode and silent to screen readers ([bc7b0c7](https://github.com/TechFides/tf-doc-vault/commit/bc7b0c7))
+
+#### ⚠️ Breaking Changes
+
+- **config:** ⚠️  Stop duplicating the updated date in the page footer ([8e41a9c](https://github.com/TechFides/tf-doc-vault/commit/8e41a9c))
+
+### ❤️ Contributors
+
+- Vaclav Miculka ([@VaclavMiculka](https://github.com/VaclavMiculka))
+- Václav Mičulka ([@VaclavMiculka](https://github.com/VaclavMiculka))
+
 ## v0.3.0
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.2.11...v0.3.0)
