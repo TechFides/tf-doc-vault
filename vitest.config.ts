@@ -1,6 +1,13 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  // `boilerplate/tsconfig.json` extends "@techfides/tf-doc-vault/tsconfig", which
+  // only resolves once this package is installed as a dependency of itself (true
+  // for a scaffolded consumer, never true in this repo's own node_modules).
+  // esbuild's own tsconfig discovery would otherwise fail transforming
+  // boilerplate/middleware.ts for its direct unit test; this repo's tests don't
+  // rely on any other tsconfig-only esbuild behavior (no paths, no decorators).
+  esbuild: { tsconfigRaw: {} },
   test: {
     include: ["tests/unit/**/*.test.{ts,mts,mjs}"],
     environment: "node",

@@ -1,0 +1,105 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.detect.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+          else
+            base="${{ github.event.before }}"
+            head="${{ github.event.after }}"
+          fi
+
+          if [ -n "$base" ] && git cat-file -e "$base" 2>/dev/null; then
+            changed="$(git diff --name-only "$base" "$head")"
+          else
+            # No usable base (first push on a new branch): treat everything as changed.
+            changed="$(git ls-files)"
+          fi
+
+          dirs=()
+          # Root (standalone repo) and one level deep (offers monorepo).
+          for pkg in package.json */package.json; do
+            [ -f "$pkg" ] || continue
+            grep -q '"docs:validate"' "$pkg" || continue
+            dir="$(dirname "$pkg")"
+            [ "$dir" = "." ] && prefix="" || prefix="$dir/"
+            if echo "$changed" | grep -qx -e "${prefix}.*" -e "${dir}"; then
+              dirs+=("\"$dir\"")
+            fi
+          done
+
+          if [ "${#dirs[@]}" -eq 0 ]; then
+            matrix="[]"
+          else
+            matrix="[$(IFS=,; echo "${dirs[*]}")]"
+          fi
+          echo "Matrix: $matrix"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  check:
+    needs: detect
+    if: needs.detect.outputs.matrix != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dir: ${{ fromJson(needs.detect.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+        working-directory: ${{ matrix.dir }}
+      - run: pnpm typecheck
+        working-directory: ${{ matrix.dir }}
+      - run: pnpm lint
+        working-directory: ${{ matrix.dir }}
+      - run: pnpm format:check
+        working-directory: ${{ matrix.dir }}
+      - run: pnpm docs:validate
+        working-directory: ${{ matrix.dir }}
+      - run: pnpm docs:build
+        working-directory: ${{ matrix.dir }}
+
+  # The one stable required-check name: matrix job names vary with the matrix,
+  # so branch protection cannot point at `check` directly. Passes on an empty
+  # matrix (check is skipped, not failed) — a change outside every doc's
+  # tree is not a doc regression.
+  result:
+    needs: [detect, check]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          if [ "${{ needs.detect.result }}" != "success" ]; then
+            echo "detect failed"
+            exit 1
+          fi
+          if [ "${{ needs.check.result }}" = "failure" ] || [ "${{ needs.check.result }}" = "cancelled" ]; then
+            echo "check failed"
+            exit 1
+          fi

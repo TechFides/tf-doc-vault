@@ -16,6 +16,10 @@ interface Sandboxes {
   techDocsHostDir: string;
   techDocsDir: string;
   anaDir: string;
+  /** Repo root a first offer was git-initialized into (the monorepo case). */
+  offersRepoDir: string;
+  /** A second offer scaffolded into the same repo, alongside the first. */
+  secondOfferDir: string;
 }
 
 interface RunOptions {
@@ -147,8 +151,6 @@ function scaffoldAna(tgz: string): string {
       path.join(REPO_ROOT, "dist/cli/setup.js"),
       "ana_test",
       "--template=ana-docs",
-      "--gcp-project=ci",
-      "--server=nginx",
       "--source=file",
       `--file-path=${tgz}`, // the scaffold prepends `file:` itself
       "--no-git",
@@ -175,6 +177,65 @@ function scaffoldAna(tgz: string): string {
   return dir;
 }
 
+/**
+ * The "offers monorepo" use case (github-vercel-migration §1.2): scaffolding
+ * a second folder inside a repo that already exists must not nest a repo
+ * inside it, must derive `repo`/`repo-subdir` from the existing origin, and
+ * must not clobber the first offer's `.github/workflows/ci.yml`.
+ */
+function scaffoldOffersMonorepo(tgz: string): {
+  repoDir: string;
+  secondOfferDir: string;
+} {
+  logger.heading("Building offers-monorepo sandbox");
+  const repoDir = path.join(SMOKE_ROOT, "offers-repo");
+  fs.rmSync(repoDir, { recursive: true, force: true });
+  fs.mkdirSync(repoDir, { recursive: true });
+
+  spawnSync("git", ["-c", "init.defaultBranch=main", "init", "-q"], {
+    cwd: repoDir,
+  });
+  spawnSync(
+    "git",
+    [
+      "remote",
+      "add",
+      "origin",
+      "git@github.com:TechFides/tf-sales-private-offers.git",
+    ],
+    { cwd: repoDir },
+  );
+
+  run(
+    "node",
+    [
+      path.join(REPO_ROOT, "dist/cli/setup.js"),
+      "offer_one",
+      "--template=ana-docs",
+      "--source=file",
+      `--file-path=${tgz}`,
+    ],
+    repoDir,
+    { label: "setup --template=ana-docs offer_one (first offer)" },
+  );
+
+  run(
+    "node",
+    [
+      path.join(REPO_ROOT, "dist/cli/setup.js"),
+      "offer_two",
+      "--template=ana-docs",
+      "--source=file",
+      `--file-path=${tgz}`,
+    ],
+    repoDir,
+    { label: "setup --template=ana-docs offer_two (second offer)" },
+  );
+
+  logger.success(`offers-monorepo sandbox ready at ${repoDir}`);
+  return { repoDir, secondOfferDir: path.join(repoDir, "offer_two") };
+}
+
 // ─── entry point ─────────────────────────────────────────────────────────────
 
 async function globalSetup(): Promise<void> {
@@ -187,12 +248,15 @@ async function globalSetup(): Promise<void> {
 
   const techDocs = scaffoldTechDocs(tgz);
   const anaDir = scaffoldAna(tgz);
+  const offersMonorepo = scaffoldOffersMonorepo(tgz);
 
   const sandboxes: Sandboxes = {
     tgz,
     techDocsHostDir: techDocs.host,
     techDocsDir: techDocs.dir,
     anaDir,
+    offersRepoDir: offersMonorepo.repoDir,
+    secondOfferDir: offersMonorepo.secondOfferDir,
   };
   fs.writeFileSync(
     path.join(SMOKE_ROOT, "sandboxes.json"),

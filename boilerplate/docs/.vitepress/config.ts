@@ -26,10 +26,11 @@ export default makeConfig({
   // Optional: put an "Edit this page" link at the bottom of every page, going
   // to the Markdown source in the repository. `repo` is the path part of the
   // repository URL, so https://github.com/acme/srvc-foo means "acme/srvc-foo".
-  // GitLab is the default host, so a GitHub repo needs the `host` line too.
+  // GitHub is the default host; a GitLab repo needs the `host` line instead.
   // editLink: {
   //   repo: "__REPO__",
-  //   branch: "master",
-  //   // host: "https://github.com",
+  //   branch: "main",
+  //   // host: "https://gitlab.com",
+  //   // path: "__REPO_SUBDIR__", // only needed inside a monorepo
   // },
 });

@@ -44,9 +44,8 @@
 
 ## Why this package exists
 
-Every documentation project needs a similar boilerplate: a VitePress configuration, a versioned sidebar, shared UI components, a CI/CD pipeline, Docker images,
-and Terraform infrastructure. Setting all of that up from scratch for each project takes long time and produces subtly divergent configurations that are hard to
-maintain.
+Every documentation project needs a similar boilerplate: a VitePress configuration, a versioned sidebar, shared UI components, a CI workflow, and a deploy
+target. Setting all of that up from scratch for each project takes long time and produces subtly divergent configurations that are hard to maintain.
 
 `@techfides/tf-doc-vault` solves this once and shares the solution across all projects. The core idea is **factory functions over copied files**: consumer repos
 call `makeConfig()` and `createTheme()`; the package owns the implementation, so updates propagate automatically.
@@ -62,7 +61,7 @@ call `makeConfig()` and `createTheme()`; the package owns the implementation, so
 | **`configs`**         | Shared `eslint.config.js`, `prettier.json`, `tsconfig.base.json` for consumer repos to extend.                                    |
 | **`infra/terraform`** | Reusable GCP module: Cloud Run + Artifact Registry + IAM.                                                                         |
 | **`docker`**          | Multi-stage Dockerfile with `nginx` / `nginx-auth` runtime variants.                                                              |
-| **`boilerplate`**     | The VitePress project scaffold shared by every template: config, theme wiring, Docker, CI, Terraform.                             |
+| **`boilerplate`**     | The VitePress project scaffold shared by every template: config, theme wiring, GitHub Actions CI, Vercel config, auth middleware. |
 | **`templates`**       | Markdown content sets (`ana-docs`, `tech-docs`, …), one folder per template, selected via `tf-doc-vault setup --template=<name>`. |
 
 ## Quick start
@@ -75,10 +74,10 @@ pnpm dlx @techfides/tf-doc-vault@latest setup
 
 It asks which template to use, then prompts for the fields that template needs. Non-interactively (CI, scripts), pass `--template` and the required flags and it never prompts:
 
-- **Standalone analysis / spec site** (its own repo, deployed to Cloud Run):
+- **Standalone analysis / spec site** (its own repo, deployed to Vercel via git integration):
 
   ```bash
-  pnpm dlx @techfides/tf-doc-vault@latest setup my_analysis --template=ana-docs --gcp-project=tfsa-my-analysis --server=nginx
+  pnpm dlx @techfides/tf-doc-vault@latest setup my_analysis --template=ana-docs
   ```
 
   Full guide → [Analytical documentation](./docs/ana-docs.md)
@@ -109,7 +108,7 @@ export default makeConfig({
   project: "lapa",
   // optional: analytics, editLink, branding, sectionNav, mermaid, …
   analytics: { provider: "umami", websiteId: "...", domain: "..." },
-  editLink: { repo: "techfides/tf-analysis/lapa_ana", branch: "master" },
+  editLink: { repo: "TechFides/tf-sales-private-offers", branch: "main" },
 });
 ```
 
@@ -132,13 +131,13 @@ To rebrand (colors, logo, fonts, footer) for a non-TechFides project, see [BRAND
 
 Task-focused guides live in **[`docs/`](./docs/README.md)**:
 
-| Guide                                                        | What it covers                                                                                                                                  |
-| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Technical documentation (`tech-docs`)](./docs/tech-docs.md) | Docs living inside a service repo, scaffolded via `setup --template=tech-docs`; the service repo publishes them itself.                         |
-| [Analytical documentation (`*_ana`)](./docs/ana-docs.md)     | Standalone analysis docs scaffolded via `setup --template=ana-docs`, deployed to Cloud Run, including `nginx-auth` and syncing the boilerplate. |
-| [Import from Confluence](./docs/confluence-import.md)        | Migrate a Confluence space into Markdown (`import-confluence`).                                                                                 |
-| [Editing &amp; publishing docs](./docs/updating-docs.md)     | The day-to-day edit → preview → validate → publish loop.                                                                                        |
-| [Testing](./docs/TESTING.md)                                 | How the package itself is tested (unit + smoke).                                                                                                |
+| Guide                                                        | What it covers                                                                                                                                      |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Technical documentation (`tech-docs`)](./docs/tech-docs.md) | Docs living inside a service repo, scaffolded via `setup --template=tech-docs`; the service repo publishes them itself.                             |
+| [Analytical documentation (`*_ana`)](./docs/ana-docs.md)     | Standalone analysis docs scaffolded via `setup --template=ana-docs`, deployed to Vercel, including the auth middleware and syncing the boilerplate. |
+| [Import from Confluence](./docs/confluence-import.md)        | Migrate a Confluence space into Markdown (`import-confluence`).                                                                                     |
+| [Editing &amp; publishing docs](./docs/updating-docs.md)     | The day-to-day edit → preview → validate → publish loop.                                                                                            |
+| [Testing](./docs/TESTING.md)                                 | How the package itself is tested (unit + smoke).                                                                                                    |
 
 ## Migration to 0.3
 
@@ -164,6 +163,27 @@ Without a TTY, `setup` never prompts: pass every required flag or it exits with 
 **New scaffolds no longer copy `.claude/settings.local.json`.**
 
 **Adding a template needs no code change:** drop a folder under `templates/<name>/` with a `_template.md` manifest and Markdown content; `tf-doc-vault setup` lists it automatically.
+
+## Migration to 0.4
+
+Version 0.4.0 removes the GitLab/GCP deploy stack from `boilerplate/` (`.gitlab-ci.yml`, `Dockerfile`, `docker/`, `infra/`) and replaces it with GitHub
+Actions + Vercel: a generic `.github/workflows/ci.yml`, `vercel.json`, and a Basic-auth `middleware.ts` that runs on Vercel's edge. This is a breaking change
+to the `ana-docs` template's wizard fields, but **existing scaffolded repos are untouched**: the scaffold is one-shot, nothing rewrites a repo's already-generated
+files. A repo keeps its `.gitlab-ci.yml`/`Dockerfile`/`infra/` until someone rescaffolds it or runs `tf-doc-vault sync --apply` against the new boilerplate.
+
+**Wizard fields removed:** `--gcp-project` and `--server` are gone (no Docker image, no GCP project to configure). **Added:** `--repo-subdir` (edit-link
+subfolder prefix, auto-detected inside a monorepo) and `--analytics` (adds `@vercel/analytics`, off by default and traceless when off).
+
+**Git detection.** Scaffolding an `ana-docs` folder that already sits inside a git repository (the "one folder per offer" monorepo pattern) now
+auto-detects that: `git init` is skipped, and `--repo`/`--repo-subdir` default to the repo's own `origin` remote and the folder's path within it, instead of
+the manifest's static default. `--no-git` still works as an explicit override.
+
+**`makeConfig`'s `editLink.host` default changes from `https://gitlab.com` to `https://github.com`.** A GitLab consumer relying on the old default must now
+pass `host: "https://gitlab.com"` explicitly. `EditLink` also gains an optional `path` field: a subfolder prefix for a docs site that lives inside a monorepo
+rather than at its repo's root.
+
+**`sync`'s tracked file set changes:** `Dockerfile`, `docker/nginx*.conf` and `infra/*.tf` are dropped; `vercel.json`, `middleware.ts` and
+`.github/workflows/ci.yml` are added.
 
 ## Contributing &amp; local development
 
