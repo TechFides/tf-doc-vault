@@ -1,6 +1,6 @@
 # CLAUDE.md: documentation generation rules
 
-This folder holds the documentation of the **__PROJECT__** project. When it sits
+This folder holds the documentation of the ****PROJECT**** project. When it sits
 inside a larger repository, these rules govern this folder only; the
 surrounding repository has its own.
 

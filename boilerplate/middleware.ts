@@ -48,10 +48,7 @@ export default function middleware(request: Request): Response {
   const suppliedUser = decoded.slice(0, separator);
   const suppliedPass = decoded.slice(separator + 1);
 
-  if (
-    !timingSafeEqual(suppliedUser, user) ||
-    !timingSafeEqual(suppliedPass, pass)
-  ) {
+  if (!timingSafeEqual(suppliedUser, user) || !timingSafeEqual(suppliedPass, pass)) {
     return unauthorized();
   }
 

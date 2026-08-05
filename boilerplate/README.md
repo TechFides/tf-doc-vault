@@ -1,6 +1,6 @@
-# __PROJECT__ documentation portal
+# **PROJECT** documentation portal
 
-Documentation for the **__PROJECT__** project, generated with VitePress + the shared [`@techfides/tf-doc-vault`](https://github.com/techfides/tf-doc-vault) tooling.
+Documentation for the ****PROJECT**** project, generated with VitePress + the shared [`@techfides/tf-doc-vault`](https://github.com/techfides/tf-doc-vault) tooling.
 
 ## Locally
 
