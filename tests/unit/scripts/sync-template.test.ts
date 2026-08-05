@@ -11,19 +11,14 @@ import { consumerName } from "../../../src/cli/scaffold.js";
 // Pinned, not derived from TRACKED_FILES: a test that only iterates the list
 // cannot notice an entry disappearing from it.
 const EXPECTED_TRACKED_FILES = [
-  "Dockerfile",
-  ".gitlab-ci.yml",
+  "vercel.json",
+  "middleware.ts",
+  ".github/workflows/ci.yml",
   ".gitignore",
   ".prettierrc",
   ".prettierignore",
   "eslint.config.js",
   "tsconfig.json",
-  "docker/nginx.conf",
-  "docker/nginx-auth.conf",
-  "infra/main.tf",
-  "infra/variables.tf",
-  "infra/outputs.tf",
-  "infra/terraform.tfvars.example",
 ];
 
 describe("tracked files", () => {

@@ -1,8 +1,9 @@
 /**
- * Compares a consumer repo's infrastructure files (Dockerfile, CI, configs,
- * Terraform) against the bundled `boilerplate/` baseline and reports drift.
- * Placeholders such as `__PROJECT__` are auto-detected from the consumer repo:
- * directory name, package.json scripts and terraform.tfvars.
+ * Compares a consumer repo's deploy/CI/config files (Vercel config, auth
+ * middleware, GitHub Actions workflow, lint/format configs) against the
+ * bundled `boilerplate/` baseline and reports drift. Placeholders such as
+ * `__PROJECT__` are auto-detected from the consumer repo: directory name and
+ * package.json dependencies.
  */
 
 import fs from "node:fs";
@@ -25,19 +26,14 @@ export const BOILERPLATE_DIR = path.resolve(
 // A tracked file with no boilerplate counterpart fails every sync run, which is
 // why `.npmrc` is absent: the boilerplate ships no `_npmrc` baseline for it.
 export const TRACKED_FILES: string[] = [
-  "Dockerfile",
-  ".gitlab-ci.yml",
+  "vercel.json",
+  "middleware.ts",
+  ".github/workflows/ci.yml",
   ".gitignore",
   ".prettierrc",
   ".prettierignore",
   "eslint.config.js",
   "tsconfig.json",
-  "docker/nginx.conf",
-  "docker/nginx-auth.conf",
-  "infra/main.tf",
-  "infra/variables.tf",
-  "infra/outputs.tf",
-  "infra/terraform.tfvars.example",
 ];
 
 interface CliFlags {
@@ -72,64 +68,18 @@ function detectPlaceholders(): Record<string, string> {
   const project = path.basename(PROJECT_ROOT);
   const dashed = project.replace(/_/g, "-");
 
-  let serverType = "nginx";
   let depValue = "^0.1.2";
   const pkg = readJSON(path.join(PROJECT_ROOT, "package.json"));
   if (pkg) {
-    const scripts = (pkg.scripts ?? {}) as Record<string, string>;
-    const m = /SERVER_TYPE=([\w-]+)/.exec(scripts["docker:build"] ?? "");
-    if (m?.[1]) serverType = m[1];
-
     const deps = (pkg.dependencies ?? {}) as Record<string, string>;
     if (deps["@techfides/tf-doc-vault"])
       depValue = deps["@techfides/tf-doc-vault"]!;
   }
 
-  let gcpProject = `tfsa-${dashed}`;
-  for (const tfvarsName of [
-    "infra/terraform.tfvars",
-    "infra/terraform.tfvars.example",
-  ]) {
-    try {
-      const tfvars = fs.readFileSync(
-        path.join(PROJECT_ROOT, tfvarsName),
-        "utf-8",
-      );
-      const m = /project_id\s*=\s*"([^"]+)"/.exec(tfvars);
-      if (m?.[1] && !m[1].startsWith("__")) {
-        gcpProject = m[1];
-        break;
-      }
-    } catch {
-      // file missing, try the next candidate
-    }
-  }
-
-  // Basic-auth credentials live in the consumer's .gitlab-ci.yml, so sync has to
-  // carry them across runs or `sync --apply` blasts production auth.
-  let basicAuthUser = "";
-  let basicAuthPass = "";
-  try {
-    const ci = fs.readFileSync(
-      path.join(PROJECT_ROOT, ".gitlab-ci.yml"),
-      "utf-8",
-    );
-    const u = /^\s*BASIC_AUTH_USER:\s*"([^"]*)"/m.exec(ci);
-    const p = /^\s*BASIC_AUTH_PASS:\s*"([^"]*)"/m.exec(ci);
-    if (u?.[1] && !u[1].startsWith("__")) basicAuthUser = u[1];
-    if (p?.[1] && !p[1].startsWith("__")) basicAuthPass = p[1];
-  } catch {
-    // fresh repo, no consumer CI yet
-  }
-
   return {
     __PROJECT__: project,
     __PROJECT_DASHED__: dashed,
-    __GCP_PROJECT__: gcpProject,
-    __SERVER_TYPE__: serverType,
     __VITEPRESS_COMMON_DEP__: depValue,
-    __BASIC_AUTH_USER__: basicAuthUser,
-    __BASIC_AUTH_PASS__: basicAuthPass,
   };
 }
 

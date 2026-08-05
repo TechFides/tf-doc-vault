@@ -8,7 +8,8 @@ Pure-logic tests for code that does not shell out, spawn processes, or build a s
 
 - `tests/unit/sidebar/`: sidebar/nav generation against in-memory file trees
 - `tests/unit/scripts/`: doc-tooling helpers (`normalize-docs`, `validate-docs`) and the boilerplate-sync file resolution (`sync-template`)
-- `tests/unit/cli/`: CLI logic that needs neither a real repo nor a TTY. `utils.test.ts` covers the helpers in `src/cli/utils.ts` (arg parsing, `copyDir`, placeholder substitution); `scaffold.test.ts` covers template manifest parsing and validation, the copy plan and its rename and exclude rules; `setup.test.ts` covers the wizard, from flag and answer resolution through a fake prompt layer to the host `package.json` and `.gitignore` integration
+- `tests/unit/cli/`: CLI logic that needs neither a real repo nor a TTY. `utils.test.ts` covers the helpers in `src/cli/utils.ts` (arg parsing, `copyDir`, placeholder substitution); `scaffold.test.ts` covers template manifest parsing and validation, the copy plan and its rename and exclude rules; `setup.test.ts` covers the wizard, from flag and answer resolution through a fake prompt layer to the host `package.json` and `.gitignore` integration; `git-context.test.ts` covers detecting an ancestor git repo and parsing its `origin` remote (real `git init` in a temp dir, no network)
+- `tests/unit/boilerplate/`: logic shipped straight to consumers rather than through `src/`. `middleware.test.ts` covers the Vercel edge auth middleware's `Request` → `Response` behavior directly
 
 Run:
 
@@ -25,7 +26,8 @@ End-to-end checks that exercise the published CLI against a real VitePress site.
 
 - `cli-subcommands.spec.ts`: `tf-doc-vault` subcommand invocation, plus the assertion that `setup --help` lists the templates found in `templates/` rather than a hardcoded set
 - `ana-dev.spec.ts`, `ana-preview.spec.ts`, `tech-docs-preview.spec.ts`: sites scaffolded by `tf-doc-vault setup` (one fixture per template) boot and render
-- `ana-served-at-root.spec.ts`: the built `ana-docs` site served at the domain root, the layout the Docker image uses. `vitepress dev`/`preview` serve under the configured base and hide a base/nginx mismatch; this spec reproduces the nginx `try_files` layout and fails on any request that 404s
+- `ana-served-at-root.spec.ts`: the built `ana-docs` site served at the domain root, the layout Vercel serves the static build under. `vitepress dev`/`preview` serve under the configured base and hide a base mismatch; this spec fails on any request that 404s
+- `ana-github-vercel.spec.ts`: a fresh `ana-docs` scaffold ships `vercel.json`/`middleware.ts`/`.github/workflows/ci.yml` and none of the removed GitLab/GCP files; scaffolding a second offer into an already-git-initialized repo (the monorepo pattern) skips `git init`, derives `repo`/`repo-subdir` from the detected `origin` remote, and never overwrites the first offer's CI workflow
 - `playground-dark-mode.spec.ts`: the theme's dark-mode navbar chrome against `playground/docs`
 - `exports.spec.ts`: every subpath export resolves from a scaffolded repo, and the packed tarball contains `boilerplate/` and `templates/` but no `specs/` path
 
@@ -37,21 +39,13 @@ Run:
 
 Config: `playwright.config.ts`. Global setup is in `tests/smoke/global-setup.ts` (builds `dist/` and prepares fixtures).
 
-## Tier 3: Docker deploy regression (`scripts/e2e-happy-path.sh`)
+## `middleware.ts`'s Basic auth
 
-Reproduces the full ana deploy chain locally (`scaffold → CI jobs → Docker build → live web behind Basic auth`), everything except `gcloud run deploy` (Cloud Run just runs the same container on port 8080). Unlike the smoke tier it builds the real `nginx-auth` image and probes it over HTTP, so it catches base-path/serving-layer regressions the `vitepress preview`/`dev` servers can't (they auto-serve under the configured base).
-
-What it asserts: the scaffold commits a `pnpm-lock.yaml` on branch `master` with an npm-versioned dependency; a fresh clone passes `pnpm install --frozen-lockfile` + the lint jobs; the `SERVER_TYPE=nginx-auth` image builds; and the running container returns `401` without creds, `200` with creds, and, probing the **base-prefixed** asset URL from the built HTML, `200` (not `404`) for a hashed asset, so Basic auth works and the site base matches the root serving layout.
-
-Coverage boundary: it scaffolds with the default npm source, so the scaffolded site consumes the **published** `@techfides/tf-doc-vault` library: this branch's `boilerplate/`, `templates/` and `setup` CLI are exercised, but the shipped library code (`src/config`, `src/theme`, …) is not. Run it while `package.json` still points at the published version (i.e. **before** the release version bump), otherwise the scaffold pins an unpublished version and the frozen install fails.
-
-Run before cutting a release:
-
-```sh
-pnpm test:e2e          # needs a running docker daemon; overrides: PORT, BASIC_AUTH_USER, BASIC_AUTH_PASS
-```
-
-Requires docker + pnpm + node + git + curl. Idempotent: it scaffolds into a `mktemp` dir and removes the container, image and temp dir on exit. Exit code = number of failed checks. Not part of `pnpm test` (needs Docker); run it manually or in the release job. `scripts/` is outside the published `files`, so it never ships to consumers.
+`boilerplate/middleware.ts` (the Vercel edge middleware every `ana-docs` scaffold ships) is plain `Request → Response` logic with no Vercel-specific runtime
+dependency, so its auth behavior is covered directly: `tests/unit/boilerplate/middleware.test.ts` asserts the pass-through when credentials are unset, `401` +
+`WWW-Authenticate` on a missing/wrong `Authorization` header, and success with the right one. There is no Docker-based deploy regression tier anymore: Vercel
+runs the build, not this repo, and the smoke tier (`ana-github-vercel.spec.ts`) already covers the files that reach a scaffold and the monorepo git-detection
+behavior.
 
 ## Confluence importer verification
 
@@ -80,6 +74,7 @@ Good to know:
 - Touching `src/sidebar`, `src/scripts`, or pure helpers in `src/cli/`: **unit test** in the matching `tests/unit/<area>/` folder.
 - Touching `src/cli/*` user-visible CLI behaviour, or anything that affects how a scaffolded site boots: **smoke test** in `tests/smoke/`.
 - Touching `src/confluence/**` or the Confluence importer: cover it with a `tests/unit/confluence/` spec and follow **Confluence importer verification** above.
+- Touching a boilerplate file with real logic (`middleware.ts`): **unit test** in `tests/unit/boilerplate/`, importing it directly.
 - Fixing a bug: add a regression test in the tier that would have caught it before fixing the code.
 
 ## External dependencies

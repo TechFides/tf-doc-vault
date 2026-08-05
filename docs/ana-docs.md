@@ -5,92 +5,93 @@
 Standalone documentation repositories for business analysis, functional specs, and technical design: the `*_ana` pattern. Suited for projects where the
 documentation has its own lifecycle and deployment, and needs to be accessible outside the application itself (e.g. for stakeholders or external reviewers).
 
-Each repo gets a complete VitePress site with versioned content, a multi-stage Docker image deployed to GCP Cloud Run via Terraform, a full GitLab CI/CD
-pipeline (install → lint → build → deploy), and optional Basic auth.
+Each repo gets a complete VitePress site with versioned content, a GitHub Actions workflow (typecheck → lint → format → validate → build), and deploy via
+Vercel's git integration (a preview URL per branch, production on merge to `main`), with optional HTTP Basic auth via an edge middleware.
 
 ## How it works
 
 1. `pnpm dlx` downloads the tooling from the npm registry and runs `tf-doc-vault setup --template=ana-docs`.
-2. The scaffolder copies the `boilerplate/` VitePress project and the `ana-docs` template's Markdown to `./my_analysis/`, substituting placeholders (`__PROJECT__`, `__GCP_PROJECT__`, `__SERVER_TYPE__`,
+2. The scaffolder copies the `boilerplate/` VitePress project and the `ana-docs` template's Markdown to `./my_analysis/`, substituting placeholders (`__PROJECT__`, `__REPO__`, `__REPO_SUBDIR__`,
    `__VITEPRESS_COMMON_DEP__`).
-3. `git init` + first commit are run automatically (skip with `--no-git` when embedding into an existing repo).
+3. `git init` + first commit are run automatically, **unless the target folder already lives inside an existing git repository** (the "one folder per offer"
+   monorepo pattern): in that case `git init` is skipped, and `--repo`/`--repo-subdir` are derived from that repo's own `origin` remote and the folder's path
+   within it, instead of falling back to the manifest's default.
 
 ```bash
-pnpm dlx @techfides/tf-doc-vault@latest setup my_analysis --template=ana-docs \
-  --gcp-project=tfsa-my-analysis \
-  --server=nginx
+pnpm dlx @techfides/tf-doc-vault@latest setup my_analysis --template=ana-docs
 ```
 
 ## Options
 
 `tf-doc-vault setup <project-name> --template=ana-docs [options]`:
 
-Each of these except `--repo` is also a prompt, with the listed default pre-filled:
+Each of these except `--repo`, `--repo-subdir` and `--analytics` is also a prompt, with the listed default pre-filled:
 
-| Option                               | Default                           | Description                                                                                                                 |
-| ------------------------------------ | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `--gcp-project=<id>`                 | `tfsa-<project>`                  | GCP project ID (written to `terraform.tfvars`).                                                                             |
-| `--server=<type>`                    | `nginx`                           | Runtime image: `nginx` (static, no auth) or `nginx-auth` (Nginx + Basic auth from `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`).     |
-| `--section-nav` / `--no-section-nav` | `--section-nav`                   | Whether the top bar gets a link per documentation section. Off means one flat sidebar.                                      |
-| `--base=<path>`                      | `/`                               | Base path baked into the VitePress build. Has to start and end with a slash.                                                |
-| `--repo=<org/repo>`                  | `techfides/tf-analysis/<project>` | Not prompted for. Pre-fills the path inside the commented-out edit-link block of `docs/.vitepress/config.ts`.               |
-| `--no-git`                           | _(false)_                         | Skip `git init` + first commit. Use when embedding the docs inside an existing repo; all infrastructure is still generated. |
+| Option                               | Default                                                           | Description                                                                                                                     |
+| ------------------------------------ | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `--section-nav` / `--no-section-nav` | `--section-nav`                                                   | Whether the top bar gets a link per documentation section. Off means one flat sidebar.                                          |
+| `--base=<path>`                      | `/`                                                               | Base path baked into the VitePress build. Has to start and end with a slash.                                                    |
+| `--repo=<org/repo>`                  | `TechFides/<project>`, or the detected repo's own `origin` remote | Not prompted for. Pre-fills the path inside the commented-out edit-link block of `docs/.vitepress/config.ts`.                   |
+| `--repo-subdir=<path>`               | detected path from the repo root, empty for a standalone repo     | Not prompted for. Pre-fills the edit link's subfolder prefix when this folder lives inside a larger repo.                       |
+| `--no-git`                           | _(false)_                                                         | Skip `git init` + first commit. Automatic when the target already sits inside a git repo (see above); use this to force it too. |
+| `--analytics` / `--no-analytics`     | `--no-analytics`                                                  | Add `@vercel/analytics` and wire it into the VitePress theme. Off leaves no trace: no dependency, no wiring.                    |
 
 The flags below are for maintainers developing this package against a local checkout. The wizard never prompts for them, and a consumer wants the default (`npm`):
 
-| Option               | Default                                               | Description                                                                                                                                                                                       |
-| -------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--source=<src>`     | `npm`                                                 | `npm` → published version from the public registry (no git credentials needed in CI or the Docker build). `git` → `git+ssh://…/tf-doc-vault.git#<ref>` (pinned to a tag). `file` → `file:<path>`. |
-| `--dev`              | _(false)_                                             | Shortcut for `--source=file` pointing at this package's checkout.                                                                                                                                 |
-| `--ref=<git-ref>`    | `v<package version>`                                  | Tag/branch/SHA for `--source=git` (ignored for `npm`/`file`).                                                                                                                                     |
-| `--git-url=<url>`    | `git+ssh://git@github.com/techfides/tf-doc-vault.git` | Override git URL for `--source=git`.                                                                                                                                                              |
-| `--file-path=<path>` | relative path to the package                          | Override `file:` path for `--source=file`.                                                                                                                                                        |
+| Option               | Default                                               | Description                                                                                                                                                                   |
+| -------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--source=<src>`     | `npm`                                                 | `npm` → published version from the public registry (no git credentials needed in CI). `git` → `git+ssh://…/tf-doc-vault.git#<ref>` (pinned to a tag). `file` → `file:<path>`. |
+| `--dev`              | _(false)_                                             | Shortcut for `--source=file` pointing at this package's checkout.                                                                                                             |
+| `--ref=<git-ref>`    | `v<package version>`                                  | Tag/branch/SHA for `--source=git` (ignored for `npm`/`file`).                                                                                                                 |
+| `--git-url=<url>`    | `git+ssh://git@github.com/techfides/tf-doc-vault.git` | Override git URL for `--source=git`.                                                                                                                                          |
+| `--file-path=<path>` | relative path to the package                          | Override `file:` path for `--source=file`.                                                                                                                                    |
 
 ### Dedicated repository
 
 The standard setup: the analytical docs live in their own git repository and are deployed independently. The scaffolder runs `git init` and makes the first
 commit automatically.
 
-The GitLab repository **does not need to be created in advance**; GitLab
-supports [push-to-create](https://docs.gitlab.com/topics/git/project/#create-a-project-using-git-push). Just add the remote and push:
+Unlike GitLab, GitHub has no push-to-create: create the repository first (web UI or `gh repo create TechFides/my_analysis --private`), then add the remote and
+push:
 
 ```bash
 cd my_analysis
 pnpm install            # installs peer deps + tf-doc-vault from the npm registry
 pnpm docs:dev           # http://localhost:5173
 
-git remote add origin git@gitlab.com:techfides/tf-analysis/my_analysis.git
-git push -u origin master   # GitLab creates the project automatically
+git remote add origin git@github.com:TechFides/my_analysis.git
+git push -u origin main
 ```
 
-Prerequisite: at least `Developer` rights in `techfides/tf-analysis`. After the first push, set the CI/CD variables (`GCP_SA_KEY`, `GCP_PROJECT`, `GCP_REGION`,
-`SERVICE_NAME`) in the newly created GitLab project; without them the `🐳 build:docs` job will fail.
+Then, in the Vercel dashboard: New Project → import the repository → framework preset `vitepress` (`vercel.json` already pins the build command and output
+directory explicitly, so nothing to configure). A push to a feature branch gets a preview URL automatically; merging to `main` deploys production. Set up
+branch protection on `main` requiring the `result` check and forbidding direct pushes.
 
-Deployment: `terraform apply` in `infra/` provisions Cloud Run + Artifact Registry on first run. Subsequent deploys happen automatically via CI on every push to
-`master`.
+### Embedded in an existing repo, or the offers monorepo pattern
 
-### Embedded in an existing repo (`--no-git`)
+Two related but different cases:
 
-When the analytical docs belong inside an existing service or project repo, add `--no-git`. The full structure (VitePress site, Dockerfile, CI, Terraform) is
-still generated, but `git init` is skipped so the output is committed as part of the parent repo:
+- **A one-off embed into any existing repo:** pass `--no-git` explicitly. The full structure (`vercel.json`, `middleware.ts`, the GitHub workflow) is still
+  generated, but `git init` is skipped so the output is committed as part of the parent repo.
+- **The "one folder per offer" monorepo pattern** (many independent analytical docs sites sharing one repo, each its own Vercel project with Root Directory
+  set to its folder): scaffold straight into the repo, no flags needed. The wizard detects the existing git repository on its own, skips `git init`, and
+  derives `--repo`/`--repo-subdir` from the repo's `origin` remote and the new folder's path within it:
 
 ```bash
-pnpm dlx @techfides/tf-doc-vault@latest setup ana_project --template=ana-docs \
-  --gcp-project=ana_project \
-  --server=nginx \
-  --no-git
+cd tf-sales-private-offers   # already a git repo, with an origin remote
+pnpm dlx @techfides/tf-doc-vault@latest setup my_offer --template=ana-docs
 
-cd ana_project
+cd my_offer
 pnpm install
 pnpm docs:dev   # http://localhost:5173
 
 cd ..
-git add ana_project/
-git commit -m "docs: add ana_project analytical documentation"
+git add my_offer/
+git commit -m "docs: add my_offer analytical documentation"
 git push
 ```
 
-The docs can still be deployed to Cloud Run independently using their own CI/CD pipeline.
+Each folder still deploys as its own Vercel project (Root Directory = that folder), independently of every other folder in the repo.
 
 ### Embedding inside an existing pnpm workspace
 
@@ -123,77 +124,40 @@ allowBuilds:
 
 Then re-run `pnpm install` from the monorepo root. The scaffolder prints these exact instructions on stderr whenever it detects an ancestor `pnpm-workspace.yaml`, so you don't need to memorise them.
 
-### CI/CD integration
+### CI in a monorepo
 
-GitLab only reads the root-level `.gitlab-ci.yml`, so the generated `ana_project/.gitlab-ci.yml` won't run automatically from the parent pipeline. Add a **child
-pipeline trigger** to the parent repo's `.gitlab-ci.yml`:
+GitHub only reads `.github/workflows/` at a repo's root, so the wizard places the generic workflow there directly (never inside an offer's own folder), and
+never overwrites one that's already there. The workflow itself only validates the folders whose `docs:validate` script actually changed in a given PR or
+push, so scaffolding more offers into the repo does not slow down CI for the others.
 
-```yaml
-ana_project:docs:
-  stage: build # any stage that already exists in the parent pipeline
-  trigger:
-    include: ana_project/.gitlab-ci.yml
-    strategy: depend
-  rules:
-    - changes:
-        - ana_project/**
-      when: on_success
-    - when: never
-```
+## Auth (edge middleware)
 
-Replace `ana_project` with the actual directory name. The child pipeline runs only when files under `ana_project/` change, inherits CI/CD variables from project
-settings, and has isolated stages with no naming conflicts. `strategy: depend` makes the parent job reflect the child pipeline's pass/fail status.
+`middleware.ts` runs on Vercel's edge, ahead of every request (including static assets), and reads `BASIC_AUTH_USER` / `BASIC_AUTH_PASS` from that Vercel
+project's environment variables:
 
-## Auth (`nginx-auth`)
+- **Unset:** the request passes through untouched; the site is public.
+- **Set:** a request without a valid `Authorization: Basic` header gets a `401` with `WWW-Authenticate: Basic realm="Documentation"`, so the browser shows its
+  native login dialog.
 
-The `nginx-auth` runtime protects the application with HTTP Basic auth. Username and password are set **at build time** via Docker build-args `BASIC_AUTH_USER` /
-`BASIC_AUTH_PASS`; the `Dockerfile` generates `/etc/nginx/.htpasswd` from them. If they are empty, the build fails fast.
+The credentials never live in the repo or the built client bundle; they exist only as Vercel project env vars, read server-side at the edge. Rotate a password
+by updating the env vars and redeploying (or just triggering a new deploy).
 
-The values are stored directly in the repo, in the top-level `variables:` block of `.gitlab-ci.yml`:
+### Public ↔ private
 
-```yaml
-variables:
-  PNPM_STORE: "$CI_PROJECT_DIR/.pnpm-store"
-  BASIC_AUTH_USER: "anadocs"
-  BASIC_AUTH_PASS: "anadocsTF"
-```
-
-This is not a secret: anyone with repo access has application access. The `🐳 build:docs` job conditionally passes them to `docker build` only when non-empty,
-so projects without auth (runtime `nginx`) just leave them blank.
-
-Local build:
-
-```bash
-docker build --build-arg SERVER_TYPE=nginx-auth \
-             --build-arg BASIC_AUTH_USER=anadocs \
-             --build-arg BASIC_AUTH_PASS=anadocsTF \
-             -t docs-web .
-```
-
-Password rotation = update `variables:` + commit + redeploy (the htpasswd hash is baked into the image layer).
-
-### Switching an existing project from `nginx` to `nginx-auth`
-
-`__SERVER_TYPE__` is baked into two places during scaffolding, so switching requires updating both:
-
-1. **`.gitlab-ci.yml`**: in `BUILD_ARGS` (job `🐳 build:docs`) change `SERVER_TYPE=nginx` to `SERVER_TYPE=nginx-auth`.
-2. **`Dockerfile`**: `ARG SERVER_TYPE=nginx` → `ARG SERVER_TYPE=nginx-auth` (default for local builds without a build-arg; CI always overrides it).
-3. **`.gitlab-ci.yml`** `variables:`: fill in `BASIC_AUTH_USER` / `BASIC_AUTH_PASS` (otherwise the build fails on the fail-fast check in `Dockerfile`).
-4. Commit + push → CI builds a new image, Cloud Run rolls out a new revision.
-
-Back to `nginx` = the same steps in reverse + clear both `BASIC_AUTH_*` values.
+The same scaffold serves both: a public offer simply never sets `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`. Adding auth to an existing public offer, or removing it
+from a private one, is only a Vercel project settings change, no redeploy of code required.
 
 ## Syncing the boilerplate to an existing repo
 
-When the package adds or fixes something in `boilerplate/` (Dockerfile, CI, configs, Terraform), consumer repos don't receive the update automatically; those
-files belong to them. To inspect or apply the diff:
+When the package adds or fixes something in `boilerplate/` (`vercel.json`, `middleware.ts`, the GitHub workflow, lint/format configs), consumer repos don't
+receive the update automatically; those files belong to them. To inspect or apply the diff:
 
 ```bash
 pnpm sync           # shows a unified diff of all drifted files
 pnpm sync:apply     # overwrites drifted files with the boilerplate (placeholders are rendered from the current repo)
 ```
 
-User content (`docs/`, `package.json`, README, CLAUDE, custom.css, terraform.tfvars) is excluded from overwriting.
+User content (`docs/`, `package.json`, README, CLAUDE) is excluded from overwriting.
 
 ---
 

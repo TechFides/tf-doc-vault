@@ -1,0 +1,6 @@
+{
+  "framework": "vitepress",
+  "buildCommand": "pnpm docs:print && pnpm docs:build",
+  "outputDirectory": "docs/.vitepress/dist",
+  "cleanUrls": true
+}

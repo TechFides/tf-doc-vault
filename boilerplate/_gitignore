@@ -4,9 +4,8 @@ docs/.vitepress/dist/
 docs/.vitepress/cache/
 docs/print.md
 artifacts/
+
 .idea/
 
-# Terraform: tfstate lives in GCS, tfvars stay tracked in the repo.
-infra/.terraform/
-infra/*.tfplan
-infra/terraform.tfstate*
+# Vercel CLI local state (`vercel link`/`vercel dev`).
+.vercel
