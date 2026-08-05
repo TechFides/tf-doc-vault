@@ -184,8 +184,8 @@ describe("fields and defaults validation", () => {
 
   test("names the known fields so the typo is easy to spot", () => {
     expect(() =>
-      fixtureManifest(MANIFEST.replace("[project, repo]", "[gcp-projekt]")),
-    ).toThrow(/Known fields: .*\bgcp-project\b/);
+      fixtureManifest(MANIFEST.replace("[project, repo]", "[analitycs]")),
+    ).toThrow(/Known fields: .*\banalytics\b/);
   });
 
   test("rejects a default for a field that is not in fields", () => {
@@ -196,16 +196,16 @@ describe("fields and defaults validation", () => {
     ).toThrow(/"defaults.server" is not listed in "fields"/);
   });
 
-  // `--server=totally-bogus` is rejected, so the manifest route must be too.
+  // `--source=totally-bogus` is rejected, so the manifest route must be too.
   test("rejects a default that fails its field's option list", () => {
     expect(() =>
       fixtureManifest(
-        MANIFEST.replace("[project, repo]", "[project, repo, server]").replace(
+        MANIFEST.replace("[project, repo]", "[project, repo, source]").replace(
           "  repo: org/__PROJECT_DASHED__",
-          "  server: totally-bogus",
+          "  source: totally-bogus",
         ),
       ),
-    ).toThrow(/"defaults.server" is invalid: Use nginx \| nginx-auth\./);
+    ).toThrow(/"defaults.source" is invalid: Use npm \| git \| file\./);
   });
 
   test("rejects a default that fails its field's validator", () => {

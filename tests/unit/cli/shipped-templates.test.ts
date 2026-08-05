@@ -25,8 +25,12 @@ import {
 
 const PLACEHOLDER = /__[A-Z0-9_]+__/g;
 
-/** Empty on purpose: the consumer fills these into their own CI variables. */
-const INTENTIONALLY_EMPTY = ["__BASIC_AUTH_USER__", "__BASIC_AUTH_PASS__"];
+/**
+ * Empty on purpose in this probe: no ancestor git repo exists in the temp cwd
+ * this test scaffolds into, so the monorepo-subfolder edit-link prefix has
+ * nothing to derive from.
+ */
+const INTENTIONALLY_EMPTY = ["__REPO_SUBDIR__"];
 
 /**
  * A new field without a catalog default is reported as missing, which is the

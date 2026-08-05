@@ -162,6 +162,68 @@ describe("makeConfig lastUpdated", () => {
   });
 });
 
+describe("makeConfig editLink", () => {
+  function editLinkOf(
+    opts: Parameters<typeof makeConfig>[0],
+  ): { pattern: string; text: string } | undefined {
+    const config = makeConfig({ ...opts, mermaid: false }) as unknown as {
+      themeConfig: { editLink?: { pattern: string; text: string } };
+    };
+    return config.themeConfig.editLink;
+  }
+
+  test("omitted when the option is not passed", () => {
+    expect(editLinkOf({ configDir })).toBeUndefined();
+  });
+
+  test("defaults to a GitHub-style path (no /-/ segment)", () => {
+    const editLink = editLinkOf({
+      configDir,
+      editLink: { repo: "TechFides/tf-sales-private-offers" },
+    });
+    expect(editLink?.pattern).toBe(
+      "https://github.com/TechFides/tf-sales-private-offers/edit/master/docs/:path",
+    );
+  });
+
+  test("a GitLab host switches to the /-/edit/ path", () => {
+    const editLink = editLinkOf({
+      configDir,
+      editLink: {
+        repo: "techfides/tf-analysis/lapa_ana",
+        host: "https://gitlab.com",
+      },
+    });
+    expect(editLink?.pattern).toBe(
+      "https://gitlab.com/techfides/tf-analysis/lapa_ana/-/edit/master/docs/:path",
+    );
+  });
+
+  test("path inserts a subfolder prefix for a monorepo offer", () => {
+    const editLink = editLinkOf({
+      configDir,
+      editLink: {
+        repo: "TechFides/tf-sales-private-offers",
+        branch: "main",
+        path: "offer-a",
+      },
+    });
+    expect(editLink?.pattern).toBe(
+      "https://github.com/TechFides/tf-sales-private-offers/edit/main/offer-a/docs/:path",
+    );
+  });
+
+  test("path is normalized whichever way it carries its slashes", () => {
+    const editLink = editLinkOf({
+      configDir,
+      editLink: { repo: "org/repo", path: "/offer-a/" },
+    });
+    expect(editLink?.pattern).toBe(
+      "https://github.com/org/repo/edit/master/offer-a/docs/:path",
+    );
+  });
+});
+
 describe("makeConfig markdown options", () => {
   test("registers a markdown config hook (GFM task lists)", () => {
     const config = makeConfig({ configDir, mermaid: false }) as unknown as {
