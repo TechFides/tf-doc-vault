@@ -16,17 +16,16 @@
     "docs:lf": "tf-doc-vault ensure-lf",
     "sync": "tf-doc-vault sync",
     "sync:apply": "tf-doc-vault sync --apply",
-    "docker:build": "docker build --build-arg SERVER_TYPE=__SERVER_TYPE__ -t docs-web .",
-    "docker:run": "docker run --rm -p 8080:8080 docs-web",
-    "lint": "eslint docs/.vitepress",
-    "lint:fix": "eslint docs/.vitepress --fix",
+    "lint": "eslint docs/.vitepress middleware.ts",
+    "lint:fix": "eslint docs/.vitepress middleware.ts --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc",
     "fix": "tf-doc-vault fix"
   },
   "dependencies": {
-    "@techfides/tf-doc-vault": "__VITEPRESS_COMMON_DEP__"
+    "@techfides/tf-doc-vault": "__VITEPRESS_COMMON_DEP__",
+    "@vercel/functions": "^3.7.7"
   },
   "devDependencies": {
     "@types/node": "25.7.0",

@@ -14,10 +14,7 @@ import {
   type CopyDirResult,
   type ParsedArgs,
 } from "./utils.js";
-
-// gitlab, not github: the scaffold's CI token `insteadOf` rewrite only covers gitlab.com.
-const GITLAB_HOST = "gitlab.com";
-const GITLAB_GROUP = "techfides/tf-analysis";
+import { detectHostRepo } from "./git-context.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // dist/cli → package root
@@ -110,6 +107,12 @@ export interface FieldSpec {
   fills?: PlaceholderFill[];
   /** Returning undefined makes the field required. */
   defaultValue?: (ctx: DefaultContext) => Answer;
+  /**
+   * A computed default (e.g. detected from the surrounding git repo) that
+   * should win over a manifest's static `defaults:` entry when it resolves to
+   * a value, instead of the usual manifest-first precedence.
+   */
+  preferComputedDefault?: boolean;
 }
 
 export function dashed(value: string): string {
@@ -153,40 +156,6 @@ export const FIELD_CATALOG: FieldSpec[] = [
     fills: PROJECT_FILLS,
   },
   {
-    key: "gcp-project",
-    type: "text",
-    prompt: "GCP project ID",
-    hint: "Written to infra/terraform.tfvars; you can edit it there later.",
-    flag: "--gcp-project=<id>",
-    help: "GCP project ID, filled into terraform.tfvars",
-    fills: [{ placeholder: "__GCP_PROJECT__" }],
-    defaultValue: ({ answers }) =>
-      typeof answers.name === "string"
-        ? `tfsa-${dashed(answers.name)}`
-        : undefined,
-  },
-  {
-    key: "server",
-    type: "select",
-    prompt: "Server flavour",
-    flag: "--server=<type>",
-    help: "nginx | nginx-auth, the flavour the Docker image serves",
-    options: [
-      {
-        value: "nginx",
-        label: "nginx (recommended)",
-        hint: "plain static hosting: everyone who can reach the URL reads the site",
-      },
-      {
-        value: "nginx-auth",
-        label: "nginx-auth",
-        hint: "static hosting behind Basic auth: only readers with the shared password get in",
-      },
-    ],
-    fills: [{ placeholder: "__SERVER_TYPE__" }],
-    defaultValue: () => "nginx",
-  },
-  {
     key: "source",
     type: "select",
     prompt: "Where should the scaffold pull @techfides/tf-doc-vault from?",
@@ -198,7 +167,7 @@ export const FIELD_CATALOG: FieldSpec[] = [
       {
         value: "npm",
         label: "npm",
-        hint: "published version from the public registry, so CI and the Docker build need no git credentials",
+        hint: "published version from the public registry, so CI needs no git credentials",
       },
       { value: "git", label: "git", hint: "git+ssh URL pinned to --ref" },
       {
@@ -283,7 +252,30 @@ export const FIELD_CATALOG: FieldSpec[] = [
     help: "Repository path pre-filled into the commented-out edit-link block",
     flagOnly: true,
     fills: [{ placeholder: "__REPO__" }],
-    defaultValue: () => "",
+    // Inside an existing repo (the offers monorepo case), the origin remote
+    // names the real repo; only fall back to the manifest's static default
+    // (e.g. "TechFides/__PROJECT__") when there is none to detect.
+    preferComputedDefault: true,
+    defaultValue: ({ cwd }) => detectHostRepo(cwd)?.originRepo ?? "",
+  },
+  {
+    key: "repo-subdir",
+    type: "text",
+    prompt: "Path prefix between the repo root and this folder (optional)",
+    hint: "Used by the edit link when this folder lives inside a larger repo.",
+    flag: "--repo-subdir=<path>",
+    help: "Path prefix for edit links when this folder lives inside a larger repo",
+    flagOnly: true,
+    fills: [{ placeholder: "__REPO_SUBDIR__" }],
+    defaultValue: ({ cwd, manifest, answers }): string => {
+      const detected = detectHostRepo(cwd);
+      if (!detected) return "";
+      // `cwd` is the offer's future parent, not the offer folder itself, so
+      // append what the target will be named once it exists.
+      const targetName = targetRelativeName(manifest, answers);
+      if (!targetName) return detected.subdir;
+      return [detected.subdir, targetName].filter(Boolean).join("/");
+    },
   },
   {
     key: "git",
@@ -292,7 +284,20 @@ export const FIELD_CATALOG: FieldSpec[] = [
     hint: "Runs git init in the new folder and commits the scaffold.",
     flag: "--git | --no-git",
     help: "Run git init and make the first commit",
-    defaultValue: ({ manifest }) => manifest.git.init,
+    // Nesting `git init` inside an already-existing repo (the offers monorepo
+    // case) would create a broken, disconnected sub-repo, so detecting one
+    // flips the default off; --git still overrides it for whoever insists.
+    defaultValue: ({ manifest, cwd }) =>
+      detectHostRepo(cwd) ? false : manifest.git.init,
+  },
+  {
+    key: "analytics",
+    type: "confirm",
+    prompt: "Enable Vercel Web Analytics?",
+    hint: "Off leaves no trace in the scaffold: no dependency, no wiring.",
+    flag: "--analytics | --no-analytics",
+    help: "Add @vercel/analytics and wire it into the VitePress theme",
+    defaultValue: () => false,
   },
 ];
 
@@ -874,22 +879,45 @@ function defaultDirs(): ScaffoldDirs {
   return { templatesDir: TEMPLATES_DIR, boilerplateDir: BOILERPLATE_DIR };
 }
 
+/**
+ * The eventual target's name/path relative to `cwd`, computed before the
+ * target may exist. `repo-subdir`'s default needs this: detection only knows
+ * the repo relative to `cwd` (typically the offer's future parent), not the
+ * offer folder itself.
+ */
+function targetRelativeName(
+  manifest: TemplateManifest,
+  answers: Record<string, Answer>,
+): string | undefined {
+  if (manifest.target.mode === "subfolder") return manifest.target.path;
+  return typeof answers.name === "string" && answers.name !== ""
+    ? answers.name
+    : undefined;
+}
+
 export function resolveCopyPlan(
   manifest: TemplateManifest,
   answers: Record<string, Answer>,
-  ctx: { cwd?: string; boilerplateDir?: string } = {},
+  ctx: { cwd?: string; boilerplateDir?: string; gitRoot?: string | null } = {},
 ): CopyPlan {
   const cwd = ctx.cwd ?? process.cwd();
   const boilerplateDir = ctx.boilerplateDir ?? BOILERPLATE_DIR;
 
-  const exclude = [MANIFEST_FILE, ...manifest.exclude];
+  // Inside an existing repo, GitHub only reads workflows from its own root, so
+  // the CI workflow must not land inside the offer subfolder; `setup.ts`
+  // places it at `ctx.gitRoot` separately (see `placeCiWorkflow`).
+  const exclude = [
+    MANIFEST_FILE,
+    ...manifest.exclude,
+    ...(ctx.gitRoot ? [".github"] : []),
+  ];
 
   let target: string;
   if (manifest.target.mode === "subfolder") {
     target = path.resolve(cwd, manifest.target.path!);
   } else {
-    const name = answers.name;
-    if (typeof name !== "string" || name === "") {
+    const name = targetRelativeName(manifest, answers);
+    if (!name) {
       throw new SetupError(`Template "${manifest.name}" needs a project name.`);
     }
     target = path.resolve(cwd, name);
@@ -904,14 +932,18 @@ export function resolveCopyPlan(
 }
 
 /**
- * `npm pack` strips dotfiles and files npm treats as its own config, so the
- * boilerplate ships them prefixed and the scaffolder renames them on copy.
- * `sync` resolves a baseline through the inverse of this one table.
+ * Files that cannot be live under their real name inside this repo (`npm pack`
+ * strips dotfiles and files npm treats as its own config; `tsconfig.json`
+ * would extend this package's own self-reference, which only resolves once
+ * the package is installed as a dependency of itself) ship prefixed and the
+ * scaffolder renames them on copy. `sync` resolves a baseline through the
+ * inverse of this one table.
  */
 const SCAFFOLD_RENAMES: Record<string, string> = {
   _npmrc: ".npmrc",
   _gitignore: ".gitignore",
   "_pnpm-workspace.yaml": "pnpm-workspace.yaml",
+  "_tsconfig.json": "tsconfig.json",
 };
 
 const WORKSPACE_SOURCE = "_pnpm-workspace.yaml";
@@ -1092,8 +1124,4 @@ export function resolveDependencyValue(
         `Invalid --source: ${source}. Use npm | git | file.`,
       );
   }
-}
-
-export function originUrl(projectName: string): string {
-  return `git@${GITLAB_HOST}:${GITLAB_GROUP}/${projectName}.git`;
 }

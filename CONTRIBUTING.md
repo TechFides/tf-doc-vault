@@ -31,10 +31,10 @@ A field the wizard should never ask about (a maintainer or local-development con
 ```yaml
 fields: [service-id, project, repo]
 defaults:
-  repo: techfides/__PROJECT_DASHED__ # `project` fills this, and resolves first
+  repo: TechFides/__PROJECT_DASHED__ # `project` fills this, and resolves first
 ```
 
-A placeholder that no earlier field fills is rejected when the manifest loads. The interpolated result then goes through the field's own validation, so a value that expands into something the field rejects (a `server` default expanding to `nginx-probe`) fails the run with `exit 1` instead of reaching the scaffold.
+A placeholder that no earlier field fills is rejected when the manifest loads. The interpolated result then goes through the field's own validation, so a value that expands into something the field rejects (a `source` default expanding to `git-probe`, which is not `npm | git | file`) fails the run with `exit 1` instead of reaching the scaffold.
 
 ## Releasing
 
@@ -70,8 +70,8 @@ whatever is missing here is missing for every consumer.
 
 Edit the section `pnpm release` just prepended: under the breaking changes, add a
 short migration summary (what disappeared, what replaces it, the replacement
-command) and a link to the README migration section, for example
-`[Migration to 0.3](https://github.com/TechFides/tf-doc-vault#migration-to-03)`.
+command) and a link to the matching section in `docs/MIGRATIONS.md`, for example
+`[Migration to 0.3](https://github.com/TechFides/tf-doc-vault/blob/master/docs/MIGRATIONS.md#migration-to-03)`.
 Absolute links, because the release body is rendered outside the repo.
 
 The tag has to end up on the finished text, so fold the edit into the release

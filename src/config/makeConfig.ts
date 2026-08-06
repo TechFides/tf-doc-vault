@@ -52,14 +52,20 @@ export interface UmamiAnalytics {
 }
 
 export interface EditLink {
-  /** GitLab/GitHub repo path, e.g. `techfides/tf-analysis/lapa_ana`. */
+  /** GitHub/GitLab repo path, e.g. `TechFides/tf-sales-private-offers`. */
   repo: string;
   /** Default branch. Defaults to `master`. */
   branch?: string;
   /** Link text in the docs footer. Defaults to "Upravit online". */
   text?: string;
-  /** Override host. Defaults to `https://gitlab.com`. */
+  /** Override host. Defaults to `https://github.com`. */
   host?: string;
+  /**
+   * Path prefix between the repo root and this docs folder, e.g. `offer-a`
+   * when this site lives inside a monorepo subfolder rather than at the
+   * repo's root. Omit for a standalone repo.
+   */
+  path?: string;
 }
 
 export interface BrandingFooter {
@@ -184,12 +190,14 @@ function buildEditLink(editLink: EditLink): { pattern: string; text: string } {
     repo,
     branch = "master",
     text = "Upravit online",
-    host = "https://gitlab.com",
+    host = "https://github.com",
+    path: subPath,
   } = editLink;
   const isGitLab = host.includes("gitlab");
   const editPath = isGitLab ? `/-/edit/${branch}` : `/edit/${branch}`;
+  const prefix = subPath ? `/${subPath.replace(/^\/+|\/+$/g, "")}` : "";
   return {
-    pattern: `${host}/${repo}${editPath}/docs/:path`,
+    pattern: `${host}/${repo}${editPath}${prefix}/docs/:path`,
     text,
   };
 }

@@ -2,6 +2,7 @@ import { describe, test, expect, vi, afterEach } from "vitest";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import {
   FIELD_CATALOG,
@@ -11,7 +12,6 @@ import {
   packagePeerDependencies,
   resolveSource,
   resolveDependencyValue,
-  originUrl,
   validateBase,
   type Answer,
   type TemplateManifest,
@@ -23,10 +23,12 @@ import {
   CancelledError,
   dependencyFlags,
   docsScripts,
+  enableAnalytics,
   gitignoreEntries,
   mergeWorkspaceSettings,
   missingDependencies,
   nextSteps,
+  originUrl,
   renderWorkspaceSettings,
   resolveAnswers,
   resolvePlaceholders,
@@ -121,10 +123,8 @@ describe("resolveDependencyValue", () => {
 });
 
 describe("originUrl", () => {
-  test("points at the GitLab analysis group, not GitHub", () => {
-    expect(originUrl("lapa_ana")).toBe(
-      "git@gitlab.com:techfides/tf-analysis/lapa_ana.git",
-    );
+  test("points at the TechFides GitHub org", () => {
+    expect(originUrl("lapa_ana")).toBe("git@github.com:TechFides/lapa_ana.git");
   });
 });
 
@@ -248,49 +248,47 @@ describe("selectTemplate", () => {
 });
 
 describe("resolveAnswers", () => {
-  test("flags and derived defaults cover the whole dialogue", async () => {
+  test("flags cover the whole non-interactive dialogue", async () => {
     const { answers } = await resolveAnswers(
-      manifest({ fields: ["name", "gcp-project", "server", "source", "git"] }),
+      manifest({ fields: ["name", "service-id", "source", "git"] }),
       {
         projectName: "demo_proj",
-        flags: { server: "nginx-auth", source: "npm", "no-git": true },
+        flags: { "service-id": "BAT", source: "npm", "no-git": true },
       },
       NO_PROMPTS,
       PIPED,
     );
     expect(answers).toEqual({
       name: "demo_proj",
-      "gcp-project": "tfsa-demo-proj",
-      server: "nginx-auth",
+      "service-id": "BAT",
       source: "npm",
       git: false,
     });
   });
 
   test("a supplied flag skips its prompt even with a TTY", async () => {
-    const { promptFn, asked } = scriptedPrompts({ "gcp-project": "tfsa-demo" });
+    const { promptFn, asked } = scriptedPrompts({ "service-id": "BAT" });
     const { answers } = await resolveAnswers(
-      manifest({ fields: ["name", "gcp-project"] }),
+      manifest({ fields: ["name", "service-id"] }),
       { projectName: "demo", flags: {} },
       promptFn,
       TTY,
     );
-    expect(asked.map((request) => request.key)).toEqual(["gcp-project"]);
+    expect(asked.map((request) => request.key)).toEqual(["service-id"]);
     expect(answers.name).toBe("demo");
   });
 
   test("prompts for what the flags leave open, with the defaults prefilled", async () => {
     const { promptFn, asked } = scriptedPrompts({
       name: "demo",
-      "gcp-project": "tfsa-custom",
-      server: "nginx",
+      "service-id": "BAT",
       "section-nav": true,
       base: "/",
       git: true,
     });
     const { answers } = await resolveAnswers(
       manifest({
-        fields: ["name", "gcp-project", "server", "section-nav", "base", "git"],
+        fields: ["name", "service-id", "section-nav", "base", "git"],
       }),
       { flags: {} },
       promptFn,
@@ -298,20 +296,16 @@ describe("resolveAnswers", () => {
     );
     expect(asked.map((request) => request.message)).toEqual([
       "Project name",
-      "GCP project ID",
-      "Server flavour",
+      "Service ID (for example BAT)",
       "Show a top navigation link per documentation section?",
       "Base path the site is served from",
       "Initialize a git repository?",
     ]);
-    // The GCP default follows the name answered one prompt earlier.
-    expect(asked[1]?.initialValue).toBe("tfsa-demo");
-    expect(asked[2]?.initialValue).toBe("nginx");
     // Both come from the manifest.
-    expect(asked[3]?.initialValue).toBe(true);
-    expect(asked[4]?.initialValue).toBe("/");
-    expect(asked[5]?.initialValue).toBe(true);
-    expect(answers["gcp-project"]).toBe("tfsa-custom");
+    expect(asked[2]?.initialValue).toBe(true);
+    expect(asked[3]?.initialValue).toBe("/");
+    expect(asked[4]?.initialValue).toBe(true);
+    expect(answers["service-id"]).toBe("BAT");
   });
 
   // A select explains itself through its options, which clack renders next to
@@ -348,15 +342,6 @@ describe("resolveAnswers", () => {
         expect(hint.length, `${request.key} hint is long`).toBeLessThan(90);
       }
     }
-  });
-
-  // The select options are where a select field explains itself, and the
-  // recommended one has to read as such.
-  test("the server options say what they do and which one is recommended", () => {
-    const server = FIELD_CATALOG.find((field) => field.key === "server");
-    expect(server?.options?.[0]?.label).toBe("nginx (recommended)");
-    expect(server?.options?.[0]?.hint).toMatch(/reach the URL/);
-    expect(server?.options?.[1]?.hint).toMatch(/Basic auth/);
   });
 
   // A consumer always wants the published version, so it is never asked.
@@ -422,8 +407,8 @@ describe("resolveAnswers", () => {
 
   test("a manifest default outranks the catalog default", async () => {
     const withDefault = manifest({
-      fields: ["server"],
-      defaults: { server: "nginx-auth" },
+      fields: ["project"],
+      defaults: { project: "custom-name" },
     });
     const { answers } = await resolveAnswers(
       withDefault,
@@ -431,15 +416,16 @@ describe("resolveAnswers", () => {
       NO_PROMPTS,
       PIPED,
     );
-    expect(answers.server).toBe("nginx-auth");
+    // The catalog default would have been path.basename(cwd) ("host-repo").
+    expect(answers.project).toBe("custom-name");
 
     const overridden = await resolveAnswers(
       withDefault,
-      { flags: { server: "nginx" } },
+      { flags: { project: "flag-name" } },
       NO_PROMPTS,
       PIPED,
     );
-    expect(overridden.answers.server).toBe("nginx");
+    expect(overridden.answers.project).toBe("flag-name");
   });
 
   // Lets a template pre-fill a value derived from the project name without
@@ -458,35 +444,36 @@ describe("resolveAnswers", () => {
   });
 
   // The manifest validator sees the uninterpolated string, so the expansion is
-  // the first thing a select field's option list can judge. Unchecked,
-  // `nginx-demo` reaches .gitlab-ci.yml as a SERVER_TYPE with no runner stage.
+  // the first thing a select field's option list can judge. Unchecked, an
+  // interpolated value outside the option list would reach the scaffold with
+  // no code path that handles it.
   test("an interpolating manifest default is checked once it has a value", async () => {
     await expect(
       resolveAnswers(
         manifest({
-          fields: ["name", "server"],
-          defaults: { server: "nginx-__PROJECT_DASHED__" },
+          fields: ["name", "source"],
+          defaults: { source: "git-__PROJECT_DASHED__" },
         }),
         { projectName: "demo", flags: {} },
         NO_PROMPTS,
         PIPED,
       ),
     ).rejects.toThrow(
-      /"defaults.server" resolves to "nginx-demo", which is invalid: Use nginx \| nginx-auth\./,
+      /"defaults.source" resolves to "git-demo", which is invalid: Use npm \| git \| file\./,
     );
   });
 
   test("an interpolating manifest default that resolves to a valid value passes", async () => {
     const { answers } = await resolveAnswers(
       manifest({
-        fields: ["name", "server"],
-        defaults: { server: "__PROJECT_DASHED__" },
+        fields: ["name", "source"],
+        defaults: { source: "__PROJECT_DASHED__" },
       }),
-      { projectName: "nginx-auth", flags: {} },
+      { projectName: "git", flags: {} },
       NO_PROMPTS,
       PIPED,
     );
-    expect(answers.server).toBe("nginx-auth");
+    expect(answers.source).toBe("git");
   });
 
   // Both name fields fill __PROJECT__ and __PROJECT_DASHED__, so an interpolated
@@ -560,7 +547,7 @@ describe("resolveAnswers", () => {
 
   test("without a TTY a defaulted value needs no flag", async () => {
     const { answers } = await resolveAnswers(
-      manifest({ fields: ["project", "repo", "server"] }),
+      manifest({ fields: ["project", "repo", "git"] }),
       { flags: {} },
       NO_PROMPTS,
       PIPED,
@@ -568,7 +555,7 @@ describe("resolveAnswers", () => {
     expect(answers).toEqual({
       project: "host-repo",
       repo: "",
-      server: "nginx",
+      git: true,
     });
   });
 
@@ -581,16 +568,17 @@ describe("resolveAnswers", () => {
       }),
       {
         projectName: "stray",
-        flags: { "service-id": "DEM", "gcp-project": "tfsa-x", ref: "main" },
+        flags: { "service-id": "DEM", repo: "acme/repo", ref: "main" },
       },
       NO_PROMPTS,
       PIPED,
     );
     expect(answers).toEqual({ "service-id": "DEM" });
+    // Catalog order: "source" (whose companion is --ref) comes before "repo".
     expect(warnings).toEqual([
       `[name] does not apply to the "fixture" template; ignoring it.`,
-      `--gcp-project=<id> does not apply to the "fixture" template; ignoring it.`,
       `--ref=<git-ref> does not apply to the "fixture" template; ignoring it.`,
+      `--repo=<org/repo> does not apply to the "fixture" template; ignoring it.`,
     ]);
   });
 
@@ -598,13 +586,13 @@ describe("resolveAnswers", () => {
   // default instead of the value the caller meant.
   test("a flag outside the known set warns", async () => {
     const { answers, warnings } = await resolveAnswers(
-      manifest({ fields: ["gcp-project", "name"] }),
-      { projectName: "demo", flags: { "gcp-projct": "oops" } },
+      manifest({ fields: ["repo", "name"] }),
+      { projectName: "demo", flags: { reop: "oops" } },
       NO_PROMPTS,
       PIPED,
     );
-    expect(warnings).toEqual(["Unknown flag --gcp-projct; ignoring it."]);
-    expect(answers["gcp-project"]).toBe("tfsa-demo");
+    expect(warnings).toEqual(["Unknown flag --reop; ignoring it."]);
+    expect(answers["repo"]).toBe("");
   });
 
   test("every flag the catalog documents counts as known", () => {
@@ -626,8 +614,8 @@ describe("resolveAnswers", () => {
   test("an invalid select value is rejected", async () => {
     await expect(
       resolveAnswers(
-        manifest({ fields: ["server"] }),
-        { flags: { server: "apache" } },
+        manifest({ fields: ["source"] }),
+        { flags: { source: "ftp" } },
         NO_PROMPTS,
         PIPED,
       ),
@@ -843,7 +831,6 @@ describe("resolvePlaceholders", () => {
     );
     expect(placeholders.__REPO__).toBe("");
     expect(placeholders.__SERVICE_ID__).toBe("");
-    expect(placeholders.__GCP_PROJECT__).toBe("");
     expect(placeholders.__PROJECT__).toBe("demo_proj");
     expect(placeholders.__PROJECT_DASHED__).toBe("demo-proj");
   });
@@ -861,8 +848,6 @@ describe("resolvePlaceholders", () => {
       {},
     );
     for (const [key, value] of Object.entries(placeholders)) {
-      // Basic auth is filled in by the consumer, never by the wizard.
-      if (key.startsWith("__BASIC_AUTH_")) continue;
       expect(value, `${key} resolved empty`).not.toBe("");
     }
   });
@@ -1433,18 +1418,109 @@ describe("host documentation dependencies", () => {
   });
 });
 
+// The offers monorepo use case: scaffolding a second folder inside a repo
+// that already exists must not nest a repo inside it, and should pre-fill
+// `repo`/`repo-subdir` from what's actually there instead of a guess.
+describe("git detection integration", () => {
+  function tempGitRepo(): string {
+    const dir = tempDir();
+    spawnSync("git", ["-c", "init.defaultBranch=main", "init", "-q"], {
+      cwd: dir,
+    });
+    spawnSync(
+      "git",
+      [
+        "remote",
+        "add",
+        "origin",
+        "git@github.com:TechFides/tf-sales-private-offers.git",
+      ],
+      { cwd: dir },
+    );
+    return dir;
+  }
+
+  test("repo and repo-subdir derive from the detected origin, outranking the manifest default", async () => {
+    const root = tempGitRepo();
+    const offer = path.join(root, "offer-a");
+    fs.mkdirSync(offer);
+    const { answers } = await resolveAnswers(
+      manifest({
+        fields: ["repo", "repo-subdir"],
+        defaults: { repo: "TechFides/__PROJECT__" },
+      }),
+      { flags: {} },
+      NO_PROMPTS,
+      { cwd: offer, interactive: false },
+    );
+    expect(answers.repo).toBe("TechFides/tf-sales-private-offers");
+    expect(answers["repo-subdir"]).toBe("offer-a");
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  test("outside any git repo, repo falls back to the manifest default", async () => {
+    const cwd = tempDir();
+    const { answers } = await resolveAnswers(
+      manifest({
+        fields: ["name", "repo"],
+        defaults: { repo: "TechFides/__PROJECT__" },
+      }),
+      { projectName: "demo", flags: {} },
+      NO_PROMPTS,
+      { cwd, interactive: false },
+    );
+    expect(answers.repo).toBe("TechFides/demo");
+    fs.rmSync(cwd, { recursive: true, force: true });
+  });
+
+  test("git defaults off inside an existing repo, on outside one", async () => {
+    const root = tempGitRepo();
+    const insideAnswers = await resolveAnswers(
+      manifest({ fields: ["git"], git: { init: true } }),
+      { flags: {} },
+      NO_PROMPTS,
+      { cwd: root, interactive: false },
+    );
+    expect(insideAnswers.answers.git).toBe(false);
+
+    const outsideDir = tempDir();
+    const outsideAnswers = await resolveAnswers(
+      manifest({ fields: ["git"], git: { init: true } }),
+      { flags: {} },
+      NO_PROMPTS,
+      { cwd: outsideDir, interactive: false },
+    );
+    expect(outsideAnswers.answers.git).toBe(true);
+
+    fs.rmSync(root, { recursive: true, force: true });
+    fs.rmSync(outsideDir, { recursive: true, force: true });
+  });
+
+  // --git still overrides the detected default for whoever insists.
+  test("an explicit --git overrides the detected default", async () => {
+    const root = tempGitRepo();
+    const { answers } = await resolveAnswers(
+      manifest({ fields: ["git"], git: { init: true } }),
+      { flags: { git: true } },
+      NO_PROMPTS,
+      { cwd: root, interactive: false },
+    );
+    expect(answers.git).toBe(true);
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+});
+
 describe("nextSteps", () => {
-  function withInfra(): { cwd: string; targetDir: string } {
+  function withVercelJson(): { cwd: string; targetDir: string } {
     const cwd = tempDir();
     const targetDir = path.join(cwd, "demo_ana");
-    fs.mkdirSync(path.join(targetDir, "infra"), { recursive: true });
+    fs.mkdirSync(targetDir, { recursive: true });
+    fs.writeFileSync(path.join(targetDir, "vercel.json"), "{}");
     return { cwd, targetDir };
   }
 
-  // Printing the infra path from the cwd after a cd lands the reader a level
-  // too deep when they copy-paste it.
   test("paths after the cd are relative to the target", () => {
-    const { cwd, targetDir } = withInfra();
+    const { cwd, targetDir } = withVercelJson();
     const epilogue = nextSteps({
       manifest: manifest(),
       answers: { name: "demo_ana" },
@@ -1454,15 +1530,16 @@ describe("nextSteps", () => {
       gitInitialized: false,
     });
     expect(epilogue).toContain("cd demo_ana\n");
-    expect(epilogue).toContain("cd infra\n");
-    expect(epilogue).not.toContain("cd demo_ana/infra");
+    expect(epilogue).toContain("Deploy (Vercel, via git integration):");
     expect(epilogue).toContain("git add .\n");
     fs.rmSync(cwd, { recursive: true, force: true });
   });
 
   // The host-driven flavour never cds, so its paths stay relative to the cwd.
-  test("paths stay relative to the cwd when the host repo drives the scripts", () => {
-    const { cwd, targetDir } = withInfra();
+  // The Vercel block itself carries no path (it's a web-UI walkthrough), so
+  // its gate (vercel.json existing) is what this exercises.
+  test("the Vercel block appears regardless of the host flavour", () => {
+    const { cwd, targetDir } = withVercelJson();
     const epilogue = nextSteps({
       manifest: manifest({
         target: { mode: "subfolder", path: "demo_ana" },
@@ -1481,7 +1558,35 @@ describe("nextSteps", () => {
       gitInitialized: false,
     });
     expect(epilogue).not.toContain("cd demo_ana\n");
-    expect(epilogue).toContain("cd demo_ana/infra\n");
+    expect(epilogue).toContain("Deploy (Vercel, via git integration):");
+    fs.rmSync(cwd, { recursive: true, force: true });
+  });
+
+  // The only other place `fromHere` isn't the identity function: a new-folder
+  // scaffold whose host repo drives the scripts still needs `git add` to name
+  // the folder relative to the cwd, not "." (which would mean the cwd itself).
+  test("git add names the folder when the host repo drives the scripts", () => {
+    const cwd = tempDir();
+    const targetDir = path.join(cwd, "demo_ana");
+    fs.mkdirSync(targetDir, { recursive: true });
+    const epilogue = nextSteps({
+      manifest: manifest({
+        target: { mode: "new-folder" },
+        host: {
+          packageJsonScripts: true,
+          devDependencies: true,
+          gitignore: true,
+          minimalPackageJson: true,
+          pnpmWorkspace: true,
+        },
+      }),
+      answers: { name: "demo_ana" },
+      targetDir,
+      cwd,
+      dependency: "0.2.10",
+      gitInitialized: false,
+    });
+    expect(epilogue).toContain("git add demo_ana\n");
     fs.rmSync(cwd, { recursive: true, force: true });
   });
 
@@ -1518,7 +1623,7 @@ describe("nextSteps", () => {
   });
 
   test("the file: hint is relative to the cwd, where it is printed", () => {
-    const { cwd, targetDir } = withInfra();
+    const { cwd, targetDir } = withVercelJson();
     const epilogue = nextSteps({
       manifest: manifest(),
       answers: { name: "demo_ana" },
@@ -1534,7 +1639,7 @@ describe("nextSteps", () => {
     fs.rmSync(cwd, { recursive: true, force: true });
   });
 
-  test("no infra folder means no deploy block", () => {
+  test("no vercel.json means no deploy block", () => {
     const cwd = tempDir();
     const targetDir = path.join(cwd, "sub");
     fs.mkdirSync(targetDir);
@@ -1546,7 +1651,68 @@ describe("nextSteps", () => {
       dependency: "0.2.10",
       gitInitialized: false,
     });
-    expect(epilogue).not.toContain("terraform");
+    expect(epilogue).not.toContain("Vercel");
     fs.rmSync(cwd, { recursive: true, force: true });
+  });
+});
+
+describe("enableAnalytics", () => {
+  function scaffold(): string {
+    const dir = tempDir();
+    fs.writeFileSync(
+      path.join(dir, "package.json"),
+      JSON.stringify({ name: "demo", dependencies: { vue: "^3.5.33" } }),
+    );
+    fs.mkdirSync(path.join(dir, "docs/.vitepress/theme"), { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, "docs/.vitepress/theme/index.ts"),
+      'import { createTheme } from "@techfides/tf-doc-vault/theme";\n' +
+        'import "./custom.css";\n' +
+        "\n" +
+        "export default createTheme({\n" +
+        "  widthToggle: true,\n" +
+        "});\n",
+    );
+    return dir;
+  }
+
+  test("adds the dependency sorted alongside existing ones", () => {
+    const dir = scaffold();
+    enableAnalytics(dir);
+    const pkg = JSON.parse(
+      fs.readFileSync(path.join(dir, "package.json"), "utf-8"),
+    ) as { dependencies: Record<string, string> };
+    expect(pkg.dependencies).toEqual({
+      "@vercel/analytics": "^2.0.1",
+      vue: "^3.5.33",
+    });
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("injects a browser-only inject() call ahead of the theme export", () => {
+    const dir = scaffold();
+    enableAnalytics(dir);
+    const theme = fs.readFileSync(
+      path.join(dir, "docs/.vitepress/theme/index.ts"),
+      "utf-8",
+    );
+    expect(theme).toContain('import { inject } from "@vercel/analytics";');
+    expect(theme).toContain('if (typeof window !== "undefined") inject();');
+    expect(theme.indexOf("inject();")).toBeLessThan(
+      theme.indexOf("export default createTheme"),
+    );
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  // A theme file reshaped so the anchor no longer matches must fail loudly
+  // rather than ship the dependency with no wiring behind it.
+  test("throws instead of silently no-oping when the anchor is missing", () => {
+    const dir = scaffold();
+    fs.writeFileSync(
+      path.join(dir, "docs/.vitepress/theme/index.ts"),
+      "export default { widthToggle: true };\n",
+    );
+    expect(() => enableAnalytics(dir)).toThrow(SetupError);
+    fs.rmSync(dir, { recursive: true, force: true });
   });
 });

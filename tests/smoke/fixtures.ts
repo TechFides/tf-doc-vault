@@ -13,6 +13,8 @@ interface Sandboxes {
   techDocsHostDir: string;
   techDocsDir: string;
   anaDir: string;
+  offersRepoDir: string;
+  secondOfferDir: string;
 }
 
 function loadSandboxes(): Sandboxes {

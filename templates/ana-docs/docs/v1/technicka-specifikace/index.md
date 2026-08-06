@@ -18,4 +18,4 @@ _(doplnit)_
 
 ## Deployment
 
-Dokumentace se nasazuje jako Cloud Run služba postavená přes `@techfides/tf-doc-vault`. Detaily v `infra/`.
+Dokumentace se nasazuje na Vercel (git integrace: push do `main` nasadí produkci, push do jiné větve vytvoří preview) přes scaffold `@techfides/tf-doc-vault`. GitHub Actions kontroluje typecheck/lint/format/validaci při každém PR. Detaily v `vercel.json` a `.github/workflows/ci.yml`.

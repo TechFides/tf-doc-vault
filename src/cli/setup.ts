@@ -21,10 +21,10 @@ import {
 import {
   FIELD_CATALOG,
   PACKAGE_DIR,
+  BOILERPLATE_DIR,
   applyCopyPlan,
   boilerplateWorkspaceSettings,
   checkFieldValue,
-  originUrl,
   documentationDependencies,
   placeholderValues,
   resolveCopyPlan,
@@ -42,6 +42,7 @@ import {
   type TemplateScan,
   type WorkspaceSettings,
 } from "./scaffold.js";
+import { detectHostRepo } from "./git-context.js";
 
 export class CancelledError extends Error {}
 
@@ -128,6 +129,12 @@ export function unknownFlags(flags: ParsedArgs["flags"]): string[] {
 }
 
 function fieldDefault(field: FieldSpec, ctx: DefaultContext): Answer {
+  if (field.preferComputedDefault) {
+    // Truthy, not merely defined: an empty "nothing detected" result must
+    // still fall through to the manifest's own static default below.
+    const computed = field.defaultValue?.(ctx);
+    if (computed) return computed;
+  }
   const override = ctx.manifest.defaults[field.key];
   if (override === undefined) return field.defaultValue?.(ctx);
   if (typeof override !== "string") return override;
@@ -308,9 +315,6 @@ export function resolvePlaceholders(
     __DOCS_BASE__: manifest.base,
     __SECTION_NAV__: String(manifest.sectionNav),
     ...placeholderValues(manifest.fields, answers),
-    // The consumer fills these into .gitlab-ci.yml for the auth-enabled flavour.
-    __BASIC_AUTH_USER__: "",
-    __BASIC_AUTH_PASS__: "",
     ...extra,
   };
 }
@@ -733,10 +737,11 @@ function generateLockfile(dir: string): void {
 }
 
 function initGitRepo(dir: string): void {
-  // `-c init.defaultBranch=master` rather than `git init -b` (git >= 2.28):
-  // older git ignores the unknown key and still lands on master, which is what
-  // the documented push command, the CI branch rules and editLink expect.
-  spawnSync("git", ["-c", "init.defaultBranch=master", "init", "-q"], {
+  // `-c init.defaultBranch=main` rather than `git init -b` (git >= 2.28):
+  // older git ignores the unknown key and still lands on whatever its own
+  // compiled-in default is, which is what the documented push command, the CI
+  // branch rules and Vercel's production deploy all assume is `main`.
+  spawnSync("git", ["-c", "init.defaultBranch=main", "init", "-q"], {
     cwd: dir,
     stdio: "inherit",
   });
@@ -746,6 +751,72 @@ function initGitRepo(dir: string): void {
     ["commit", "-q", "-m", "Initial scaffold from @techfides/tf-doc-vault"],
     { cwd: dir, stdio: "inherit" },
   );
+}
+
+/** GitHub org this package's scaffolds are published under. */
+export function originUrl(projectName: string): string {
+  return `git@github.com:TechFides/${projectName}.git`;
+}
+
+/**
+ * GitHub only reads workflows from `.github/workflows/` at a repo's root, so
+ * inside an existing repo (the offers monorepo case) the CI workflow has to
+ * land there instead of the offer subfolder. Never overwrites: a later offer
+ * scaffolded into the same repo must not clobber CI tuning an earlier one (or
+ * a human) already made.
+ */
+function placeCiWorkflow(gitRoot: string): void {
+  const dest = path.join(gitRoot, ".github", "workflows", "ci.yml");
+  if (fs.existsSync(dest)) {
+    console.log(
+      `  .github/workflows/ci.yml already present at the repo root; skipped.`,
+    );
+    return;
+  }
+  const source = path.join(BOILERPLATE_DIR, ".github", "workflows", "ci.yml");
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.copyFileSync(source, dest);
+  console.log(`  .github/workflows/ci.yml created at the repo root`);
+}
+
+const VERCEL_ANALYTICS_VERSION = "^2.0.1";
+
+/**
+ * Off leaves no trace, so enabling it is a patch of the freshly-copied
+ * scaffold's own files rather than a placeholder: the dependency and the
+ * theme wiring only exist when asked for.
+ */
+export function enableAnalytics(targetDir: string): void {
+  const pkgPath = path.join(targetDir, "package.json");
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as {
+    dependencies?: Record<string, string>;
+  };
+  pkg.dependencies = Object.fromEntries(
+    Object.entries({
+      ...pkg.dependencies,
+      "@vercel/analytics": VERCEL_ANALYTICS_VERSION,
+    }).sort(([a], [b]) => a.localeCompare(b)),
+  );
+  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf-8");
+
+  const themePath = path.join(targetDir, "docs/.vitepress/theme/index.ts");
+  const theme = fs.readFileSync(themePath, "utf-8");
+  const injected = theme.replace(
+    /\n(export default createTheme)/,
+    '\nimport { inject } from "@vercel/analytics";\n' +
+      "\n" +
+      // Vite's SSR pass has no `window`; `import.meta.env.SSR` would need
+      // `vite/client` in the scaffold's tsconfig `types` to typecheck.
+      'if (typeof window !== "undefined") inject();\n' +
+      "\n$1",
+  );
+  if (injected === theme) {
+    throw new SetupError(
+      `Could not wire up @vercel/analytics: "export default createTheme" not found in ${themePath}`,
+    );
+  }
+  fs.writeFileSync(themePath, injected, "utf-8");
+  console.log("  @vercel/analytics enabled (dependency + theme wiring)");
 }
 
 // ─── output ───
@@ -906,17 +977,17 @@ Commit it together with your other changes:
   }
 
   // A template can exclude the deploy files, so the hint follows what landed.
-  if (fs.existsSync(path.join(ctx.targetDir, "infra"))) {
-    blocks.push(`Deploy (Cloud Run, its own pipeline):
-  cd ${fromHere("infra")}
-  terraform init && terraform apply
-  # set CI/CD variables (GCP_SA_KEY, …) from the terraform outputs`);
+  if (fs.existsSync(path.join(ctx.targetDir, "vercel.json"))) {
+    blocks.push(`Deploy (Vercel, via git integration):
+  Import the repo in the Vercel dashboard, Root Directory = this folder.
+  Set BASIC_AUTH_USER / BASIC_AUTH_PASS as project env vars for a password;
+  leave them unset to keep the site public.`);
   }
 
   if (ctx.gitInitialized && typeof ctx.answers.name === "string") {
     blocks.push(`Publish the new repository:
   git remote add origin ${originUrl(ctx.answers.name)}
-  git push -u origin master`);
+  git push -u origin main`);
   }
 
   return blocks.join("\n\n");
@@ -1043,7 +1114,11 @@ async function run(): Promise<void> {
     process.stderr.write(`⚠  ${warning}\n`);
   }
 
-  const plan = resolveCopyPlan(manifest, answers, { cwd });
+  const hostRepo = detectHostRepo(cwd);
+  const plan = resolveCopyPlan(manifest, answers, {
+    cwd,
+    gitRoot: hostRepo?.root ?? null,
+  });
   const targetDir = plan.target;
   if (manifest.target.mode === "new-folder" && fs.existsSync(targetDir)) {
     throw new SetupError(`Target already exists: ${targetDir}`);
@@ -1056,6 +1131,12 @@ async function run(): Promise<void> {
   console.log(
     `  copied: ${copied} file(s), skipped: ${skipped} (already exist)`,
   );
+
+  // GitHub only reads workflows from the real repo root, not the offer
+  // subfolder `resolveCopyPlan` excluded `.github` from above.
+  if (hostRepo && manifest.target.mode === "new-folder") {
+    placeCiWorkflow(hostRepo.root);
+  }
 
   replacePlaceholders(
     targetDir,
@@ -1086,7 +1167,11 @@ async function run(): Promise<void> {
   if (manifest.workspaceWarning) {
     warnIfEmbeddedInWorkspace(targetDir, ancestorWorkspace);
   }
+  if (answers.analytics === true) enableAnalytics(targetDir);
+
   // An embedded scaffold shares the parent workspace's lockfile at its root.
+  // Runs after `enableAnalytics`: the lockfile must reflect every dependency
+  // the scaffold ends up with, including the one analytics adds.
   if (manifest.lockfile && !ancestorWorkspace) generateLockfile(targetDir);
 
   const gitInitialized = manifest.git.init && answers.git !== false;
