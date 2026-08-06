@@ -5,6 +5,7 @@
  * is about to become its own repo.
  */
 
+import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 
@@ -37,17 +38,36 @@ function runGit(args: string[], cwd: string): string | null {
   return result.stdout.trim();
 }
 
+const cache = new Map<string, HostRepo | null>();
+
 /**
  * `null` outside a git repository, so the caller falls back to today's
  * behavior (init a fresh repo, use the manifest's static `repo` default).
+ * Memoized per `cwd`: one `setup` run asks this up to four times (three field
+ * defaults plus the run itself), each a pair of `spawnSync` calls.
  */
 export function detectHostRepo(cwd: string): HostRepo | null {
+  const cached = cache.get(cwd);
+  if (cached !== undefined) return cached;
+
+  const result = detectHostRepoUncached(cwd);
+  cache.set(cwd, result);
+  return result;
+}
+
+function detectHostRepoUncached(cwd: string): HostRepo | null {
   const root = runGit(["rev-parse", "--show-toplevel"], cwd);
   if (!root) return null;
 
   const remote = runGit(["remote", "get-url", "origin"], root);
   const originRepo = remote ? parseGitHubRepoPath(remote) : undefined;
-  const subdir = path.relative(root, cwd).split(path.sep).join("/");
+  // `git rev-parse --show-toplevel` resolves symlinks; `cwd` may not have (an
+  // OS tmpdir is commonly a symlink), so `path.relative` needs both realpathed
+  // or a symlinked cwd yields a bogus "../../.." subdir instead of "".
+  const subdir = path
+    .relative(fs.realpathSync(root), fs.realpathSync(cwd))
+    .split(path.sep)
+    .join("/");
 
   return { root, originRepo, subdir };
 }

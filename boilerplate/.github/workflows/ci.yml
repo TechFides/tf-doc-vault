@@ -5,6 +5,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -15,7 +18,7 @@ jobs:
     outputs:
       matrix: ${{ steps.detect.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
       - id: detect
@@ -44,8 +47,26 @@ jobs:
             [ -f "$pkg" ] || continue
             grep -q '"docs:validate"' "$pkg" || continue
             dir="$(dirname "$pkg")"
-            [ "$dir" = "." ] && prefix="" || prefix="$dir/"
-            if echo "$changed" | grep -qx -e "${prefix}.*" -e "${dir}"; then
+
+            # Root has no path to scope by (it IS the whole repo): any change
+            # counts. A subfolder only counts on a literal-prefix match, not a
+            # regex one: "offer.a" as a regex prefix would also match
+            # "offerXa/...", since "." means "any character".
+            if [ "$dir" = "." ]; then
+              matched=true
+            else
+              matched=false
+              prefix="$dir/"
+              while IFS= read -r line; do
+                [ -z "$line" ] && continue
+                if [ "$line" = "$dir" ] || [ "${line#"$prefix"}" != "$line" ]; then
+                  matched=true
+                  break
+                fi
+              done <<< "$changed"
+            fi
+
+            if [ "$matched" = true ]; then
               dirs+=("\"$dir\"")
             fi
           done
@@ -67,8 +88,8 @@ jobs:
       matrix:
         dir: ${{ fromJson(needs.detect.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24
       - run: corepack enable
@@ -81,6 +102,10 @@ jobs:
       - run: pnpm format:check
         working-directory: ${{ matrix.dir }}
       - run: pnpm docs:validate
+        working-directory: ${{ matrix.dir }}
+      # Mirrors vercel.json's buildCommand, so CI catches a print-time failure
+      # (e.g. a broken PDF export) before it only shows up on the Vercel build.
+      - run: pnpm docs:print
         working-directory: ${{ matrix.dir }}
       - run: pnpm docs:build
         working-directory: ${{ matrix.dir }}

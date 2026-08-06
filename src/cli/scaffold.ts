@@ -932,14 +932,18 @@ export function resolveCopyPlan(
 }
 
 /**
- * `npm pack` strips dotfiles and files npm treats as its own config, so the
- * boilerplate ships them prefixed and the scaffolder renames them on copy.
- * `sync` resolves a baseline through the inverse of this one table.
+ * Files that cannot be live under their real name inside this repo (`npm pack`
+ * strips dotfiles and files npm treats as its own config; `tsconfig.json`
+ * would extend this package's own self-reference, which only resolves once
+ * the package is installed as a dependency of itself) ship prefixed and the
+ * scaffolder renames them on copy. `sync` resolves a baseline through the
+ * inverse of this one table.
  */
 const SCAFFOLD_RENAMES: Record<string, string> = {
   _npmrc: ".npmrc",
   _gitignore: ".gitignore",
   "_pnpm-workspace.yaml": "pnpm-workspace.yaml",
+  "_tsconfig.json": "tsconfig.json",
 };
 
 const WORKSPACE_SOURCE = "_pnpm-workspace.yaml";

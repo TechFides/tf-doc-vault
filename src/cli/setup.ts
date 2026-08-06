@@ -786,7 +786,7 @@ const VERCEL_ANALYTICS_VERSION = "^2.0.1";
  * scaffold's own files rather than a placeholder: the dependency and the
  * theme wiring only exist when asked for.
  */
-function enableAnalytics(targetDir: string): void {
+export function enableAnalytics(targetDir: string): void {
   const pkgPath = path.join(targetDir, "package.json");
   const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as {
     dependencies?: Record<string, string>;
@@ -805,9 +805,16 @@ function enableAnalytics(targetDir: string): void {
     /\n(export default createTheme)/,
     '\nimport { inject } from "@vercel/analytics";\n' +
       "\n" +
-      "if (!import.meta.env.SSR) inject();\n" +
+      // Vite's SSR pass has no `window`; `import.meta.env.SSR` would need
+      // `vite/client` in the scaffold's tsconfig `types` to typecheck.
+      'if (typeof window !== "undefined") inject();\n' +
       "\n$1",
   );
+  if (injected === theme) {
+    throw new SetupError(
+      `Could not wire up @vercel/analytics: "export default createTheme" not found in ${themePath}`,
+    );
+  }
   fs.writeFileSync(themePath, injected, "utf-8");
   console.log("  @vercel/analytics enabled (dependency + theme wiring)");
 }
@@ -1160,10 +1167,12 @@ async function run(): Promise<void> {
   if (manifest.workspaceWarning) {
     warnIfEmbeddedInWorkspace(targetDir, ancestorWorkspace);
   }
-  // An embedded scaffold shares the parent workspace's lockfile at its root.
-  if (manifest.lockfile && !ancestorWorkspace) generateLockfile(targetDir);
-
   if (answers.analytics === true) enableAnalytics(targetDir);
+
+  // An embedded scaffold shares the parent workspace's lockfile at its root.
+  // Runs after `enableAnalytics`: the lockfile must reflect every dependency
+  // the scaffold ends up with, including the one analytics adds.
+  if (manifest.lockfile && !ancestorWorkspace) generateLockfile(targetDir);
 
   const gitInitialized = manifest.git.init && answers.git !== false;
   if (gitInitialized) initGitRepo(targetDir);

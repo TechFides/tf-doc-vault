@@ -23,6 +23,7 @@ import {
   CancelledError,
   dependencyFlags,
   docsScripts,
+  enableAnalytics,
   gitignoreEntries,
   mergeWorkspaceSettings,
   missingDependencies,
@@ -1652,5 +1653,66 @@ describe("nextSteps", () => {
     });
     expect(epilogue).not.toContain("Vercel");
     fs.rmSync(cwd, { recursive: true, force: true });
+  });
+});
+
+describe("enableAnalytics", () => {
+  function scaffold(): string {
+    const dir = tempDir();
+    fs.writeFileSync(
+      path.join(dir, "package.json"),
+      JSON.stringify({ name: "demo", dependencies: { vue: "^3.5.33" } }),
+    );
+    fs.mkdirSync(path.join(dir, "docs/.vitepress/theme"), { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, "docs/.vitepress/theme/index.ts"),
+      'import { createTheme } from "@techfides/tf-doc-vault/theme";\n' +
+        'import "./custom.css";\n' +
+        "\n" +
+        "export default createTheme({\n" +
+        "  widthToggle: true,\n" +
+        "});\n",
+    );
+    return dir;
+  }
+
+  test("adds the dependency sorted alongside existing ones", () => {
+    const dir = scaffold();
+    enableAnalytics(dir);
+    const pkg = JSON.parse(
+      fs.readFileSync(path.join(dir, "package.json"), "utf-8"),
+    ) as { dependencies: Record<string, string> };
+    expect(pkg.dependencies).toEqual({
+      "@vercel/analytics": "^2.0.1",
+      vue: "^3.5.33",
+    });
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("injects a browser-only inject() call ahead of the theme export", () => {
+    const dir = scaffold();
+    enableAnalytics(dir);
+    const theme = fs.readFileSync(
+      path.join(dir, "docs/.vitepress/theme/index.ts"),
+      "utf-8",
+    );
+    expect(theme).toContain('import { inject } from "@vercel/analytics";');
+    expect(theme).toContain('if (typeof window !== "undefined") inject();');
+    expect(theme.indexOf("inject();")).toBeLessThan(
+      theme.indexOf("export default createTheme"),
+    );
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  // A theme file reshaped so the anchor no longer matches must fail loudly
+  // rather than ship the dependency with no wiring behind it.
+  test("throws instead of silently no-oping when the anchor is missing", () => {
+    const dir = scaffold();
+    fs.writeFileSync(
+      path.join(dir, "docs/.vitepress/theme/index.ts"),
+      "export default { widthToggle: true };\n",
+    );
+    expect(() => enableAnalytics(dir)).toThrow(SetupError);
+    fs.rmSync(dir, { recursive: true, force: true });
   });
 });

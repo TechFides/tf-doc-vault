@@ -92,4 +92,23 @@ describe("detectHostRepo", () => {
     expect(detected?.root).toBe(fs.realpathSync(dir));
     expect(detected?.originRepo).toBeUndefined();
   });
+
+  // `git rev-parse --show-toplevel` always resolves symlinks, so a `cwd`
+  // reached through one (e.g. macOS's `os.tmpdir()`, itself a symlink) must
+  // be realpathed too, or `path.relative` returns a bogus "../../..." chain
+  // instead of the real subdir.
+  test("resolves symlinks in cwd the same as it does in the detected root", () => {
+    const dir = tempRepo();
+    const offer = path.join(dir, "offer-a");
+    fs.mkdirSync(offer);
+    const linkParent = fs.mkdtempSync(
+      path.join(os.tmpdir(), "git-context-link-"),
+    );
+    dirs.push(linkParent);
+    const link = path.join(linkParent, "offer-a-link");
+    fs.symlinkSync(offer, link);
+    const detected = detectHostRepo(link);
+    expect(detected?.root).toBe(fs.realpathSync(dir));
+    expect(detected?.subdir).toBe("offer-a");
+  });
 });

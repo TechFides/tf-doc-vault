@@ -9,5 +9,6 @@ Task-focused guides for using `@techfides/tf-doc-vault`. New here? Start with th
 | [Import from Confluence](./confluence-import.md)        | Migrate a Confluence space into Markdown (`import-confluence`).                                                                                     |
 | [Editing &amp; publishing docs](./updating-docs.md)     | The day-to-day edit → preview → validate → publish loop.                                                                                            |
 | [Testing](./TESTING.md)                                 | How the package itself is tested (unit + smoke), incl. Confluence importer verification.                                                            |
+| [Migrations](./MIGRATIONS.md)                           | Breaking-change guides for major package versions.                                                                                                  |
 
 Developing `tf-doc-vault` itself? See [CONTRIBUTING.md](../CONTRIBUTING.md). Rebranding for a non-TechFides project? See [BRANDING.md](../BRANDING.md).

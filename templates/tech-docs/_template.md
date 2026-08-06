@@ -12,7 +12,7 @@ defaults:
 exclude:
   - README.md
   - eslint.config.js
-  - tsconfig.json
+  - _tsconfig.json
   - .prettierrc
   - .prettierignore
   - _gitignore

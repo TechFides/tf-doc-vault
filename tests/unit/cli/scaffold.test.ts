@@ -433,13 +433,19 @@ describe("scaffold renames", () => {
     expect(consumerName("_gitignore")).toBe(".gitignore");
     expect(consumerName("_npmrc")).toBe(".npmrc");
     expect(consumerName("_pnpm-workspace.yaml")).toBe("pnpm-workspace.yaml");
+    expect(consumerName("_tsconfig.json")).toBe("tsconfig.json");
     expect(consumerName("Dockerfile")).toBe("Dockerfile");
   });
 
   // `sync` resolves a baseline through the inverse, so an entry present in one
   // direction only leaves that file without a baseline.
   test("the inverse covers exactly the same entries", () => {
-    for (const source of ["_gitignore", "_npmrc", "_pnpm-workspace.yaml"]) {
+    for (const source of [
+      "_gitignore",
+      "_npmrc",
+      "_pnpm-workspace.yaml",
+      "_tsconfig.json",
+    ]) {
       expect(boilerplateName(consumerName(source))).toBe(source);
     }
     expect(boilerplateName("Dockerfile")).toBe("Dockerfile");
