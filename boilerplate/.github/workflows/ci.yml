@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   detect:
-    runs-on: ubuntu-latest
+    runs-on: docker
     outputs:
       matrix: ${{ steps.detect.outputs.matrix }}
     steps:
@@ -82,7 +82,7 @@ jobs:
   check:
     needs: detect
     if: needs.detect.outputs.matrix != '[]'
-    runs-on: ubuntu-latest
+    runs-on: docker
     strategy:
       fail-fast: false
       matrix:
@@ -117,7 +117,7 @@ jobs:
   result:
     needs: [detect, check]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: docker
     steps:
       - run: |
           if [ "${{ needs.detect.result }}" != "success" ]; then
