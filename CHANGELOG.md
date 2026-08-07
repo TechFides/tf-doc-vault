@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.4.0
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.3.1...v0.4.0)
+
+### 🩹 Fixes
+
+- Format ([93800da](https://github.com/TechFides/tf-doc-vault/commit/93800da))
+- Address PR #97 review feedback ([#97](https://github.com/TechFides/tf-doc-vault/issues/97))
+- Address remaining PR #97 review feedback ([#97](https://github.com/TechFides/tf-doc-vault/issues/97))
+
+### 🏡 Chore
+
+- Setup boilerplate to github ([1d22600](https://github.com/TechFides/tf-doc-vault/commit/1d22600))
+
+### 🤖 CI
+
+- Remove lint boilerplate dockerfile ([6bdf53c](https://github.com/TechFides/tf-doc-vault/commit/6bdf53c))
+- Use docker runner ([095cd3c](https://github.com/TechFides/tf-doc-vault/commit/095cd3c))
+
+### ❤️ Contributors
+
+- Lukáš Brzobohatý ([@Brzda](https://github.com/Brzda))
+
 ## v0.3.1
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.3.0...v0.3.1)
