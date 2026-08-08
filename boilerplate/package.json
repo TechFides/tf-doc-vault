@@ -33,7 +33,7 @@
     "@typescript-eslint/parser": "8.59.3",
     "eslint": "10.3.0",
     "eslint-config-prettier": "10.1.8",
-    "mermaid": "11.15.0",
+    "mermaid": "11.16.1",
     "prettier": "3.8.3",
     "tsx": "4.21.0",
     "typescript": "6.0.3",
