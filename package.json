@@ -138,7 +138,7 @@
     "eslint-config-prettier": "10.1.8",
     "husky": "9.1.7",
     "knip": "6.24.0",
-    "mermaid": "11.14.0",
+    "mermaid": "11.16.1",
     "prettier": "3.8.3",
     "tf-licence-checker": "1.1.9",
     "tsx": "4.21.0",
