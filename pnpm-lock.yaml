@@ -43,7 +43,7 @@ importers:
         specifier: 8.59.2
         version: 8.59.2(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3)
       '@vercel/functions':
-        specifier: ^3.7.7
+        specifier: 3.7.7
         version: 3.7.7
       '@vitest/coverage-v8':
         specifier: 3.2.4
