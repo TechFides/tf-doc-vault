@@ -554,8 +554,8 @@ html.layout-max .VPContent {
   text-decoration: line-through;
 }
 
-/* `.vp-doc code` and `.vp-doc blockquote` set their own colour. */
-.vp-doc .tf-tobe :where(code, blockquote) {
+/* `.vp-doc` sets its own colour on `code`, `blockquote` and `th`. */
+.vp-doc .tf-tobe :where(code, blockquote, th) {
   color: inherit;
 }
 

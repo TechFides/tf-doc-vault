@@ -56,6 +56,14 @@ test("TO-BE tag colours reach content inside the block form", async ({
     .evaluate((el) => getComputedStyle(el).color);
   expect(headingColor).toBe("rgb(255, 86, 48)");
 
+  // `.vp-doc th` sets its own colour, so a table header only follows the wrapper
+  // through the `:where()` reset; headings inherit it either way.
+  const headerCellColor = await addBlock
+    .locator("th")
+    .first()
+    .evaluate((el) => getComputedStyle(el).color);
+  expect(headerCellColor).toBe("rgb(255, 86, 48)");
+
   const ticketLink = addBlock.locator("a").first();
   await expect(ticketLink).toHaveAttribute(
     "href",

@@ -99,6 +99,12 @@ describe("toBeTags block rule", () => {
     expect(html).toContain('<div class="tf-tobe tf-tobe-add">');
     expect(html).toMatch(/<h2[^>]*>/);
   });
+
+  test("a ticket cannot break out of the href attribute either", async () => {
+    const html = await render('::: add x"onmouseover="alert(1)\ntext\n:::\n');
+    expect(html).toContain(`href="${JIRA}/x%22onmouseover%3D%22alert(1)"`);
+    expect(html).not.toMatch(/<a [^>]*onmouseover=/);
+  });
 });
 
 describe("toBeTags pairing and tokenisation", () => {
@@ -125,6 +131,19 @@ describe("toBeTags pairing and tokenisation", () => {
       expect(html).toContain('class="tf-tobe tf-tobe-add"');
       expect(html).toContain(`href="${JIRA}/${ticket}"`);
     }
+  });
+
+  test("a ticket cannot break out of the href attribute", async () => {
+    const html = await render('{ADD x"onmouseover="alert(1)}text{/ADD}\n');
+    expect(html).toContain(`href="${JIRA}/x%22onmouseover%3D%22alert(1)"`);
+    expect(html).not.toMatch(/<a [^>]*onmouseover=/);
+    expect(html).toContain("x&quot;onmouseover=&quot;alert(1)</a>");
+  });
+
+  test("a ticket with markup characters is escaped in the label", async () => {
+    const html = await render("{ADD A&B<c>}text{/ADD}\n");
+    expect(html).toContain(`href="${JIRA}/A%26B%3Cc%3E"`);
+    expect(html).toContain("A&amp;B&lt;c&gt;</a>");
   });
 
   test("a multi-word ticket is not a marker", async () => {
