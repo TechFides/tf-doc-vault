@@ -1,4 +1,4 @@
-import { test } from "./fixtures";
+import { test, PORTS } from "./fixtures";
 
 // The host repo owns the node_modules, so preview runs from there.
 test("vitepress preview serves tech-docs cleanly", async ({
@@ -15,12 +15,12 @@ test("vitepress preview serves tech-docs cleanly", async ({
       "preview",
       "tech-docs/docs",
       "--port",
-      "4173",
+      String(PORTS.techDocsPreview),
       "--host",
       "127.0.0.1",
     ],
     cwd: sandboxes.techDocsHostDir,
-    readyUrl: "http://127.0.0.1:4173/tech-docs/",
+    readyUrl: `http://127.0.0.1:${PORTS.techDocsPreview}/tech-docs/`,
   });
 
   await page.goto(server.url);

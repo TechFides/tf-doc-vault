@@ -1,12 +1,12 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { test, expect } from "./fixtures";
+import { test, expect, PORTS } from "./fixtures";
 
 const REPO_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../..",
 );
-const PORT = 5176;
+const PORT = PORTS.playgroundSidebarMarkers;
 
 const FOLDER_CLASS = ".text.default-emoji-folder";
 const FILE_CLASS = ".text.default-emoji-file";
