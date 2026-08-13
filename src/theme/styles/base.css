@@ -78,19 +78,14 @@
 
 .VPDocAsideOutline .outline-link:hover,
 .VPDocAsideOutline .outline-link.active {
-  color: var(--vp-c-brand-1);
-}
-
-.dark .VPDocAsideOutline .outline-link:hover,
-.dark .VPDocAsideOutline .outline-link.active {
-  color: var(--tf-color-accent-2);
+  color: var(--tf-color-link);
 }
 
 /* --vp-sidebar-bg-color is translucent, so the blur is required: without it the stars
    behind the sidebar sit hard in the labels. */
 .VPSidebar {
   border-right: 1px solid var(--vp-c-border);
-  backdrop-filter: blur(var(--tf-blur-panel)) saturate(var(--tf-glass-saturate));
+  backdrop-filter: var(--tf-glass-filter);
   /* Marker geometry, consumed by the entry-marker rules further down. The inset is air
      between the row's left edge, where the active row draws its rail, and the marker
      column: an emoji nearly fills the slot, so without it the two touch. */
@@ -153,7 +148,7 @@ body,
 .VPLocalSearchBox .shell {
   border: 1px solid var(--tf-color-line) !important;
   border-radius: var(--tf-radius-xl) !important;
-  backdrop-filter: blur(var(--tf-blur-panel)) saturate(var(--tf-glass-saturate));
+  backdrop-filter: var(--tf-glass-filter);
   box-shadow: var(--tf-shadow-3) !important;
   overflow: hidden;
 }
@@ -406,7 +401,7 @@ body,
 .VPDoc .content-container {
   position: relative;
   background-color: var(--tf-color-panel-glass);
-  backdrop-filter: blur(var(--tf-blur-panel)) saturate(var(--tf-glass-saturate));
+  backdrop-filter: var(--tf-glass-filter);
   border: 1px solid var(--tf-color-line-2);
   border-radius: var(--tf-radius-xl);
   box-shadow: var(--tf-shadow-1);
@@ -416,7 +411,7 @@ body,
   /* The measure is enforced here, not per paragraph, or headings and tables would run
      past a band of empty panel. At the default layout the column is narrower than this
      cap, so it binds only on very wide screens and in layout-wide. */
-  max-width: calc(var(--tf-measure) + 2 * var(--tf-spacing-8));
+  max-width: var(--tf-panel-max);
 }
 
 /* Below the sidebar breakpoint the panel would waste the little width there is,
@@ -463,22 +458,16 @@ body,
 /* VPDoc.vue is <style scoped> (specificity 0,4,0), so its own max-width needs an
    !important to beat, which in turn means the panel width has to be restated
    here rather than left to the .content-container rule above. */
-.VPDoc.has-aside .content-container {
-  max-width: calc(var(--tf-measure) + 2 * var(--tf-spacing-8)) !important;
-}
-
+.VPDoc.has-aside .content-container,
 .VPDoc:not(.has-sidebar) .content {
-  max-width: calc(var(--tf-measure) + 2 * var(--tf-spacing-8)) !important;
+  max-width: var(--tf-panel-max) !important;
 }
 
 html.layout-wide {
   --vp-layout-max-width: var(--layout-max-width-wide);
 }
 
-html.layout-wide .VPDoc .content-container {
-  max-width: 1152px !important;
-}
-
+html.layout-wide .VPDoc .content-container,
 html.layout-wide .VPDoc .content {
   max-width: 1152px !important;
 }
@@ -667,7 +656,7 @@ html.layout-max .VPContent {
 
 .vp-doc thead th[aria-sort]::after {
   opacity: 1;
-  color: var(--vp-c-brand-1);
+  color: var(--tf-color-link);
 }
 
 .vp-doc thead th[aria-sort="ascending"]::after {
@@ -676,10 +665,6 @@ html.layout-max .VPContent {
 
 .vp-doc thead th[aria-sort="descending"]::after {
   content: "↓";
-}
-
-.dark .vp-doc thead th[aria-sort]::after {
-  color: var(--tf-color-accent-2);
 }
 
 /* Table wrapper injected by the tableWrapper rule in config/tableWrapper.ts.
@@ -1171,25 +1156,13 @@ html.layout-max .VPContent {
 }
 
 .VPSidebarItem.is-active > .item .text.default-emoji-folder::before {
-  background-image: linear-gradient(var(--vp-c-brand-1) 0 0);
+  background-image: linear-gradient(var(--tf-color-link) 0 0);
 }
 
 .VPSidebarItem.is-active > .item .text.default-emoji-file::before {
   background-image: radial-gradient(
     circle closest-side,
-    var(--vp-c-brand-1) 100%,
-    transparent
-  );
-}
-
-.dark .VPSidebarItem.is-active > .item .text.default-emoji-folder::before {
-  background-image: linear-gradient(var(--tf-color-accent-2) 0 0);
-}
-
-.dark .VPSidebarItem.is-active > .item .text.default-emoji-file::before {
-  background-image: radial-gradient(
-    circle closest-side,
-    var(--tf-color-accent-2) 100%,
+    var(--tf-color-link) 100%,
     transparent
   );
 }
@@ -1244,23 +1217,25 @@ html.layout-max .VPContent {
   font-weight: 600;
 }
 
-.dark .VPSidebarItem.is-active > .item .link .text {
-  color: var(--tf-color-accent-2) !important;
-}
-
-/* Mermaid is themed here off the --brand-* tokens, so overriding a token
-   recolors diagrams in both modes. Dark mode needs the extra `.dark` prefix to
-   win: vitepress-plugin-mermaid hard-forces theme="dark" on <html>.dark and
-   ignores anything passed through config. */
+/* Mermaid is themed off the --brand-* tokens, so overriding a token recolors diagrams in
+   both modes. The six values a diagram differs by between modes come from --tf-mermaid-*,
+   which is why this block has no dark counterpart. */
 .mermaid .node rect,
 .mermaid .node polygon,
 .mermaid .node circle,
 .mermaid .node ellipse,
 .mermaid .node path,
 .mermaid .cluster rect {
-  fill: var(--brand-surface) !important;
+  fill: var(--tf-mermaid-surface) !important;
   stroke: var(--brand-primary) !important;
   stroke-width: 1px !important;
+}
+
+.mermaid .actor,
+.mermaid .classGroup rect,
+.mermaid .classGroup path {
+  fill: var(--tf-mermaid-surface) !important;
+  stroke: var(--brand-primary) !important;
 }
 
 /* SVG geometry attributes take plain numbers, so these cannot read the radius
@@ -1278,19 +1253,47 @@ html.layout-max .VPContent {
 .mermaid .node text,
 .mermaid .cluster .nodeLabel,
 .mermaid .cluster text {
-  color: var(--brand-text-default) !important;
-  fill: var(--brand-text-default) !important;
+  color: var(--tf-mermaid-ink) !important;
+  fill: var(--tf-mermaid-ink) !important;
+}
+
+.mermaid .classGroup .classTitle,
+.mermaid .classLabel .label,
+.mermaid .classGroup text,
+.mermaid g.classGroup text,
+.mermaid text.actor > tspan {
+  fill: var(--tf-mermaid-ink) !important;
+}
+
+.mermaid .messageText,
+.mermaid .labelText,
+.mermaid .loopText,
+.mermaid .noteText {
+  fill: var(--tf-mermaid-ink) !important;
+  stroke: none !important;
 }
 
 .mermaid .nodeLabel p,
 .mermaid .edgeLabel p {
-  color: var(--brand-text-default) !important;
+  color: var(--tf-mermaid-ink) !important;
   background-color: transparent !important;
 }
 
 .mermaid span.edgeLabel {
-  background-color: var(--brand-bg-page) !important;
-  color: var(--brand-text-default) !important;
+  background-color: var(--tf-mermaid-label-bg) !important;
+  color: var(--tf-mermaid-ink) !important;
+}
+
+.mermaid .edgeLabel,
+.mermaid .edgeLabel rect {
+  background-color: var(--tf-mermaid-edge-bg) !important;
+  color: var(--tf-mermaid-ink) !important;
+  fill: var(--tf-mermaid-edge-bg) !important;
+}
+
+.mermaid .edgeLabel foreignObject div {
+  background-color: var(--tf-mermaid-edge-bg) !important;
+  color: var(--tf-mermaid-ink) !important;
 }
 
 .mermaid .edgePath .path,
@@ -1298,7 +1301,10 @@ html.layout-max .VPContent {
 .mermaid .messageLine0,
 .mermaid .messageLine1,
 .mermaid line,
-.mermaid .relation {
+.mermaid .relation,
+.mermaid .actor-line,
+.mermaid line.actor-line,
+.mermaid .classGroup line {
   stroke: var(--brand-text-muted) !important;
 }
 
@@ -1309,170 +1315,15 @@ html.layout-max .VPContent {
   stroke: var(--brand-text-muted) !important;
 }
 
-.mermaid .edgeLabel,
-.mermaid .edgeLabel rect {
-  background-color: var(--brand-bg-page) !important;
-  color: var(--brand-text-default) !important;
-  fill: var(--brand-bg-page) !important;
-}
-
-.mermaid .edgeLabel foreignObject div {
-  background-color: var(--brand-bg-page) !important;
-  color: var(--brand-text-default) !important;
-}
-
-.mermaid .actor {
-  fill: var(--brand-surface) !important;
-  stroke: var(--brand-primary) !important;
-}
-
-.mermaid text.actor > tspan {
-  fill: var(--brand-text-default) !important;
-}
-
-.mermaid .actor-line,
-.mermaid line.actor-line {
-  stroke: var(--brand-text-muted) !important;
-}
-
-.mermaid .messageText,
-.mermaid .labelText,
-.mermaid .loopText,
-.mermaid .noteText {
-  fill: var(--brand-text-default) !important;
-  stroke: none !important;
-}
-
 .mermaid .note {
-  fill: var(--brand-warning-bg) !important;
-  stroke: var(--brand-warning) !important;
+  fill: var(--tf-mermaid-note-bg) !important;
+  stroke: var(--tf-mermaid-note-line) !important;
 }
 
-.mermaid .classGroup rect,
-.mermaid .classGroup path {
-  fill: var(--brand-surface) !important;
-  stroke: var(--brand-primary) !important;
-}
-
-.mermaid .classGroup .classTitle,
-.mermaid .classLabel .label,
-.mermaid .classGroup text,
-.mermaid g.classGroup text {
-  fill: var(--brand-text-default) !important;
-}
-
-.mermaid .classGroup line {
-  stroke: var(--brand-text-muted) !important;
-}
-
+/* vitepress-plugin-mermaid forces theme="dark" on <html>.dark, and Mermaid's dark theme
+   paints a background onto the svg itself. */
 .dark .mermaid svg {
   background-color: transparent;
-}
-
-.dark .mermaid .node rect,
-.dark .mermaid .node polygon,
-.dark .mermaid .node circle,
-.dark .mermaid .node ellipse,
-.dark .mermaid .node path,
-.dark .mermaid .cluster rect {
-  fill: var(--vp-c-bg-soft) !important;
-  stroke: var(--brand-primary) !important;
-  stroke-width: 1px !important;
-}
-
-.dark .mermaid .node .label,
-.dark .mermaid .node .nodeLabel,
-.dark .mermaid .node text,
-.dark .mermaid .cluster .nodeLabel,
-.dark .mermaid .cluster text {
-  color: #ffffff !important;
-  fill: #ffffff !important;
-}
-
-.dark .mermaid .nodeLabel p,
-.dark .mermaid .edgeLabel p {
-  color: #ffffff !important;
-  background-color: transparent !important;
-}
-
-.dark .mermaid span.edgeLabel {
-  background-color: transparent !important;
-  color: #ffffff !important;
-}
-
-.dark .mermaid .edgePath .path,
-.dark .mermaid .flowchart-link,
-.dark .mermaid .messageLine0,
-.dark .mermaid .messageLine1,
-.dark .mermaid line,
-.dark .mermaid .relation {
-  stroke: var(--brand-text-muted) !important;
-}
-
-.dark .mermaid .arrowheadPath,
-.dark .mermaid .marker,
-.dark .mermaid #arrowhead path {
-  fill: var(--brand-text-muted) !important;
-  stroke: var(--brand-text-muted) !important;
-}
-
-.dark .mermaid .edgeLabel,
-.dark .mermaid .edgeLabel rect {
-  background-color: var(--vp-c-bg-soft) !important;
-  color: #ffffff !important;
-  fill: var(--vp-c-bg-soft) !important;
-}
-
-.dark .mermaid .edgeLabel foreignObject div {
-  background-color: var(--vp-c-bg-soft) !important;
-  color: #ffffff !important;
-}
-
-.dark .mermaid .actor {
-  fill: var(--vp-c-bg-soft) !important;
-  stroke: var(--brand-primary) !important;
-}
-
-.dark .mermaid text.actor > tspan {
-  fill: #ffffff !important;
-}
-
-.dark .mermaid .actor-line,
-.dark .mermaid line.actor-line {
-  stroke: var(--brand-text-muted) !important;
-}
-
-.dark .mermaid .messageText,
-.dark .mermaid .labelText,
-.dark .mermaid .loopText,
-.dark .mermaid .noteText {
-  fill: #ffffff !important;
-  stroke: none !important;
-}
-
-.dark .mermaid .note {
-  fill: var(--vp-c-bg-mute) !important;
-  stroke: var(--brand-secondary) !important;
-}
-
-.dark .mermaid .classGroup rect,
-.dark .mermaid .classGroup path {
-  fill: var(--vp-c-bg-soft) !important;
-  stroke: var(--brand-primary) !important;
-}
-
-.dark .mermaid .classGroup .classTitle,
-.dark .mermaid .classLabel .label {
-  fill: #ffffff !important;
-}
-
-.dark .mermaid .classGroup text,
-.dark .mermaid g.classGroup text {
-  fill: #ffffff !important;
-}
-
-.dark .mermaid .classGroup line {
-  stroke: var(--brand-text-muted) !important;
 }
 
 /* The transition names `fill` and `stroke` because those are the SVG attributes Mermaid
@@ -1559,27 +1410,15 @@ html.layout-max .VPContent {
 }
 
 .vp-doc a {
-  color: var(--brand-primary);
+  color: var(--tf-color-link);
   text-decoration: none;
 }
 
 .vp-doc a:hover {
-  color: var(--brand-primary-hover);
+  color: var(--tf-color-link-hover);
   text-decoration: underline;
 }
 
 .vp-doc a:active {
-  color: var(--brand-primary-active);
-}
-
-.dark .vp-doc a {
-  color: var(--tf-color-accent-2);
-}
-
-.dark .vp-doc a:hover {
-  color: color-mix(in oklab, var(--tf-color-accent-2) 78%, white);
-}
-
-.dark .vp-doc a:active {
-  color: var(--tf-color-accent);
+  color: var(--tf-color-link-active);
 }

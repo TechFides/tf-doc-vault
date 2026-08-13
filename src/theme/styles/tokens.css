@@ -44,6 +44,13 @@
     var(--brand-navy)
   );
 
+  /* The accent used as a link, which dark mode takes two steps lighter. Every place that
+     reads as a link takes these, so the mode difference is declared once here instead of
+     as a `.dark` override beside each rule. */
+  --tf-color-link: var(--tf-color-accent);
+  --tf-color-link-hover: var(--brand-primary-hover);
+  --tf-color-link-active: var(--brand-primary-active);
+
   --tf-color-bg: #f7f9fc;
   --tf-color-surface-1: #eef2f8;
   --tf-color-panel: #ffffff;
@@ -140,6 +147,9 @@
 
   /* Prose only. Tables, code blocks and diagrams break out to the container. */
   --tf-measure: 72ch;
+  /* The reading panel is the measure plus the padding it sits in, so the text inside it
+     is exactly one measure wide whichever selector ends up setting the width. */
+  --tf-panel-max: calc(var(--tf-measure) + 2 * var(--tf-spacing-8));
 
   --tf-icon-sm: 14px;
   --tf-icon-md: 16px;
@@ -200,6 +210,11 @@
 
   --tf-blur-panel: 18px;
   --tf-blur-overlay: 4px;
+  /* What frosts a surface lying on the backdrop. The saturate is half of it: blur alone
+     greys the nebula out, and pushing saturation back up is what keeps the colour behind
+     the glass. Every glass surface takes this, so the recipe is defined once. */
+  --tf-glass-filter: blur(var(--tf-blur-panel))
+    saturate(var(--tf-glass-saturate));
 
   /* Page backdrop. The star field is dark mode only: white specks on a near-white page
      read as dust. Raise --tf-stars-opacity in light mode to opt in. */
@@ -318,6 +333,16 @@
     transparent
   );
 
+  /* Mermaid renders to SVG and takes fills and strokes, not backgrounds, so it cannot use
+     the surface tokens directly. These are the six values its diagrams differ by between
+     the two modes; everything else it draws is mode-independent. */
+  --tf-mermaid-surface: var(--brand-surface);
+  --tf-mermaid-ink: var(--brand-text-default);
+  --tf-mermaid-label-bg: var(--brand-bg-page);
+  --tf-mermaid-edge-bg: var(--brand-bg-page);
+  --tf-mermaid-note-bg: var(--brand-warning-bg);
+  --tf-mermaid-note-line: var(--brand-warning);
+
   --vp-c-brand-1: var(--tf-color-accent);
   --vp-c-brand-2: var(--tf-color-accent-hi);
   --vp-c-brand-3: var(--brand-primary-active);
@@ -402,6 +427,23 @@
   --brand-primary-hover: var(--brand-secondary);
   /* Ink on a dark tint goes the other way: the lighter accent, not the darker one. */
   --tf-color-accent-ink: var(--tf-color-accent-2);
+
+  --tf-color-link: var(--tf-color-accent-2);
+  --tf-color-link-hover: color-mix(
+    in oklab,
+    var(--tf-color-accent-2) 78%,
+    white
+  );
+  --tf-color-link-active: var(--tf-color-accent);
+
+  --tf-mermaid-surface: var(--vp-c-bg-soft);
+  /* Pure white, not --tf-color-fg: a diagram's labels are small and sit on a lifted
+     surface, where the page's slightly cooled foreground goes muddy. */
+  --tf-mermaid-ink: #ffffff;
+  --tf-mermaid-label-bg: transparent;
+  --tf-mermaid-edge-bg: var(--vp-c-bg-soft);
+  --tf-mermaid-note-bg: var(--vp-c-bg-mute);
+  --tf-mermaid-note-line: var(--brand-secondary);
   /* Historically the dark navbar / sidebar navy, and still that hook: it is the
      only token the nav chrome reads, so overriding it recolours dark chrome. */
   --brand-nav-navy: #101219;

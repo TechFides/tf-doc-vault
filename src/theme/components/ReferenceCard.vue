@@ -90,7 +90,7 @@ const derivedInitials = computed(() => {
   border: 1px solid var(--tf-color-line);
   border-radius: var(--tf-radius-xl);
   background: var(--tf-color-panel-glass);
-  backdrop-filter: blur(var(--tf-blur-panel)) saturate(var(--tf-glass-saturate));
+  backdrop-filter: var(--tf-glass-filter);
   /* The hairline of light along the top edge that makes a glass panel read as glass rather than
      as a flat fill. */
   box-shadow:

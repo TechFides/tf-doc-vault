@@ -103,7 +103,7 @@ const features = computed<FeatureCard[]>(
   /* Glass, because a feature card sits directly on the backdrop rather than inside
      the reading panel and has to soften the stars behind it itself. */
   background: var(--tf-color-panel-glass);
-  backdrop-filter: blur(var(--tf-blur-panel)) saturate(var(--tf-glass-saturate));
+  backdrop-filter: var(--tf-glass-filter);
   box-shadow: var(--tf-shadow-1);
   text-decoration: none;
   color: inherit;

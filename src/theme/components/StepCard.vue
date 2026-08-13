@@ -14,7 +14,7 @@ defineProps<{
 <template>
   <aside class="step-card">
     <div class="step-card__bloom" aria-hidden="true" />
-    <p v-if="number" class="step-card__number">{{ number }}</p>
+    <p v-if="number" class="step-card__number tf-grad-text">{{ number }}</p>
     <div class="step-card__body">
       <!-- A paragraph, not a heading: a set of these would otherwise fill the page outline
            with entries that belong to the cards rather than to the document. -->
@@ -52,7 +52,7 @@ defineProps<{
   border: 1px solid var(--tf-color-line);
   border-radius: var(--tf-radius-xl);
   background: var(--tf-color-panel-glass);
-  backdrop-filter: blur(var(--tf-blur-panel)) saturate(var(--tf-glass-saturate));
+  backdrop-filter: var(--tf-glass-filter);
   box-shadow: var(--tf-shadow-1);
 }
 
@@ -79,11 +79,9 @@ defineProps<{
   );
 }
 
-/*
- * Gradient-filled, which is what turns the index into the card's one graphic element. The clip
- * paints the whole block, so the gradient runs across both digits rather than restarting.
- * min-width in ch keeps a single-digit card on the same axis as its two-digit neighbours.
- */
+/* The gradient fill (tf-grad-text) is what turns the index into the card's one graphic
+   element. min-width in ch keeps a single-digit card on the same axis as its two-digit
+   neighbours. */
 .step-card__number {
   position: relative;
   flex: none;
@@ -95,19 +93,6 @@ defineProps<{
   line-height: 1;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
-  background: var(--tf-grad-accent-h);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Without clip-to-text support a transparent fill would erase the digits entirely. */
-@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
-  .step-card__number {
-    color: var(--tf-color-accent);
-    -webkit-text-fill-color: var(--tf-color-accent);
-  }
 }
 
 .step-card__body {

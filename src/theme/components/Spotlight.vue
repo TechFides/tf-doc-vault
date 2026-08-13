@@ -55,7 +55,7 @@ withDefaults(
   border: 1px solid var(--tf-color-line);
   border-radius: var(--tf-radius-xl);
   background: var(--tf-color-panel-glass);
-  backdrop-filter: blur(var(--tf-blur-panel)) saturate(var(--tf-glass-saturate));
+  backdrop-filter: var(--tf-glass-filter);
   box-shadow: var(--tf-shadow-2);
   text-align: center;
 }

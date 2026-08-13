@@ -13,12 +13,8 @@
   font-weight: 500;
   letter-spacing: var(--tf-tracking-eyebrow);
   text-transform: uppercase;
-  color: var(--vp-c-brand-1);
+  color: var(--tf-color-link);
   margin-bottom: var(--tf-spacing-3);
-}
-
-.dark .tf-eyebrow {
-  color: var(--tf-color-accent-2);
 }
 
 .tf-lead {
@@ -63,7 +59,7 @@
   border-radius: var(--tf-radius-xl);
   background: var(--tf-color-panel);
   box-shadow: var(--tf-shadow-1);
-  backdrop-filter: blur(var(--tf-blur-panel)) saturate(var(--tf-glass-saturate));
+  backdrop-filter: var(--tf-glass-filter);
   transition: var(--tf-t-base);
 }
 

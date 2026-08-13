@@ -18,7 +18,7 @@ const homeLink = computed(
   <div class="not-found">
     <div class="not-found__inner">
       <LogoSymbol class="not-found__mark" />
-      <p class="not-found__code">{{ t("notFound.code") }}</p>
+      <p class="not-found__code tf-grad-text">{{ t("notFound.code") }}</p>
       <h1 class="not-found__heading">{{ t("notFound.heading") }}</h1>
       <p class="not-found__message">{{ t("notFound.message") }}</p>
       <a class="not-found__link" :href="homeLink">
@@ -50,8 +50,9 @@ const homeLink = computed(
   color: var(--vp-c-brand-1);
 }
 
-/* The code takes the accent gradient and the sentence stays plain: one of the two
-   should carry the colour, and the number is the part a reader recognises first. */
+/* The code takes the accent gradient (tf-grad-text in patterns.css) and the sentence stays
+   plain: one of the two should carry the colour, and the number is the part a reader
+   recognises first. */
 .not-found__code {
   font-family: var(--tf-font-display);
   font-size: var(--tf-text-h1);
@@ -59,19 +60,7 @@ const homeLink = computed(
   line-height: 1;
   letter-spacing: var(--tf-tracking-h);
   font-variant-numeric: tabular-nums;
-  background: var(--tf-grad-accent-h);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
   margin: 0 0 var(--tf-spacing-2);
-}
-
-@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
-  .not-found__code {
-    color: var(--vp-c-brand-1);
-    -webkit-text-fill-color: var(--vp-c-brand-1);
-  }
 }
 
 .not-found__heading {
