@@ -107,10 +107,6 @@ them in `docs/.vitepress/theme/custom.css`.
 | `--brand-tobe-add`       | `#ff5630`   | TO-BE tags: content marked for addition              |
 | `--brand-tobe-del`       | `#97a0af`   | TO-BE tags: content marked for removal, struck       |
 
-The two `--brand-tobe-*` tokens keep the same value in light and dark mode,
-because analysts learned those colours from the hand-written `<span>` convention
-the `toBeTags` option replaced. Override them if a project wants different ones.
-
 `DocMeta` status badges read `--brand-badge-{published,draft,review,archived}-{bg,text,border}`
 (separate light/dark values in `base.css`); override those to recolor the
 status pills.
