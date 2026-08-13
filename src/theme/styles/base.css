@@ -859,7 +859,7 @@ html.layout-max .VPContent {
   margin-right: var(--tf-spacing-2);
   vertical-align: -0.18em;
   border: 1px solid var(--tf-color-line-hi);
-  border-radius: var(--tf-radius-xs);
+  border-radius: var(--tf-radius-check);
   background: var(--tf-color-panel-2);
   cursor: pointer;
   transition: var(--tf-t-base);

@@ -170,6 +170,10 @@
   --tf-spacing-xl: 72px;
   --tf-spacing-2xl: 100px;
 
+  /* Tighter than --tf-radius-xs, for the boxes that read as checkboxes: at 6px a 16px box
+     starts to look like a pill, and the check inside it wants a corner to sit in. Separate from
+     the shared small radius, which inline code, kbd, mark and the colour swatch also use. */
+  --tf-radius-check: 3px;
   --tf-radius-xs: 6px;
   --tf-radius-sm: 8px;
   --tf-radius-lg: 12px;

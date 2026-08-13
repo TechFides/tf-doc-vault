@@ -133,6 +133,8 @@ const derivedInitials = computed(() => {
 }
 
 .reference-card__points {
+  /* tf-checks carries block margins for use in a page; here the card's gap places it. */
+  margin-block: 0;
   font-size: var(--tf-text-body-sm);
   line-height: var(--tf-leading-body);
 }

@@ -164,6 +164,13 @@
  * it, and an author can reach for it directly. The check is masked from --tf-check-mask, the
  * same shape the theme's own checked box draws, so the two never drift apart.
  */
+/* Its own block spacing, like every other block-level pattern class: placed in a page the
+   wrapper sits between paragraphs, and without this the sentence after it touches the last
+   check. A component that positions it can zero this out. */
+.tf-checks {
+  margin-block: var(--tf-spacing-5);
+}
+
 .tf-checks ul {
   margin: 0;
   padding: 0;
@@ -193,7 +200,7 @@
 }
 
 .tf-checks li::before {
-  border-radius: var(--tf-radius-xs);
+  border-radius: var(--tf-radius-check);
   background: color-mix(
     in oklab,
     var(--tf-color-accent) var(--tf-tint),
