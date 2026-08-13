@@ -444,7 +444,9 @@
      barely registers against #0e0f14. */
   --tf-nebula-opacity: 1;
   --tf-stars-opacity: 1;
-  --tf-hero-bloom-opacity: 1;
+  /* Held below the page nebula: at full strength the bloom lit the hero's right half far
+     brighter than its left and flattened the star field inside it. */
+  --tf-hero-bloom-opacity: 0.6;
   --tf-hero-stars-opacity: 1;
   --tf-nebula-1: color-mix(in oklab, var(--tf-color-accent) 46%, transparent);
   /* Cloud 2 lands on the outline column, which has no panel of its own. At 34% it took the
