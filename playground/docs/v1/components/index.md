@@ -11,13 +11,13 @@ what is already working for you. The handful you do place yourself are in the fi
 
 Registered globally by `createTheme()`, so Markdown can use them with no import.
 
-| Component      | What it is                                                              | Page                                |
-| -------------- | ----------------------------------------------------------------------- | ----------------------------------- |
-| `BrandHero`    | Landing banner. Renders only on a page with a `hero` frontmatter block. | [BrandHero](./006-brand-hero)       |
-| `FeatureCards` | The row of cards on a landing page, driven by `features` frontmatter.   | [FeatureCards](./009-feature-cards) |
-| `Spotlight`    | A centred panel that sends the reader out of the document to one thing. | [Spotlight](./007-spotlight)        |
-| `AuthorCard`   | Who stands behind the document: name, role, and the record behind them. | [AuthorCard](./008-author-card)     |
-| `PrintLayout`  | Print header carrying the site title, for the PDF export.               | —                                   |
+| Component      | What it is                                                               | Page                                |
+| -------------- | ------------------------------------------------------------------------ | ----------------------------------- |
+| `BrandHero`    | Landing banner. Renders only on a page with a `hero` frontmatter block.  | [BrandHero](./006-brand-hero)       |
+| `FeatureCards` | The row of cards on a landing page, driven by `features` frontmatter.    | [FeatureCards](./009-feature-cards) |
+| `Spotlight`    | A centred panel that sends the reader out of the document to one thing.  | [Spotlight](./007-spotlight)        |
+| `AuthorCard`   | Who stands behind the document: name, role, and the record behind them.  | [AuthorCard](./008-author-card)     |
+| `PrintLayout`  | The layout the print and PDF export renders into, chosen by frontmatter. | [PrintLayout](./010-print-layout)   |
 
 ## The theme mounts these
 
@@ -25,14 +25,14 @@ Nothing to write. They arrive with `createTheme()` and hang off VitePress' layou
 
 | Component             | What it does                                                                            | Page                                  |
 | --------------------- | --------------------------------------------------------------------------------------- | ------------------------------------- |
-| `PageBackdrop`        | The nebula and star field behind the site. Off with `createTheme({ backdrop: false })`. | —                                     |
+| `PageBackdrop`        | The nebula and star field behind the site. Off with `createTheme({ backdrop: false })`. | [PageBackdrop](./011-page-backdrop)   |
 | `DocMeta`             | Status badge, updated date and author line above the title.                             | [DocMeta](./001-doc-meta)             |
-| `DocPageTitle`        | The page title, unless the page has a `hero` or sets `hideTitle`.                       | —                                     |
+| `DocPageTitle`        | The page title, unless the page has a `hero` or sets `hideTitle`.                       | [DocPageTitle](./012-doc-page-title)  |
 | `ImageLightbox`       | Click an image in the content to open it full size.                                     | [ImageLightbox](./002-image-lightbox) |
 | `TableEnhancer`       | Sortable columns, column type detection, unbreakable single-token columns.              | [Tables](../tokens/007-tables)        |
 | `SidebarDefaultEmoji` | Aligns sidebar labels by hoisting a leading emoji into the marker slot.                 | [Emoji](../tokens/008-emoji)          |
-| `BrandFooter`         | The footer, only when `branding.footer` is configured.                                  | —                                     |
-| `NotFound`            | The 404 page.                                                                           | —                                     |
+| `BrandFooter`         | The footer, only when `branding.footer` is configured.                                  | [BrandFooter](./013-brand-footer)     |
+| `NotFound`            | The 404 page.                                                                           | [NotFound](./014-not-found)           |
 
 ## You opt into this one
 
@@ -42,10 +42,13 @@ Nothing to write. They arrive with `createTheme()` and hang off VitePress' layou
 
 ## Shipped but not wired
 
-`VersionSwitcher` is in the package and complete: it reads `site.locales` and needs no
-props. Nothing imports or registers it, though, so no site renders it today. `knip.json`
-silences the unused-file warning for exactly this reason. Either wire it into the navbar the
-way `WidthToggle` is wired, or drop it. Until then, treat it as unavailable.
+| Component         | State                                                                | Page                                      |
+| ----------------- | -------------------------------------------------------------------- | ----------------------------------------- |
+| `VersionSwitcher` | Complete, registered nowhere, and not reachable through the exports. | [VersionSwitcher](./015-version-switcher) |
+
+`makeConfig()` already puts a version dropdown in the navbar for a multi-version site, so
+this is a second implementation of a solved problem. Nothing is being deleted, though; its
+page has the detail and what wiring it would take.
 
 ## Not components
 
