@@ -38,7 +38,7 @@ Nothing to write. They arrive with `createTheme()` and hang off VitePress' layou
 | `PageBackdrop`        | The nebula and star field behind the site. Off with `createTheme({ backdrop: false })`. | [PageBackdrop](./011-page-backdrop)   |
 | `DocMeta`             | Status badge, updated date and author line above the title.                             | [DocMeta](./001-doc-meta)             |
 | `DocPageTitle`        | The page title, unless the page has a `hero` or sets `hideTitle`.                       | [DocPageTitle](./012-doc-page-title)  |
-| `ImageLightbox`       | Click an image in the content to open it full size.                                     | [ImageLightbox](./002-image-lightbox) |
+| `ImageLightbox`       | Click an image or diagram to open it full screen, then wheel or pinch to zoom into it.  | [ImageLightbox](./002-image-lightbox) |
 | `TableEnhancer`       | Sortable columns, column type detection, unbreakable single-token columns.              | [Tables](../tokens/007-tables)        |
 | `SidebarDefaultEmoji` | Aligns sidebar labels by hoisting a leading emoji into the marker slot.                 | [Emoji](../tokens/008-emoji)          |
 | `BrandFooter`         | The footer, only when `branding.footer` is configured.                                  | [BrandFooter](./013-brand-footer)     |
