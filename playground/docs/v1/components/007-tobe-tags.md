@@ -10,8 +10,8 @@ enabled by the `toBeTags` option on `makeConfig`). `ADD` marks content that will
 appear, `DEL` content that will be removed. The ticket number links to the issue
 tracker.
 
-The playground registers the pattern `[A-Z]{2,}-\d+`; the default is
-`FF[VP]-\d+`.
+The ticket is taken verbatim, so any tracker's format works. It has to be one
+whitespace-free token, which is what marks the end of the marker.
 
 ## Inline form
 

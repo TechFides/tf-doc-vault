@@ -112,37 +112,6 @@ export default makeConfig({
 });
 ```
 
-### TO-BE tags
-
-Functional specifications often describe changes that are planned but not yet
-deployed. Set `toBeTags` and the analyst marks those passages in Markdown instead
-of hand-writing coloured `<span>` elements:
-
-```ts
-toBeTags: {
-  jiraBaseUrl: "https://acme.atlassian.net/browse",
-  ticketPattern: "FF[VP]-\\d+", // the default; any tracker key works
-}
-```
-
-`ADD` renders the passage in `--brand-tobe-add`, `DEL` in `--brand-tobe-del` and
-struck through. Both link the ticket number.
-
-```markdown
-Inline, including mid-sentence: {ADD FFV-9693}newly added wording{/ADD}.
-
-::: add FFV-9693
-Block form, for anything spanning more than one paragraph. Headings, lists and
-tables inside keep working, so a whole new page can sit in one tag.
-:::
-```
-
-A marker is recognised only when the ticket matches `ticketPattern`, so ordinary
-braces (JSON, template placeholders) are never touched. A ticket that looks
-misspelled logs a build warning and renders as plain text. An inline tag must open
-and close within one paragraph; unpaired markers render literally rather than
-colouring the rest of the page. Omit the option and no rules are registered.
-
 `docs/.vitepress/theme/index.ts`
 
 ```ts

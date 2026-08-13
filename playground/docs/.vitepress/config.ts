@@ -30,11 +30,8 @@ export default makeConfig({
       email: "info@techfides.cz",
     },
   },
-  // A generic ticket pattern rather than the FF[VP]- default, so the demo is not
-  // tied to one client's project keys.
   toBeTags: {
     jiraBaseUrl: "https://example.atlassian.net/browse",
-    ticketPattern: "[A-Z]{2,}-\\d+",
   },
   override: {
     base: "/",

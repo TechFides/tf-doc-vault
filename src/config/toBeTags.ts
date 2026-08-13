@@ -19,15 +19,10 @@ type Token = Parameters<RenderRule>[0][number];
 export interface ToBeTags {
   /**
    * Base URL a ticket number is appended to, including the browse path, e.g.
-   * `https://acme.atlassian.net/browse`. Any issue tracker works.
+   * `https://acme.atlassian.net/browse`. Any issue tracker works; the ticket is
+   * taken verbatim and never validated against a project key.
    */
   jiraBaseUrl: string;
-  /**
-   * Source pattern (a string, not a RegExp, so it survives config
-   * serialisation) matching a ticket number. Defaults to `FF[VP]-\d+`.
-   * Anchoring and grouping are added internally.
-   */
-  ticketPattern?: string;
 }
 
 type Kind = "add" | "del";
@@ -45,25 +40,24 @@ interface CloseMeta {
   unmatched?: boolean;
 }
 
-interface Resolved {
-  jiraBaseUrl: string;
-  pattern: string;
-  /** Inline opener, e.g. `{ADD FFV-1}`. */
-  open: RegExp;
-  /** Container info string per kind, e.g. `add FFV-1`. */
-  info: Record<Kind, RegExp>;
-}
-
-const DEFAULT_TICKET_PATTERN = "FF[VP]-\\d+";
 const OPEN_TOKEN = "tobe_open";
 const CLOSE_TOKEN = "tobe_close";
 const KINDS: readonly Kind[] = ["add", "del"];
 const CURLY = 0x7b;
 
-// A marker shaped like ours but carrying a ticket the pattern rejects. Used only
-// to warn: a typo'd ticket would otherwise render as silent literal text.
-const LOOSE_OPEN = /^\{(ADD|DEL)\s+([^}]*)\}/;
+/*
+ * The ticket is one whitespace-free token. That is tokenisation, not validation:
+ * something has to decide where the ticket ends. It also keeps prose such as
+ * `{ADD a note here}` from being read as a marker. Ordinary braces never reach
+ * these patterns anyway, because the ADD / DEL keyword gates them.
+ */
+const OPEN = /^\{(ADD|DEL)\s+([^}\s]+)\}/;
 const CLOSE = /^\{\/(ADD|DEL)\}/;
+// The \s+ stops `::: added` from matching the `add` container.
+const INFO: Record<Kind, RegExp> = {
+  add: /^add\s+([^}\s]+)\s*$/,
+  del: /^del\s+([^}\s]+)\s*$/,
+};
 
 /**
  * Live options per renderer. The rules read from here instead of closing over
@@ -71,20 +65,7 @@ const CLOSE = /^\{\/(ADD|DEL)\}/;
  * HMR, and VitePress hands out one cached renderer per process) updates the
  * options without installing a second copy of every rule.
  */
-const configs = new WeakMap<MarkdownRenderer, Resolved>();
-
-function resolve(options: ToBeTags): Resolved {
-  const pattern = options.ticketPattern ?? DEFAULT_TICKET_PATTERN;
-  const info = (kind: Kind): RegExp =>
-    // The \s+ stops `::: added` from matching the `add` container.
-    new RegExp(`^${kind}\\s+(${pattern})\\s*$`);
-  return {
-    jiraBaseUrl: options.jiraBaseUrl,
-    pattern,
-    open: new RegExp(`^\\{(ADD|DEL)\\s+(${pattern})\\}`),
-    info: { add: info("add"), del: info("del") },
-  };
-}
+const configs = new WeakMap<MarkdownRenderer, ToBeTags>();
 
 function ticketUrl(base: string, ticket: string): string {
   return `${base.replace(/\/+$/, "")}/${ticket}`;
@@ -103,15 +84,6 @@ function closeMarker(kind: Kind): string {
   return `<strong class="tf-tobe-marker">{/${kind.toUpperCase()}}</strong>`;
 }
 
-/** VitePress puts the page path here; absent when markdown-it is driven directly. */
-function sourcePath(env: unknown): string {
-  if (env && typeof env === "object" && "relativePath" in env) {
-    const value = (env as { relativePath?: unknown }).relativePath;
-    if (typeof value === "string") return value;
-  }
-  return "unknown file";
-}
-
 /**
  * Both markers are pushed with nesting 0 and emit their own `<span>` tags as
  * text. Real nesting (1/-1) would be more idiomatic but makes markdown-it
@@ -122,12 +94,10 @@ function sourcePath(env: unknown): string {
  */
 function registerInline(md: MarkdownRenderer): void {
   md.inline.ruler.before("link", "tobe-tag", (state, silent) => {
-    const config = configs.get(md);
-    if (!config) return false;
     if (state.src.charCodeAt(state.pos) !== CURLY) return false;
     const rest = state.src.slice(state.pos, state.posMax);
 
-    const opening = config.open.exec(rest);
+    const opening = OPEN.exec(rest);
     if (opening) {
       if (!silent) {
         const token = state.push(OPEN_TOKEN, "span", 0);
@@ -154,14 +124,6 @@ function registerInline(md: MarkdownRenderer): void {
       return true;
     }
 
-    const loose = LOOSE_OPEN.exec(rest);
-    if (loose && !silent) {
-      console.warn(
-        `[tf-doc-vault] ${sourcePath(state.env)}: "${loose[0]}" looks like a ` +
-          `TO-BE tag but the ticket does not match /${config.pattern}/, so it ` +
-          `renders as plain text.`,
-      );
-    }
     return false;
   });
 }
@@ -197,13 +159,15 @@ function registerPairing(md: MarkdownRenderer): void {
 
 function registerRenderers(md: MarkdownRenderer): void {
   md.renderer.rules[OPEN_TOKEN] = (tokens, idx): string => {
-    const config = configs.get(md);
     const meta = tokens[idx]?.meta as OpenMeta | undefined;
-    if (!config || !meta) return "";
-    if (meta.unmatched) return md.utils.escapeHtml(meta.literal);
+    if (!meta) return "";
+    const base = configs.get(md)?.jiraBaseUrl;
+    if (meta.unmatched || base === undefined) {
+      return md.utils.escapeHtml(meta.literal);
+    }
     return (
       `<span class="tf-tobe tf-tobe-${meta.kind}">` +
-      openMarker(meta.kind, meta.ticket, config.jiraBaseUrl)
+      openMarker(meta.kind, meta.ticket, base)
     );
   };
 
@@ -217,18 +181,17 @@ function registerRenderers(md: MarkdownRenderer): void {
 
 function registerContainer(md: MarkdownRenderer, kind: Kind): void {
   md.use(container, kind, {
-    validate: (params: string): boolean =>
-      configs.get(md)?.info[kind].test(params.trim()) ?? false,
+    validate: (params: string): boolean => INFO[kind].test(params.trim()),
     render: (tokens: Token[], idx: number): string => {
       const token = tokens[idx];
       if (token?.nesting !== 1) {
         return `<p class="tf-tobe-marker-line">${closeMarker(kind)}</p>\n</div>\n`;
       }
-      const config = configs.get(md);
-      const ticket = config?.info[kind].exec(token.info.trim())?.[1] ?? "";
+      const ticket = INFO[kind].exec(token.info.trim())?.[1] ?? "";
+      const base = configs.get(md)?.jiraBaseUrl ?? "";
       return (
         `<div class="tf-tobe tf-tobe-${kind}">\n<p class="tf-tobe-marker-line">` +
-        `${openMarker(kind, ticket, config?.jiraBaseUrl ?? "")}</p>\n`
+        `${openMarker(kind, ticket, base)}</p>\n`
       );
     },
   });
@@ -236,7 +199,7 @@ function registerContainer(md: MarkdownRenderer, kind: Kind): void {
 
 export function toBeTags(md: MarkdownRenderer, options: ToBeTags): void {
   const installed = configs.has(md);
-  configs.set(md, resolve(options));
+  configs.set(md, { jiraBaseUrl: options.jiraBaseUrl });
   if (installed) return;
 
   for (const kind of KINDS) registerContainer(md, kind);
