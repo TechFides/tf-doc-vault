@@ -201,8 +201,9 @@
      read as dust. Raise --tf-stars-opacity in light mode to opt in. */
   --tf-nebula-opacity: 1;
   --tf-stars-opacity: 0;
-  /* The hero turns the same material up, since no document sits on it. */
-  --tf-hero-bloom-opacity: 0.5;
+  /* Light clouds darken the glass they sit on rather than lighting it, so the hero's bloom
+     runs quieter here than the wash behind the page. */
+  --tf-hero-bloom-opacity: 0.38;
   --tf-hero-stars-opacity: 0;
   /* Cloud 2 is the pair that lands on the outline column, which has no panel of its own,
      so its muted links sit straight on the sky. That is what caps it this far below the
@@ -528,10 +529,9 @@
   }
 }
 
-/* Transform rather than background-position, to stay on the compositor. The layer is
-   oversized (see .tf-backdrop__nebula) so the travel never exposes its edges. */
-/* A different period from the page nebula, so the two never pulse together. */
-@keyframes tf-hero-bloom {
+/* Transform rather than background-position, to stay on the compositor. Shared by the hero
+   and the spotlight, each on its own period so no two blooms breathe in step. */
+@keyframes tf-bloom-drift {
   0% {
     transform: translate3d(0, 0, 0) scale(1);
   }

@@ -71,7 +71,7 @@ const eyebrow = computed(
       transparent 72%
     );
   opacity: var(--tf-hero-bloom-opacity);
-  animation: tf-hero-bloom 90s ease-in-out infinite;
+  animation: tf-bloom-drift 90s ease-in-out infinite;
   will-change: transform;
 }
 
