@@ -19,72 +19,72 @@ defineProps<{
 
 <style scoped>
 /*
- * One entry, carrying its own piece of the rail. The rail is a pseudo-element on the item and
- * the last item does not draw one, which is what makes the line stop at the final dot rather
- * than running on into the list's padding.
+ * One entry on the rail. The rail itself belongs to Timeline; an entry only marks its own point
+ * on it.
  */
 .timeline-item {
   position: relative;
-  padding-left: var(--tf-spacing-6);
-  padding-bottom: var(--tf-spacing-6);
+  padding-bottom: var(--tf-spacing-7);
 }
 
 .timeline-item:last-child {
   padding-bottom: 0;
 }
 
-/* The dot. Centred on the rail rather than beside it, and aligned with the cap height of the
-   head above the baseline, which is what the 0.42em offset buys. */
+/*
+ * A hollow ring, punched out of the rail. Its centre is the panel showing through rather than a
+ * fill, so the ring reads as a station on the line instead of a bead sitting on top of it.
+ */
 .timeline-item::before {
   content: "";
   position: absolute;
-  left: 0;
-  top: 0.42em;
-  width: var(--tf-size-2xs);
-  height: var(--tf-size-2xs);
+  left: calc(-1 * var(--tf-spacing-7) + 0.5px);
+  top: 0.34em;
+  width: var(--tf-size-xs);
+  height: var(--tf-size-xs);
+  box-sizing: border-box;
+  border: 1px solid color-mix(in oklab, var(--tf-color-accent) 55%, transparent);
   border-radius: var(--tf-radius-pill);
-  background: var(--tf-color-accent);
-  box-shadow: 0 0 0 3px
-    color-mix(in oklab, var(--tf-color-accent) var(--tf-tint), transparent);
+  background: var(--tf-color-bg);
 }
 
-.dark .timeline-item::before {
-  background: var(--tf-color-accent-2);
+/*
+ * The newest entry is the only filled point, with the accent glow the rest of the theme uses
+ * for a live thing. It is what makes "newest first" legible without a word saying so.
+ */
+.timeline-item:first-child::before {
+  border-color: transparent;
+  background: var(--tf-grad-accent);
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--tf-color-accent) 14%, transparent);
 }
 
-/* The rail. It starts below the dot and runs to the next entry's dot. */
-.timeline-item:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  left: calc(var(--tf-size-2xs) / 2 - 0.5px);
-  top: calc(0.42em + var(--tf-size-2xs) + var(--tf-spacing-2));
-  bottom: calc(-1 * var(--tf-spacing-2));
-  width: 1px;
-  /* The accent at low alpha rather than the neutral line colour: a hairline of --tf-color-line
-     is nearly invisible on a light panel, and tinting it ties the rail to the dots it joins. */
-  background: color-mix(in oklab, var(--tf-color-accent) 28%, transparent);
-}
-
-/* Date and title on one line: the labels differ in width, from a year to a range to a word,
-   and a fixed column for them would leave a ragged gutter or wrap the short ones. */
 .timeline-item__head {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--tf-spacing-2);
+  gap: var(--tf-spacing-3);
   margin: 0;
   font-family: var(--tf-font-display);
-  font-size: var(--tf-text-body-sm);
   line-height: var(--tf-leading-tight);
 }
 
+/*
+ * The date is the label of the entry, so it takes the uppercase treatment the theme gives every
+ * other label rather than being a second heading beside the title. Tabular figures keep a
+ * column of years from wobbling.
+ */
 .timeline-item__date {
+  font-size: var(--tf-text-caption-sm);
   font-weight: 600;
+  letter-spacing: var(--tf-tracking-label);
+  text-transform: uppercase;
   font-variant-numeric: tabular-nums;
   color: var(--tf-color-accent-ink);
 }
 
 .timeline-item__title {
+  font-size: var(--tf-text-body);
   font-weight: 600;
   color: var(--tf-color-fg);
 }

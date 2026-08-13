@@ -4,7 +4,7 @@ import { computed } from "vue";
 
 const props = withDefaults(
   defineProps<{
-    /** Client logo, resolved against the site base. Omit to drop the panel. */
+    /** Client logo, resolved against the site base. Omit to drop the row. */
     logo?: string;
     /** The client's name. Used as the logo's alternative text. */
     client?: string;
@@ -36,14 +36,14 @@ const derivedInitials = computed(() => {
 
 <template>
   <aside class="reference-card">
-    <div v-if="logo" class="reference-card__logo">
-      <img
-        :src="withBase(logo)"
-        :alt="client"
-        loading="lazy"
-        decoding="async"
-      />
-    </div>
+    <img
+      v-if="logo"
+      class="reference-card__logo"
+      :src="withBase(logo)"
+      :alt="client"
+      loading="lazy"
+      decoding="async"
+    />
     <p v-if="title" class="reference-card__title">{{ title }}</p>
     <!-- tf-checks is in patterns.css, shared with StepCard. -->
     <div class="reference-card__points tf-checks"><slot /></div>
@@ -74,13 +74,12 @@ const derivedInitials = computed(() => {
 
 <style scoped>
 /*
- * One delivered project: whose it was, what it was, what it involved, and who will vouch for
- * it. Built to sit in a grid of these, so it is a column rather than a band: the parts stack
- * and nothing depends on the card being wide.
+ * One delivered project. Built to sit in a grid of these, so it is a column rather than a band
+ * and nothing in it depends on the card being wide.
  *
- * gap rather than margins between the parts, because it guarantees the minimum spacing that
- * the footer's `margin-top: auto` would otherwise collapse to nothing on a card the grid is
- * not stretching.
+ * gap rather than margins between the parts, because it guarantees the minimum spacing that the
+ * footer's `margin-top: auto` would otherwise collapse to nothing on a card the grid is not
+ * stretching.
  */
 .reference-card {
   display: flex;
@@ -92,40 +91,35 @@ const derivedInitials = computed(() => {
   border-radius: var(--tf-radius-xl);
   background: var(--tf-color-panel-glass);
   backdrop-filter: blur(var(--tf-blur-panel)) saturate(var(--tf-glass-saturate));
-  box-shadow: var(--tf-shadow-1);
+  /* The hairline of light along the top edge that makes a glass panel read as glass rather than
+     as a flat fill. */
+  box-shadow:
+    var(--tf-shadow-1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 /*
- * Near-white in both modes, deliberately. A client's logo is drawn for their own background,
- * which is light far more often than not, and a dark panel turns a dark wordmark into a
- * silhouette. Own the panel rather than hoping every logo ships a light variant.
+ * Flattened to one ink colour rather than framed on a plate. A row of references is a logo wall,
+ * and a wall of full-colour marks reads as a ransom note; one colour makes it a set, and the
+ * card keeps its glass instead of carrying a white rectangle.
  *
- * Framed rather than bare: a plate of pure white with no edge reads as a hole punched in the
- * card, and the logo is the strongest thing a reference has. The hairline is warmer than the
- * card's own border so the plate stays a plate in dark mode instead of dissolving into glare.
+ * brightness(0) collapses the mark to black for light mode, and dark mode inverts that to
+ * white. Give it a logo with a transparent background: a baked-in white one flattens to a solid
+ * block.
  */
 .reference-card__logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 84px;
-  padding: var(--tf-spacing-5) var(--tf-spacing-6);
-  border: 1px solid rgba(9, 38, 70, 0.12);
-  border-radius: var(--tf-radius-lg);
-  background: linear-gradient(180deg, #fff, #f4f7fb);
-  box-shadow: inset 0 1px 0 #fff;
+  align-self: flex-start;
+  width: auto;
+  height: var(--tf-size-xl);
+  max-width: 100%;
+  object-fit: contain;
+  filter: brightness(0);
+  opacity: 0.72;
 }
 
-/*
- * A definite box plus object-fit, not `width: auto`. An SVG with a viewBox and no width or
- * height attributes has no intrinsic size until it loads, so `auto` measures 0x0, and a 0x0
- * image with loading="lazy" never intersects the viewport, never loads, and stays 0x0. Filling
- * the panel breaks that circle and object-fit keeps the logo's proportions.
- */
-.reference-card__logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+.dark .reference-card__logo {
+  filter: brightness(0) invert(1);
+  opacity: 0.82;
 }
 
 .reference-card__title {
@@ -172,12 +166,12 @@ const derivedInitials = computed(() => {
   width: var(--tf-size-xl);
   height: var(--tf-size-xl);
   border-radius: var(--tf-radius-pill);
+  box-shadow: 0 0 0 1px
+    color-mix(in oklab, var(--tf-color-accent) 35%, transparent);
 }
 
 .reference-card__portrait {
   object-fit: cover;
-  box-shadow: 0 0 0 1px
-    color-mix(in oklab, var(--tf-color-accent) 30%, var(--tf-color-line-hi));
 }
 
 .reference-card__initials {

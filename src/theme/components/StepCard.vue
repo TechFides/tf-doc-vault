@@ -13,6 +13,7 @@ defineProps<{
 
 <template>
   <aside class="step-card">
+    <div class="step-card__bloom" aria-hidden="true" />
     <p v-if="number" class="step-card__number">{{ number }}</p>
     <div class="step-card__body">
       <!-- A paragraph, not a heading: a set of these would otherwise fill the page outline
@@ -33,12 +34,16 @@ defineProps<{
 
 <style scoped>
 /*
- * One numbered point of a method, standing on its own: a label, a claim, the checks that
- * back it up, and the terms it introduces. Meant to be used as a set, so the number stays
- * readable rather than decorative; a screen reader announcing "01" before the title is the
- * same order the eye takes.
+ * One numbered point of a method. The number is the whole design: set in the display face at
+ * headline size and filled with the accent gradient, it indexes the card as a graphic rather
+ * than as a grey label beside the text. Everything else stays quiet so it can.
+ *
+ * Meant to be used as a set, so the number stays readable rather than decorative: a screen
+ * reader announcing "01" before the title is the order the eye takes.
  */
 .step-card {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: flex-start;
   gap: var(--tf-spacing-6);
@@ -51,22 +56,62 @@ defineProps<{
   box-shadow: var(--tf-shadow-1);
 }
 
-/* min-width in ch, so a card numbered 9 keeps the column its two-digit neighbours have and
-   the titles down a set stay on one axis. */
+/* Light gathered behind the number, contained by the card's own overflow. Its centre sits
+   outside the panel so only the falloff crosses the content. */
+.step-card__bloom {
+  position: absolute;
+  inset: -70% auto auto -18%;
+  width: 55%;
+  aspect-ratio: 1;
+  pointer-events: none;
+  background-image: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--tf-color-accent) 12%, transparent),
+    transparent
+  );
+}
+
+.dark .step-card__bloom {
+  background-image: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--tf-color-accent-2) 20%, transparent),
+    transparent
+  );
+}
+
+/*
+ * Gradient-filled, which is what turns the index into the card's one graphic element. The clip
+ * paints the whole block, so the gradient runs across both digits rather than restarting.
+ * min-width in ch keeps a single-digit card on the same axis as its two-digit neighbours.
+ */
 .step-card__number {
+  position: relative;
   flex: none;
   margin: 0;
   min-width: 2.2ch;
   font-family: var(--tf-font-display);
-  font-size: var(--tf-text-display);
-  font-weight: 600;
+  font-size: var(--tf-text-h1);
+  font-weight: 700;
   line-height: 1;
-  letter-spacing: var(--tf-tracking-h);
+  letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
-  color: color-mix(in oklab, var(--tf-color-accent) 35%, transparent);
+  background: var(--tf-grad-accent-h);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Without clip-to-text support a transparent fill would erase the digits entirely. */
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .step-card__number {
+    color: var(--tf-color-accent);
+    -webkit-text-fill-color: var(--tf-color-accent);
+  }
 }
 
 .step-card__body {
+  position: relative;
   min-width: 0;
 }
 
@@ -102,22 +147,26 @@ defineProps<{
   line-height: var(--tf-leading-body);
 }
 
+/* The rule starts at the content rather than spanning the card, so the tags read as a footnote
+   to this card's points and not as a divider between two cards. */
 .step-card__tags {
   display: flex;
   flex-wrap: wrap;
   gap: var(--tf-spacing-2);
   margin-top: var(--tf-spacing-5);
+  padding-top: var(--tf-spacing-5);
+  border-top: 1px solid var(--tf-color-line);
 }
 
 @media (max-width: 560px) {
   .step-card {
     flex-direction: column;
-    gap: var(--tf-spacing-3);
+    gap: var(--tf-spacing-2);
     padding: var(--tf-spacing-6);
   }
 
   .step-card__number {
-    font-size: var(--tf-text-h1);
+    font-size: var(--tf-text-h2);
   }
 }
 </style>

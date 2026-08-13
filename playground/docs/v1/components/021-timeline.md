@@ -70,9 +70,18 @@ The date and the title share one line rather than sitting in two columns. The la
 width, from `2014` to `2020–2023` to `Dnes`, and a column wide enough for the longest leaves a
 ragged gutter beside the short ones. Inline, they read as one phrase: when, then what.
 
-The rail is drawn per entry rather than once behind the list, so it ends at the last dot
-instead of running past it into the padding below. Each entry draws the piece of line between
-its own dot and the next one, and the last entry draws none.
+The rail is one gradient behind the whole list, bright where the present is and fading to
+nothing by the bottom. That is the component's idea rather than decoration: the shape says
+"newest first, and the past recedes" without a word doing it. A gradient has to run the length
+of the thing it describes, which is why the rail belongs to the list and not to the entries.
+
+For the same reason the newest entry is the only filled point, with the accent gradient and the
+glow the theme uses elsewhere for a live thing. The older entries are hollow rings whose centre
+is the page showing through, so they read as stations on the line rather than beads sitting on
+top of it.
+
+The date is set as a label, uppercase and tracked out, not as a second heading beside the
+title. One line, two weights: when, then what.
 
 `Timeline` renders an `ol`, because the entries are a sequence whose order carries meaning. The
 list markers are suppressed, so the dots are the only numbering the reader sees, but the

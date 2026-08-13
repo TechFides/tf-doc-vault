@@ -96,9 +96,17 @@ Open each point with a bold term. The term takes the page's text colour and the 
 after it stays muted, which is what makes a long list scannable; without the bold the rows
 turn into a wall.
 
-The number is in the accessibility tree rather than hidden, because it is information: a
-screen reader reads "01" and then the title, which is the order the eye takes. It is set in
-the accent at 35%, loud enough to index the card and quiet enough to stay behind the title.
+The number is the card's one graphic. Set in the display face at headline size and filled with
+the accent gradient, it indexes the card rather than labelling it, and a soft bloom gathers
+behind it in the corner. A grey numeral in the margin is what this was before, and it read as
+a footnote to the card instead of the thing that orders a set of them.
+
+It stays in the accessibility tree rather than being hidden, because it is information: a
+screen reader reads "01" and then the title, which is the order the eye takes. Its column is
+sized in `ch`, so a single-digit card keeps the same axis as its two-digit neighbours.
+
+The rule above the tags starts at the content rather than spanning the card, so the tags read
+as a footnote to this card's points and not as a divider between two cards.
 
 Below 560px the number moves above the title and drops a size, since the two side by side
 leave the text about half the width it needs.

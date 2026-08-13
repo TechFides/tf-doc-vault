@@ -39,15 +39,15 @@ placed.
 
 ## Props
 
-| Prop            | Default | Effect                                                               |
-| --------------- | ------- | -------------------------------------------------------------------- |
-| `logo`          | —       | Client logo, resolved against the site base. Omit to drop the panel. |
-| `client`        | `""`    | The client's name, used as the logo's alternative text.              |
-| `title`         | —       | What was delivered. Omit to drop the row.                            |
-| `contact`       | —       | Who vouches for it. Omit to drop the whole footer.                   |
-| `contactRole`   | —       | A quiet line under the name.                                         |
-| `contactAvatar` | —       | Their photo. Without one the footer uses their initials.             |
-| `initials`      | derived | Override, for a name the first letters get wrong.                    |
+| Prop            | Default | Effect                                                             |
+| --------------- | ------- | ------------------------------------------------------------------ |
+| `logo`          | —       | Client logo, resolved against the site base. Omit to drop the row. |
+| `client`        | `""`    | The client's name, used as the logo's alternative text.            |
+| `title`         | —       | What was delivered. Omit to drop the row.                          |
+| `contact`       | —       | Who vouches for it. Omit to drop the whole footer.                 |
+| `contactRole`   | —       | A quiet line under the name.                                       |
+| `contactAvatar` | —       | Their photo. Without one the footer uses their initials.           |
+| `initials`      | derived | Override, for a name the first letters get wrong.                  |
 
 Initials come from the first letters of the first two words: `Václav Hradec` gives `VH`. Set
 `initials` where that is wrong, such as a name carrying a title or a middle particle.
@@ -80,12 +80,18 @@ Prettier reflows a tag split across lines and fails the page build.
 
 ## Design
 
-The logo panel is near-white in both modes, deliberately. A client's logo is drawn for their
-own background, which is light far more often than not, and a dark panel turns a dark wordmark
-into a silhouette. Owning the panel beats hoping every client ships a light variant.
+The logo is flattened to one ink colour and sits straight on the glass. A row of references is a
+logo wall, and a wall of full-colour marks reads as a ransom note; one colour makes it a set.
+It also lets the card keep its own material instead of carrying a white rectangle that belonged
+to nothing else on the page.
+
+`brightness(0)` collapses the mark to black for light mode and dark mode inverts that to white,
+so **give it a logo with a transparent background**. A baked-in white one flattens to a solid
+block.
 
 Without a photo the contact gets their initials on an accent tint rather than a generic avatar
-glyph: initials say who it is, a silhouette says only that somebody is missing.
+glyph: initials say who it is, a silhouette says only that somebody is missing. Both the
+initials and a photo take the same accent ring, so the two are interchangeable in a row.
 
 The hairline above the footer belongs to the footer rather than to a separate divider, so a
 card with no contact has no rule dangling at its foot.
