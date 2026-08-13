@@ -73,14 +73,8 @@ const derivedInitials = computed(() => {
 </template>
 
 <style scoped>
-/*
- * One delivered project. Built to sit in a grid of these, so it is a column rather than a band
- * and nothing in it depends on the card being wide.
- *
- * gap rather than margins between the parts, because it guarantees the minimum spacing that the
- * footer's `margin-top: auto` would otherwise collapse to nothing on a card the grid is not
- * stretching.
- */
+/* gap rather than margins between the parts: it is the minimum the footer's `margin-top: auto`
+   cannot collapse on a card the grid is not stretching. */
 .reference-card {
   display: flex;
   flex-direction: column;
@@ -91,22 +85,13 @@ const derivedInitials = computed(() => {
   border-radius: var(--tf-radius-xl);
   background: var(--tf-color-panel-glass);
   backdrop-filter: var(--tf-glass-filter);
-  /* The hairline of light along the top edge that makes a glass panel read as glass rather than
-     as a flat fill. */
   box-shadow:
     var(--tf-shadow-1),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-/*
- * Flattened to one ink colour rather than framed on a plate. A row of references is a logo wall,
- * and a wall of full-colour marks reads as a ransom note; one colour makes it a set, and the
- * card keeps its glass instead of carrying a white rectangle.
- *
- * brightness(0) collapses the mark to black for light mode, and dark mode inverts that to
- * white. Give it a logo with a transparent background: a baked-in white one flattens to a solid
- * block.
- */
+/* brightness(0) collapses the mark to one ink colour, which dark mode then inverts. The logo
+   must have a transparent background: a baked-in white one flattens to a solid block. */
 .reference-card__logo {
   align-self: flex-start;
   width: auto;
@@ -145,14 +130,9 @@ const derivedInitials = computed(() => {
   gap: var(--tf-spacing-2);
 }
 
-/*
- * The rule is on the footer rather than a separate element, so a card with no contact has no
- * dangling line at its foot.
- *
- * margin-top: auto pins it to the bottom. In a grid the row stretches every card to its
- * tallest, and without this a short reference left its footer floating mid-card with a few
- * hundred pixels of nothing under it while its neighbour's sat at the foot.
- */
+/* The rule is on the footer, so a card with no contact has no dangling line at its foot.
+   margin-top: auto pins it down: a grid stretches every card to the tallest in the row, and
+   without it a short reference leaves its footer floating mid-card. */
 .reference-card__contact {
   display: flex;
   align-items: center;

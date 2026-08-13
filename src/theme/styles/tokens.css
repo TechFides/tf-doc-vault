@@ -86,10 +86,8 @@
   --tf-color-scrim: rgba(9, 38, 70, 0.2);
   --tf-color-backdrop: rgba(247, 249, 252, 0.72);
 
-  /* Lightness is set against the worst ground each state actually lands on: its own chip,
-     tinted by --tf-tint of itself, over the bare page colour. That is the phone layout,
-     where the reading panel carries no fill; clearing it there clears the panel too. The
-     dark block lifts them to Forge's 0.66-0.80, which needs a dark ground. */
+  /* Set against the worst ground each state lands on: its own tinted chip over the bare page
+     colour, which is the phone layout, where the reading panel carries no fill. */
   --tf-color-success: oklch(0.47 0.14 155);
   --tf-color-warning: oklch(0.5 0.13 70);
   --tf-color-info: oklch(0.49 0.15 245);
@@ -420,10 +418,6 @@
 /*
  * Dark takes ticket-forge-offer's surface values verbatim. Its greys are near-neutral so
  * the blue accent reads against a ground that is not competing with it.
- *
- * That stylesheet's --color-*-on-bg trio has no counterpart here: it compensates for
- * translucent panels stacking on translucent sections, which light mode has no
- * equivalent for, so it would be two tokens that differ in one mode and not the other.
  */
 .dark {
   --brand-surface: #14161d;
@@ -490,10 +484,8 @@
   --tf-shadow-2: 0 16px 40px -16px rgba(0, 0, 0, 0.8);
   --tf-shadow-3: 0 24px 60px -24px rgba(0, 0, 0, 0.85);
 
-  /* The backdrop is held well under full strength here. Against #0e0f14 the clouds are
-     glow rather than shade, and at 1 they cast a blue over the whole top band and right
-     column that competed with the reading panel. Light mode runs its own mix for the
-     opposite reason; see backdrop.css. */
+  /* Held under full strength: against #0e0f14 the clouds glow rather than shade, and at 1
+     they cast a blue over the top band and the outline column. */
   --tf-nebula-opacity: 0.65;
   /* Lower again, because stars are points and read brighter than their opacity suggests.
      Under about 0.45 they stop registering as a field at all. */

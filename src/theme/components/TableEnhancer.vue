@@ -131,23 +131,37 @@ function onKeydown(e: KeyboardEvent): void {
 
 // ─── per-render decoration ───────────────────────────────────────────────────
 
-// Right-align auto-detected numeric columns, unless the author aligned them
-// explicitly in Markdown (`:---:`), in which case leave them alone.
-function alignNumericColumns(table: HTMLTableElement): void {
+interface Column {
+  th: HTMLTableCellElement | undefined;
+  cells: HTMLTableCellElement[];
+  values: string[];
+}
+
+/** The table read column-wise: what the per-column decorators below both work from. */
+function columns(table: HTMLTableElement): Column[] {
   const head = table.tHead?.rows[0];
   const body = table.tBodies[0];
-  if (!head || !body) return;
+  if (!head || !body) return [];
   const rows = dataRows(body);
-
-  for (let c = 0; c < head.cells.length; c++) {
-    const th = head.cells[c];
+  return Array.from({ length: head.cells.length }, (_, c) => {
     const cells = rows
       .map((r) => r.cells[c])
       .filter((cell): cell is HTMLTableCellElement => cell != null);
+    return {
+      th: head.cells[c],
+      cells,
+      values: cells.map((cell) => cell.textContent?.trim() ?? ""),
+    };
+  });
+}
+
+// Right-align auto-detected numeric columns, unless the author aligned them
+// explicitly in Markdown (`:---:`), in which case leave them alone.
+function alignNumericColumns(table: HTMLTableElement): void {
+  for (const { th, cells, values } of columns(table)) {
     if (th?.style.textAlign || cells.some((cell) => cell.style.textAlign)) {
       continue;
     }
-    const values = cells.map((cell) => cell.textContent?.trim() ?? "");
     if (detectColumnType(values, decimal) !== "number") continue;
     th?.classList.add("tf-col-num");
     for (const cell of cells) cell.classList.add("tf-col-num");
@@ -161,23 +175,13 @@ function alignNumericColumns(table: HTMLTableElement): void {
 const ATOM_MIN_LENGTH = 4;
 
 function nowrapAtomColumns(table: HTMLTableElement): void {
-  const head = table.tHead?.rows[0];
-  const body = table.tBodies[0];
-  if (!head || !body) return;
-  const rows = dataRows(body);
-
-  for (let c = 0; c < head.cells.length; c++) {
-    const cells = rows
-      .map((r) => r.cells[c])
-      .filter((cell): cell is HTMLTableCellElement => cell != null);
+  const isAtom = (v: string): boolean => !/\s/.test(v) && v.length > 0;
+  for (const { th, cells, values } of columns(table)) {
     if (!cells.length) continue;
-
-    const values = cells.map((cell) => cell.textContent?.trim() ?? "");
-    const isAtom = (v: string): boolean => !/\s/.test(v) && v.length > 0;
     if (!values.every(isAtom)) continue;
     if (!values.some((v) => v.length >= ATOM_MIN_LENGTH)) continue;
 
-    head.cells[c]?.classList.add("tf-col-atom");
+    th?.classList.add("tf-col-atom");
     for (const cell of cells) cell.classList.add("tf-col-atom");
   }
 }

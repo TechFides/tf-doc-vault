@@ -37,16 +37,6 @@ withDefaults(
 </template>
 
 <style scoped>
-/*
- * A centred panel that sends the reader out of the document to one thing. Glass rather
- * than the filled slab a promo block usually is: it lies on the backdrop like the feature
- * cards, and a solid accent fill here would both fight the nebula and force white text
- * onto a mid-blue ground.
- *
- * What separates it from a card is the light: a bloom contained by the panel's own
- * overflow, and a static accent hairline along the top drawn from --tf-edge-stops, the
- * same colours the hero's swept rim uses. The sweep stays the hero's alone.
- */
 .spotlight {
   position: relative;
   overflow: hidden;
@@ -68,16 +58,15 @@ withDefaults(
   background: linear-gradient(90deg, var(--tf-edge-stops));
 }
 
-/* Oversized and offset so only its falloff crosses the panel; the centre sits outside,
-   which keeps the wash off the copy. */
+/* The centre sits outside the panel, so only the falloff crosses the copy. */
 .spotlight__bloom {
   position: absolute;
   inset: -30% -15% auto auto;
   width: 60%;
   aspect-ratio: 1;
   pointer-events: none;
-  /* Quieter than the dark variant below, and well under the cap where the peak landing on
-     the copy would cost it 4.5:1: a light cloud darkens the glass instead of lighting it. */
+  /* In light mode the cloud darkens the glass rather than lighting it, so the strength is
+     held below where its peak lands on the copy. */
   background-image: radial-gradient(
     closest-side,
     color-mix(in oklab, var(--tf-color-accent) 11%, transparent),
@@ -95,8 +84,6 @@ withDefaults(
   );
 }
 
-/* Free-standing, not in a tinted tile. A brand mark carries its own shape and colour, and
-   framing it fights both; an icon glyph reads fine unframed above the eyebrow. */
 .spotlight__mark {
   display: flex;
   align-items: center;
@@ -105,8 +92,6 @@ withDefaults(
   color: var(--tf-color-accent-ink);
 }
 
-/* Opt-in via markFrame. The tile is fixed-size, so the glyph inside it drops to the size the
-   frame leaves rather than keeping the free-standing cap. */
 .spotlight__mark--framed {
   width: var(--tf-size-2xl);
   height: var(--tf-size-2xl);
@@ -114,8 +99,8 @@ withDefaults(
   background: var(--tf-color-accent-soft);
 }
 
-/* Height, not width: a wordmark is wide and a glyph is square, and capping the height is
-   what makes the two sit at the same optical size. */
+/* Capped on height, not width: it is what puts a wide wordmark and a square glyph at the
+   same optical size. */
 .spotlight__mark :deep(*) {
   width: auto;
   max-width: 100%;
@@ -141,12 +126,8 @@ withDefaults(
 
 .spotlight__title {
   margin: 0 auto var(--tf-spacing-4);
-  /* Wider than the copy below it: the display face is larger, so the same character count
-     would break a headline two lines earlier than it breaks the paragraph. */
   max-width: 46ch;
   font-family: var(--tf-font-display);
-  /* The panel's job is to carry one statement, so the headline has to outweigh the copy
-     rather than sit a step above it. */
   font-size: var(--tf-text-h2);
   font-weight: 600;
   line-height: var(--tf-leading-tight);
@@ -154,8 +135,6 @@ withDefaults(
   color: var(--tf-color-fg);
 }
 
-/* Narrower than the panel, so the copy keeps a readable line even though the panel runs
-   the full width of the reading column. */
 .spotlight__copy {
   max-width: 52ch;
   margin: 0 auto;
@@ -185,13 +164,11 @@ withDefaults(
     padding: var(--tf-spacing-6) var(--tf-spacing-5);
   }
 
-  /* One step down: at the desktop size a Czech headline runs to three or four lines here,
-     which reads as a page title dropped inside a card rather than as a statement. */
   .spotlight__title {
     font-size: var(--tf-text-h3);
   }
 
-  /* Full-width buttons: two pills side by side wrap into an uneven pair on a phone. */
+  /* Two pills side by side wrap into an uneven pair on a phone. */
   .spotlight__actions :deep(> *) {
     flex: 1 1 100%;
     justify-content: center;

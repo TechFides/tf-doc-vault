@@ -146,15 +146,12 @@
 
 /*
  * A list of settled points rather than tasks to tick. Put it on the element holding a plain
- * list; the items keep their own markup and gain the check row.
+ * list; the items keep their own markup and gain the check row. Shared by StepCard and
+ * ReferenceCard, and masked from --tf-check-mask so it cannot drift from the theme's own
+ * checked box.
  *
- * It lives here rather than inside a component because StepCard and ReferenceCard both need
- * it, and an author can reach for it directly. The check is masked from --tf-check-mask, the
- * same shape the theme's own checked box draws, so the two never drift apart.
+ * A component that places it can zero the block spacing out.
  */
-/* Its own block spacing, like every other block-level pattern class: placed in a page the
-   wrapper sits between paragraphs, and without this the sentence after it touches the last
-   check. A component that positions it can zero this out. */
 .tf-checks {
   margin-block: var(--tf-spacing-5);
 }

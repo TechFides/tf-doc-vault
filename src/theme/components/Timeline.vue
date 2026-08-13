@@ -7,14 +7,8 @@
 </template>
 
 <style scoped>
-/*
- * A dated sequence, newest first, and the rail says so: one gradient behind the whole list,
- * bright where the present is and fading out into the past. That is the component's whole
- * idea, so the entries themselves stay plain and the first one is the only marked point.
- *
- * One rail rather than a segment per entry: a gradient has to run the length of the thing it
- * describes, and per-entry pieces would each restart it.
- */
+/* The rail belongs to the list, not to the entries: one gradient has to run the length of the
+   sequence, where per-entry pieces would each restart it. */
 .timeline {
   position: relative;
   margin-block: var(--tf-spacing-7);

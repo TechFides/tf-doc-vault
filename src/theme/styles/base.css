@@ -582,12 +582,10 @@ html.layout-max .VPContent {
   line-height: var(--tf-leading-body);
 }
 
-/* Zebra striping. The nth-child rule is the pre-hydration and no-JS fallback;
-   its paint goes stale once a sort or filter shifts the parity, so
-   TableEnhancer.vue tags rows `.tf-row` / `.tf-stripe` and reassigns them on
-   every sort and filter. The class rules must therefore outrank it, which they
-   do on specificity ((0,2,2) against (0,1,2)) now that the stripe colour is a
-   mode-aware token and needs no `.dark` variant to fight. */
+/* Zebra striping. The nth-child rule is the pre-hydration and no-JS fallback; its parity
+   goes stale the moment a sort or filter reorders the rows, so TableEnhancer.vue tags them
+   `.tf-row` / `.tf-stripe` instead. Those two are the same specificity as the fallback, so
+   they must stay below it here: source order is the only thing making them win. */
 .vp-doc table tr:nth-child(even) {
   background-color: color-mix(in srgb, var(--brand-surface) 60%, transparent);
 }
@@ -1098,19 +1096,15 @@ html.layout-max .VPContent {
 }
 
 /*
- * Entry markers. Every label leads with one slot of the same width, holding either a
- * drawn marker or an author's emoji (SidebarDefaultEmoji.vue hoists that emoji into a
- * span so it lands in the slot too). One width is what keeps every label in one column.
+ * Entry markers. Every label leads with one slot of the same width, holding either a drawn
+ * marker or an author's emoji (SidebarDefaultEmoji.vue hoists that emoji into a span so it
+ * lands in the slot too). One width is what keeps every label in one column.
  *
- * The marker is a centred background inside the slot rather than the box itself, so the
- * slot can hold shapes of different sizes without moving the label. Drawn rather than
- * an emoji glyph because an emoji carries U+FE0F, which hands it to Noto Color Emoji:
- * that font paints its own colour and `color` cannot reach it.
+ * Drawn rather than an emoji glyph because an emoji carries U+FE0F, which hands it to Noto
+ * Color Emoji: that font paints its own colour and `color` cannot reach it.
+ *
+ * Out of flow, so the slot adds no width whatever it holds.
  */
-/* Absolutely positioned in the label's padding, for two reasons: out of flow it adds no
-   width, so every label starts at the padding edge whatever the slot holds; and
-   `top: 50%` with a half-height translate centres it on the label box exactly, where
-   `vertical-align: middle` reaches only baseline plus half an x-height. */
 .VPSidebarItem .text.default-emoji-folder::before,
 .VPSidebarItem .text.default-emoji-file::before,
 .VPSidebarItem .text .tf-sb-marker {

@@ -18,10 +18,7 @@ defineProps<{
 </template>
 
 <style scoped>
-/*
- * One entry on the rail. The rail itself belongs to Timeline; an entry only marks its own point
- * on it.
- */
+/* The rail belongs to Timeline; an entry only marks its own point on it. */
 .timeline-item {
   position: relative;
   padding-bottom: var(--tf-spacing-7);
@@ -31,10 +28,7 @@ defineProps<{
   padding-bottom: 0;
 }
 
-/*
- * A hollow ring, punched out of the rail. Its centre is the panel showing through rather than a
- * fill, so the ring reads as a station on the line instead of a bead sitting on top of it.
- */
+/* The page colour, not transparent: the ring has to punch the rail out behind it. */
 .timeline-item::before {
   content: "";
   position: absolute;
@@ -48,10 +42,7 @@ defineProps<{
   background: var(--tf-color-bg);
 }
 
-/*
- * The newest entry is the only filled point, with the accent glow the rest of the theme uses
- * for a live thing. It is what makes "newest first" legible without a word saying so.
- */
+/* Filling only the first point is what makes "newest first" legible without a word saying so. */
 .timeline-item:first-child::before {
   border-color: transparent;
   background: var(--tf-grad-accent);
@@ -69,11 +60,6 @@ defineProps<{
   line-height: var(--tf-leading-tight);
 }
 
-/*
- * The date is the label of the entry, so it takes the uppercase treatment the theme gives every
- * other label rather than being a second heading beside the title. Tabular figures keep a
- * column of years from wobbling.
- */
 .timeline-item__date {
   font-size: var(--tf-text-caption-sm);
   font-weight: 600;

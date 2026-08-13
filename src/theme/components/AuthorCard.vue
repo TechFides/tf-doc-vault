@@ -39,14 +39,6 @@ withDefaults(
 </template>
 
 <style scoped>
-/*
- * Who stands behind the document. A byline with evidence: the name and role carry the
- * claim, the slot carries what backs it up.
- *
- * Glass on the backdrop, like the feature cards and the spotlight. No bloom and no
- * hairline here: this is a credential, not a call to action, and it should read as the
- * quietest of the three panels.
- */
 .author-card {
   display: flex;
   align-items: flex-start;
@@ -85,8 +77,6 @@ withDefaults(
   color: var(--tf-color-fg);
 }
 
-/* Its own line rather than trailing the name behind a separator: a role runs long in
-   Czech, and any glyph between the two has to survive both languages. */
 .author-card__role {
   margin: var(--tf-spacing-1) 0 0;
   font-size: var(--tf-text-body-sm);

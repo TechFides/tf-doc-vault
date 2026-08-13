@@ -1,12 +1,9 @@
 /*
  * The page backdrop: a nebula and a star field, fixed behind the whole site.
  *
- * z-index -1 paints it above the root background but below every in-flow block
- * background, which only works while the layout above stays transparent: `html` carries
- * the page colour and body and the VitePress containers carry none (see base.css). A
- * fill on `body` buries it, and looks exactly like the component failing to mount.
- *
- * Star offsets are in vw/vh so the field spreads with the viewport.
+ * z-index -1 paints it above the root background but below every in-flow block background,
+ * which only holds while the layout above stays transparent (see base.css). A fill on
+ * `body` buries it, and looks exactly like the component failing to mount.
  */
 
 .tf-backdrop {
@@ -23,20 +20,12 @@
  * four. Oversized so the drift has slack: at inset 0 the translate walks their soft edges
  * into view.
  *
- * The two modes place the clouds differently, because what limits them differs. Dark
- * clouds are lighter than the page, so they read as glow wherever they fall. Light clouds
- * have to be darker than a near-white page to be visible at all, which turns them into a
- * contrast cost for any text they end up behind. Behind the sidebar and the reading panel
- * that cost is paid by the glass (62% and 80% white), leaving nav labels at 12:1 and muted
- * body text above 5:1 even under the deepest cloud. The outline column has no panel of its
- * own, so its muted links sit on the raw sky.
- *
- * Light therefore pools its strength on the left, where the frosted surfaces are, and the
- * right pair stays faint so the outline holds ~5:1. Clouds 1 and 3 are centred off-canvas
- * because a hero page has no sidebar and no reading panel (see base.css): its content sits
- * on the raw sky, and accent-coloured links there run at 4.6:1 on the page colour alone.
- * Only their falloff crosses the viewport, which keeps that figure intact. Moving either
- * centre inward is what breaks it, so measure a hero page before nudging these.
+ * The two modes place them differently. A dark cloud is lighter than the page and reads as
+ * glow wherever it falls; a light cloud has to be darker than a near-white page, which makes
+ * it a contrast cost for whatever text it lands behind. Light therefore pools its strength
+ * on the left, where the frosted surfaces pay that cost, and centres clouds 1 and 3
+ * off-canvas so only their falloff crosses a hero page, which has no panel at all. Moving
+ * either centre inward is what breaks it: measure a hero page before nudging these.
  */
 .tf-backdrop__nebula {
   position: absolute;
@@ -153,11 +142,8 @@
 }
 
 /* Below the panel breakpoint the reading column is full-bleed and transparent (see
-   base.css), leaving no gutter and no glass: every star and every cloud lands on a line of
-   text. Measured on a phone-width viewport, the clouds cost status badges, doc meta, alert
-   titles and task list items 2 to 3 contrast steps, which takes several of them under AA.
-   The whole backdrop therefore stands down here, in both modes, and the page keeps its
-   flat colour. */
+   base.css), so every star and cloud lands directly on a line of text and takes several
+   elements under AA. The backdrop stands down entirely rather than being toned down. */
 @media (max-width: 768px) {
   .tf-backdrop {
     display: none;

@@ -100,8 +100,6 @@ const features = computed<FeatureCard[]>(
   padding: var(--tf-spacing-7);
   border-radius: var(--tf-radius-xl);
   border: 1px solid var(--tf-color-line);
-  /* Glass, because a feature card sits directly on the backdrop rather than inside
-     the reading panel and has to soften the stars behind it itself. */
   background: var(--tf-color-panel-glass);
   backdrop-filter: var(--tf-glass-filter);
   box-shadow: var(--tf-shadow-1);
@@ -135,8 +133,6 @@ a.feature-card:hover {
   transition: var(--tf-t-base);
 }
 
-/* The tile fills with the accent gradient on hover and the glyph flips to white:
-   the card's own colour arriving, rather than a generic highlight. */
 a.feature-card:hover .feature-card__icon-wrap {
   background: var(--tf-grad-accent);
 }

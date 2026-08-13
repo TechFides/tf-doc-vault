@@ -33,14 +33,6 @@ defineProps<{
 </template>
 
 <style scoped>
-/*
- * One numbered point of a method. The number is the whole design: set in the display face at
- * headline size and filled with the accent gradient, it indexes the card as a graphic rather
- * than as a grey label beside the text. Everything else stays quiet so it can.
- *
- * Meant to be used as a set, so the number stays readable rather than decorative: a screen
- * reader announcing "01" before the title is the order the eye takes.
- */
 .step-card {
   position: relative;
   overflow: hidden;
@@ -79,9 +71,7 @@ defineProps<{
   );
 }
 
-/* The gradient fill (tf-grad-text) is what turns the index into the card's one graphic
-   element. min-width in ch keeps a single-digit card on the same axis as its two-digit
-   neighbours. */
+/* min-width in ch keeps a single-digit card on the same axis as its two-digit neighbours. */
 .step-card__number {
   position: relative;
   flex: none;
@@ -134,8 +124,6 @@ defineProps<{
   line-height: var(--tf-leading-body);
 }
 
-/* The rule starts at the content rather than spanning the card, so the tags read as a footnote
-   to this card's points and not as a divider between two cards. */
 .step-card__tags {
   display: flex;
   flex-wrap: wrap;

@@ -109,7 +109,7 @@ other way, so a one-line override still works.
 | `--brand-border-default` | `rgba(9,38,70,.10)`  | Dividers, table borders                                      |
 | `--brand-border-strong`  | `rgba(9,38,70,.18)`  | Stronger borders                                             |
 | `--brand-success`/`-bg`  | `oklch(.47 .14 155)` | Status, badges                                               |
-| `--brand-warning`/`-bg`  | `oklch(.50 .13 70)`  | Also drives Mermaid note styling                             |
+| `--brand-warning`/`-bg`  | `oklch(.50 .13 70)`  | Also drives the Mermaid note in light mode                   |
 | `--brand-danger`/`-bg`   | `oklch(.51 .19 25)`  | "                                                            |
 | `--brand-info`/`-bg`     | `oklch(.49 .15 245)` | "                                                            |
 
@@ -120,11 +120,18 @@ carries no fill; clearing 4.5:1 there clears it on the panel too. Dark lifts the
 `L 0.66-0.80`, which needs a dark ground. The `-bg` variants are `color-mix` of the state
 colour, so recolouring the state recolours its wash.
 
-`--tf-color-accent-ink` is the accent for text rather than for fills: the brand blue clears
-4.5:1 on bare white by only 0.2, which is gone the moment the text sits on a tint of
-itself, so the active sidebar item, the accent chip and the forward pager link use the ink
-token instead. Light mixes 30 % navy into the accent; dark takes the lighter
-`--tf-color-accent-2`.
+The accent has three derived forms, and which one a rule takes is the whole reason there
+are almost no `.dark` overrides left in `base.css`:
+
+| Token                    | Light                     | Dark                  | For                                                        |
+| ------------------------ | ------------------------- | --------------------- | ---------------------------------------------------------- |
+| `--tf-color-accent-ink`  | 30 % navy into the accent | `--tf-color-accent-2` | The accent as text on a tint of itself                     |
+| `--tf-color-link`        | `--brand-primary`         | `--tf-color-accent-2` | Anything that reads as a link, plus `-hover` and `-active` |
+| `--tf-color-accent-soft` | `--brand-primary-soft`    | same                  | The accent as a wash: hovers, tinted tiles, chips          |
+
+`--tf-color-accent-ink` exists because the brand blue clears 4.5:1 on bare white by only
+0.2, which is gone the moment the text sits on a tint of itself, so the active sidebar
+item, the accent chip and the forward pager link take the ink token instead.
 
 `DocMeta` status badges read `--brand-badge-{published,draft,review,archived}-{bg,text,border}`.
 Each one is a `color-mix` of a state colour rather than a hardcoded pair, so
@@ -135,18 +142,19 @@ overriding `--brand-success` moves the published pill in both modes.
 Worth knowing about even though you rarely override them. Full list in
 `tokens.css`; the names match the `ticket-forge-offer` stylesheet one for one.
 
-| Group   | Tokens                                                                            |
-| ------- | --------------------------------------------------------------------------------- |
-| Surface | `--tf-color-bg`, `-surface-1`, `-panel`, `-panel-2`, `-panel-hi`, `-inset`        |
-| Line    | `--tf-color-line`, `-line-2`, `-line-hi`                                          |
-| Type    | `--tf-text-display` … `--tf-text-caption-sm`, `--tf-tracking-*`, `--tf-leading-*` |
-| Measure | `--tf-measure` (`72ch`), the reading width the content panel is sized to          |
-| Space   | `--tf-spacing-1` … `-8`, `-lg`, `-xl`, `-2xl`                                     |
-| Shape   | `--tf-radius-xs/sm/lg/xl/pill`                                                    |
-| Depth   | `--tf-shadow-1/2/3`, `--tf-blur-panel`, `--tf-glass-saturate`                     |
-| Motion  | `--tf-dur-1/2/3`, `--tf-ease-out`, `--tf-ease-spring`, `--tf-t-base`              |
-| Accent  | `--tf-grad-accent`, `-accent-h`, `--tf-grad-line`                                 |
-| Marks   | `--tf-rail`, `--tf-rail-width`, `--tf-check-mask`                                 |
+| Group   | Tokens                                                                             |
+| ------- | ---------------------------------------------------------------------------------- |
+| Surface | `--tf-color-bg`, `-surface-1`, `-panel`, `-panel-2`, `-panel-hi`, `-inset`         |
+| Line    | `--tf-color-line`, `-line-2`, `-line-hi`                                           |
+| Type    | `--tf-text-display` … `--tf-text-caption-sm`, `--tf-tracking-*`, `--tf-leading-*`  |
+| Measure | `--tf-measure` (`72ch`) and `--tf-panel-max`, the panel sized around it            |
+| Space   | `--tf-spacing-1` … `-8`, `-lg`, `-xl`, `-2xl`                                      |
+| Shape   | `--tf-radius-check/xs/sm/lg/xl/pill`                                               |
+| Depth   | `--tf-shadow-1/2/3`, `--tf-blur-panel`, `--tf-glass-saturate`, `--tf-glass-filter` |
+| Motion  | `--tf-dur-1/2/3`, `--tf-ease-out`, `--tf-ease-spring`, `--tf-t-base`               |
+| Accent  | `--tf-grad-accent`, `-accent-h`, `--tf-grad-line`                                  |
+| Marks   | `--tf-rail`, `--tf-rail-width`, `--tf-check-mask`                                  |
+| Diagram | `--tf-mermaid-surface`, `-ink`, `-label-bg`, `-edge-bg`, `-note-bg`, `-note-line`  |
 
 `--tf-rail` is the active-item bar the sidebar, the outline, the selected search result
 and the callouts all share; anything carrying it must square its own left corners,
@@ -566,5 +574,5 @@ Place `logo.svg` and `favicon.svg` under `docs/public/`. Run
 - Navbar shows Acme logo + title
 - Buttons, links, sidebar active items use the orange brand color
 - Footer shows `acme.example` and the contact email, no `techfides.cz`
-- Mermaid diagrams use the orange brand color in both light and dark mode
-  (they read the `--brand-*` tokens)
+- Mermaid diagrams outline their nodes in the orange brand color in both modes
+  (`--brand-primary`; their fills and labels come from `--tf-mermaid-*`)
