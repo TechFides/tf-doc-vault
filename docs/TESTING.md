@@ -29,6 +29,7 @@ End-to-end checks that exercise the published CLI against a real VitePress site.
 - `ana-served-at-root.spec.ts`: the built `ana-docs` site served at the domain root, the layout Vercel serves the static build under. `vitepress dev`/`preview` serve under the configured base and hide a base mismatch; this spec fails on any request that 404s
 - `ana-github-vercel.spec.ts`: a fresh `ana-docs` scaffold ships `vercel.json`/`middleware.ts`/`.github/workflows/ci.yml` and none of the removed GitLab/GCP files; scaffolding a second offer into an already-git-initialized repo (the monorepo pattern) skips `git init`, derives `repo`/`repo-subdir` from the detected `origin` remote, and never overwrites the first offer's CI workflow
 - `playground-dark-mode.spec.ts`: the theme's dark-mode navbar chrome against `playground/docs`
+- `playground-tobe-tags.spec.ts`: TO-BE tag colours actually reach content nested inside a block-form tag through the real theme, which the unit tests cannot see because `.vp-doc` sets its own colours on headings, code and table cells
 - `exports.spec.ts`: every subpath export resolves from a scaffolded repo, and the packed tarball contains `boilerplate/` and `templates/` but no `specs/` path
 
 Run:

@@ -120,6 +120,7 @@
   "dependencies": {
     "@clack/prompts": "^1.7.0",
     "extended-markdown-adf-parser": "2.4.0",
+    "markdown-it-container": "^4.0.0",
     "markdownlint": "^0.40.0",
     "playwright": "^1.59.1",
     "vue-i18n": "^11.4.4"
@@ -128,6 +129,7 @@
     "@commitlint/cli": "21.0.1",
     "@commitlint/config-conventional": "21.0.1",
     "@playwright/test": "1.60.0",
+    "@types/markdown-it-container": "4.0.0",
     "@types/node": "25.6.2",
     "@typescript-eslint/eslint-plugin": "8.59.2",
     "@typescript-eslint/parser": "8.59.2",

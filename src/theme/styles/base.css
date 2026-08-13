@@ -43,6 +43,12 @@
   --brand-badge-archived-text: #374151;
   --brand-badge-archived-border: #e5e7eb;
 
+  /* TO-BE tagging (see config/toBeTags.ts). Deliberately the same values in
+     light and dark: analysts learned these two colours from the hand-written
+     <span> convention this replaced. */
+  --brand-tobe-add: #ff5630;
+  --brand-tobe-del: #97a0af;
+
   --layout-max-width-narrow: 800px;
   --layout-max-width-content: 1440px;
   --layout-max-width-wide: 1800px;
@@ -540,6 +546,47 @@ html.layout-max .VPContent {
 .vp-doc .tf-table.is-overflow-start::before,
 .vp-doc .tf-table.is-overflow-end::after {
   opacity: 1;
+}
+
+/* TO-BE tags. Colour sits on the wrapper so the block form tints every heading,
+   list and table inside it by inheritance, and `line-through` propagates to
+   in-flow descendants for free. `code` needs an explicit reset because
+   `.vp-doc code` sets its own colour and would otherwise stay unmarked. */
+.vp-doc .tf-tobe-add {
+  color: var(--brand-tobe-add);
+}
+
+.vp-doc .tf-tobe-del {
+  color: var(--brand-tobe-del);
+  text-decoration: line-through;
+}
+
+.vp-doc .tf-tobe :where(code, blockquote) {
+  color: inherit;
+}
+
+/* The ticket link has to read as part of the marker, not as an ordinary link.
+   The extra `.tf-tobe` in these selectors is load-bearing: `.dark .vp-doc a` and
+   `.vp-doc a:hover` both tie a two-class selector on specificity and win on
+   source order, which painted the ticket brand-blue in dark mode only. Ordinary
+   links inside a tag deliberately keep the brand colour. */
+.vp-doc .tf-tobe .tf-tobe-marker,
+.vp-doc .tf-tobe .tf-tobe-marker a,
+.vp-doc .tf-tobe .tf-tobe-marker a:hover,
+.vp-doc .tf-tobe .tf-tobe-marker a:active {
+  color: inherit;
+  font-weight: 700;
+}
+
+/* Marker lines carry no prose, so they sit tight against the content they wrap
+   rather than taking a full paragraph gap. The spacing moves to the wrapper
+   instead, matching `.vp-doc p`, so two adjacent block tags do not collide. */
+.vp-doc .tf-tobe-marker-line {
+  margin: 0;
+}
+
+.vp-doc div.tf-tobe {
+  margin: 16px 0;
 }
 
 /* Numeric columns align right with tabular figures for easy comparison.
