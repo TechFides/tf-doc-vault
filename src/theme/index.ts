@@ -11,6 +11,7 @@ import BrandHero from "./components/BrandHero.vue";
 import FeatureCards from "./components/FeatureCards.vue";
 import Spotlight from "./components/Spotlight.vue";
 import AuthorCard from "./components/AuthorCard.vue";
+import StepCard from "./components/StepCard.vue";
 import BrandFooter from "./components/BrandFooter.vue";
 import NotFound from "./components/NotFound.vue";
 import PageBackdrop from "./components/PageBackdrop.vue";
@@ -94,6 +95,7 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
       app.component("FeatureCards", FeatureCards);
       app.component("Spotlight", Spotlight);
       app.component("AuthorCard", AuthorCard);
+      app.component("StepCard", StepCard);
     },
   };
 }
@@ -109,6 +111,7 @@ export {
   FeatureCards,
   Spotlight,
   AuthorCard,
+  StepCard,
   BrandFooter,
   NotFound,
   PageBackdrop,

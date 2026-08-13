@@ -24,6 +24,7 @@ Registered globally by `createTheme()`, so Markdown can use them with no import.
 | `FeatureCards` | The row of cards on a landing page, driven by `features` frontmatter.    | [FeatureCards](./009-feature-cards) |
 | `Spotlight`    | A centred panel that sends the reader out of the document to one thing.  | [Spotlight](./007-spotlight)        |
 | `AuthorCard`   | Who stands behind the document: name, role, and the record behind them.  | [AuthorCard](./008-author-card)     |
+| `StepCard`     | One numbered point of a method: a claim, its checks, and its terms.      | [StepCard](./019-step-card)         |
 | `PrintLayout`  | The layout the print and PDF export renders into, chosen by frontmatter. | [PrintLayout](./010-print-layout)   |
 
 ## The theme mounts these
