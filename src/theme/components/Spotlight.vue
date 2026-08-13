@@ -83,30 +83,27 @@ defineProps<{
   );
 }
 
+/* Free-standing, not in a tinted tile. A brand mark carries its own shape and colour, and
+   framing it fights both; an icon glyph reads fine unframed above the eyebrow. */
 .spotlight__mark {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--tf-size-2xl);
-  height: var(--tf-size-2xl);
-  margin: 0 auto var(--tf-spacing-5);
-  border-radius: var(--tf-radius-lg);
-  background: color-mix(
-    in oklab,
-    var(--tf-color-accent) var(--tf-tint),
-    transparent
-  );
+  margin: 0 auto var(--tf-spacing-4);
   color: var(--tf-color-accent-ink);
 }
 
-/* Whatever the author drops in the slot: an inline SVG, an img, an icon glyph. */
+/* Height, not width: a wordmark is wide and a glyph is square, and capping the height is
+   what makes the two sit at the same optical size. */
 .spotlight__mark :deep(*) {
-  max-width: var(--tf-size-lg);
-  max-height: var(--tf-size-lg);
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: var(--tf-size-2xl);
 }
 
 .spotlight__eyebrow {
-  margin: 0 0 var(--tf-spacing-2);
+  margin: 0 0 var(--tf-spacing-4);
   font-family: var(--tf-font-display);
   font-size: var(--tf-text-caption-sm);
   font-weight: 500;
@@ -121,7 +118,9 @@ defineProps<{
      would break a headline two lines earlier than it breaks the paragraph. */
   max-width: 46ch;
   font-family: var(--tf-font-display);
-  font-size: var(--tf-text-h3);
+  /* The panel's job is to carry one statement, so the headline has to outweigh the copy
+     rather than sit a step above it. */
+  font-size: var(--tf-text-h2);
   font-weight: 600;
   line-height: var(--tf-leading-tight);
   letter-spacing: var(--tf-tracking-h);
@@ -157,6 +156,12 @@ defineProps<{
 @media (max-width: 480px) {
   .spotlight {
     padding: var(--tf-spacing-6) var(--tf-spacing-5);
+  }
+
+  /* One step down: at the desktop size a Czech headline runs to three or four lines here,
+     which reads as a page title dropped inside a card rather than as a statement. */
+  .spotlight__title {
+    font-size: var(--tf-text-h3);
   }
 
   /* Full-width buttons: two pills side by side wrap into an uneven pair on a phone. */
