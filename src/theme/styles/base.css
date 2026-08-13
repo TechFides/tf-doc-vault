@@ -219,7 +219,10 @@ body,
   margin: 0 !important;
 }
 
+/* baseline, not the default stretch: the icon and the label are separate flex items and
+   stretch leaves each aligning inside its own box. */
 .VPLocalSearchBox .titles {
+  align-items: baseline;
   min-height: 0 !important;
   padding: 0 !important;
 }
@@ -234,7 +237,12 @@ body,
   box-shadow: var(--tf-rail);
 }
 
+/* Same metrics as the label beside it. VitePress sets the icon 16px/16px against the
+   title's 14px/21px, which centres the two boxes but not the ink: `#` runs from
+   ascender to baseline where the label only reaches x-height, so it rides high. */
 .VPLocalSearchBox .title-icon {
+  font-size: var(--tf-text-body-sm);
+  line-height: 1.5;
   color: var(--vp-c-brand-1) !important;
   opacity: 1 !important;
 }
