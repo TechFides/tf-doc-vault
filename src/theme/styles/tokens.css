@@ -440,12 +440,16 @@
   --tf-shadow-2: 0 16px 40px -16px rgba(0, 0, 0, 0.8);
   --tf-shadow-3: 0 24px 60px -24px rgba(0, 0, 0, 0.85);
 
-  /* Stronger than light mode: the same accent wash that would muddy a white page
-     barely registers against #0e0f14. */
-  --tf-nebula-opacity: 1;
-  --tf-stars-opacity: 1;
-  /* Held below the page nebula: at full strength the bloom lit the hero's right half far
-     brighter than its left and flattened the star field inside it. */
+  /* The backdrop is held well under full strength here. Against #0e0f14 the clouds are
+     glow rather than shade, and at 1 they cast a blue over the whole top band and right
+     column that competed with the reading panel. Light mode runs its own mix for the
+     opposite reason; see backdrop.css. */
+  --tf-nebula-opacity: 0.65;
+  /* Lower again, because stars are points and read brighter than their opacity suggests.
+     Under about 0.45 they stop registering as a field at all. */
+  --tf-stars-opacity: 0.55;
+  /* Lowest of the three: the bloom sits inside the hero panel, and at full strength it lit
+     its right half far brighter than its left and flattened the stars in it. */
   --tf-hero-bloom-opacity: 0.6;
   --tf-hero-stars-opacity: 1;
   --tf-nebula-1: color-mix(in oklab, var(--tf-color-accent) 46%, transparent);
