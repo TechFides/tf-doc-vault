@@ -77,10 +77,15 @@ const derivedInitials = computed(() => {
  * One delivered project: whose it was, what it was, what it involved, and who will vouch for
  * it. Built to sit in a grid of these, so it is a column rather than a band: the parts stack
  * and nothing depends on the card being wide.
+ *
+ * gap rather than margins between the parts, because it guarantees the minimum spacing that
+ * the footer's `margin-top: auto` would otherwise collapse to nothing on a card the grid is
+ * not stretching.
  */
 .reference-card {
   display: flex;
   flex-direction: column;
+  gap: var(--tf-spacing-5);
   margin-block: var(--tf-spacing-6);
   padding: var(--tf-spacing-6);
   border: 1px solid var(--tf-color-line);
@@ -94,16 +99,21 @@ const derivedInitials = computed(() => {
  * Near-white in both modes, deliberately. A client's logo is drawn for their own background,
  * which is light far more often than not, and a dark panel turns a dark wordmark into a
  * silhouette. Own the panel rather than hoping every logo ships a light variant.
+ *
+ * Framed rather than bare: a plate of pure white with no edge reads as a hole punched in the
+ * card, and the logo is the strongest thing a reference has. The hairline is warmer than the
+ * card's own border so the plate stays a plate in dark mode instead of dissolving into glare.
  */
 .reference-card__logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: var(--tf-size-4xl);
-  margin-bottom: var(--tf-spacing-5);
-  padding: var(--tf-spacing-4);
+  height: 84px;
+  padding: var(--tf-spacing-5) var(--tf-spacing-6);
+  border: 1px solid rgba(9, 38, 70, 0.12);
   border-radius: var(--tf-radius-lg);
-  background: #fff;
+  background: linear-gradient(180deg, #fff, #f4f7fb);
+  box-shadow: inset 0 1px 0 #fff;
 }
 
 /*
@@ -119,7 +129,7 @@ const derivedInitials = computed(() => {
 }
 
 .reference-card__title {
-  margin: 0 0 var(--tf-spacing-5);
+  margin: 0;
   font-family: var(--tf-font-display);
   font-size: var(--tf-text-h4);
   font-weight: 600;
@@ -137,16 +147,21 @@ const derivedInitials = computed(() => {
   display: flex;
   flex-wrap: wrap;
   gap: var(--tf-spacing-2);
-  margin-top: var(--tf-spacing-5);
 }
 
-/* The rule is on the footer rather than a separate element, so a card with no contact has no
-   dangling line at its foot. */
+/*
+ * The rule is on the footer rather than a separate element, so a card with no contact has no
+ * dangling line at its foot.
+ *
+ * margin-top: auto pins it to the bottom. In a grid the row stretches every card to its
+ * tallest, and without this a short reference left its footer floating mid-card with a few
+ * hundred pixels of nothing under it while its neighbour's sat at the foot.
+ */
 .reference-card__contact {
   display: flex;
   align-items: center;
   gap: var(--tf-spacing-3);
-  margin-top: var(--tf-spacing-5);
+  margin-top: auto;
   padding-top: var(--tf-spacing-5);
   border-top: 1px solid var(--tf-color-line);
 }
