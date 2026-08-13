@@ -103,11 +103,7 @@
   display: grid;
   place-items: center;
   flex: none;
-  background: color-mix(
-    in oklab,
-    var(--tf-color-accent) var(--tf-tint),
-    transparent
-  );
+  background: var(--tf-color-accent-soft);
   color: var(--vp-c-brand-1);
 }
 
@@ -144,11 +140,7 @@
     var(--tf-color-accent) 40%,
     var(--tf-color-line)
   );
-  background: color-mix(
-    in oklab,
-    var(--tf-color-accent) var(--tf-tint),
-    transparent
-  );
+  background: var(--tf-color-accent-soft);
   color: var(--tf-color-accent-ink);
 }
 
@@ -197,11 +189,7 @@
 
 .tf-checks li::before {
   border-radius: var(--tf-radius-check);
-  background: color-mix(
-    in oklab,
-    var(--tf-color-accent) var(--tf-tint),
-    transparent
-  );
+  background: var(--tf-color-accent-soft);
 }
 
 .tf-checks li::after {
@@ -256,11 +244,7 @@
 
 :is(a, button).tf-btn:hover {
   border-color: var(--tf-color-accent);
-  background: color-mix(
-    in oklab,
-    var(--tf-color-accent) var(--tf-tint),
-    transparent
-  );
+  background: var(--tf-color-accent-soft);
   color: var(--vp-c-brand-1) !important;
   text-decoration: none;
 }

@@ -1,5 +1,21 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+/**
+ * Whether `moduleUrl` is the module node was started with, so a CLI can run itself while a
+ * test importing its helpers does not. Pass `import.meta.url` from the entrypoint.
+ */
+export function isEntryModule(moduleUrl: string): boolean {
+  const entry = process.argv[1];
+  if (!entry) return false;
+  try {
+    // realpath resolves the bin symlink, so node_modules/.bin still matches.
+    return fs.realpathSync(entry) === fileURLToPath(moduleUrl);
+  } catch {
+    return false;
+  }
+}
 
 /**
  * A problem the user can fix from the command line or a template manifest. The

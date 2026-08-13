@@ -111,11 +111,7 @@ withDefaults(
   width: var(--tf-size-2xl);
   height: var(--tf-size-2xl);
   border-radius: var(--tf-radius-lg);
-  background: color-mix(
-    in oklab,
-    var(--tf-color-accent) var(--tf-tint),
-    transparent
-  );
+  background: var(--tf-color-accent-soft);
 }
 
 /* Height, not width: a wordmark is wide and a glyph is square, and capping the height is

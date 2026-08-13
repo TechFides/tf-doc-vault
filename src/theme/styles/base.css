@@ -943,11 +943,7 @@ html.layout-max .VPContent {
 
 .VPDocFooter .pager-link:hover {
   border-color: var(--tf-color-accent);
-  background: color-mix(
-    in oklab,
-    var(--tf-color-accent) var(--tf-tint),
-    transparent
-  );
+  background: var(--tf-color-accent-soft);
 }
 
 .VPDocFooter .pager-link .desc {

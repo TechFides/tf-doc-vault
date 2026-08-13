@@ -12,6 +12,7 @@ import os from "node:os";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { boilerplateName } from "../cli/scaffold.js";
+import { isEntryModule } from "../cli/utils.js";
 
 const PROJECT_ROOT = process.cwd();
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -243,16 +244,4 @@ function main(): void {
   process.exit(1);
 }
 
-// Only when invoked as a CLI, so a test can import the resolution helpers
-// without diffing the cwd.
-const invokedAsScript = ((): boolean => {
-  const entry = process.argv[1];
-  if (!entry) return false;
-  try {
-    return fs.realpathSync(entry) === fileURLToPath(import.meta.url);
-  } catch {
-    return false;
-  }
-})();
-
-if (invokedAsScript) main();
+if (isEntryModule(import.meta.url)) main();

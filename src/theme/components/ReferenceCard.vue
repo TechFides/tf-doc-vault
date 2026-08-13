@@ -179,11 +179,7 @@ const derivedInitials = computed(() => {
 .reference-card__initials {
   display: grid;
   place-items: center;
-  background: color-mix(
-    in oklab,
-    var(--tf-color-accent) var(--tf-tint),
-    transparent
-  );
+  background: var(--tf-color-accent-soft);
   color: var(--tf-color-accent-ink);
   font-family: var(--tf-font-display);
   font-size: var(--tf-text-caption);

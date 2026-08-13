@@ -44,6 +44,9 @@
     var(--brand-navy)
   );
 
+  /* The accent as a wash: what a hover, a tinted tile or a chip fills with. */
+  --tf-color-accent-soft: var(--brand-primary-soft);
+
   /* The accent used as a link, which dark mode takes two steps lighter. Every place that
      reads as a link takes these, so the mode difference is declared once here instead of
      as a `.dark` override beside each rule. */

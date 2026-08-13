@@ -126,11 +126,7 @@ a.feature-card:hover {
   width: var(--tf-size-2xl);
   height: var(--tf-size-2xl);
   border-radius: var(--tf-radius-lg);
-  background: color-mix(
-    in oklab,
-    var(--tf-color-accent) var(--tf-tint),
-    transparent
-  );
+  background: var(--tf-color-accent-soft);
   display: flex;
   align-items: center;
   justify-content: center;
