@@ -156,6 +156,63 @@
   color: var(--tf-color-accent-ink);
 }
 
+/*
+ * A list of settled points rather than tasks to tick. Put it on the element holding a plain
+ * list; the items keep their own markup and gain the check row.
+ *
+ * It lives here rather than inside a component because StepCard and ReferenceCard both need
+ * it, and an author can reach for it directly. The check is masked from --tf-check-mask, the
+ * same shape the theme's own checked box draws, so the two never drift apart.
+ */
+.tf-checks ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tf-checks li {
+  position: relative;
+  margin: 0 0 var(--tf-spacing-3);
+  padding-left: calc(var(--tf-size-md) + var(--tf-spacing-3));
+  color: var(--tf-color-muted);
+}
+
+.tf-checks li:last-child {
+  margin-bottom: 0;
+}
+
+/* Two pseudo-elements per row: the tinted square, and the check masked inside it. */
+.tf-checks li::before,
+.tf-checks li::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.15em;
+  width: var(--tf-size-md);
+  height: var(--tf-size-md);
+}
+
+.tf-checks li::before {
+  border-radius: var(--tf-radius-xs);
+  background: color-mix(
+    in oklab,
+    var(--tf-color-accent) var(--tf-tint),
+    transparent
+  );
+}
+
+.tf-checks li::after {
+  background: var(--tf-color-accent-ink);
+  -webkit-mask: var(--tf-check-mask) no-repeat center / 12px 12px;
+  mask: var(--tf-check-mask) no-repeat center / 12px 12px;
+}
+
+/* The term opening a point takes the page's text colour, so the explanation after it stays
+   quiet and a long list stays scannable. */
+.tf-checks strong {
+  color: var(--tf-color-fg);
+}
+
 /* Numbered step marker. Only reach for it when the content really is a sequence:
    on an unordered set the numbers claim an order that is not there. */
 .tf-step {

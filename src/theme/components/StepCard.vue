@@ -24,7 +24,8 @@ defineProps<{
         {{ title }}
       </p>
       <p v-if="lead" class="step-card__lead">{{ lead }}</p>
-      <div class="step-card__points"><slot /></div>
+      <!-- tf-checks is in patterns.css, shared with ReferenceCard. -->
+      <div class="step-card__points tf-checks"><slot /></div>
       <div v-if="$slots.tags" class="step-card__tags"><slot name="tags" /></div>
     </div>
   </aside>
@@ -99,59 +100,6 @@ defineProps<{
   margin-top: var(--tf-spacing-5);
   font-size: var(--tf-text-body-sm);
   line-height: var(--tf-leading-body);
-}
-
-/* The slot takes a plain list and turns each item into a check row, so an author writes
-   `- item` rather than `- [x] item`: these are settled points, not tasks to tick. */
-.step-card__points :deep(ul) {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.step-card__points :deep(li) {
-  position: relative;
-  margin: 0 0 var(--tf-spacing-3);
-  padding-left: calc(var(--tf-size-md) + var(--tf-spacing-3));
-  color: var(--tf-color-muted);
-}
-
-.step-card__points :deep(li:last-child) {
-  margin-bottom: 0;
-}
-
-/* Two pseudo-elements on one row: the tinted square, and the check masked inside it. */
-.step-card__points :deep(li::before) {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.15em;
-  width: var(--tf-size-md);
-  height: var(--tf-size-md);
-  border-radius: var(--tf-radius-xs);
-  background: color-mix(
-    in oklab,
-    var(--tf-color-accent) var(--tf-tint),
-    transparent
-  );
-}
-
-.step-card__points :deep(li::after) {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.15em;
-  width: var(--tf-size-md);
-  height: var(--tf-size-md);
-  background: var(--tf-color-accent-ink);
-  -webkit-mask: var(--tf-check-mask) no-repeat center / 12px 12px;
-  mask: var(--tf-check-mask) no-repeat center / 12px 12px;
-}
-
-/* The term that opens a point carries the page's own text colour, so it reads as the label
-   of the line and the explanation after it stays quiet. */
-.step-card__points :deep(strong) {
-  color: var(--tf-color-fg);
 }
 
 .step-card__tags {

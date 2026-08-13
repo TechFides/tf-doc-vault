@@ -84,12 +84,13 @@ the measure and a larger floor drops a three-card row to two.
 
 ## Chips and steps
 
-| Class             | Effect                       |
-| ----------------- | ---------------------------- |
-| `tf-chips`        | Row of chips, wrapping.      |
-| `tf-chip`         | One chip.                    |
-| `tf-chip--accent` | The same chip in the accent. |
-| `tf-step`         | Numbered circle marker.      |
+| Class             | Effect                                         |
+| ----------------- | ---------------------------------------------- |
+| `tf-chips`        | Row of chips, wrapping.                        |
+| `tf-chip`         | One chip.                                      |
+| `tf-chip--accent` | The same chip in the accent.                   |
+| `tf-step`         | Numbered circle marker.                        |
+| `tf-checks`       | Turns a plain list into check rows. See below. |
 
 <div class="tf-chips">
   <span class="tf-chip">Node 24</span>
@@ -110,6 +111,27 @@ the measure and a larger floor drops a three-card row to two.
 
 Only reach for `tf-step` when the content really is a sequence. On an unordered set the
 numbers claim an order that is not there.
+
+`tf-checks` goes on the element holding a list, and the items keep their own markup:
+
+<div class="tf-checks">
+
+- **A settled point**: the term takes the page's colour, the explanation stays quiet.
+- **Another one**: the check is masked from the same shape the theme's checked box uses.
+
+</div>
+
+```md
+<div class="tf-checks">
+
+- **A settled point**: with its explanation.
+
+</div>
+```
+
+Use it rather than a task list where the items are established facts. Real checkboxes are
+interactive, and a page of them invites a reader to click things that do nothing.
+[StepCard](./019-step-card) and [ReferenceCard](./020-reference-card) both apply it for you.
 
 ## Buttons
 
