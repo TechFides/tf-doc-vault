@@ -35,6 +35,14 @@
   --tf-color-accent: var(--brand-primary);
   --tf-color-accent-2: var(--brand-secondary);
   --tf-color-accent-hi: var(--brand-primary-hover);
+  /* The accent as ink rather than as a fill. The brand blue clears 4.5:1 on bare white by
+     0.2, which is gone the moment the text sits on a tint of itself, so anywhere it labels
+     an accent-tinted surface it needs this instead. */
+  --tf-color-accent-ink: color-mix(
+    in oklab,
+    var(--tf-color-accent) 70%,
+    var(--brand-navy)
+  );
 
   --tf-color-bg: #f7f9fc;
   --tf-color-surface-1: #eef2f8;
@@ -68,12 +76,14 @@
   --tf-color-scrim: rgba(9, 38, 70, 0.2);
   --tf-color-backdrop: rgba(247, 249, 252, 0.72);
 
-  /* Lightness sits near 0.55 so each state passes AA as text on a white panel;
-     the dark block lifts them to Forge's 0.66-0.80, which needs a dark ground. */
-  --tf-color-success: oklch(0.55 0.14 155);
-  --tf-color-warning: oklch(0.58 0.13 70);
-  --tf-color-info: oklch(0.52 0.15 245);
-  --tf-color-danger: oklch(0.53 0.19 25);
+  /* Lightness is set against the worst ground each state actually lands on: its own chip,
+     tinted by --tf-tint of itself, over the bare page colour. That is the phone layout,
+     where the reading panel carries no fill; clearing it there clears the panel too. The
+     dark block lifts them to Forge's 0.66-0.80, which needs a dark ground. */
+  --tf-color-success: oklch(0.47 0.14 155);
+  --tf-color-warning: oklch(0.5 0.13 70);
+  --tf-color-info: oklch(0.49 0.15 245);
+  --tf-color-danger: oklch(0.51 0.19 25);
 
   --tf-tint: 15%;
   --tf-tint-hi: 30%;
@@ -189,14 +199,21 @@
 
   /* Page backdrop. The star field is dark mode only: white specks on a near-white page
      read as dust. Raise --tf-stars-opacity in light mode to opt in. */
-  --tf-nebula-opacity: 0.45;
+  --tf-nebula-opacity: 1;
   --tf-stars-opacity: 0;
   /* The hero turns the same material up, since no document sits on it. */
   --tf-hero-bloom-opacity: 0.5;
   --tf-hero-stars-opacity: 0;
-  --tf-nebula-1: color-mix(in oklab, var(--tf-color-accent) 16%, transparent);
-  --tf-nebula-2: color-mix(in oklab, var(--tf-color-accent-2) 13%, transparent);
-  --tf-nebula-3: color-mix(in oklab, var(--tf-color-accent) 11%, transparent);
+  /* Cloud 2 is the pair that lands on the outline column, which has no panel of its own,
+     so its muted links sit straight on the sky. That is what caps it this far below the
+     other two; see backdrop.css for which cloud goes where. */
+  --tf-nebula-1: color-mix(in oklab, var(--tf-color-accent) 55%, transparent);
+  --tf-nebula-2: color-mix(in oklab, var(--tf-color-accent-2) 11%, transparent);
+  --tf-nebula-3: color-mix(
+    in oklab,
+    color-mix(in oklab, var(--brand-navy) 55%, var(--tf-color-accent)) 38%,
+    transparent
+  );
   --tf-ring-focus: 0 0 0 3px
     color-mix(in oklab, var(--tf-color-accent) var(--tf-tint-hi), transparent);
 
@@ -235,7 +252,7 @@
   --brand-info: var(--tf-color-info);
   /* Kept distinct from success only because the two custom blocks sit next to
      each other often enough that identical colours read as a mistake. */
-  --brand-tip: oklch(0.52 0.13 165);
+  --brand-tip: oklch(0.47 0.13 165);
 
   --brand-success-bg: color-mix(
     in oklab,
@@ -378,6 +395,8 @@
 .dark {
   --brand-surface: #14161d;
   --brand-primary-hover: var(--brand-secondary);
+  /* Ink on a dark tint goes the other way: the lighter accent, not the darker one. */
+  --tf-color-accent-ink: var(--tf-color-accent-2);
   /* Historically the dark navbar / sidebar navy, and still that hook: it is the
      only token the nav chrome reads, so overriding it recolours dark chrome. */
   --brand-nav-navy: #101219;
@@ -428,7 +447,9 @@
   --tf-hero-bloom-opacity: 1;
   --tf-hero-stars-opacity: 1;
   --tf-nebula-1: color-mix(in oklab, var(--tf-color-accent) 46%, transparent);
-  --tf-nebula-2: color-mix(in oklab, var(--tf-color-accent-2) 34%, transparent);
+  /* Cloud 2 lands on the outline column, which has no panel of its own. At 34% it took the
+     outline's labels to 4.3:1; this holds them near 4.7:1. */
+  --tf-nebula-2: color-mix(in oklab, var(--tf-color-accent-2) 30%, transparent);
   --tf-nebula-3: color-mix(in oklab, var(--tf-color-accent) 38%, transparent);
 
   --brand-tip: oklch(0.75 0.14 165);
@@ -516,21 +537,23 @@
   }
 }
 
+/* The opacities are fractions of --tf-nebula-opacity, not absolutes: a keyframe wins over
+   the element's own declaration, so a literal here would leave that token doing nothing. */
 @keyframes tf-nebula-drift {
   0% {
-    opacity: 0.78;
+    opacity: calc(var(--tf-nebula-opacity) * 0.78);
     transform: translate3d(0, 0, 0) scale(1);
   }
   33% {
-    opacity: 1;
+    opacity: var(--tf-nebula-opacity);
     transform: translate3d(1.6%, -1.2%, 0) scale(1.04);
   }
   66% {
-    opacity: 0.86;
+    opacity: calc(var(--tf-nebula-opacity) * 0.86);
     transform: translate3d(-1.2%, 1.4%, 0) scale(1.02);
   }
   100% {
-    opacity: 0.78;
+    opacity: calc(var(--tf-nebula-opacity) * 0.78);
     transform: translate3d(0, 0, 0) scale(1);
   }
 }

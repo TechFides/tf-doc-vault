@@ -108,15 +108,23 @@ other way, so a one-line override still works.
 | `--brand-bg-subtle`      | `#eef2f8`            | Code block background                                        |
 | `--brand-border-default` | `rgba(9,38,70,.10)`  | Dividers, table borders                                      |
 | `--brand-border-strong`  | `rgba(9,38,70,.18)`  | Stronger borders                                             |
-| `--brand-success`/`-bg`  | `oklch(.55 .14 155)` | Status, badges                                               |
-| `--brand-warning`/`-bg`  | `oklch(.58 .13 70)`  | Also drives Mermaid note styling                             |
-| `--brand-danger`/`-bg`   | `oklch(.53 .19 25)`  | "                                                            |
-| `--brand-info`/`-bg`     | `oklch(.52 .15 245)` | "                                                            |
+| `--brand-success`/`-bg`  | `oklch(.47 .14 155)` | Status, badges                                               |
+| `--brand-warning`/`-bg`  | `oklch(.50 .13 70)`  | Also drives Mermaid note styling                             |
+| `--brand-danger`/`-bg`   | `oklch(.51 .19 25)`  | "                                                            |
+| `--brand-info`/`-bg`     | `oklch(.49 .15 245)` | "                                                            |
 
-State colours are set per mode: light sits near `L 0.55` so each one passes AA as
-text on a white panel, dark lifts them to `L 0.66-0.80`, which needs a dark ground.
-The `-bg` variants are `color-mix` of the state colour, so recolouring the state
-recolours its wash.
+State colours are set per mode. Light sits near `L 0.50`, calibrated against the worst
+ground each state actually lands on: its own badge or alert chip, tinted by `--tf-tint` of
+itself, over the bare page colour. That is the phone layout, where the reading panel
+carries no fill; clearing 4.5:1 there clears it on the panel too. Dark lifts them to
+`L 0.66-0.80`, which needs a dark ground. The `-bg` variants are `color-mix` of the state
+colour, so recolouring the state recolours its wash.
+
+`--tf-color-accent-ink` is the accent for text rather than for fills: the brand blue clears
+4.5:1 on bare white by only 0.2, which is gone the moment the text sits on a tint of
+itself, so the active sidebar item, the accent chip and the forward pager link use the ink
+token instead. Light mixes 30 % navy into the accent; dark takes the lighter
+`--tf-color-accent-2`.
 
 `DocMeta` status badges read `--brand-badge-{published,draft,review,archived}-{bg,text,border}`.
 Each one is a `color-mix` of a state colour rather than a hardcoded pair, so
@@ -173,17 +181,28 @@ whole thing off with `createTheme({ backdrop: false })`.
 The nebula layer is inset `-8%` so the drift has slack; at inset 0 the translate would
 walk the clouds' soft edges into view along the viewport border.
 
-| Token                 | Light             | Dark       | Effect                       |
-| --------------------- | ----------------- | ---------- | ---------------------------- |
-| `--tf-nebula-opacity` | `.45`             | `1`        | Strength of the whole nebula |
-| `--tf-stars-opacity`  | `0`               | `1`        | Strength of the star field   |
-| `--tf-nebula-1/2/3`   | 16/13/11 % accent | 30/22/24 % | The three clouds             |
+| Token                 | Light      | Dark       | Effect                       |
+| --------------------- | ---------- | ---------- | ---------------------------- |
+| `--tf-nebula-opacity` | `1`        | `1`        | Strength of the whole nebula |
+| `--tf-stars-opacity`  | `0`        | `1`        | Strength of the star field   |
+| `--tf-nebula-1/2/3`   | 55/11/38 % | 46/30/38 % | The three clouds             |
+
+The drift keyframes scale their opacity from `--tf-nebula-opacity` rather than setting it
+outright, because a keyframe outranks the element's own declaration and a literal there
+would leave the token doing nothing.
 
 The stars are off in light mode: white specks on a near-white page read as dust
 rather than sky. Raise `--tf-stars-opacity` if you want them anyway.
 
-Below 768px the panel goes full-bleed and there is no gutter left for stars, so that
-layer switches off and only the nebula remains.
+The two modes place the clouds differently, and `backdrop.css` explains why: dark clouds
+read as glow wherever they fall, while light clouds have to be darker than a near-white
+page to register at all, which makes them a contrast cost for any text above them. Light
+therefore pools its strength behind the frosted sidebar and panel, and keeps the pair over
+the outline column faint, since that column has no panel of its own.
+
+Below 768px the reading column is full-bleed and transparent, so there is no gutter and no
+glass: every star and every cloud would land on a line of text. The whole backdrop stands
+down there, in both modes, and the page keeps its flat colour.
 
 The page colour is on `html`, and `body` plus the VitePress containers are pinned
 transparent: the layer paints at `z-index: -1` and any fill above it would bury it.
