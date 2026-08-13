@@ -9,7 +9,7 @@ to a product site, a demo, a related portal; without them it is the last word on
 Either way, use it once per page at most. Two of them on one screen and neither is a
 spotlight any more.
 
-<Spotlight title="Forge, náš AI agent, který z ticketu vyrobí draft MR">
+<Spotlight title="Forge, náš AI agent, který z ticketu vyrobí draft MR" mark-frame>
   <template #mark>
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M12 2 4 7v10l8 5 8-5V7l-8-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>

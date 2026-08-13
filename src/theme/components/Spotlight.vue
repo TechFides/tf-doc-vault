@@ -1,16 +1,28 @@
 <script setup lang="ts">
-defineProps<{
-  /** Small uppercase label above the headline. Omit to drop the row. */
-  eyebrow?: string;
-  /** The headline. Omit to drop the row. */
-  title?: string;
-}>();
+withDefaults(
+  defineProps<{
+    /** Small uppercase label above the headline. Omit to drop the row. */
+    eyebrow?: string;
+    /** The headline. Omit to drop the row. */
+    title?: string;
+    /**
+     * Put the mark in an accent tile. Right for an icon glyph, which a frame gives weight
+     * to; leave it off for a brand mark, which carries its own shape and colour.
+     */
+    markFrame?: boolean;
+  }>(),
+  { markFrame: false },
+);
 </script>
 
 <template>
   <aside class="spotlight">
     <div class="spotlight__bloom" aria-hidden="true" />
-    <div v-if="$slots.mark" class="spotlight__mark">
+    <div
+      v-if="$slots.mark"
+      class="spotlight__mark"
+      :class="{ 'spotlight__mark--framed': markFrame }"
+    >
       <slot name="mark" />
     </div>
     <p v-if="eyebrow" class="spotlight__eyebrow">{{ eyebrow }}</p>
@@ -93,6 +105,19 @@ defineProps<{
   color: var(--tf-color-accent-ink);
 }
 
+/* Opt-in via markFrame. The tile is fixed-size, so the glyph inside it drops to the size the
+   frame leaves rather than keeping the free-standing cap. */
+.spotlight__mark--framed {
+  width: var(--tf-size-2xl);
+  height: var(--tf-size-2xl);
+  border-radius: var(--tf-radius-lg);
+  background: color-mix(
+    in oklab,
+    var(--tf-color-accent) var(--tf-tint),
+    transparent
+  );
+}
+
 /* Height, not width: a wordmark is wide and a glyph is square, and capping the height is
    what makes the two sit at the same optical size. */
 .spotlight__mark :deep(*) {
@@ -100,6 +125,12 @@ defineProps<{
   max-width: 100%;
   height: auto;
   max-height: var(--tf-size-2xl);
+}
+
+/* After the rule above, not before it: both are (0,2,1) once the scope attribute is added,
+   so source order is the only thing deciding which cap applies. */
+.spotlight__mark--framed :deep(*) {
+  max-height: var(--tf-size-lg);
 }
 
 .spotlight__eyebrow {

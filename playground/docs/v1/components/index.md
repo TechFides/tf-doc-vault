@@ -3,9 +3,16 @@ title: Components
 order: 1
 ---
 
-Every Vue component the shared theme ships, and how you get it. Most of them you never
-write: the theme mounts them into VitePress' layout slots, and they are here so you can see
-what is already working for you. The handful you do place yourself are in the first table.
+Everything the shared theme gives you: the Vue components, the CSS classes you write in
+Markdown, the icons and the rest of the export surface. Most of the components you never
+write, because the theme mounts them into VitePress' layout slots, and they are listed so you
+can see what is already working for you.
+
+| Beyond the components                    | What is in it                                   |
+| ---------------------------------------- | ----------------------------------------------- |
+| [Pattern classes](./016-pattern-classes) | The `tf-*` classes and `data-tf-*` attributes.  |
+| [Icons](./017-icons)                     | The 47 icon-font glyphs and the five SVG marks. |
+| [Exports](./018-exports)                 | `createTheme` options, `useScrollSpy`, `i18n`.  |
 
 ## You place these
 
