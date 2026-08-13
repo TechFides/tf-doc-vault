@@ -10,7 +10,8 @@ interface FeatureCard {
   icon?: string;
   title: string;
   description: string;
-  link: string;
+  /** Omit to get a card that states something rather than leading somewhere. */
+  link?: string;
   linkText?: string;
 }
 
@@ -34,10 +35,14 @@ const features = computed<FeatureCard[]>(
 
 <template>
   <div v-if="features.length" class="feature-cards">
-    <a
+    <!-- An anchor only when there is somewhere to go. The element type is what carries the
+         distinction: the interactive styles below hang off `a.feature-card`, so a card
+         without a link cannot pick up a pointer, a hover lift or a focus ring. -->
+    <component
+      :is="card.link ? 'a' : 'div'"
       v-for="card in features"
       :key="card.title"
-      :href="withBase(card.link)"
+      :href="card.link ? withBase(card.link) : undefined"
       class="feature-card"
     >
       <div class="feature-card__icon-wrap">
@@ -45,7 +50,7 @@ const features = computed<FeatureCard[]>(
       </div>
       <h3 class="feature-card__title">{{ card.title }}</h3>
       <p class="feature-card__desc">{{ card.description }}</p>
-      <span class="feature-card__cta">
+      <span v-if="card.link" class="feature-card__cta">
         {{ card.linkText ?? t("feature.cta") }}
         <svg
           class="feature-card__arrow"
@@ -63,7 +68,7 @@ const features = computed<FeatureCard[]>(
           />
         </svg>
       </span>
-    </a>
+    </component>
   </div>
 </template>
 
@@ -102,11 +107,10 @@ const features = computed<FeatureCard[]>(
   box-shadow: var(--tf-shadow-1);
   text-decoration: none;
   color: inherit;
-  cursor: pointer;
   transition: var(--tf-t-base);
 }
 
-.feature-card:hover {
+a.feature-card:hover {
   border-color: color-mix(
     in oklab,
     var(--tf-color-accent) 45%,
@@ -137,7 +141,7 @@ const features = computed<FeatureCard[]>(
 
 /* The tile fills with the accent gradient on hover and the glyph flips to white:
    the card's own colour arriving, rather than a generic highlight. */
-.feature-card:hover .feature-card__icon-wrap {
+a.feature-card:hover .feature-card__icon-wrap {
   background: var(--tf-grad-accent);
 }
 
@@ -153,8 +157,8 @@ const features = computed<FeatureCard[]>(
   color: var(--tf-color-accent-2);
 }
 
-.feature-card:hover .feature-card__icon,
-.dark .feature-card:hover .feature-card__icon {
+a.feature-card:hover .feature-card__icon,
+.dark a.feature-card:hover .feature-card__icon {
   color: #fff;
 }
 
@@ -196,7 +200,7 @@ const features = computed<FeatureCard[]>(
   color: var(--tf-color-accent-2);
 }
 
-.feature-card:hover .feature-card__cta {
+a.feature-card:hover .feature-card__cta {
   gap: var(--tf-spacing-3);
 }
 
@@ -207,7 +211,7 @@ const features = computed<FeatureCard[]>(
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .feature-card:hover {
+  a.feature-card:hover {
     transform: none;
   }
 }
