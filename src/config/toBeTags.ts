@@ -1,26 +1,22 @@
 import container from "markdown-it-container";
 import type { MarkdownRenderer } from "vitepress";
 
-/**
- * VitePress bundles markdown-it into its own dist rather than depending on the
- * package, so `markdown-it/lib/token.mjs` does not resolve. Recover the token
- * type from the renderer's public surface instead of adding a second copy of
- * markdown-it just for a type.
- */
+// VitePress bundles markdown-it instead of depending on it, so
+// `markdown-it/lib/token.mjs` does not resolve.
 type RenderRule = NonNullable<MarkdownRenderer["renderer"]["rules"][string]>;
 type Token = Parameters<RenderRule>[0][number];
 
 /**
- * TO-BE tagging: mark planned, not-yet-deployed changes in a functional
- * specification. Analysts write `{ADD <ticket>}…{/ADD}` inline or a
- * `::: add <ticket>` block; both render coloured with the ticket linked.
- * Omit the option and no rules are registered.
+ * Tagging for planned, not-yet-deployed changes in a functional specification.
+ * Analysts write `{ADD <ticket>}…{/ADD}` inline or a `::: add <ticket>` block;
+ * both render coloured with the ticket linked. Omit the option to register no
+ * rules at all.
  */
 export interface ToBeTags {
   /**
-   * Base URL a ticket number is appended to, including the browse path, e.g.
-   * `https://acme.atlassian.net/browse`. Any issue tracker works; the ticket is
-   * taken verbatim and never validated against a project key.
+   * Base URL the ticket is appended to, including the browse path, e.g.
+   * `https://acme.atlassian.net/browse`. The ticket is never checked against a
+   * project key, so any tracker works.
    */
   jiraBaseUrl: string;
 }
@@ -45,12 +41,8 @@ const CLOSE_TOKEN = "tobe_close";
 const KINDS: readonly Kind[] = ["add", "del"];
 const CURLY = 0x7b;
 
-/*
- * The ticket is one whitespace-free token. That is tokenisation, not validation:
- * something has to decide where the ticket ends. It also keeps prose such as
- * `{ADD a note here}` from being read as a marker. Ordinary braces never reach
- * these patterns anyway, because the ADD / DEL keyword gates them.
- */
+// A whitespace-free ticket is what keeps prose like `{ADD a note here}` from
+// parsing as a marker.
 const OPEN = /^\{(ADD|DEL)\s+([^}\s]+)\}/;
 const CLOSE = /^\{\/(ADD|DEL)\}/;
 // The \s+ stops `::: added` from matching the `add` container.
@@ -59,12 +51,9 @@ const INFO: Record<Kind, RegExp> = {
   del: /^del\s+([^}\s]+)\s*$/,
 };
 
-/**
- * Live options per renderer. The rules read from here instead of closing over
- * the values, so re-invoking `toBeTags` (the dev server re-runs the config on
- * HMR, and VitePress hands out one cached renderer per process) updates the
- * options without installing a second copy of every rule.
- */
+// Rules read options from here rather than closing over them: VitePress caches
+// one renderer per process, so a later call has to retarget the installed rules
+// instead of adding a second copy of each.
 const configs = new WeakMap<MarkdownRenderer, ToBeTags>();
 
 function ticketUrl(base: string, ticket: string): string {
@@ -84,14 +73,6 @@ function closeMarker(kind: Kind): string {
   return `<strong class="tf-tobe-marker">{/${kind.toUpperCase()}}</strong>`;
 }
 
-/**
- * Both markers are pushed with nesting 0 and emit their own `<span>` tags as
- * text. Real nesting (1/-1) would be more idiomatic but makes markdown-it
- * maintain a delimiter stack, and a closer with no opener pops it empty, then
- * crashes `link_pairs` on an undefined `state.delimiters`. Unbalanced markers are
- * a normal authoring mistake here, not an edge case, so the stack must stay
- * untouched.
- */
 function registerInline(md: MarkdownRenderer): void {
   md.inline.ruler.before("link", "tobe-tag", (state, silent) => {
     if (state.src.charCodeAt(state.pos) !== CURLY) return false;
@@ -100,6 +81,9 @@ function registerInline(md: MarkdownRenderer): void {
     const opening = OPEN.exec(rest);
     if (opening) {
       if (!silent) {
+        // Nesting stays 0: with real nesting markdown-it keeps a delimiter
+        // stack, and an unmatched closer pops it empty, then crashes
+        // `link_pairs` on an undefined `state.delimiters`.
         const token = state.push(OPEN_TOKEN, "span", 0);
         token.meta = {
           kind: opening[1]?.toLowerCase() as Kind,
@@ -128,13 +112,7 @@ function registerInline(md: MarkdownRenderer): void {
   });
 }
 
-/**
- * Pair the inline markers within each paragraph. An unclosed opener or a stray
- * closer is flagged to render as literal text: emitting a half-open span would
- * bleed colour into unrelated content, and the visible braces make the mistake
- * obvious to the author. Spanning a paragraph boundary is what the block form is
- * for.
- */
+/** Pairing is per `inline` token, so an inline tag cannot cross a paragraph. */
 function registerPairing(md: MarkdownRenderer): void {
   md.core.ruler.push("tobe-pair", (state) => {
     for (const token of state.tokens) {

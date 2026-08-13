@@ -8,12 +8,6 @@ const REPO_ROOT = path.resolve(
 );
 const PORT = 5177;
 
-/**
- * The unit tests cover the markdown-it rules. This covers what they cannot: that
- * the colour actually reaches content inside a block-form tag through the real
- * VitePress theme, where `.vp-doc` sets its own colours on headings, code and
- * table cells.
- */
 test("TO-BE tag colours reach content inside the block form", async ({
   page,
   webServer,
@@ -38,9 +32,9 @@ test("TO-BE tag colours reach content inside the block form", async ({
   await page.goto(`${server.url}v1/components/007-tobe-tags`);
   await page.waitForLoadState("networkidle");
 
-  // The theme transitions `color`, so reading a computed colour right after the
-  // dark-mode toggle returns an intermediate value and any assertion on it
-  // passes regardless of the rule that ends up winning.
+  // The theme transitions `color`: without this, a colour read after the
+  // dark-mode toggle is an intermediate value and every assertion below passes
+  // vacuously.
   await page.addStyleTag({
     content:
       "*, *::before, *::after { transition: none !important; animation: none !important; }",
@@ -56,7 +50,6 @@ test("TO-BE tag colours reach content inside the block form", async ({
   const addBlock = page.locator("div.tf-tobe-add").first();
   await expect(addBlock).toBeVisible();
 
-  // A heading nested in the block must inherit the tag colour, not the theme's.
   const headingColor = await addBlock
     .locator("h3")
     .first()
@@ -68,10 +61,8 @@ test("TO-BE tag colours reach content inside the block form", async ({
     "href",
     "https://example.atlassian.net/browse/DOC-9700",
   );
-  // `.vp-doc a` and `.dark .vp-doc a` would otherwise paint the ticket
-  // brand-blue; the marker has to read as part of the tag. This rests on
-  // selector specificity, and the dark-mode rule is a separate, later selector
-  // that regressed this once, so assert BOTH modes.
+  // `.dark .vp-doc a` is a separate selector from `.vp-doc a`, so both modes
+  // need asserting.
   const linkColorOf = async (): Promise<string> =>
     ticketLink.evaluate((el) => getComputedStyle(el).color);
   expect(await linkColorOf()).toBe("rgb(255, 86, 48)");
@@ -86,7 +77,6 @@ test("TO-BE tag colours reach content inside the block form", async ({
     .evaluate((el) => getComputedStyle(el).textDecorationLine);
   expect(delDecoration).toContain("line-through");
 
-  // The unpaired opener must not have produced a span.
   const unpaired = page.getByText("this opener is never closed");
   await expect(unpaired).toBeVisible();
   expect(await unpaired.evaluate((el) => el.closest(".tf-tobe") !== null)).toBe(

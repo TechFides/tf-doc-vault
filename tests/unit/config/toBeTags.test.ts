@@ -93,9 +93,7 @@ describe("toBeTags block rule", () => {
     expect(html).not.toContain("tf-tobe");
   });
 
-  // Prettier inserts a blank line after the opener when it formats a docs page,
-  // so both spacings have to work: the one an analyst types and the one the
-  // formatter leaves behind.
+  // Prettier inserts this blank line when it formats a docs page.
   test("a blank line after the opener is accepted", async () => {
     const html = await render("::: add DOC-9693\n\n## Nadpis\n\n:::\n");
     expect(html).toContain('<div class="tf-tobe tf-tobe-add">');
@@ -121,8 +119,6 @@ describe("toBeTags pairing and tokenisation", () => {
     expect(html).not.toContain("tf-tobe");
   });
 
-  // The ticket is never validated against a project key, so any tracker's
-  // format has to work with no configuration.
   test("any ticket format is accepted verbatim", async () => {
     for (const ticket of ["DOC-9693", "ABC-42", "PROJ_1", "1234", "gh-7"]) {
       const html = await render(`{ADD ${ticket}}text{/ADD}\n`);
@@ -131,8 +127,6 @@ describe("toBeTags pairing and tokenisation", () => {
     }
   });
 
-  // The ticket is one whitespace-free token, so prose that happens to start
-  // with the keyword is not swallowed as a marker.
   test("a multi-word ticket is not a marker", async () => {
     const html = await render("{ADD a note here}text{/ADD}\n");
     expect(html).not.toContain("tf-tobe");
@@ -151,9 +145,7 @@ describe("toBeTags pairing and tokenisation", () => {
 });
 
 describe("toBeTags options", () => {
-  // VitePress hands out one cached renderer per process, so re-invoking
-  // toBeTags has to retarget the existing rules rather than leave the first
-  // call's options in force or install a second copy of everything.
+  // VitePress hands out one cached renderer per process.
   test("re-registering with new options retargets the installed rules", async () => {
     const md = await createMarkdownRenderer(process.cwd());
     toBeTags(md, { jiraBaseUrl: JIRA });
@@ -164,7 +156,6 @@ describe("toBeTags options", () => {
     toBeTags(md, { jiraBaseUrl: "https://other.example/browse" });
     const second = md.render("{ADD DOC-7}text{/ADD}\n");
     expect(second).toContain('href="https://other.example/browse/DOC-7"');
-    // Not a second copy of every rule, and no stale base URL.
     expect(second).not.toContain(JIRA);
     expect(second.match(/tf-tobe-add/g)).toHaveLength(1);
   });
