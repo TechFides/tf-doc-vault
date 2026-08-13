@@ -10,6 +10,7 @@ import WidthToggle from "./components/WidthToggle.vue";
 import BrandHero from "./components/BrandHero.vue";
 import FeatureCards from "./components/FeatureCards.vue";
 import Spotlight from "./components/Spotlight.vue";
+import AuthorCard from "./components/AuthorCard.vue";
 import BrandFooter from "./components/BrandFooter.vue";
 import NotFound from "./components/NotFound.vue";
 import PageBackdrop from "./components/PageBackdrop.vue";
@@ -92,6 +93,7 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
       app.component("BrandHero", BrandHero);
       app.component("FeatureCards", FeatureCards);
       app.component("Spotlight", Spotlight);
+      app.component("AuthorCard", AuthorCard);
     },
   };
 }
@@ -106,6 +108,7 @@ export {
   BrandHero,
   FeatureCards,
   Spotlight,
+  AuthorCard,
   BrandFooter,
   NotFound,
   PageBackdrop,
