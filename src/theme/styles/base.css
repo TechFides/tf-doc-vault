@@ -593,22 +593,6 @@ html.layout-max .VPContent {
   line-height: var(--tf-leading-body);
 }
 
-/* The panel's inner width is the measure (see .content-container), so a figure that
-   should exceed it bleeds by half the panel padding. */
-.vp-doc .tf-table,
-.vp-doc div[class*="language-"],
-.vp-doc .mermaid {
-  margin-inline: calc(-1 * var(--tf-spacing-6));
-}
-
-@media (max-width: 768px) {
-  .vp-doc .tf-table,
-  .vp-doc div[class*="language-"],
-  .vp-doc .mermaid {
-    margin-inline: 0;
-  }
-}
-
 /* Zebra striping. The nth-child rule is the pre-hydration and no-JS fallback;
    its paint goes stale once a sort or filter shifts the parity, so
    TableEnhancer.vue tags rows `.tf-row` / `.tf-stripe` and reassigns them on
@@ -706,8 +690,6 @@ html.layout-max .VPContent {
   /* Block spacing lives on the wrapper; the table's own margin is zeroed
      below so it doesn't push an empty strip inside this bordered frame. */
   position: relative;
-  /* margin-block, not the shorthand: the shorthand would reset the inline bleed
-     set for figures further up and silently pull the table back into the column. */
   margin-block: var(--tf-spacing-5);
   border-radius: var(--tf-radius-lg);
   border: 1px solid var(--brand-border-default);
@@ -1009,12 +991,15 @@ html.layout-max .VPContent {
   letter-spacing: 0;
 }
 
-.VPDocFooter .pager-link.next .title {
-  color: var(--vp-c-brand-1);
+/* Only the forward link carries the accent, so the pair reads as one emphasised and one
+   ordinary. VitePress accents both, which also leaves the back link on the light-mode blue
+   in dark mode, at 3.5:1. */
+.VPDocFooter .pager-link.prev .title {
+  color: var(--tf-color-fg);
 }
 
-.dark .VPDocFooter .pager-link.next .title {
-  color: var(--tf-color-accent-2);
+.VPDocFooter .pager-link.next .title {
+  color: var(--tf-color-accent-ink);
 }
 
 .vp-doc div[class*="language-"] {
@@ -1255,7 +1240,7 @@ html.layout-max .VPContent {
 }
 
 .VPSidebarItem.is-active > .item .link .text {
-  color: var(--vp-c-brand-1) !important;
+  color: var(--tf-color-accent-ink) !important;
   font-weight: 600;
 }
 

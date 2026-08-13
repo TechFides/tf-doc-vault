@@ -153,11 +153,7 @@
     var(--tf-color-accent) var(--tf-tint),
     transparent
   );
-  color: var(--vp-c-brand-1);
-}
-
-.dark .tf-chip--accent {
-  color: var(--tf-color-accent-2);
+  color: var(--tf-color-accent-ink);
 }
 
 /* Numbered step marker. Only reach for it when the content really is a sequence:
