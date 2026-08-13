@@ -44,6 +44,9 @@
   /* Frosted glass for surfaces that lie directly on the backdrop. Pair it with a blur:
      that is what turns a star behind the surface into a glow instead of a speck. */
   --tf-glass-alpha: 80%;
+  /* The sidebar carries short labels rather than paragraphs, so it can sit lighter than
+     the reading panel and let more of the backdrop through. */
+  --tf-glass-alpha-sidebar: 62%;
   --tf-color-panel-glass: color-mix(
     in srgb,
     #ffffff var(--tf-glass-alpha),
@@ -325,7 +328,7 @@
   --vp-sidebar-width: 360px;
   --vp-sidebar-bg-color: color-mix(
     in srgb,
-    var(--tf-color-surface-1) var(--tf-glass-alpha),
+    var(--tf-color-surface-1) var(--tf-glass-alpha-sidebar),
     transparent
   );
   --vp-nav-bg-color: var(--tf-color-bg);
@@ -387,6 +390,7 @@
   /* The inner mix is the translucent panel tone flattened onto the page, so the glass
      keeps the panel's colour rather than turning into a grey veil. */
   --tf-glass-alpha: 72%;
+  --tf-glass-alpha-sidebar: 48%;
   --tf-color-panel-glass: color-mix(
     in srgb,
     color-mix(in srgb, #ffffff 4.5%, var(--tf-color-bg)) var(--tf-glass-alpha),
@@ -432,7 +436,7 @@
   --vp-code-block-bg: color-mix(in srgb, #0a0c11 72%, transparent);
   --vp-sidebar-bg-color: color-mix(
     in srgb,
-    var(--brand-nav-navy) var(--tf-glass-alpha),
+    var(--brand-nav-navy) var(--tf-glass-alpha-sidebar),
     transparent
   );
   --vp-nav-bg-color: var(--tf-color-bg);
