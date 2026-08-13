@@ -71,110 +71,109 @@ const features = computed<FeatureCard[]>(
 .feature-cards {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
-  margin: 0 0 40px;
+  gap: var(--tf-spacing-4);
+  margin: 0 0 var(--tf-spacing-lg);
 }
 
 @media (min-width: 480px) {
   .feature-cards {
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    gap: var(--tf-spacing-5);
   }
 }
 
 @media (min-width: 768px) {
   .feature-cards {
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    gap: var(--tf-spacing-6);
   }
 }
 
 .feature-card {
   display: flex;
   flex-direction: column;
-  padding: 28px;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 116, 200, 0.18);
-  background: var(--vp-c-bg);
-  box-shadow:
-    0 1px 4px rgba(0, 0, 0, 0.06),
-    0 0 0 0 transparent;
+  padding: var(--tf-spacing-7);
+  border-radius: var(--tf-radius-xl);
+  border: 1px solid var(--tf-color-line);
+  /* Glass, because a feature card sits directly on the backdrop rather than inside
+     the reading panel and has to soften the stars behind it itself. */
+  background: var(--tf-color-panel-glass);
+  backdrop-filter: blur(var(--tf-blur-panel)) saturate(var(--tf-glass-saturate));
+  box-shadow: var(--tf-shadow-1);
   text-decoration: none;
   color: inherit;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.15s ease;
   cursor: pointer;
+  transition: var(--tf-t-base);
 }
 
 .feature-card:hover {
-  border-color: var(--brand-primary);
-  box-shadow: 0 6px 20px rgba(0, 116, 200, 0.12);
+  border-color: color-mix(
+    in oklab,
+    var(--tf-color-accent) 45%,
+    var(--tf-color-line)
+  );
+  background: var(--tf-color-panel-hi);
+  box-shadow: var(--tf-shadow-2);
   transform: translateY(-2px);
   text-decoration: none;
 }
 
-.dark .feature-card {
-  background: #0e2240;
-  border-color: rgba(0, 116, 200, 0.35);
-}
-
-.dark .feature-card:hover {
-  border-color: var(--brand-secondary);
-  box-shadow: 0 4px 20px rgba(0, 160, 227, 0.12);
-}
-
 .feature-card__icon-wrap {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  background: var(--brand-primary-soft);
+  width: var(--tf-size-2xl);
+  height: var(--tf-size-2xl);
+  border-radius: var(--tf-radius-lg);
+  background: color-mix(
+    in oklab,
+    var(--tf-color-accent) var(--tf-tint),
+    transparent
+  );
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: var(--tf-spacing-5);
   flex-shrink: 0;
-  transition: background 0.15s ease;
+  transition: var(--tf-t-base);
 }
 
+/* The tile fills with the accent gradient on hover and the glyph flips to white:
+   the card's own colour arriving, rather than a generic highlight. */
 .feature-card:hover .feature-card__icon-wrap {
-  background: rgba(0, 116, 200, 0.16);
-}
-
-.dark .feature-card__icon-wrap {
-  background: rgba(0, 116, 200, 0.15);
-}
-
-.dark .feature-card:hover .feature-card__icon-wrap {
-  background: rgba(0, 160, 227, 0.2);
+  background: var(--tf-grad-accent);
 }
 
 .feature-card__icon {
-  width: 22px;
-  height: 22px;
-  color: var(--brand-primary);
+  width: var(--tf-icon-xl);
+  height: var(--tf-icon-xl);
+  color: var(--vp-c-brand-1);
   flex-shrink: 0;
+  transition: var(--tf-t-base);
 }
 
 .dark .feature-card__icon {
-  color: var(--brand-secondary);
+  color: var(--tf-color-accent-2);
+}
+
+.feature-card:hover .feature-card__icon,
+.dark .feature-card:hover .feature-card__icon {
+  color: #fff;
 }
 
 .feature-card__title {
-  font-size: 15px;
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-h4);
   font-weight: 600;
   line-height: 1.3;
-  color: var(--vp-c-text-1);
-  margin: 0 0 10px;
+  letter-spacing: var(--tf-tracking-h);
+  color: var(--tf-color-fg);
+  margin: 0 0 var(--tf-spacing-2);
   border: none;
   padding: 0;
 }
 
 .feature-card__desc {
-  font-size: 13px;
-  line-height: 1.65;
-  color: var(--vp-c-text-2);
+  font-size: var(--tf-text-body-sm);
+  line-height: var(--tf-leading-body);
+  color: var(--tf-color-muted);
   margin: 0;
   flex: 1;
 }
@@ -182,32 +181,34 @@ const features = computed<FeatureCard[]>(
 .feature-card__cta {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 24px;
-  font-size: 13px;
+  gap: var(--tf-spacing-2);
+  margin-top: var(--tf-spacing-6);
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-body-sm);
   font-weight: 600;
-  color: var(--brand-primary);
+  color: var(--vp-c-brand-1);
   transition:
-    gap 0.15s ease,
-    color 0.15s ease;
+    gap var(--tf-dur-1) var(--tf-ease-out),
+    color var(--tf-dur-1) var(--tf-ease-out);
 }
 
 .dark .feature-card__cta {
-  color: var(--brand-secondary);
+  color: var(--tf-color-accent-2);
 }
 
 .feature-card:hover .feature-card__cta {
-  gap: 10px;
-  color: var(--brand-primary-hover);
-}
-
-.dark .feature-card:hover .feature-card__cta {
-  color: #4dbfee;
+  gap: var(--tf-spacing-3);
 }
 
 .feature-card__arrow {
-  width: 16px;
-  height: 16px;
+  width: var(--tf-icon-md);
+  height: var(--tf-icon-md);
   flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feature-card:hover {
+    transform: none;
+  }
 }
 </style>

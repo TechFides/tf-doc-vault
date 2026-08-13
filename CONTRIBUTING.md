@@ -137,8 +137,18 @@ pnpm install         # once after cloning
 pnpm dev:docs        # → http://localhost:5173
 ```
 
-Then edit, for example, `src/theme/components/DocMeta.vue` or `src/theme/styles/base.css`; the browser re-renders without restart. Sample content lives in
-`playground/docs/v1/index.md` and covers the common rendering cases (code blocks, tables, DocMeta, outline, inline code).
+Then edit, for example, `src/theme/components/DocMeta.vue` or one of the four
+stylesheets in `src/theme/styles/`; the browser re-renders without restart. The
+stylesheets are imported in cascade order by `src/theme/index.ts` and each has one
+job: `tokens.css` defines tokens, `icons.css` carries the icon font, `backdrop.css`
+draws the nebula and star field, `base.css` maps tokens onto VitePress and styles
+Markdown, `patterns.css` holds the author-facing classes and must stay last so they
+outrank the chrome.
+
+Sample content lives under `playground/docs/v1/`. `showcase/001-elements` holds
+every Markdown construct on one page, `showcase/002-patterns` every pattern class,
+and `showcase/003-specification` a full-length document for judging vertical
+rhythm; `tokens/` and `components/` cover the individual features.
 
 Production build of the playground (useful for sanity-checking the eventual consumer build):
 

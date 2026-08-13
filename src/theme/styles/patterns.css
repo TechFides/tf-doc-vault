@@ -1,0 +1,342 @@
+/*
+ * Author-facing pattern classes and the ambient motion primitives they use.
+ * Last in the cascade (see theme/index.ts) so a `tf-` class placed in Markdown
+ * wins over the chrome rules in base.css.
+ */
+
+/* Label above a heading. Says what kind of thing follows, in the accent, so the
+   heading itself does not have to carry a category prefix. */
+.tf-eyebrow {
+  display: block;
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-caption-sm);
+  font-weight: 500;
+  letter-spacing: var(--tf-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--vp-c-brand-1);
+  margin-bottom: var(--tf-spacing-3);
+}
+
+.dark .tf-eyebrow {
+  color: var(--tf-color-accent-2);
+}
+
+.tf-lead {
+  font-size: var(--tf-text-lead);
+  line-height: var(--tf-leading-body);
+  color: var(--tf-color-muted);
+}
+
+/* Gradient-filled text for a single figure or phrase. The clip paints the whole
+   block, so a headline broken over two lines runs one gradient across both. */
+.tf-grad-text {
+  background: var(--tf-grad-accent-h);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Without clip-to-text support a transparent fill would erase the text entirely. */
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .tf-grad-text {
+    color: var(--tf-color-accent);
+    -webkit-text-fill-color: var(--tf-color-accent);
+  }
+}
+
+/* 180px, not 240: the reading column is sized to the measure, and a larger floor drops
+   a three-card row to two. */
+.tf-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: var(--tf-spacing-4);
+  margin-block: var(--tf-spacing-6);
+}
+
+.tf-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tf-spacing-3);
+  padding: var(--tf-spacing-6);
+  border: 1px solid var(--tf-color-line);
+  border-radius: var(--tf-radius-xl);
+  background: var(--tf-color-panel);
+  box-shadow: var(--tf-shadow-1);
+  backdrop-filter: blur(var(--tf-blur-panel)) saturate(var(--tf-glass-saturate));
+  transition: var(--tf-t-base);
+}
+
+.tf-card > :first-child {
+  margin-top: 0;
+}
+
+.tf-card > :last-child {
+  margin-bottom: 0;
+}
+
+/* A figure and its label. The number leads on size and tabular figures so a row
+   of them lines up on the digits. */
+.tf-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tf-spacing-1);
+}
+
+.tf-stat__value {
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-h2);
+  font-weight: 700;
+  line-height: var(--tf-leading-tight);
+  letter-spacing: var(--tf-tracking-h);
+  font-variant-numeric: tabular-nums;
+  color: var(--tf-color-fg);
+}
+
+.tf-stat__label {
+  font-size: var(--tf-text-caption);
+  color: var(--tf-color-muted);
+}
+
+/* Square tile behind an icon, at the two weights Forge uses: a wash for a quiet
+   one, the accent gradient for the one the eye should land on. */
+.tf-tile {
+  width: var(--tf-size-2xl);
+  height: var(--tf-size-2xl);
+  border-radius: var(--tf-radius-lg);
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: color-mix(
+    in oklab,
+    var(--tf-color-accent) var(--tf-tint),
+    transparent
+  );
+  color: var(--vp-c-brand-1);
+}
+
+.tf-tile--grad {
+  background: var(--tf-grad-accent);
+  color: #fff;
+}
+
+.tf-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tf-spacing-2);
+  margin-block: var(--tf-spacing-4);
+}
+
+.tf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tf-spacing-2);
+  height: var(--tf-size-lg);
+  padding: 0 var(--tf-spacing-3);
+  border: 1px solid var(--tf-color-line);
+  border-radius: var(--tf-radius-pill);
+  background: var(--tf-color-panel-2);
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-caption);
+  color: var(--tf-color-fg);
+  white-space: nowrap;
+}
+
+.tf-chip--accent {
+  border-color: color-mix(
+    in oklab,
+    var(--tf-color-accent) 40%,
+    var(--tf-color-line)
+  );
+  background: color-mix(
+    in oklab,
+    var(--tf-color-accent) var(--tf-tint),
+    transparent
+  );
+  color: var(--vp-c-brand-1);
+}
+
+.dark .tf-chip--accent {
+  color: var(--tf-color-accent-2);
+}
+
+/* Numbered step marker. Only reach for it when the content really is a sequence:
+   on an unordered set the numbers claim an order that is not there. */
+.tf-step {
+  width: var(--tf-size-lg);
+  height: var(--tf-size-lg);
+  border-radius: var(--tf-radius-pill);
+  background: var(--tf-grad-accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex: none;
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-caption-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The colour declarations carry !important because no class selector beats
+   `.dark .vp-doc a` on an anchor: that is (0,2,1), while `:is(a, button).tf-btn` is
+   (0,1,1), :is() taking the specificity of its heaviest argument. */
+:is(a, button).tf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tf-spacing-2);
+  height: var(--tf-size-3xl);
+  padding: 0 var(--tf-spacing-5);
+  border: 1px solid var(--tf-color-line-hi);
+  border-radius: var(--tf-radius-lg);
+  background: transparent;
+  color: var(--tf-color-fg) !important;
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-body-sm);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: var(--tf-t-base);
+}
+
+:is(a, button).tf-btn:hover {
+  border-color: var(--tf-color-accent);
+  background: color-mix(
+    in oklab,
+    var(--tf-color-accent) var(--tf-tint),
+    transparent
+  );
+  color: var(--vp-c-brand-1) !important;
+  text-decoration: none;
+}
+
+:is(a, button).tf-btn--primary,
+:is(a, button).tf-btn--primary:hover {
+  border-color: transparent;
+  background: var(--tf-grad-accent);
+  color: #fff !important;
+}
+
+:is(a, button).tf-btn--primary:hover {
+  box-shadow: var(--tf-shadow-2);
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(a, button).tf-btn--primary:hover {
+    transform: none;
+  }
+}
+
+.tf-divider {
+  height: 1px;
+  border: none;
+  background: var(--tf-grad-line);
+  opacity: var(--tf-dim);
+  margin-block: var(--tf-spacing-6);
+}
+
+/* Row of label and value separated by a hairline, for the compact fact lists that
+   fill the head of a specification page. */
+.tf-rows {
+  display: flex;
+  flex-direction: column;
+  margin-block: var(--tf-spacing-4);
+}
+
+.tf-rows > * {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--tf-spacing-4);
+  padding-block: var(--tf-spacing-3);
+  border-bottom: 1px solid var(--tf-color-line-2);
+  font-size: var(--tf-text-body-sm);
+}
+
+.tf-rows > *:last-child {
+  border-bottom: none;
+}
+
+/* inline-flex, so a label carrying a step marker or an icon keeps it on the baseline
+   instead of stacking the text under it. */
+.tf-rows dt,
+.tf-rows > * > :first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tf-spacing-3);
+  color: var(--tf-color-muted);
+}
+
+.tf-rows dd,
+.tf-rows > * > :last-child {
+  margin: 0;
+  font-family: var(--tf-font-display);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--tf-color-fg);
+  text-align: right;
+}
+
+[data-tf-reveal] > * {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity var(--tf-dur-3) var(--tf-ease-out),
+    transform var(--tf-dur-3) var(--tf-ease-out);
+}
+
+[data-tf-reveal] > *[data-shown] {
+  opacity: 1;
+  transform: none;
+}
+
+[data-tf-skeleton] {
+  background: linear-gradient(
+    90deg,
+    var(--tf-color-panel-hi) 18%,
+    var(--tf-color-line-hi) 50%,
+    var(--tf-color-panel-hi) 82%
+  );
+  background-size: 200% 100%;
+  animation: tf-shimmer 1.6s linear infinite;
+  border-radius: var(--tf-radius-pill);
+}
+
+/* Gradient hairline drawn in the border box via a masked pseudo-element, so the
+   element keeps its own background and the sweep rides on top of it. */
+[data-tf-edge] {
+  position: relative;
+}
+
+[data-tf-edge]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(var(--tf-edge), var(--tf-edge-stops));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: tf-edge-sweep 16s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tf-reveal] > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  [data-tf-skeleton],
+  [data-tf-edge]::before {
+    animation: none;
+  }
+}
