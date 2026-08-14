@@ -5,7 +5,7 @@ This is an internal TechFides tooling package. External contributions are welcom
 ## Setup
 
 ```bash
-pnpm install   # installs deps + runs prepare (builds dist/)
+pnpm install   # installs deps + runs prepare (builds dist/, installs the git hooks)
 pnpm dev       # watch mode: tsc --watch + asset copy
 ```
 
@@ -13,6 +13,7 @@ pnpm dev       # watch mode: tsc --watch + asset copy
 
 - Use **pnpm** (enforced via corepack).
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/). `changelogen` derives the next version and changelog entries from these, so keep them well-formed.
+- Git hooks are managed by [Lefthook](https://lefthook.dev) (`lefthook.yml`): the `commit-msg` hook runs `commitlint`. `pnpm install` installs it into `.git/hooks` and clears any local `core.hooksPath` override, `LEFTHOOK=0 git commit …` skips it for one commit, and a git-ignored `lefthook-local.yml` overrides the config on your machine.
 - Run `pnpm typecheck && pnpm lint` before submitting a PR.
 - Releases: see [Releasing](#releasing) below.
 
@@ -161,7 +162,7 @@ scaffolded project:
 ```bash
 # 1. in the package, once after cloning
 cd tf-doc-vault
-pnpm install                  # deps + "prepare" hook builds dist/
+pnpm install                  # deps + "prepare" script builds dist/ and installs the git hooks
 pnpm dev                      # tsc --watch + auto-copy static assets (.vue/.css/.json/.ico)
 
 # 2. in an adjacent application repo scaffolded with --source=file

@@ -128,7 +128,7 @@ function scaffoldTechDocs(tgz: string): { host: string; dir: string } {
   // The wizard already wrote the dependencies and the hoist patterns.
   run("pnpm", ["install"], host, {
     label: "pnpm install (tech-docs deps)",
-    env: { HUSKY: "0" },
+    env: { LEFTHOOK: "0" },
   });
   verifyHoistPatterns(host);
 
@@ -164,7 +164,7 @@ function scaffoldAna(tgz: string): string {
   const dir = path.join(parent, "ana_test");
   run("pnpm", ["install"], dir, {
     label: "pnpm install (ana)",
-    env: { HUSKY: "0" },
+    env: { LEFTHOOK: "0" },
   });
 
   verifyHoistPatterns(dir);

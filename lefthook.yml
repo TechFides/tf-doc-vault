@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=./node_modules/lefthook/schema.json
+
+output:
+  - failure
+
+commit-msg:
+  jobs:
+    - name: commitlint
+      run: pnpm exec commitlint --edit {1}

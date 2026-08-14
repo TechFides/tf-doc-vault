@@ -1,5 +1,6 @@
 allowBuilds:
   esbuild: true
+  lefthook: false
 
 # Hoist Mermaid + transitive deps so Vite can pre-bundle them for the
 # playground. Without this, pnpm's nested layout hides dayjs / cytoscape /
