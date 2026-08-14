@@ -9,6 +9,7 @@ import TableEnhancer from "./components/TableEnhancer.vue";
 import WidthToggle from "./components/WidthToggle.vue";
 import BrandHero from "./components/BrandHero.vue";
 import FeatureCards from "./components/FeatureCards.vue";
+import FeatureCard from "./components/FeatureCard.vue";
 import Spotlight from "./components/Spotlight.vue";
 import AuthorCard from "./components/AuthorCard.vue";
 import StepCard from "./components/StepCard.vue";
@@ -96,6 +97,7 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
       app.component("PrintLayout", PrintLayout);
       app.component("BrandHero", BrandHero);
       app.component("FeatureCards", FeatureCards);
+      app.component("FeatureCard", FeatureCard);
       app.component("Spotlight", Spotlight);
       app.component("AuthorCard", AuthorCard);
       app.component("StepCard", StepCard);
@@ -115,6 +117,7 @@ export {
   WidthToggle,
   BrandHero,
   FeatureCards,
+  FeatureCard,
   Spotlight,
   AuthorCard,
   StepCard,

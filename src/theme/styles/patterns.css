@@ -71,6 +71,34 @@
   margin-bottom: 0;
 }
 
+/*
+ * The card's own parts. Scoped to .tf-card rather than standing alone, because that is what
+ * lets `margin: 0` beat `.vp-doc p` (0,2,0 against 0,1,1): the card spaces its children with
+ * gap, and a paragraph's own margin would add to it.
+ */
+.tf-card .tf-card__icon {
+  margin: 0;
+  font-size: var(--tf-icon-xl);
+  line-height: 1;
+}
+
+.tf-card .tf-card__title {
+  margin: 0;
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-body);
+  font-weight: 600;
+  line-height: var(--tf-leading-tight);
+  letter-spacing: var(--tf-tracking-h);
+  color: var(--tf-color-fg);
+}
+
+.tf-card .tf-card__text {
+  margin: 0;
+  font-size: var(--tf-text-body-sm);
+  line-height: var(--tf-leading-body);
+  color: var(--tf-color-muted);
+}
+
 /* A figure and its label. The number leads on size and tabular figures so a row
    of them lines up on the digits. */
 .tf-stat {
@@ -110,6 +138,45 @@
 .tf-tile--grad {
   background: var(--tf-grad-accent);
   color: #fff;
+}
+
+/*
+ * Two exports of one figure, one per mode: place both and the theme hides the wrong one.
+ * These only ever hide, so whichever is shown keeps the display it would have had anyway.
+ */
+html:not(.dark) .tf-dark-only {
+  display: none;
+}
+
+.dark .tf-light-only {
+  display: none;
+}
+
+/* A row of third-party marks: client logos, award badges. Each sits on its own plate,
+   because the artwork is someone else's colour and cannot be inverted for dark mode. */
+.tf-logos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 120px), 1fr));
+  gap: var(--tf-spacing-3);
+  align-items: center;
+  margin-block: var(--tf-spacing-5);
+}
+
+.tf-logos img {
+  width: 100%;
+  height: var(--tf-size-4xl);
+  object-fit: contain;
+  padding: var(--tf-spacing-2) var(--tf-spacing-3);
+  border-radius: var(--tf-radius-xs);
+  background: var(--tf-color-plate);
+}
+
+/* For a set that should read as one block rather than as a row inside the running text. */
+.tf-logos--framed {
+  padding: var(--tf-spacing-6);
+  border: 1px solid var(--tf-color-line);
+  border-radius: var(--tf-radius-lg);
+  background: var(--tf-color-panel-2);
 }
 
 .tf-chips {

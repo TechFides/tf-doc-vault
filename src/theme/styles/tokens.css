@@ -47,6 +47,11 @@
   /* The accent as a wash: what a hover, a tinted tile or a chip fills with. */
   --tf-color-accent-soft: var(--brand-primary-soft);
 
+  /* A ground for third-party artwork that cannot be recoloured: a client logo or an award
+     badge is usually dark line-work on transparency. Light in both modes on purpose, since
+     a mode-aware plate would put that artwork on near-black in dark mode. */
+  --tf-color-plate: #ffffff;
+
   /* The accent used as a link, which dark mode takes two steps lighter. Every place that
      reads as a link takes these, so the mode difference is declared once here instead of
      as a `.dark` override beside each rule. */

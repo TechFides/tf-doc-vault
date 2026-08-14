@@ -17,15 +17,15 @@ features:
     description: No link on this one, so it is a statement rather than a door. Not clickable, no hover lift, no row at the foot.
 ---
 
-The row of cards on a landing page. Driven by frontmatter rather than props, so the page
-declares its own cards and the component renders whatever it finds. A page without a
-`features` block can place the component safely and get nothing.
+The row of cards on a landing page. `FeatureCards` is the grid; `FeatureCard` is one card.
+The grid takes its cards from frontmatter, so a landing page declares them once at the top
+and places the component where the row belongs. A page without a `features` block can place
+it safely and get nothing.
 
 <FeatureCards />
 
-Three of the cards above are the component's whole surface: the first has a link and its own
-link text, the second has a link and takes the theme's wording, the third has no link at
-all.
+Three of the cards above are the frontmatter surface: the first has a link and its own link
+text, the second has a link and takes the theme's wording, the third has no link at all.
 
 ## Frontmatter
 
@@ -35,9 +35,24 @@ Each entry in `features` takes:
 | ------------- | --------------------- | ------------------------------------------------------------ |
 | `title`       | —                     | Card heading. Required.                                      |
 | `description` | —                     | The body copy. Required.                                     |
+| `eyebrow`     | —                     | Label above the title, for the card's category.              |
 | `icon`        | `business`            | One of `business`, `functional`, `technical`.                |
 | `link`        | —                     | Where the card leads. Omit for a card that is not clickable. |
 | `linkText`    | theme's `feature.cta` | The label at the foot. Only used when `link` is set.         |
+
+## A second row, mid-page
+
+Frontmatter holds one set, which is the landing row. For another row further down, write the
+cards into the page: `FeatureCards` renders its slot instead when it has one, so both can
+live on the same page.
+
+<FeatureCards>
+  <FeatureCard eyebrow="Team" icon="business" title="Certified throughout" description="An eyebrow labels the card's category, so the title does not have to carry it." link="/v1/components/" linkText="See the components" />
+  <FeatureCard eyebrow="Quality" icon="technical" title="Measured, not promised" description="The same card, one row down the page, with no frontmatter involved." />
+</FeatureCards>
+
+`FeatureCard` takes the frontmatter keys as props. `description` covers one sentence; for
+anything longer use the default slot, which accepts Markdown.
 
 ## No link, no door
 

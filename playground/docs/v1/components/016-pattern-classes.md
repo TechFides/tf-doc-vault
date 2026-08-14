@@ -37,15 +37,33 @@ than vanishing.
 
 ## Cards and figures
 
-| Class            | Effect                                                       |
-| ---------------- | ------------------------------------------------------------ |
-| `tf-cards`       | Auto-fitting grid, one column at a time as the space allows. |
-| `tf-card`        | A single panel inside it.                                    |
-| `tf-stat`        | Wrapper for one figure and its label.                        |
-| `tf-stat__value` | The figure. Display face, tabular figures.                   |
-| `tf-stat__label` | The caption under it.                                        |
-| `tf-tile`        | Square icon tile, for a card that opens with a glyph.        |
-| `tf-tile--grad`  | The same tile filled with the accent gradient.               |
+| Class              | Effect                                                       |
+| ------------------ | ------------------------------------------------------------ |
+| `tf-cards`         | Auto-fitting grid, one column at a time as the space allows. |
+| `tf-card`          | A single panel inside it.                                    |
+| `tf-card__icon`    | An emoji or glyph opening the card.                          |
+| `tf-card__title`   | The card's heading.                                          |
+| `tf-card__text`    | Its body copy, muted.                                        |
+| `tf-stat`          | Wrapper for one figure and its label.                        |
+| `tf-stat__value`   | The figure. Display face, tabular figures.                   |
+| `tf-stat__label`   | The caption under it.                                        |
+| `tf-tile`          | Square icon tile, for a card that opens with a glyph.        |
+| `tf-tile--grad`    | The same tile filled with the accent gradient.               |
+| `tf-logos`         | Row of third-party marks, each on its own plate.             |
+| `tf-logos--framed` | The same row as one bordered block.                          |
+| `tf-light-only`    | Hidden in dark mode.                                         |
+| `tf-dark-only`     | Hidden in light mode.                                        |
+
+The card parts take no margin of their own: `tf-card` spaces its children with `gap`, so a
+`<p class="tf-card__text">` does not add a second gap under itself.
+
+`tf-logos` plates each mark on `--tf-color-plate`, which is white in **both** modes. A client
+logo is someone else's colour and cannot be inverted, and a mode-aware plate would put dark
+line-work on near-black.
+
+`tf-light-only` and `tf-dark-only` are for a figure exported twice, once per mode: place both
+and the theme hides the wrong one. They only ever hide, so whichever survives keeps the
+display it would have had.
 
 <div class="tf-cards">
   <div class="tf-card">

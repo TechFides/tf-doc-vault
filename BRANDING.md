@@ -172,10 +172,15 @@ light mode does not have.
 
 `src/theme/styles/patterns.css` ships classes an author can put straight into
 Markdown, so a page can hold a card grid or a row of figures without a component
-or an inline style. `tf-eyebrow`, `tf-lead`, `tf-grad-text`, `tf-cards`, `tf-card`,
-`tf-stat`, `tf-tile`, `tf-chip`, `tf-step`, `tf-btn`, `tf-divider`, `tf-rows`, plus
+or an inline style. `tf-eyebrow`, `tf-lead`, `tf-grad-text`, `tf-cards`, `tf-card`
+(with `tf-card__icon/__title/__text`), `tf-stat`, `tf-tile`, `tf-chip`, `tf-step`,
+`tf-checks`, `tf-btn`, `tf-divider`, `tf-rows`, `tf-logos` for a row of third-party
+marks, `tf-light-only` / `tf-dark-only` for a figure exported once per mode, plus
 `data-tf-edge` for the animated hairline and `data-tf-reveal` for scroll reveal.
 Every animation is off under `prefers-reduced-motion`.
+
+`tf-logos` plates each mark on `--tf-color-plate`, white in both modes: a third-party logo
+cannot be recoloured, and a mode-aware plate would leave dark line-work on near-black.
 
 ### Page backdrop
 

@@ -21,7 +21,8 @@ Registered globally by `createTheme()`, so Markdown can use them with no import.
 | Component                  | What it is                                                               | Page                                  |
 | -------------------------- | ------------------------------------------------------------------------ | ------------------------------------- |
 | `BrandHero`                | Landing banner. Renders only on a page with a `hero` frontmatter block.  | [BrandHero](./006-brand-hero)         |
-| `FeatureCards`             | The row of cards on a landing page, driven by `features` frontmatter.    | [FeatureCards](./009-feature-cards)   |
+| `FeatureCards`             | The row of cards, from `features` frontmatter or from its own slot.      | [FeatureCards](./009-feature-cards)   |
+| `FeatureCard`              | One card, for a row written into the page rather than into frontmatter.  | [FeatureCards](./009-feature-cards)   |
 | `Spotlight`                | A centred panel that sends the reader out of the document to one thing.  | [Spotlight](./007-spotlight)          |
 | `AuthorCard`               | Who stands behind the document: name, role, and the record behind them.  | [AuthorCard](./008-author-card)       |
 | `StepCard`                 | One numbered point of a method: a claim, its checks, and its terms.      | [StepCard](./019-step-card)           |
