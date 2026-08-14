@@ -119,7 +119,7 @@ export const test = base.extend<Fixtures>({
       const logChunks: string[] = [];
       const proc = spawn(opts.cmd, opts.args, {
         cwd: opts.cwd,
-        env: { ...process.env, HUSKY: "0" },
+        env: { ...process.env, LEFTHOOK: "0" },
         stdio: opts.inheritStdio ? "inherit" : ["ignore", "pipe", "pipe"],
       });
       if (!opts.inheritStdio) {

@@ -1,6 +1,6 @@
 {
   "name": "@techfides/tf-doc-vault",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Shared VitePress tooling for TFSA documentation: config factory, theme components, sidebar generator, build/export scripts, CI and Terraform module.",
   "type": "module",
   "license": "MIT",
@@ -98,7 +98,7 @@
     "dev:docs": "vitepress dev playground/docs",
     "build:docs": "vitepress build playground/docs",
     "preview:docs": "vitepress preview playground/docs",
-    "prepare": "node scripts/build.mjs && husky",
+    "prepare": "node scripts/build.mjs && lefthook install --reset-hooks-path",
     "typecheck": "tsc --noEmit",
     "lint": "eslint --config configs/eslint.config.js src",
     "format": "prettier --write .",
@@ -120,6 +120,7 @@
   "dependencies": {
     "@clack/prompts": "^1.7.0",
     "extended-markdown-adf-parser": "2.4.0",
+    "markdown-it-container": "^4.0.0",
     "markdownlint": "^0.40.0",
     "playwright": "^1.59.1",
     "vue-i18n": "^11.4.4"
@@ -128,6 +129,7 @@
     "@commitlint/cli": "21.0.1",
     "@commitlint/config-conventional": "21.0.1",
     "@playwright/test": "1.60.0",
+    "@types/markdown-it-container": "4.0.0",
     "@types/node": "25.6.2",
     "@typescript-eslint/eslint-plugin": "8.59.2",
     "@typescript-eslint/parser": "8.59.2",
@@ -136,8 +138,8 @@
     "changelogen": "0.6.2",
     "eslint": "10.3.0",
     "eslint-config-prettier": "10.1.8",
-    "husky": "9.1.7",
     "knip": "6.24.0",
+    "lefthook": "2.1.10",
     "mermaid": "11.16.1",
     "prettier": "3.8.3",
     "tf-licence-checker": "1.1.9",

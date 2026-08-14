@@ -118,15 +118,17 @@ function scaffoldTechDocs(tgz: string): { host: string; dir: string } {
       "--service-id=SMK",
       "--project=smoke",
       "--repo=test/test",
+      "--source=file",
+      `--file-path=${tgz}`,
     ],
     host,
     { label: "setup --template=tech-docs" },
   );
 
   // The wizard already wrote the dependencies and the hoist patterns.
-  run("pnpm", ["add", `file:${tgz}`], host, {
-    label: "pnpm add (tech-docs deps)",
-    env: { HUSKY: "0" },
+  run("pnpm", ["install"], host, {
+    label: "pnpm install (tech-docs deps)",
+    env: { LEFTHOOK: "0" },
   });
   verifyHoistPatterns(host);
 
@@ -162,7 +164,7 @@ function scaffoldAna(tgz: string): string {
   const dir = path.join(parent, "ana_test");
   run("pnpm", ["install"], dir, {
     label: "pnpm install (ana)",
-    env: { HUSKY: "0" },
+    env: { LEFTHOOK: "0" },
   });
 
   verifyHoistPatterns(dir);

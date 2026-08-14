@@ -30,6 +30,9 @@ export default makeConfig({
       email: "info@techfides.cz",
     },
   },
+  toBeTags: {
+    jiraBaseUrl: "https://example.atlassian.net/browse",
+  },
   override: {
     base: "/",
     vite: {

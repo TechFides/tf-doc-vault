@@ -339,6 +339,11 @@
     transparent
   );
 
+  /* TO-BE tags. Literal hues rather than derived ones: they mark a planned addition and a
+     planned removal, and that pair has to stay readable whatever the brand accent is. */
+  --brand-tobe-add: #ff5630;
+  --brand-tobe-del: #97a0af;
+
   /* Mermaid renders to SVG and takes fills and strokes, not backgrounds, so it cannot use
      the surface tokens directly. These are the six values its diagrams differ by between
      the two modes; everything else it draws is mode-independent. */

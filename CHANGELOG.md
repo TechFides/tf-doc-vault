@@ -1,5 +1,36 @@
 # Changelog
 
+## v0.4.1
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.4.0...v0.4.1)
+
+### 🚀 Enhancements
+
+- **config:** Add TO-BE tagging for planned spec changes ([a4d0c5a](https://github.com/TechFides/tf-doc-vault/commit/a4d0c5a))
+
+### 🩹 Fixes
+
+- **config:** Escape the TO-BE ticket and colour table headers ([c6b87d8](https://github.com/TechFides/tf-doc-vault/commit/c6b87d8))
+
+### 💅 Refactors
+
+- **config:** Drop ticket validation, README section and FF fixtures ([e3ea748](https://github.com/TechFides/tf-doc-vault/commit/e3ea748))
+- Trim comments to the AGENTS.md rules ([e0eb724](https://github.com/TechFides/tf-doc-vault/commit/e0eb724))
+
+### 📖 Documentation
+
+- Drop the tobe token rationale from BRANDING.md ([abf7527](https://github.com/TechFides/tf-doc-vault/commit/abf7527))
+
+### 🏡 Chore
+
+- Remove Michal Vlček from CODEOWNERS ([70db783](https://github.com/TechFides/tf-doc-vault/commit/70db783))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+- Filip Koukal ([@filipkoukal](https://github.com/filipkoukal))
+- Tomáš Pokorný <tomas.pokorny@techfides.cz>
+
 ## v0.4.0
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.3.1...v0.4.0)

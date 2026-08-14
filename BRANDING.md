@@ -112,6 +112,8 @@ other way, so a one-line override still works.
 | `--brand-warning`/`-bg`  | `oklch(.50 .13 70)`  | Also drives the Mermaid note in light mode                   |
 | `--brand-danger`/`-bg`   | `oklch(.51 .19 25)`  | "                                                            |
 | `--brand-info`/`-bg`     | `oklch(.49 .15 245)` | "                                                            |
+| `--brand-tobe-add`       | `#ff5630`            | TO-BE tags: content marked for addition                      |
+| `--brand-tobe-del`       | `#97a0af`            | TO-BE tags: content marked for removal, struck               |
 
 State colours are set per mode. Light sits near `L 0.50`, calibrated against the worst
 ground each state actually lands on: its own badge or alert chip, tinted by `--tf-tint` of

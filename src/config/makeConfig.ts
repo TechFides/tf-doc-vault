@@ -5,6 +5,7 @@ import { defineConfig } from "vitepress";
 import { withMermaid } from "vitepress-plugin-mermaid";
 import { taskLists } from "./taskLists.js";
 import { tableWrapper } from "./tableWrapper.js";
+import { toBeTags, type ToBeTags } from "./toBeTags.js";
 import { generateNav, generateSidebar, getVersions } from "../sidebar/index.js";
 import { LOGO_SHAPES, LOGO_VIEW_BOX } from "../theme/icons/logoSymbol.js";
 import defaultStrings from "./strings.cs.json" with { type: "json" };
@@ -128,6 +129,7 @@ export interface MakeConfigOptions {
   sectionNav?: boolean;
   override?: Partial<UserConfig>;
   mermaid?: boolean;
+  toBeTags?: ToBeTags;
 }
 
 const UMAMI_DEFAULT_SRC = "https://cloud.umami.is/script.js";
@@ -388,6 +390,7 @@ export function makeConfig(
       config(md) {
         taskLists(md);
         tableWrapper(md);
+        if (opts.toBeTags) toBeTags(md, opts.toBeTags);
       },
     },
     vite: {
