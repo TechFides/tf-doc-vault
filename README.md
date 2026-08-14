@@ -106,7 +106,7 @@ import { makeConfig } from "@techfides/tf-doc-vault/config";
 export default makeConfig({
   configDir: import.meta.dirname,
   project: "lapa",
-  // optional: analytics, editLink, branding, sectionNav, mermaid, …
+  // optional: analytics, editLink, branding, sectionNav, mermaid, toBeTags, …
   analytics: { provider: "umami", websiteId: "...", domain: "..." },
   editLink: { repo: "TechFides/tf-sales-private-offers", branch: "main" },
 });

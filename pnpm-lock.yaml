@@ -14,6 +14,9 @@ importers:
       extended-markdown-adf-parser:
         specifier: 2.4.0
         version: 2.4.0
+      markdown-it-container:
+        specifier: ^4.0.0
+        version: 4.0.0
       markdownlint:
         specifier: ^0.40.0
         version: 0.40.0
@@ -33,6 +36,9 @@ importers:
       '@playwright/test':
         specifier: 1.60.0
         version: 1.60.0
+      '@types/markdown-it-container':
+        specifier: 4.0.0
+        version: 4.0.0
       '@types/node':
         specifier: 25.6.2
         version: 25.6.2
@@ -1280,6 +1286,9 @@ packages:
   '@types/linkify-it@5.0.0':
     resolution: {integrity: sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==}
 
+  '@types/markdown-it-container@4.0.0':
+    resolution: {integrity: sha512-GmD8OECLfzPHv8VyvFRzslqdwXoDBJ2H40fxXFjrarbqvJZSB/BJKZXN5e3k7Mx7GQanSNzTYhzeS3H9o0gAOw==}
+
   '@types/markdown-it@14.1.2':
     resolution: {integrity: sha512-promo4eFwuiW+TfGxhi+0x3czqTYJkG8qB17ZUJiVF10Xm7NLVRSLUsfRTU/6h1e24VvRnXCx+hG7li58lkzog==}
 
@@ -2442,6 +2451,9 @@ packages:
 
   mark.js@8.11.1:
     resolution: {integrity: sha512-1I+1qpDt4idfgLQG+BNWmrqku+7/2bi5nLf4YwF8y8zXvmfiTBY3PV3ZibfrjBueCByROpuBjLLFCajqkgYoLQ==}
+
+  markdown-it-container@4.0.0:
+    resolution: {integrity: sha512-HaNccxUH0l7BNGYbFbjmGpf5aLHAMTinqRZQAEQbMr2cdD3z91Q6kIo1oUn1CQndkT03jat6ckrdRYuwwqLlQw==}
 
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
@@ -4265,6 +4277,10 @@ snapshots:
 
   '@types/linkify-it@5.0.0': {}
 
+  '@types/markdown-it-container@4.0.0':
+    dependencies:
+      '@types/markdown-it': 14.1.2
+
   '@types/markdown-it@14.1.2':
     dependencies:
       '@types/linkify-it': 5.0.0
@@ -5544,6 +5560,8 @@ snapshots:
       semver: 7.8.0
 
   mark.js@8.11.1: {}
+
+  markdown-it-container@4.0.0: {}
 
   markdown-table@3.0.4: {}
 

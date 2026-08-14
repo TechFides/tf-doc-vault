@@ -43,6 +43,9 @@
   --brand-badge-archived-text: #374151;
   --brand-badge-archived-border: #e5e7eb;
 
+  --brand-tobe-add: #ff5630;
+  --brand-tobe-del: #97a0af;
+
   --layout-max-width-narrow: 800px;
   --layout-max-width-content: 1440px;
   --layout-max-width-wide: 1800px;
@@ -540,6 +543,41 @@ html.layout-max .VPContent {
 .vp-doc .tf-table.is-overflow-start::before,
 .vp-doc .tf-table.is-overflow-end::after {
   opacity: 1;
+}
+
+.vp-doc .tf-tobe-add {
+  color: var(--brand-tobe-add);
+}
+
+.vp-doc .tf-tobe-del {
+  color: var(--brand-tobe-del);
+  text-decoration: line-through;
+}
+
+/* `.vp-doc` sets its own colour on `code`, `blockquote` and `th`. */
+.vp-doc .tf-tobe :where(code, blockquote, th) {
+  color: inherit;
+}
+
+/* The extra `.tf-tobe` is load-bearing: `.dark .vp-doc a` and `.vp-doc a:hover`
+   tie a two-class selector and win on source order. Ordinary links inside a tag
+   keep the brand colour. */
+.vp-doc .tf-tobe .tf-tobe-marker,
+.vp-doc .tf-tobe .tf-tobe-marker a,
+.vp-doc .tf-tobe .tf-tobe-marker a:hover,
+.vp-doc .tf-tobe .tf-tobe-marker a:active {
+  color: inherit;
+  font-weight: 700;
+}
+
+/* Spacing lives on the wrapper, not the marker lines, so two adjacent block tags
+   do not collide. */
+.vp-doc .tf-tobe-marker-line {
+  margin: 0;
+}
+
+.vp-doc div.tf-tobe {
+  margin: 16px 0;
 }
 
 /* Numeric columns align right with tabular figures for easy comparison.
