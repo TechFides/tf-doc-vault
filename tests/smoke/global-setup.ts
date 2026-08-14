@@ -118,14 +118,16 @@ function scaffoldTechDocs(tgz: string): { host: string; dir: string } {
       "--service-id=SMK",
       "--project=smoke",
       "--repo=test/test",
+      "--source=file",
+      `--file-path=${tgz}`,
     ],
     host,
     { label: "setup --template=tech-docs" },
   );
 
   // The wizard already wrote the dependencies and the hoist patterns.
-  run("pnpm", ["add", `file:${tgz}`], host, {
-    label: "pnpm add (tech-docs deps)",
+  run("pnpm", ["install"], host, {
+    label: "pnpm install (tech-docs deps)",
     env: { HUSKY: "0" },
   });
   verifyHoistPatterns(host);

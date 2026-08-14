@@ -40,6 +40,8 @@ Run:
 
 Config: `playwright.config.ts`. Global setup is in `tests/smoke/global-setup.ts` (builds `dist/` and prepares fixtures).
 
+Every sandbox installs this package from the tarball `pnpm pack` produced, via `setup --source=file --file-path=<tgz>`. Never let a sandbox resolve `@techfides/tf-doc-vault` from npm: on a `chore(release)` commit the version in `package.json` is not published yet, so the install fails. pnpm resolves every spec already in a manifest before it applies an `add`, so swapping the dependency after scaffolding does not help; the wizard has to write the tarball path in the first place.
+
 ## `middleware.ts`'s Basic auth
 
 `boilerplate/middleware.ts` (the Vercel edge middleware every `ana-docs` scaffold ships) is plain `Request → Response` logic with no Vercel-specific runtime
