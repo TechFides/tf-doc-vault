@@ -1,5 +1,101 @@
 # Changelog
 
+## v0.5.0
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.4.1...v0.5.0)
+
+### 🚀 Enhancements
+
+- **theme:** ⚠️  Redesign on a shared token layer with a nebula backdrop ([231a285](https://github.com/TechFides/tf-doc-vault/commit/231a285))
+- **theme:** Let more of the backdrop through the sidebar ([22e3ac8](https://github.com/TechFides/tf-doc-vault/commit/22e3ac8))
+- **theme:** Give light mode its own nebula ([ca0a6ea](https://github.com/TechFides/tf-doc-vault/commit/ca0a6ea))
+- **theme:** Add Spotlight, a panel that points out of the document ([4c56df8](https://github.com/TechFides/tf-doc-vault/commit/4c56df8))
+- **theme:** Add AuthorCard, a byline with evidence ([6b06a32](https://github.com/TechFides/tf-doc-vault/commit/6b06a32))
+- **theme:** Let a feature card stand without a link ([e57983b](https://github.com/TechFides/tf-doc-vault/commit/e57983b))
+- **theme:** Make the spotlight carry a statement, not only a link ([ae1be3c](https://github.com/TechFides/tf-doc-vault/commit/ae1be3c))
+- **theme:** Add StepCard for a numbered point of a method ([8d6cd19](https://github.com/TechFides/tf-doc-vault/commit/8d6cd19))
+- **theme:** Add ReferenceCard for one delivered project ([9ef2bc9](https://github.com/TechFides/tf-doc-vault/commit/9ef2bc9))
+- **theme:** Add Timeline for a dated sequence ([202594c](https://github.com/TechFides/tf-doc-vault/commit/202594c))
+- **theme:** Give tf-checks its own spacing, and square the checkboxes ([f356bd1](https://github.com/TechFides/tf-doc-vault/commit/f356bd1))
+- **theme:** Let the lightbox zoom into a diagram ([4aee742](https://github.com/TechFides/tf-doc-vault/commit/4aee742))
+- **theme:** Give the theme what consumer pages were reimplementing ([0ac4656](https://github.com/TechFides/tf-doc-vault/commit/0ac4656))
+
+### 🩹 Fixes
+
+- **theme:** Align the search result icon with its label ([241d765](https://github.com/TechFides/tf-doc-vault/commit/241d765))
+- **theme:** Align figures with the text and fix accent text on tints ([b68c61e](https://github.com/TechFides/tf-doc-vault/commit/b68c61e))
+- **test:** Install the packed tarball in the tech-docs smoke sandbox ([63f87e2](https://github.com/TechFides/tf-doc-vault/commit/63f87e2))
+- **theme:** Close the navbar chrome and unscope the doc column selector ([055ea81](https://github.com/TechFides/tf-doc-vault/commit/055ea81))
+- **theme:** Make the base.css export carry its own tokens ([b559146](https://github.com/TechFides/tf-doc-vault/commit/b559146))
+
+### 💅 Refactors
+
+- **theme:** Let the token layer carry the mode difference ([161d2e5](https://github.com/TechFides/tf-doc-vault/commit/161d2e5))
+- Share the helpers that had been copied instead ([2ca1225](https://github.com/TechFides/tf-doc-vault/commit/2ca1225))
+- Cut the comments that argue instead of warn ([5997d9e](https://github.com/TechFides/tf-doc-vault/commit/5997d9e))
+
+### 📖 Documentation
+
+- Inventory every theme component in the playground ([124efae](https://github.com/TechFides/tf-doc-vault/commit/124efae))
+- Add the six missing component demo pages ([be53ce9](https://github.com/TechFides/tf-doc-vault/commit/be53ce9))
+- Document the rest of the author-facing surface ([b5ed1d6](https://github.com/TechFides/tf-doc-vault/commit/b5ed1d6))
+- Add the 0.5 migration guide ([902e6fd](https://github.com/TechFides/tf-doc-vault/commit/902e6fd))
+
+### 🏡 Chore
+
+- Add a launch config for the built docs ([9d78f57](https://github.com/TechFides/tf-doc-vault/commit/9d78f57))
+- Replace husky with lefthook ([541d720](https://github.com/TechFides/tf-doc-vault/commit/541d720))
+
+### ✅ Tests
+
+- **smoke:** Remove three sources of nondeterminism ([52698c0](https://github.com/TechFides/tf-doc-vault/commit/52698c0))
+
+### 🎨 Styles
+
+- **theme:** Calm the hero bloom in dark mode ([8b8e244](https://github.com/TechFides/tf-doc-vault/commit/8b8e244))
+- **theme:** Calm the page backdrop in dark mode ([35c6046](https://github.com/TechFides/tf-doc-vault/commit/35c6046))
+- **theme:** Give the reference card its craft back ([7880287](https://github.com/TechFides/tf-doc-vault/commit/7880287))
+- **theme:** Redesign the timeline and the two cards ([34b3b5e](https://github.com/TechFides/tf-doc-vault/commit/34b3b5e))
+- **theme:** Calm the dark-mode backdrop ([b676922](https://github.com/TechFides/tf-doc-vault/commit/b676922))
+- **theme:** Rework the hero surface ([0c4a921](https://github.com/TechFides/tf-doc-vault/commit/0c4a921))
+
+#### ⚠️ Breaking Changes
+
+- **theme:** ⚠️  Redesign on a shared token layer with a nebula backdrop ([231a285](https://github.com/TechFides/tf-doc-vault/commit/231a285))
+
+The theme is rebuilt on a three-layer token system: `--brand-*` inputs, a `--tf-*` design
+system derived from them, and `--vp-*` mapped from both. Sites change appearance
+substantially, but **no `--brand-*` token is renamed or removed**, so an existing
+`docs/.vitepress/theme/custom.css` keeps working untouched.
+
+What needs action:
+
+- **Overrides that reached for `--vp-*` directly.** They now fight the mapping layer; move
+  them onto the `--brand-*` names.
+- **Restyled sidebar marker `::before` rules.** The markers are a background image now
+  rather than emoji `content`.
+- **A `background` on `body` in your `custom.css`.** It buries the new page backdrop, and
+  the result looks exactly like the component failing to mount. Drop it, or turn the
+  backdrop off with `createTheme({ backdrop: false })`.
+- **`branding.fonts: "none"` with self-hosted Open Sans.** The theme now asks for Inter and
+  IBM Plex Sans/Mono. Host those, or point `--tf-font-display`, `--tf-font-body` and
+  `--tf-font-mono` at what you do host.
+
+Default values moved even though the names did not: `--brand-bg-page` becomes `#f7f9fc` so
+panels can be white above a tinted page, `--brand-text-muted` becomes `#5a6678` (3.2:1 to
+5.2:1, over the AA line it had been under), and the `DocMeta` badge tokens are a
+`color-mix` of the state colours instead of hardcoded light/dark pairs.
+
+Full guide, including the seven newly registered global components, the page backdrop and
+the author-facing pattern classes:
+[Migration to 0.5](https://github.com/TechFides/tf-doc-vault/blob/master/docs/MIGRATIONS.md#migration-to-05)
+
+### ❤️ Contributors
+
+- Václav Mičulka ([@VaclavMiculka](https://github.com/VaclavMiculka))
+- Filip.koukal <filip.koukal@techfides.cz>
+- Ondřej Misák <ondrej.misak@techfides.cz>
+
 ## v0.4.1
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.4.0...v0.4.1)
