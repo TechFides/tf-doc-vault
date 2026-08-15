@@ -5,17 +5,20 @@
  * patterns.css. Nothing here may define a token.
  */
 
-/* Dark-mode navbar chrome. These reach into VitePress' internal DOM
+/* Navbar chrome. These reach into VitePress' internal DOM
    (`.VPNavBar > .wrapper > .container > ...`), which is not public API: a minor
    upgrade can rename it and break this block silently. Verified against
-   VitePress 1.6.x by `tests/smoke/playground-dark-mode.spec.ts`. */
-.dark .VPNav,
-.dark .VPNavBar,
-.dark .VPNavBar > .wrapper,
-.dark .VPNavBar > .wrapper > .container,
-.dark .VPNavBar > .wrapper > .container > .content,
-.dark .VPNavBar > .wrapper > .container > .content > .content-body {
-  background-color: var(--tf-color-bg) !important;
+   VitePress 1.6.x by `tests/smoke/playground-dark-mode.spec.ts`.
+   Both modes, not just dark: VitePress fills only .title and .content-body, and
+   .content-body ends at the layout max width, so on a viewport wider than that the
+   right end of the bar keeps showing the backdrop while the rest of it is opaque. */
+.VPNav,
+.VPNavBar,
+.VPNavBar > .wrapper,
+.VPNavBar > .wrapper > .container,
+.VPNavBar > .wrapper > .container > .content,
+.VPNavBar > .wrapper > .container > .content > .content-body {
+  background-color: var(--vp-nav-bg-color) !important;
 }
 
 .dark .VPNavBar,
@@ -26,6 +29,15 @@
 .VPNavBarTitle.has-sidebar,
 .VPNavBarTitle.has-sidebar .title {
   border-bottom-color: transparent !important;
+}
+
+/* The line under the bar is a separate element, and VitePress insets it by the sidebar
+   column plus the layout gutter, so it starts where the content does and the stretch above
+   the sidebar is left undrawn. The bar reads as one surface, so the rule closing it runs
+   the whole width. !important because the inset it overrides sits in a media query, which
+   the cascade puts after this file. */
+.VPNavBar.has-sidebar .divider {
+  padding-left: 0 !important;
 }
 
 /* Only above 960px: below it VitePress has no sidebar column and the fill would cut
@@ -390,8 +402,10 @@ body,
   padding-top: var(--tf-spacing-6) !important;
 }
 
-/* The panel owns the horizontal inset; VitePress would add its own on top. */
-.VPDoc .content {
+/* The panel owns the horizontal inset; VitePress would add its own on top. The path has
+   to be spelled out: the outline in the aside is also a `.content` inside `.VPDoc`, and
+   unscoped this strips the padding that holds its labels off their rail. */
+.VPDoc > .container > .content {
   padding-inline: 0 !important;
 }
 
@@ -459,7 +473,7 @@ body,
    !important to beat, which in turn means the panel width has to be restated
    here rather than left to the .content-container rule above. */
 .VPDoc.has-aside .content-container,
-.VPDoc:not(.has-sidebar) .content {
+.VPDoc:not(.has-sidebar) > .container > .content {
   max-width: var(--tf-panel-max) !important;
 }
 
@@ -468,7 +482,7 @@ html.layout-wide {
 }
 
 html.layout-wide .VPDoc .content-container,
-html.layout-wide .VPDoc .content {
+html.layout-wide .VPDoc > .container > .content {
   max-width: 1152px !important;
 }
 
