@@ -18,7 +18,7 @@ const homeLink = computed(
   <div class="not-found">
     <div class="not-found__inner">
       <LogoSymbol class="not-found__mark" />
-      <p class="not-found__code">{{ t("notFound.code") }}</p>
+      <p class="not-found__code tf-grad-text">{{ t("notFound.code") }}</p>
       <h1 class="not-found__heading">{{ t("notFound.heading") }}</h1>
       <p class="not-found__message">{{ t("notFound.message") }}</p>
       <a class="not-found__link" :href="homeLink">
@@ -34,7 +34,7 @@ const homeLink = computed(
   align-items: center;
   justify-content: center;
   min-height: calc(100vh - var(--vp-nav-height, 64px) - 200px);
-  padding: 48px 24px;
+  padding: var(--tf-spacing-lg) var(--tf-spacing-6);
 }
 
 .not-found__inner {
@@ -43,68 +43,71 @@ const homeLink = computed(
 }
 
 .not-found__mark {
-  width: 80px;
+  width: var(--tf-icon-hero);
   height: auto;
-  margin: 0 auto 24px;
+  margin: 0 auto var(--tf-spacing-6);
   display: block;
-  color: var(--brand-primary);
+  color: var(--vp-c-brand-1);
 }
 
+/* The code takes the accent gradient (tf-grad-text in patterns.css) and the sentence stays
+   plain: one of the two should carry the colour, and the number is the part a reader
+   recognises first. */
 .not-found__code {
-  font-size: 40px;
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-h1);
   font-weight: 700;
   line-height: 1;
-  color: var(--brand-primary);
-  margin: 0 0 8px;
-  letter-spacing: 0;
+  letter-spacing: var(--tf-tracking-h);
+  font-variant-numeric: tabular-nums;
+  margin: 0 0 var(--tf-spacing-2);
 }
 
 .not-found__heading {
-  font-size: 32px;
-  font-weight: 500;
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-h2);
+  font-weight: 600;
   line-height: 1.25;
-  color: var(--vp-c-text-1);
-  margin: 0 0 16px;
+  letter-spacing: var(--tf-tracking-h);
+  color: var(--tf-color-fg);
+  margin: 0 0 var(--tf-spacing-4);
   border: none;
   padding: 0;
 }
 
 .not-found__message {
-  font-size: 16px;
-  line-height: 1.6;
-  color: var(--vp-c-text-2);
-  margin: 0 0 32px;
+  font-size: var(--tf-text-lead);
+  line-height: var(--tf-leading-body);
+  color: var(--tf-color-muted);
+  margin: 0 0 var(--tf-spacing-8);
 }
 
 .not-found__link {
-  display: inline-block;
-  padding: 12px 24px;
-  border-radius: 0;
-  background: var(--brand-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tf-spacing-2);
+  height: var(--tf-size-3xl);
+  padding: 0 var(--tf-spacing-7);
+  border-radius: var(--tf-radius-lg);
+  background: var(--tf-grad-accent);
   color: #fff;
-  font-size: 16px;
-  font-weight: 700;
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-body);
+  font-weight: 600;
   text-decoration: none;
-  transition: background 0.15s ease;
+  transition: var(--tf-t-base);
 }
 
 .not-found__link:hover {
-  background: var(--brand-primary-hover);
+  color: #fff;
+  box-shadow: var(--tf-shadow-2);
+  transform: translateY(-1px);
   text-decoration: none;
 }
 
-@media (min-width: 640px) {
-  .not-found__mark {
-    width: 96px;
-    margin-bottom: 32px;
-  }
-
-  .not-found__code {
-    font-size: 48px;
-  }
-
-  .not-found__heading {
-    font-size: 40px;
+@media (prefers-reduced-motion: reduce) {
+  .not-found__link:hover {
+    transform: none;
   }
 }
 </style>

@@ -1,157 +1,28 @@
-:root {
-  --brand-primary: #0074c8;
-  --brand-secondary: #00a0e3;
-  --brand-navy: #092646;
-  --brand-nav-navy: #082850;
-  --brand-surface: #f5f7fa;
+/*
+ * VitePress chrome overrides and Markdown element styling. Every value comes
+ * from a token in tokens.css; the author-facing pattern classes come after this
+ * file in patterns.css. Nothing here may define a token.
+ *
+ * The @import is what keeps `@techfides/tf-doc-vault/theme/styles/base.css`, a
+ * published export, usable on its own: without it every var() below resolves to
+ * nothing for a consumer who imports this file rather than calling createTheme().
+ */
+@import "./tokens.css";
 
-  --brand-primary-hover: #0f75c5;
-  --brand-primary-active: #092646;
-  --brand-primary-soft: rgba(0, 116, 200, 0.1);
-
-  --brand-text-default: #333333;
-  --brand-text-muted: #7e8890;
-  --brand-text-disabled: #acb2b7;
-
-  --brand-bg-page: #ffffff;
-  --brand-bg-subtle: #eeeeee;
-  --brand-border-default: #e9e9e9;
-  --brand-border-strong: #7e8890;
-
-  --brand-success: #00dd0a;
-  --brand-success-bg: rgba(0, 221, 10, 0.08);
-  --brand-warning: #e08800;
-  --brand-warning-bg: rgba(224, 136, 0, 0.08);
-  --brand-danger: #c8232c;
-  --brand-danger-bg: rgba(200, 35, 44, 0.08);
-  --brand-tip: #16a34a;
-  --brand-tip-bg: rgba(22, 163, 74, 0.08);
-
-  --brand-info: #0074c8;
-  --brand-info-bg: rgba(0, 116, 200, 0.08);
-
-  --brand-badge-published-bg: #d1fae5;
-  --brand-badge-published-text: #166534;
-  --brand-badge-published-border: #bbf7d0;
-  --brand-badge-draft-bg: #fef3c7;
-  --brand-badge-draft-text: #92400e;
-  --brand-badge-draft-border: #fde68a;
-  --brand-badge-review-bg: #dbeafe;
-  --brand-badge-review-text: #1e40af;
-  --brand-badge-review-border: #bfdbfe;
-  --brand-badge-archived-bg: #f3f4f6;
-  --brand-badge-archived-text: #374151;
-  --brand-badge-archived-border: #e5e7eb;
-
-  --brand-tobe-add: #ff5630;
-  --brand-tobe-del: #97a0af;
-
-  --layout-max-width-narrow: 800px;
-  --layout-max-width-content: 1440px;
-  --layout-max-width-wide: 1800px;
-  --layout-side-padding-sm: 24px;
-  --layout-side-padding-md: 48px;
-  --layout-side-padding-lg: 64px;
-
-  --vp-c-brand-1: var(--brand-primary);
-  --vp-c-brand-2: var(--brand-primary-hover);
-  --vp-c-brand-3: var(--brand-primary-active);
-  --vp-c-brand-soft: var(--brand-primary-soft);
-
-  --vp-c-text-1: var(--brand-text-default);
-  --vp-c-text-2: var(--brand-text-muted);
-  --vp-c-text-3: var(--brand-text-disabled);
-
-  --vp-c-divider: var(--brand-border-default);
-  --vp-c-border: var(--brand-border-default);
-  --vp-c-gutter: var(--brand-border-default);
-
-  --vp-code-block-bg: var(--brand-bg-subtle);
-
-  /* Noto Color Emoji goes behind the text fonts (they cover the Latin, digits
-     and keycaps it would otherwise claim) but ahead of the system stack. */
-  --vp-font-family-base:
-    "Open Sans", "Inter", "Noto Color Emoji", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
-
-  --vp-font-family-mono:
-    ui-monospace, "Menlo", "Monaco", "Consolas", "Liberation Mono",
-    "Courier New", "Noto Color Emoji", monospace;
-
-  --vp-layout-max-width: var(--layout-max-width-content);
-  --vp-sidebar-width: 360px;
-  --vp-sidebar-bg-color: #f4f6fb;
-
-  /* The `locales` config carries versions (v1, v2), not languages, so hide the
-     language switcher VitePress would otherwise render. */
-  --vp-nav-translations-display: none;
-
-  /* Custom blocks: remap VitePress colour vars to brand tokens. */
-  --vp-c-warning-1: var(--brand-warning);
-  --vp-c-warning-2: rgba(224, 136, 0, 0.35);
-  --vp-c-warning-soft: var(--brand-warning-bg);
-
-  --vp-c-danger-1: var(--brand-danger);
-  --vp-c-danger-2: rgba(200, 35, 44, 0.35);
-  --vp-c-danger-soft: var(--brand-danger-bg);
-}
-
-.dark {
-  /* Overall a touch darker: deepen the blue surface tokens (bg-alt / nav title
-     follow the dark-scoped --brand-nav-navy override below). */
-  --brand-nav-navy: #061f3e;
-  --vp-c-bg: #010710;
-  --vp-c-bg-alt: var(--brand-nav-navy);
-  --vp-c-bg-soft: #082340;
-  --vp-c-bg-mute: #0c2c57;
-  --vp-c-bg-elv: #082340;
-
-  --vp-sidebar-bg-color: #030f21;
-
-  --vp-c-text-1: #ffffff;
-  --vp-c-text-2: rgba(255, 255, 255, 0.72);
-  --vp-c-text-3: var(--brand-text-disabled);
-
-  --vp-c-divider: rgba(255, 255, 255, 0.08);
-  --vp-c-border: rgba(255, 255, 255, 0.08);
-  --vp-c-gutter: rgba(255, 255, 255, 0.08);
-
-  --vp-c-brand-2: var(--brand-secondary);
-
-  --vp-code-block-bg: #040c19;
-
-  --brand-badge-published-bg: #052e16;
-  --brand-badge-published-text: #4ade80;
-  --brand-badge-published-border: #166534;
-  --brand-badge-draft-bg: #2d1a00;
-  --brand-badge-draft-text: #fbbf24;
-  --brand-badge-draft-border: #92400e;
-  --brand-badge-review-bg: #0f1e40;
-  --brand-badge-review-text: #60a5fa;
-  --brand-badge-review-border: #1e40af;
-  --brand-badge-archived-bg: #1f2937;
-  --brand-badge-archived-text: #9ca3af;
-  --brand-badge-archived-border: #374151;
-
-  --brand-tip: #4ade80;
-  --brand-tip-bg: rgba(74, 222, 128, 0.1);
-}
-
-/* Dark-mode navbar chrome. These reach into VitePress' internal DOM
+/* Navbar chrome. These reach into VitePress' internal DOM
    (`.VPNavBar > .wrapper > .container > ...`), which is not public API: a minor
    upgrade can rename it and break this block silently. Verified against
-   VitePress 1.6.x by `tests/smoke/playground-dark-mode.spec.ts`. */
-.dark .VPNav,
-.dark .VPNavBar,
-.dark .VPNavBar > .wrapper,
-.dark .VPNavBar > .wrapper > .container,
-.dark .VPNavBar > .wrapper > .container > .content,
-.dark .VPNavBar > .wrapper > .container > .content > .content-body {
-  background-color: var(--vp-c-bg) !important;
-}
-
-.dark .VPNavBar.has-sidebar > .wrapper > .container > .title {
-  background-color: var(--brand-nav-navy) !important;
+   VitePress 1.6.x by `tests/smoke/playground-dark-mode.spec.ts`.
+   Both modes, not just dark: VitePress fills only .title and .content-body, and
+   .content-body ends at the layout max width, so on a viewport wider than that the
+   right end of the bar keeps showing the backdrop while the rest of it is opaque. */
+.VPNav,
+.VPNavBar,
+.VPNavBar > .wrapper,
+.VPNavBar > .wrapper > .container,
+.VPNavBar > .wrapper > .container > .content,
+.VPNavBar > .wrapper > .container > .content > .content-body {
+  background-color: var(--vp-nav-bg-color) !important;
 }
 
 .dark .VPNavBar,
@@ -164,14 +35,78 @@
   border-bottom-color: transparent !important;
 }
 
-/* Light mode: navbar title column matches sidebar background */
-.VPNavBar.has-sidebar > .wrapper > .container > .title {
-  background-color: var(--vp-sidebar-bg-color);
-  border-right: 1px solid var(--vp-c-border);
+/* The line under the bar is a separate element, and VitePress insets it by the sidebar
+   column plus the layout gutter, so it starts where the content does and the stretch above
+   the sidebar is left undrawn. The bar reads as one surface, so the rule closing it runs
+   the whole width. !important because the inset it overrides sits in a media query, which
+   the cascade puts after this file. */
+.VPNavBar.has-sidebar .divider {
+  padding-left: 0 !important;
 }
 
+/* Only above 960px: below it VitePress has no sidebar column and the fill would cut
+   across the logo. `background`, not `background-color`: VitePress sets the shorthand
+   to transparent here, and a longhand override loses to a later shorthand. */
+@media (min-width: 960px) {
+  .VPNavBar.has-sidebar > .wrapper > .container > .title {
+    background: var(--vp-sidebar-bg-color) !important;
+    border-right: 1px solid var(--vp-c-border);
+  }
+}
+
+.VPNavBar .VPNavBarTitle .title {
+  font-family: var(--tf-font-display);
+  font-weight: 600;
+  letter-spacing: var(--tf-tracking-h);
+}
+
+.VPNavBarMenuLink,
+.VPNavBarMenuGroup .VPFlyout button {
+  font-family: var(--tf-font-display);
+  font-weight: 500;
+}
+
+.VPDocAsideOutline .outline-title {
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-caption-sm);
+  font-weight: 600;
+  letter-spacing: var(--tf-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--tf-color-muted);
+}
+
+/* VitePress fades a long outline with a fixed strip gradienting to the page colour,
+   which over the backdrop paints a flat patch. The fade is cosmetic and the aside
+   scrolls with the page. */
+.aside-curtain {
+  display: none !important;
+}
+
+.VPDocAsideOutline .outline-marker {
+  background-color: var(--tf-color-accent) !important;
+  width: var(--tf-rail-width) !important;
+  border-radius: 0;
+}
+
+.VPDocAsideOutline .outline-link {
+  transition: var(--tf-t-base);
+}
+
+.VPDocAsideOutline .outline-link:hover,
+.VPDocAsideOutline .outline-link.active {
+  color: var(--tf-color-link);
+}
+
+/* --vp-sidebar-bg-color is translucent, so the blur is required: without it the stars
+   behind the sidebar sit hard in the labels. */
 .VPSidebar {
   border-right: 1px solid var(--vp-c-border);
+  backdrop-filter: var(--tf-glass-filter);
+  /* Marker geometry, consumed by the entry-marker rules further down. The inset is air
+     between the row's left edge, where the active row draws its rail, and the marker
+     column: an emoji nearly fills the slot, so without it the two touch. */
+  --tf-sb-marker-slot: 20px;
+  --tf-sb-marker-inset: var(--tf-spacing-2);
 }
 
 .VPSidebar::-webkit-scrollbar {
@@ -181,61 +116,243 @@
   background: transparent;
 }
 .VPSidebar::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.12);
-  border-radius: 4px;
-}
-.dark .VPSidebar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--tf-color-line-hi);
+  border-radius: var(--tf-radius-pill);
 }
 
-.dark html,
-.dark body,
-.dark .Layout,
-.dark .VPContent,
-.dark .VPDoc,
-.dark .VPDocAside,
-.dark .VPDocAsideOutline {
-  background-color: var(--vp-c-bg);
-}
-
-.VPNavBarSearchButton,
-.vp-doc div[class*="language-"],
-.vp-doc div[class*="language-"] pre,
-.vp-doc div[class*="language-"] code,
-.VPButton,
-.VPLocalSearchBox,
-.VPLocalSearchBox input,
-.VPMenu {
-  border-radius: 0 !important;
-}
-
-.vp-doc :not(pre) > code {
-  border-radius: 4px;
-}
-
-.custom-block {
-  border-radius: 4px;
-}
-
-/* scrollbar-gutter prevents layout shift on lightbox open */
+/* The page colour goes on `html` alone. PageBackdrop paints at z-index -1, which
+   is above the root background but below every in-flow block background, so any
+   fill on `body` or on the VitePress containers would bury it. They are pinned
+   transparent rather than merely left alone, because VitePress paints some of them
+   itself. */
+/* scrollbar-gutter prevents layout shift on lightbox open. */
 html {
+  background-color: var(--vp-c-bg);
   scrollbar-gutter: stable;
 }
 
+body,
+.Layout,
+.VPContent,
+.VPDoc,
+.VPDocAside,
+.VPDocAsideOutline {
+  background-color: transparent !important;
+}
+
+.VPNavBarSearchButton,
+.VPLocalSearchBox input {
+  border-radius: var(--tf-radius-sm) !important;
+}
+
+.vp-doc div[class*="language-"],
+.VPMenu {
+  border-radius: var(--tf-radius-lg) !important;
+}
+
+/*
+ * Local search. Colours go through the --vp-local-search-* variables in tokens.css;
+ * only what no variable covers is here. It needs !important because the component
+ * is lazy-loaded: its scoped stylesheet is injected at runtime after this file, so
+ * an equal-specificity rule loses on order no matter how it is written.
+ */
+.VPLocalSearchBox .backdrop {
+  background: var(--tf-color-backdrop) !important;
+  backdrop-filter: blur(var(--tf-blur-overlay));
+}
+
+.VPLocalSearchBox .shell {
+  border: 1px solid var(--tf-color-line) !important;
+  border-radius: var(--tf-radius-xl) !important;
+  backdrop-filter: var(--tf-glass-filter);
+  box-shadow: var(--tf-shadow-3) !important;
+  overflow: hidden;
+}
+
+.VPLocalSearchBox .search-bar {
+  position: relative;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: var(--tf-spacing-2) var(--tf-spacing-4) !important;
+  background: transparent !important;
+}
+
+/* The same fading accent hairline that opens a section, separating field from
+   results without a full-width grey rule across the panel. */
+.VPLocalSearchBox .search-bar::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: var(--tf-grad-line);
+  opacity: var(--tf-dim);
+}
+
+.VPLocalSearchBox .search-input {
+  padding: var(--tf-spacing-3) var(--tf-spacing-2);
+  font-size: var(--tf-text-lead);
+  color: var(--tf-color-fg);
+}
+
+.VPLocalSearchBox .search-input::placeholder {
+  color: var(--tf-color-disabled);
+}
+
+.VPLocalSearchBox .search-icon {
+  color: var(--vp-c-brand-1);
+}
+
+.VPLocalSearchBox .search-actions button {
+  border-radius: var(--tf-radius-xs);
+  color: var(--tf-color-muted);
+  transition: var(--tf-t-base);
+}
+
+.VPLocalSearchBox .search-actions button:hover {
+  background: var(--tf-color-panel-hi);
+  color: var(--vp-c-brand-1);
+}
+
+.VPLocalSearchBox .results {
+  padding: var(--tf-spacing-2);
+}
+
+/* The border is off via --vp-local-search-result-border, so only the shape is here. */
+.VPLocalSearchBox .result {
+  border-radius: var(--tf-radius-lg) !important;
+  padding: var(--tf-spacing-2) var(--tf-spacing-3) !important;
+  min-height: 0 !important;
+  transition: var(--tf-t-base);
+}
+
+/* The row's spacing is the padding above, so the wrapper's own 12px margin goes. */
+.VPLocalSearchBox .result > div {
+  margin: 0 !important;
+}
+
+/* baseline, not the default stretch: the icon and the label are separate flex items and
+   stretch leaves each aligning inside its own box. */
+.VPLocalSearchBox .titles {
+  align-items: baseline;
+  min-height: 0 !important;
+  padding: 0 !important;
+}
+
+.VPLocalSearchBox .result:hover {
+  background: var(--tf-color-panel-hi) !important;
+}
+
+/* Left corners square so the rail runs straight (see --tf-rail). */
+.VPLocalSearchBox .result.selected {
+  border-radius: 0 var(--tf-radius-lg) var(--tf-radius-lg) 0 !important;
+  box-shadow: var(--tf-rail);
+}
+
+/* Same metrics as the label beside it. VitePress sets the icon 16px/16px against the
+   title's 14px/21px, which centres the two boxes but not the ink: `#` runs from
+   ascender to baseline where the label only reaches x-height, so it rides high. */
+.VPLocalSearchBox .title-icon {
+  font-size: var(--tf-text-body-sm);
+  line-height: 1.5;
+  color: var(--vp-c-brand-1) !important;
+  opacity: 1 !important;
+}
+
+.VPLocalSearchBox .title {
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-body-sm);
+  line-height: 1.5;
+  padding: 0 !important;
+}
+
+/* Parent headings are the breadcrumb, not the hit: they step back so the matched
+   heading is the thing the eye lands on. */
+.VPLocalSearchBox .titles .title:not(.main) {
+  color: var(--tf-color-muted) !important;
+  font-size: var(--tf-text-caption);
+}
+
+.VPLocalSearchBox .title.main {
+  font-weight: 600;
+  color: var(--tf-color-fg) !important;
+}
+
+.VPLocalSearchBox .excerpt {
+  background: var(--tf-color-inset) !important;
+  border-radius: var(--tf-radius-sm);
+  padding: var(--tf-spacing-3);
+  font-size: var(--tf-text-body-sm);
+  line-height: var(--tf-leading-snug);
+  color: var(--tf-color-muted);
+}
+
+/* VitePress fades the clipped excerpt with colour gradients, which cannot hide the cut
+   on a translucent shell. A mask fades the content itself, whatever is behind it. */
+.VPLocalSearchBox .excerpt-gradient-top,
+.VPLocalSearchBox .excerpt-gradient-bottom {
+  display: none !important;
+}
+
+.VPLocalSearchBox .excerpt-wrapper {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - var(--tf-spacing-8)),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - var(--tf-spacing-8)),
+    transparent
+  );
+}
+
+/* Colour comes from --vp-local-search-highlight-*; the shape does not. */
+.VPLocalSearchBox mark {
+  border-radius: var(--tf-radius-xs);
+  padding: 0 3px;
+  font-weight: 600;
+}
+
+.VPLocalSearchBox .search-keyboard-shortcuts {
+  padding: var(--tf-spacing-3) var(--tf-spacing-4) !important;
+  border-top: 1px solid var(--tf-color-line-2) !important;
+  font-size: var(--tf-text-caption-sm);
+  color: var(--tf-color-muted);
+}
+
+.VPLocalSearchBox .search-keyboard-shortcuts kbd {
+  border: 1px solid var(--tf-color-line) !important;
+  border-radius: var(--tf-radius-xs) !important;
+  background: var(--tf-color-inset) !important;
+  box-shadow: none !important;
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-caption-sm);
+}
+
+/* The pre inherits the wrapper's clip, so rounding it again leaves a hairline of
+   wrapper background inside the corner. */
+.vp-doc div[class*="language-"] pre,
+.vp-doc div[class*="language-"] code {
+  border-radius: 0 !important;
+}
+
+.VPButton {
+  border-radius: var(--tf-radius-sm) !important;
+}
+
 .custom-block {
+  border-radius: var(--tf-radius-lg);
   color: var(--brand-text-default);
 }
 
-.dark .custom-block {
-  color: rgba(255, 255, 255, 0.85);
-}
-
+/* The 3px left border is the rail, so the left corners square (see --tf-rail). */
 .custom-block.info,
 .custom-block.tip,
 .custom-block.warning,
 .custom-block.danger,
 .custom-block.details {
   border-width: 0 0 0 3px !important;
+  border-radius: 0 var(--tf-radius-lg) var(--tf-radius-lg) 0;
 }
 
 .custom-block.info {
@@ -269,18 +386,8 @@ html {
   border-left-color: var(--brand-border-strong) !important;
 }
 
-.dark .custom-block.info {
-  background-color: rgba(0, 116, 200, 0.1);
-  border-left-color: var(--brand-secondary) !important;
-}
-
-.dark .custom-block.info .custom-block-title {
-  color: var(--brand-secondary);
-}
-
 .dark .custom-block.details {
-  background-color: rgba(255, 255, 255, 0.04);
-  border-left-color: rgba(255, 255, 255, 0.2) !important;
+  border-left-color: var(--tf-color-line-hi) !important;
 }
 
 .VPNavBarTranslations,
@@ -295,30 +402,91 @@ html {
   cursor: zoom-in;
 }
 
-/* VPDoc.vue is <style scoped> (specificity 0,4,0), so overrides need !important. */
-.VPDoc.has-aside .content-container {
-  max-width: 826px !important;
+.VPDoc {
+  padding-top: var(--tf-spacing-6) !important;
 }
 
-.VPDoc:not(.has-sidebar) .content {
-  max-width: 860px !important;
+/* The panel owns the horizontal inset; VitePress would add its own on top. The path has
+   to be spelled out: the outline in the aside is also a `.content` inside `.VPDoc`, and
+   unscoped this strips the padding that holds its labels off their rail. */
+.VPDoc > .container > .content {
+  padding-inline: 0 !important;
 }
 
-@media (min-width: 1440px) {
-  .VPDoc:not(.has-sidebar) .content {
-    max-width: 900px !important;
+/* The only backdrop-filter the document needs. Tables, code blocks and callouts inside
+   it already lie on this glass, so a blur of their own would re-blur the parent's
+   result at full cost. */
+.VPDoc .content-container {
+  position: relative;
+  background-color: var(--tf-color-panel-glass);
+  backdrop-filter: var(--tf-glass-filter);
+  border: 1px solid var(--tf-color-line-2);
+  border-radius: var(--tf-radius-xl);
+  box-shadow: var(--tf-shadow-1);
+  /* Bottom is one step deeper than the top so the last line is not flush against the
+     edge, but only one: 72px read as a gap rather than as padding. */
+  padding: var(--tf-spacing-8) var(--tf-spacing-8) var(--tf-spacing-lg);
+  /* The measure is enforced here, not per paragraph, or headings and tables would run
+     past a band of empty panel. At the default layout the column is narrower than this
+     cap, so it binds only on very wide screens and in layout-wide. */
+  max-width: var(--tf-panel-max);
+}
+
+/* Below the sidebar breakpoint the panel would waste the little width there is,
+   so it flattens back onto the page. */
+@media (max-width: 768px) {
+  .VPDoc .content-container {
+    background-color: transparent;
+    /* No surface left to frost, and a full-height blur layer costs real GPU for
+       nothing: the star field is already off at this width. */
+    backdrop-filter: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
   }
+}
+
+/* A landing page is not a reading column, so the panel and the measure step aside.
+   Keyed off the hero element rather than frontmatter, so it holds during SSR.
+   backdrop-filter must go with the rest: left on it is an invisible pane that still
+   blurs, along edges that line up with nothing. Same wherever else the panel is turned
+   off (the mobile rule above, print.css). */
+.VPDoc .content-container:has(.brand-hero),
+.VPDoc.has-aside .content-container:has(.brand-hero),
+.VPDoc:not(.has-sidebar) .content:has(.brand-hero) {
+  max-width: var(--layout-max-width-content) !important;
+  background-color: transparent;
+  backdrop-filter: none;
+  border: none;
+  box-shadow: none;
+  padding-inline: 0;
+}
+
+/* Running text below the hero still gets the measure; the child combinator is what
+   keeps it off the hero's own subtitle and the card copy, which are nested. */
+.VPDoc
+  .content-container:has(.brand-hero)
+  .vp-doc
+  > div
+  > :is(p, ul, ol, blockquote) {
+  max-width: var(--tf-measure);
+}
+
+/* VPDoc.vue is <style scoped> (specificity 0,4,0), so its own max-width needs an
+   !important to beat, which in turn means the panel width has to be restated
+   here rather than left to the .content-container rule above. */
+.VPDoc.has-aside .content-container,
+.VPDoc:not(.has-sidebar) > .container > .content {
+  max-width: var(--tf-panel-max) !important;
 }
 
 html.layout-wide {
   --vp-layout-max-width: var(--layout-max-width-wide);
 }
 
-html.layout-wide .VPDoc .content-container {
-  max-width: 1152px !important;
-}
-
-html.layout-wide .VPDoc .content {
+html.layout-wide .VPDoc .content-container,
+html.layout-wide .VPDoc > .container > .content {
   max-width: 1152px !important;
 }
 
@@ -343,91 +511,130 @@ html.layout-max .VPContent {
   max-width: 100% !important;
 }
 
-.vp-doc h1 {
-  font-size: 32px;
-  font-weight: 500;
-  line-height: 1.25;
-  margin-top: 0;
-  margin-bottom: 16px;
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3,
+.vp-doc h4,
+.vp-doc h5,
+.vp-doc h6 {
+  font-family: var(--tf-font-display);
+  font-weight: 600;
+  letter-spacing: var(--tf-tracking-h);
 }
 
+/* Matches DocPageTitle, for the pages that write their own h1 in Markdown instead of
+   letting the component render it. */
+.vp-doc h1 {
+  font-size: var(--tf-text-h1);
+  line-height: var(--tf-leading-tight);
+  margin-top: 0;
+  margin-bottom: var(--tf-spacing-4);
+  color: var(--tf-color-fg);
+}
+
+/* Replaces VitePress' own full-width grey divider on h2. */
 .vp-doc h2 {
-  font-size: 24px;
-  font-weight: 500;
-  margin-top: 40px;
-  margin-bottom: 8px;
-  padding-top: 0;
+  font-size: var(--tf-text-h2);
+  line-height: 1.25;
+  margin-top: var(--tf-spacing-lg);
+  margin-bottom: var(--tf-spacing-3);
+  padding-top: var(--tf-spacing-5);
   border-top: none;
+  position: relative;
+}
+
+.vp-doc h2::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--tf-grad-line);
+  opacity: var(--tf-dim);
+}
+
+/* An authored `---` right before a heading already draws the same hairline, so the
+   heading drops its own instead of stacking two. The `hr` is the one kept rather
+   than hidden: print.css uses it as the page-break marker, and an element with
+   `display: none` generates no box and would take the break with it. */
+.vp-doc hr + h2 {
+  padding-top: 0;
+}
+
+.vp-doc hr + h2::before {
+  content: none;
 }
 
 .vp-doc h3 {
-  font-size: 20px;
-  font-weight: 500;
-  margin-top: 24px;
-  margin-bottom: 4px;
+  font-size: var(--tf-text-h3);
+  margin-top: var(--tf-spacing-8);
+  margin-bottom: var(--tf-spacing-2);
+}
+
+.vp-doc h4 {
+  font-size: var(--tf-text-h4);
+  margin-top: var(--tf-spacing-6);
+  margin-bottom: var(--tf-spacing-2);
 }
 
 /* An H3 directly under an H2 belongs to it, so pull it closer. */
 .vp-doc h2 + h3 {
-  margin-top: 12px;
+  margin-top: var(--tf-spacing-3);
+}
+
+/* VitePress positions the anchor with a fixed `top` tuned to its own heading metrics.
+   The h2 now carries padding-top for its hairline, which pushed the `#` below the
+   text; starting the anchor where the text line starts puts the two on one baseline. */
+.vp-doc h2 .header-anchor {
+  top: var(--tf-spacing-5);
+}
+
+.vp-doc :is(h1, h3, h4, h5, h6) .header-anchor {
+  top: 0;
 }
 
 .vp-doc p {
   margin-top: 0;
-  margin-bottom: 16px;
-  line-height: 1.6;
+  margin-bottom: var(--tf-spacing-4);
+  line-height: var(--tf-leading-body);
 }
 
-/* Zebra striping. These nth-child rules are the pre-hydration and no-JS
-   fallback; their paint goes stale once a sort or filter shifts the parity.
-   TableEnhancer.vue therefore tags rows `.tf-row` / `.tf-stripe` and reassigns
-   them on every sort and filter. Those class rules follow here and each needs
-   its own `.dark` variant to outrank `.dark ... :nth-child(even)`, which is why
-   the dark rules below are not redundant duplicates. */
+/* Zebra striping. The nth-child rule is the pre-hydration and no-JS fallback; its parity
+   goes stale the moment a sort or filter reorders the rows, so TableEnhancer.vue tags them
+   `.tf-row` / `.tf-stripe` instead. Those two are the same specificity as the fallback, so
+   they must stay below it here: source order is the only thing making them win. */
 .vp-doc table tr:nth-child(even) {
-  background-color: var(--brand-surface);
-}
-
-.dark .vp-doc table tr:nth-child(even) {
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: color-mix(in srgb, var(--brand-surface) 60%, transparent);
 }
 
 .vp-doc table tr.tf-row {
   background-color: transparent;
 }
 
-.dark .vp-doc table tr.tf-row {
-  background-color: transparent;
-}
-
 .vp-doc table tr.tf-stripe {
-  background-color: var(--brand-surface);
-}
-
-.dark .vp-doc table tr.tf-stripe {
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: color-mix(in srgb, var(--brand-surface) 60%, transparent);
 }
 
 /* Row hover: keeps the eye on one row across many columns. Must follow the
    zebra rules (equal specificity) so it wins on hovered rows. */
 .vp-doc tbody tr:hover {
-  background-color: rgba(0, 116, 200, 0.07);
+  background-color: color-mix(in oklab, var(--tf-color-accent) 9%, transparent);
 }
 
-.dark .vp-doc tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.09);
-}
-
-/* Brand-tinted header so the row reads as a header when scanning data tables.
-   A flat 0.1 tint was too weak on white to separate the header from the first
-   zebra row, so light mode uses a stronger alpha; dark keeps its own. */
+/* Alpha rather than a flat colour, so it composites over the zebra beneath. */
 .vp-doc table th {
-  background-color: rgba(0, 116, 200, 0.15);
-  font-weight: 700;
-}
-
-.dark .vp-doc table th {
-  background-color: rgba(0, 116, 200, 0.22);
+  background-color: color-mix(
+    in oklab,
+    var(--tf-color-accent) 18%,
+    transparent
+  );
+  font-weight: 600;
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-body-sm);
+  letter-spacing: var(--tf-tracking-label);
+  text-transform: uppercase;
+  color: var(--tf-color-fg);
 }
 
 /* Colour swatch for documenting design tokens (e.g. the Colors token page).
@@ -437,13 +644,9 @@ html.layout-max .VPContent {
   width: 0.95em;
   height: 0.95em;
   margin-right: 0.4em;
-  border-radius: 3px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: var(--tf-radius-xs);
+  border: 1px solid var(--tf-color-line-hi);
   vertical-align: -0.12em;
-}
-
-.dark .vp-doc .tf-swatch {
-  border-color: rgba(255, 255, 255, 0.25);
 }
 
 /* Click-to-sort affordance (behavior in components/TableEnhancer.vue). A faint
@@ -469,7 +672,7 @@ html.layout-max .VPContent {
 
 .vp-doc thead th[aria-sort]::after {
   opacity: 1;
-  color: var(--brand-primary);
+  color: var(--tf-color-link);
 }
 
 .vp-doc thead th[aria-sort="ascending"]::after {
@@ -480,10 +683,6 @@ html.layout-max .VPContent {
   content: "↓";
 }
 
-.dark .vp-doc thead th[aria-sort]::after {
-  color: #7cc4f5;
-}
-
 /* Table wrapper injected by the tableWrapper rule in config/tableWrapper.ts.
    The outer .tf-table holds the frame and the scroll-shadow pseudo-elements and
    does not scroll, so the shadows stay pinned to its edges; the inner
@@ -492,18 +691,18 @@ html.layout-max .VPContent {
   /* Block spacing lives on the wrapper; the table's own margin is zeroed
      below so it doesn't push an empty strip inside this bordered frame. */
   position: relative;
-  margin: 20px 0;
-  border-radius: 6px;
+  margin-block: var(--tf-spacing-5);
+  border-radius: var(--tf-radius-lg);
   border: 1px solid var(--brand-border-default);
+  /* Translucent, no blur of its own: it lies on the glass panel, so letting the
+     panel's tone through is what keeps the nebula visible under the table. */
+  background-color: color-mix(in srgb, var(--tf-color-panel) 55%, transparent);
+  box-shadow: var(--tf-shadow-1);
   overflow: hidden; /* clip the inner scroller to the rounded corners */
 }
 
 .vp-doc .tf-table-scroll {
   overflow-x: auto;
-}
-
-.dark .vp-doc .tf-table {
-  border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Scroll-shadow affordance: edge gradients that appear only when there's more
@@ -524,20 +723,12 @@ html.layout-max .VPContent {
 
 .vp-doc .tf-table::before {
   left: 0;
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0));
+  background: linear-gradient(to right, var(--tf-color-scrim), transparent);
 }
 
 .vp-doc .tf-table::after {
   right: 0;
-  background: linear-gradient(to left, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0));
-}
-
-.dark .vp-doc .tf-table::before {
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
-}
-
-.dark .vp-doc .tf-table::after {
-  background: linear-gradient(to left, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+  background: linear-gradient(to left, var(--tf-color-scrim), transparent);
 }
 
 .vp-doc .tf-table.is-overflow-start::before,
@@ -588,6 +779,14 @@ html.layout-max .VPContent {
   font-variant-numeric: tabular-nums;
 }
 
+/* Columns of single tokens (dates, IDs, versions, paths) keep them whole. Detected in
+   TableEnhancer.vue, because CSS cannot tell `2026-07-15` from a sentence. The table
+   scrolls when the sum of columns exceeds the frame, so nothing is lost. */
+.vp-doc .tf-col-atom {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
 /* Filter toolbar (injected by TableEnhancer.vue). Sits inside the frame above
    the scroller, right-aligned; z-index keeps it above the scroll shadows. */
 .vp-doc .tf-table-toolbar {
@@ -595,33 +794,26 @@ html.layout-max .VPContent {
   z-index: 2;
   display: flex;
   justify-content: flex-end;
-  padding: 8px 10px;
-  background-color: var(--brand-surface);
+  padding: var(--tf-spacing-2) var(--tf-spacing-3);
+  background-color: var(--tf-color-inset);
   border-bottom: 1px solid var(--brand-border-default);
-}
-
-.dark .vp-doc .tf-table-toolbar {
-  background-color: rgba(255, 255, 255, 0.03);
-  border-bottom-color: rgba(255, 255, 255, 0.15);
 }
 
 .vp-doc .tf-table-filter {
   width: min(240px, 60%);
-  padding: 4px 10px;
+  padding: var(--tf-spacing-1) var(--tf-spacing-3);
   font-size: 0.85em;
   color: var(--vp-c-text-1);
-  background-color: var(--vp-c-bg);
-  border: 1px solid var(--brand-border-default);
-  border-radius: 4px;
+  background-color: var(--tf-color-panel);
+  border: 1px solid var(--tf-color-line-hi);
+  border-radius: var(--tf-radius-sm);
   outline: none;
+  transition: var(--tf-t-base);
 }
 
 .vp-doc .tf-table-filter:focus {
-  border-color: var(--brand-primary);
-}
-
-.dark .vp-doc .tf-table-filter {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--tf-color-accent);
+  box-shadow: var(--tf-ring-focus);
 }
 
 .vp-doc .tf-no-results td {
@@ -683,8 +875,8 @@ html.layout-max .VPContent {
 
 .dark .vp-doc th,
 .dark .vp-doc td {
-  border-right-color: rgba(255, 255, 255, 0.15) !important;
-  border-bottom-color: rgba(255, 255, 255, 0.15) !important;
+  border-right-color: var(--tf-color-line) !important;
+  border-bottom-color: var(--tf-color-line) !important;
 }
 
 .vp-doc ul.contains-task-list {
@@ -692,9 +884,226 @@ html.layout-max .VPContent {
   padding-left: 1.25rem;
 }
 
+/* Drawn rather than native because `accent-color` takes a single colour and the theme's
+   affirmative is a gradient. The tick is a mask, so it is the box's own background
+   showing through and needs no colour of its own. */
 .vp-doc .task-list-item-checkbox {
-  margin-right: 8px;
-  accent-color: var(--brand-primary);
+  appearance: none;
+  flex: none;
+  width: var(--tf-size-sm);
+  height: var(--tf-size-sm);
+  margin-right: var(--tf-spacing-2);
+  vertical-align: -0.18em;
+  border: 1px solid var(--tf-color-line-hi);
+  border-radius: var(--tf-radius-check);
+  background: var(--tf-color-panel-2);
+  cursor: pointer;
+  transition: var(--tf-t-base);
+}
+
+.vp-doc .task-list-item-checkbox:hover {
+  border-color: var(--tf-color-accent);
+}
+
+.vp-doc .task-list-item-checkbox:focus-visible {
+  outline: none;
+  box-shadow: var(--tf-ring-focus);
+}
+
+.vp-doc .task-list-item-checkbox:checked {
+  border-color: transparent;
+  background: var(--tf-grad-accent);
+  animation: tf-check-pop var(--tf-dur-2) var(--tf-ease-spring);
+}
+
+.vp-doc .task-list-item-checkbox:checked::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  -webkit-mask: var(--tf-check-mask) no-repeat center / 10px 10px;
+  mask: var(--tf-check-mask) no-repeat center / 10px 10px;
+}
+
+.vp-doc .task-list-item:has(.task-list-item-checkbox:checked) {
+  color: var(--tf-color-muted);
+}
+
+.vp-doc hr {
+  height: 1px;
+  border: none;
+  background: var(--tf-grad-line);
+  opacity: var(--tf-dim);
+  margin-block: var(--tf-spacing-lg);
+}
+
+.vp-doc blockquote {
+  position: relative;
+  border-left: none !important;
+  padding-left: var(--tf-spacing-5);
+  margin-block: var(--tf-spacing-6);
+  font-size: var(--tf-text-lead);
+  line-height: var(--tf-leading-body);
+  color: var(--tf-color-fg);
+}
+
+.vp-doc blockquote::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--tf-rail-width);
+  border-radius: 0;
+  background: linear-gradient(
+    180deg,
+    var(--tf-color-accent-2),
+    var(--tf-color-accent)
+  );
+}
+
+.vp-doc blockquote > p {
+  margin-bottom: var(--tf-spacing-3);
+}
+
+.vp-doc blockquote > p:last-child {
+  margin-bottom: 0;
+}
+
+/* A faint accent wash rather than a solid grey fill, so identifiers separate from prose
+   without the boxed-in look. */
+.vp-doc :not(pre) > code {
+  border-radius: var(--tf-radius-xs);
+  background-color: color-mix(in oklab, var(--tf-color-accent) 8%, transparent);
+  color: var(--tf-color-fg);
+  border: 1px solid color-mix(in oklab, var(--tf-color-accent) 14%, transparent);
+  font-size: 0.875em;
+  padding: 2px 5px;
+}
+
+.vp-doc a > code {
+  color: var(--vp-c-brand-1);
+}
+
+.VPDocFooter .pager-link {
+  border-radius: var(--tf-radius-lg);
+  background: var(--tf-color-panel-2);
+  transition: var(--tf-t-base);
+}
+
+.VPDocFooter .pager-link:hover {
+  border-color: var(--tf-color-accent);
+  background: var(--tf-color-accent-soft);
+}
+
+.VPDocFooter .pager-link .desc {
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-caption-sm);
+  letter-spacing: var(--tf-tracking-label);
+  text-transform: uppercase;
+  color: var(--tf-color-muted);
+}
+
+.VPDocFooter .pager-link .title {
+  font-family: var(--tf-font-display);
+  font-weight: 600;
+}
+
+.VPDocFooter .pager-link.next {
+  border-color: color-mix(
+    in oklab,
+    var(--tf-color-accent) 45%,
+    var(--tf-color-line)
+  );
+}
+
+.VPDocFooter .pager-link.next .desc::after {
+  content: " →";
+  letter-spacing: 0;
+}
+
+/* Only the forward link carries the accent, so the pair reads as one emphasised and one
+   ordinary. VitePress accents both, which also leaves the back link on the light-mode blue
+   in dark mode, at 3.5:1. */
+.VPDocFooter .pager-link.prev .title {
+  color: var(--tf-color-fg);
+}
+
+.VPDocFooter .pager-link.next .title {
+  color: var(--tf-color-accent-ink);
+}
+
+.vp-doc div[class*="language-"] {
+  border: 1px solid var(--brand-border-default);
+  box-shadow: var(--tf-shadow-1);
+}
+
+.vp-doc div[class*="language-"] .lang {
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-caption-sm);
+  letter-spacing: var(--tf-tracking-label);
+  text-transform: uppercase;
+}
+
+.vp-doc div[class*="language-"] > button.copy {
+  border-radius: var(--tf-radius-xs) !important;
+  transition: var(--tf-t-base);
+}
+
+.vp-doc [class*="language-"] code .highlighted {
+  background-color: color-mix(
+    in oklab,
+    var(--tf-color-accent) 16%,
+    transparent
+  );
+}
+
+.vp-doc img {
+  border-radius: var(--tf-radius-lg);
+  box-shadow: var(--tf-shadow-2);
+}
+
+/* Definition-ish emphasis: bold in running text is almost always a term being
+   introduced, and display weight makes it read as one. */
+.vp-doc strong {
+  font-family: var(--tf-font-display);
+  font-weight: 600;
+  color: var(--tf-color-fg);
+}
+
+.vp-doc li {
+  line-height: var(--tf-leading-body);
+  margin-bottom: var(--tf-spacing-1);
+}
+
+.vp-doc ul > li::marker {
+  color: var(--tf-color-accent);
+}
+
+.vp-doc ol > li::marker {
+  color: var(--tf-color-muted);
+  font-family: var(--tf-font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.custom-block-title {
+  font-family: var(--tf-font-display);
+  font-size: var(--tf-text-caption-sm);
+  font-weight: 600;
+  letter-spacing: var(--tf-tracking-label);
+}
+
+.custom-block.details summary {
+  font-family: var(--tf-font-display);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vp-doc .task-list-item-checkbox:checked {
+    animation: none;
+  }
 }
 
 .VPSidebarItem .item {
@@ -708,9 +1117,12 @@ html.layout-max .VPContent {
 }
 
 .VPSidebarItem .text {
+  position: relative;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  padding-left: calc(var(--tf-sb-marker-inset) + var(--tf-sb-marker-slot));
+  color: color-mix(in oklab, var(--tf-color-fg) 88%, transparent) !important;
 }
 
 .VPSidebarItem.level-0:not(.collapsible) {
@@ -723,7 +1135,7 @@ html.layout-max .VPContent {
   > .items
   > .VPSidebarItem
   + .VPSidebarItem {
-  border-top: 1px solid var(--vp-c-divider);
+  border-top: 1px solid var(--tf-color-line-2);
   padding-top: 10px;
 }
 .VPSidebarItem.level-0:not(.collapsible)
@@ -736,107 +1148,147 @@ html.layout-max .VPContent {
   padding-top: 20px;
 }
 
-/* U+FE0F hands these to Noto Color Emoji, which paints its own colour, so dark
-   mode needs the light glyphs rather than a `color` override. The `/ ""` blanks
-   the accessible name: without it a screen reader announces "black small
-   square" before every label. No width / font-size, an emoji needs neither. */
+/*
+ * Entry markers. Every label leads with one slot of the same width, holding either a drawn
+ * marker or an author's emoji (SidebarDefaultEmoji.vue hoists that emoji into a span so it
+ * lands in the slot too). One width is what keeps every label in one column.
+ *
+ * Drawn rather than an emoji glyph because an emoji carries U+FE0F, which hands it to Noto
+ * Color Emoji: that font paints its own colour and `color` cannot reach it.
+ *
+ * Out of flow, so the slot adds no width whatever it holds.
+ */
+.VPSidebarItem .text.default-emoji-folder::before,
+.VPSidebarItem .text.default-emoji-file::before,
+.VPSidebarItem .text .tf-sb-marker {
+  position: absolute;
+  left: var(--tf-sb-marker-inset);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tf-sb-marker-slot);
+  height: 1em;
+  line-height: 1;
+}
+
+/* `content: "" / ""` keeps the accessible name blank, otherwise a screen reader
+   announces the marker before every label. */
+.VPSidebarItem .text.default-emoji-folder::before,
+.VPSidebarItem .text.default-emoji-file::before {
+  content: "" / "";
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* A group is a square, a page a dot: the same distinction the emoji pair carried,
+   two steps quieter. */
 .VPSidebarItem .text.default-emoji-folder::before {
-  content: "◼️ " / "";
+  background-image: linear-gradient(var(--tf-color-disabled) 0 0);
+  background-size: 6px 6px;
 }
 
 .VPSidebarItem .text.default-emoji-file::before {
-  content: "▪️ " / "";
+  background-image: radial-gradient(
+    circle closest-side,
+    var(--tf-color-disabled) 100%,
+    transparent
+  );
+  background-size: 5px 5px;
 }
 
-.dark .VPSidebarItem .text.default-emoji-folder::before {
-  content: "◻️ " / "";
+.VPSidebarItem.is-active > .item .text.default-emoji-folder::before {
+  background-image: linear-gradient(var(--tf-color-link) 0 0);
 }
 
-.dark .VPSidebarItem .text.default-emoji-file::before {
-  content: "▫️ " / "";
-}
-
-.VPSidebarItem .text {
-  color: #2d3748 !important;
-}
-
-.dark .VPSidebarItem .text {
-  color: rgba(255, 255, 255, 0.75) !important;
-}
-
-.VPSidebarItem h2,
-.VPSidebarItem h3,
-.VPSidebarItem h4,
-.VPSidebarItem h5,
-.VPSidebarItem h6,
-.VPSidebarItem p {
-  padding-left: 8px !important;
+.VPSidebarItem.is-active > .item .text.default-emoji-file::before {
+  background-image: radial-gradient(
+    circle closest-side,
+    var(--tf-color-link) 100%,
+    transparent
+  );
 }
 
 .VPSidebarItem .caret {
-  padding-right: 8px !important;
+  padding-right: var(--tf-spacing-2) !important;
 }
 
-/* Compensate text padding-left shift so border-left stays aligned with text */
-.VPSidebarItem.level-1 .items,
-.VPSidebarItem.level-2 .items,
-.VPSidebarItem.level-3 .items,
-.VPSidebarItem.level-4 .items,
-.VPSidebarItem.level-5 .items {
-  margin-left: 8px !important;
+/* One indent step per group, and the step is the marker slot, so a child's marker lands
+   in the column its parent's label starts in. Uniform at every depth, where VitePress
+   indents a level-1 group's children by 24px and a level-0 group's by nothing. */
+.VPSidebarItem.collapsible > .items {
+  margin-left: 0 !important;
+  padding-left: var(--tf-sb-marker-slot) !important;
+  /* VitePress draws a tree line here, but only from level 1 down, which makes the step
+     21px instead of 20. Depth is carried by the indent alone. */
+  border-left: none !important;
+}
+
+/* The level-0 non-collapsible item is the container VitePress wraps consecutive
+   top-level pages in, not a nesting level, so it adds no indent of its own. */
+.VPSidebarItem.level-0:not(.collapsible) > .items {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
 }
 
 .VPSidebarItem > .item {
-  border-radius: 6px;
-  transition: background-color 0.15s ease;
+  border-radius: var(--tf-radius-sm);
+  transition: var(--tf-t-base);
 }
 
+/* panel-hi is a lift against the sidebar surface in both modes: white above the
+   tinted band in light, a translucent white veil in dark. */
 .VPSidebarItem > .item:hover {
-  background-color: rgba(0, 116, 200, 0.05);
+  background-color: var(--tf-color-panel-hi);
 }
 
-.dark .VPSidebarItem > .item:hover {
-  background-color: rgba(255, 255, 255, 0.04);
-}
-
+/* An inset shadow rather than a border, so it costs no layout and cannot shift the
+   label, which is clipped to one line. Left corners square (see --tf-rail). */
 .VPSidebarItem.is-active > .item {
-  background-color: rgba(0, 116, 200, 0.09);
-}
-
-.dark .VPSidebarItem.is-active > .item {
-  background-color: rgba(0, 160, 227, 0.12);
+  background-color: color-mix(
+    in oklab,
+    var(--tf-color-accent) 10%,
+    transparent
+  );
+  border-radius: 0 var(--tf-radius-sm) var(--tf-radius-sm) 0;
+  box-shadow: var(--tf-rail);
 }
 
 .VPSidebarItem.is-active > .item .link .text {
-  color: var(--brand-primary) !important;
-  font-weight: 700;
+  color: var(--tf-color-accent-ink) !important;
+  font-weight: 600;
 }
 
-.dark .VPSidebarItem.is-active > .item .link .text {
-  color: var(--brand-secondary) !important;
-}
-
-/* Mermaid is themed here off the --brand-* tokens, so overriding a token
-   recolors diagrams in both modes. Dark mode needs the extra `.dark` prefix to
-   win: vitepress-plugin-mermaid hard-forces theme="dark" on <html>.dark and
-   ignores anything passed through config. */
+/* Mermaid is themed off the --brand-* tokens, so overriding a token recolors diagrams in
+   both modes. The six values a diagram differs by between modes come from --tf-mermaid-*,
+   which is why this block has no dark counterpart. */
 .mermaid .node rect,
 .mermaid .node polygon,
 .mermaid .node circle,
 .mermaid .node ellipse,
 .mermaid .node path,
 .mermaid .cluster rect {
-  fill: var(--brand-surface) !important;
+  fill: var(--tf-mermaid-surface) !important;
   stroke: var(--brand-primary) !important;
   stroke-width: 1px !important;
 }
 
+.mermaid .actor,
+.mermaid .classGroup rect,
+.mermaid .classGroup path {
+  fill: var(--tf-mermaid-surface) !important;
+  stroke: var(--brand-primary) !important;
+}
+
+/* SVG geometry attributes take plain numbers, so these cannot read the radius
+   tokens; they mirror --tf-radius-sm and --tf-radius-lg by hand. */
 .mermaid .node rect {
-  rx: 4;
+  rx: 8;
 }
 
 .mermaid .cluster rect {
-  rx: 6;
+  rx: 12;
 }
 
 .mermaid .node .label,
@@ -844,19 +1296,47 @@ html.layout-max .VPContent {
 .mermaid .node text,
 .mermaid .cluster .nodeLabel,
 .mermaid .cluster text {
-  color: var(--brand-text-default) !important;
-  fill: var(--brand-text-default) !important;
+  color: var(--tf-mermaid-ink) !important;
+  fill: var(--tf-mermaid-ink) !important;
+}
+
+.mermaid .classGroup .classTitle,
+.mermaid .classLabel .label,
+.mermaid .classGroup text,
+.mermaid g.classGroup text,
+.mermaid text.actor > tspan {
+  fill: var(--tf-mermaid-ink) !important;
+}
+
+.mermaid .messageText,
+.mermaid .labelText,
+.mermaid .loopText,
+.mermaid .noteText {
+  fill: var(--tf-mermaid-ink) !important;
+  stroke: none !important;
 }
 
 .mermaid .nodeLabel p,
 .mermaid .edgeLabel p {
-  color: var(--brand-text-default) !important;
+  color: var(--tf-mermaid-ink) !important;
   background-color: transparent !important;
 }
 
 .mermaid span.edgeLabel {
-  background-color: var(--brand-bg-page) !important;
-  color: var(--brand-text-default) !important;
+  background-color: var(--tf-mermaid-label-bg) !important;
+  color: var(--tf-mermaid-ink) !important;
+}
+
+.mermaid .edgeLabel,
+.mermaid .edgeLabel rect {
+  background-color: var(--tf-mermaid-edge-bg) !important;
+  color: var(--tf-mermaid-ink) !important;
+  fill: var(--tf-mermaid-edge-bg) !important;
+}
+
+.mermaid .edgeLabel foreignObject div {
+  background-color: var(--tf-mermaid-edge-bg) !important;
+  color: var(--tf-mermaid-ink) !important;
 }
 
 .mermaid .edgePath .path,
@@ -864,7 +1344,10 @@ html.layout-max .VPContent {
 .mermaid .messageLine0,
 .mermaid .messageLine1,
 .mermaid line,
-.mermaid .relation {
+.mermaid .relation,
+.mermaid .actor-line,
+.mermaid line.actor-line,
+.mermaid .classGroup line {
   stroke: var(--brand-text-muted) !important;
 }
 
@@ -875,179 +1358,70 @@ html.layout-max .VPContent {
   stroke: var(--brand-text-muted) !important;
 }
 
-.mermaid .edgeLabel,
-.mermaid .edgeLabel rect {
-  background-color: var(--brand-bg-page) !important;
-  color: var(--brand-text-default) !important;
-  fill: var(--brand-bg-page) !important;
-}
-
-.mermaid .edgeLabel foreignObject div {
-  background-color: var(--brand-bg-page) !important;
-  color: var(--brand-text-default) !important;
-}
-
-.mermaid .actor {
-  fill: var(--brand-surface) !important;
-  stroke: var(--brand-primary) !important;
-}
-
-.mermaid text.actor > tspan {
-  fill: var(--brand-text-default) !important;
-}
-
-.mermaid .actor-line,
-.mermaid line.actor-line {
-  stroke: var(--brand-text-muted) !important;
-}
-
-.mermaid .messageText,
-.mermaid .labelText,
-.mermaid .loopText,
-.mermaid .noteText {
-  fill: var(--brand-text-default) !important;
-  stroke: none !important;
-}
-
 .mermaid .note {
-  fill: var(--brand-warning-bg) !important;
-  stroke: var(--brand-warning) !important;
+  fill: var(--tf-mermaid-note-bg) !important;
+  stroke: var(--tf-mermaid-note-line) !important;
 }
 
-.mermaid .classGroup rect,
-.mermaid .classGroup path {
-  fill: var(--brand-surface) !important;
-  stroke: var(--brand-primary) !important;
-}
-
-.mermaid .classGroup .classTitle,
-.mermaid .classLabel .label,
-.mermaid .classGroup text,
-.mermaid g.classGroup text {
-  fill: var(--brand-text-default) !important;
-}
-
-.mermaid .classGroup line {
-  stroke: var(--brand-text-muted) !important;
-}
-
+/* vitepress-plugin-mermaid forces theme="dark" on <html>.dark, and Mermaid's dark theme
+   paints a background onto the svg itself. */
 .dark .mermaid svg {
   background-color: transparent;
 }
 
-.dark .mermaid .node rect,
-.dark .mermaid .node polygon,
-.dark .mermaid .node circle,
-.dark .mermaid .node ellipse,
-.dark .mermaid .node path,
-.dark .mermaid .cluster rect {
-  fill: var(--vp-c-bg-soft) !important;
-  stroke: var(--brand-primary) !important;
-  stroke-width: 1px !important;
+/* The transition names `fill` and `stroke` because those are the SVG attributes Mermaid
+   sets; `background` would do nothing here. */
+.mermaid .node,
+.mermaid .cluster,
+.mermaid .actor,
+.mermaid .classGroup {
+  transition:
+    fill var(--tf-dur-1) var(--tf-ease-out),
+    stroke var(--tf-dur-1) var(--tf-ease-out),
+    filter var(--tf-dur-1) var(--tf-ease-out);
 }
 
-.dark .mermaid .node .label,
-.dark .mermaid .node .nodeLabel,
-.dark .mermaid .node text,
-.dark .mermaid .cluster .nodeLabel,
-.dark .mermaid .cluster text {
-  color: #ffffff !important;
-  fill: #ffffff !important;
+.mermaid .node:hover rect,
+.mermaid .node:hover polygon,
+.mermaid .node:hover circle,
+.mermaid .node:hover ellipse,
+.mermaid .node:hover path,
+.mermaid .cluster:hover > rect {
+  fill: color-mix(
+    in oklab,
+    var(--tf-color-accent) var(--tf-tint),
+    var(--brand-surface)
+  ) !important;
+  stroke: var(--tf-color-accent-2) !important;
 }
 
-.dark .mermaid .nodeLabel p,
-.dark .mermaid .edgeLabel p {
-  color: #ffffff !important;
-  background-color: transparent !important;
+.mermaid .node,
+.mermaid .cluster > rect {
+  cursor: default;
 }
 
-.dark .mermaid span.edgeLabel {
-  background-color: transparent !important;
-  color: #ffffff !important;
-}
-
-.dark .mermaid .edgePath .path,
-.dark .mermaid .flowchart-link,
-.dark .mermaid .messageLine0,
-.dark .mermaid .messageLine1,
-.dark .mermaid line,
-.dark .mermaid .relation {
-  stroke: var(--brand-text-muted) !important;
-}
-
-.dark .mermaid .arrowheadPath,
-.dark .mermaid .marker,
-.dark .mermaid #arrowhead path {
-  fill: var(--brand-text-muted) !important;
-  stroke: var(--brand-text-muted) !important;
-}
-
-.dark .mermaid .edgeLabel,
-.dark .mermaid .edgeLabel rect {
-  background-color: var(--vp-c-bg-soft) !important;
-  color: #ffffff !important;
-  fill: var(--vp-c-bg-soft) !important;
-}
-
-.dark .mermaid .edgeLabel foreignObject div {
-  background-color: var(--vp-c-bg-soft) !important;
-  color: #ffffff !important;
-}
-
-.dark .mermaid .actor {
-  fill: var(--vp-c-bg-soft) !important;
-  stroke: var(--brand-primary) !important;
-}
-
-.dark .mermaid text.actor > tspan {
-  fill: #ffffff !important;
-}
-
-.dark .mermaid .actor-line,
-.dark .mermaid line.actor-line {
-  stroke: var(--brand-text-muted) !important;
-}
-
-.dark .mermaid .messageText,
-.dark .mermaid .labelText,
-.dark .mermaid .loopText,
-.dark .mermaid .noteText {
-  fill: #ffffff !important;
-  stroke: none !important;
-}
-
-.dark .mermaid .note {
-  fill: var(--vp-c-bg-mute) !important;
-  stroke: var(--brand-secondary) !important;
-}
-
-.dark .mermaid .classGroup rect,
-.dark .mermaid .classGroup path {
-  fill: var(--vp-c-bg-soft) !important;
-  stroke: var(--brand-primary) !important;
-}
-
-.dark .mermaid .classGroup .classTitle,
-.dark .mermaid .classLabel .label {
-  fill: #ffffff !important;
-}
-
-.dark .mermaid .classGroup text,
-.dark .mermaid g.classGroup text {
-  fill: #ffffff !important;
-}
-
-.dark .mermaid .classGroup line {
-  stroke: var(--brand-text-muted) !important;
+@media (prefers-reduced-motion: reduce) {
+  .mermaid .node,
+  .mermaid .cluster,
+  .mermaid .actor,
+  .mermaid .classGroup {
+    transition: none;
+  }
 }
 
 /* Global mirror of DocMeta's scoped status badge, usable straight from markdown. */
+/* line-height is set, not inherited: the surrounding meta row runs 24px, which made a
+   12px pill 30px tall. */
 .doc-status-badge {
   display: inline-block;
-  padding: 2px 10px;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0;
+  padding: 1px var(--tf-spacing-2);
+  border-radius: var(--tf-radius-pill);
+  font-family: var(--tf-font-display);
+  font-weight: 600;
+  font-size: var(--tf-text-caption-sm);
+  line-height: 1.5;
+  letter-spacing: var(--tf-tracking-label);
+  text-transform: uppercase;
 }
 
 .doc-status-badge[data-status="published"] {
@@ -1074,36 +1448,20 @@ html.layout-max .VPContent {
   border: 1px solid var(--brand-badge-archived-border);
 }
 
-.vp-doc div[class*="language-"] {
-  border: 1px solid var(--brand-border-default);
-}
-
 .dark .vp-doc div[class*="language-"] {
   border: 1px solid var(--vp-c-border);
 }
 
 .vp-doc a {
-  color: var(--brand-primary);
+  color: var(--tf-color-link);
   text-decoration: none;
 }
 
 .vp-doc a:hover {
-  color: var(--brand-primary-hover);
+  color: var(--tf-color-link-hover);
   text-decoration: underline;
 }
 
 .vp-doc a:active {
-  color: var(--brand-primary-active);
-}
-
-.dark .vp-doc a {
-  color: var(--brand-secondary);
-}
-
-.dark .vp-doc a:hover {
-  color: #5bc8f5;
-}
-
-.dark .vp-doc a:active {
-  color: var(--brand-primary);
+  color: var(--tf-color-link-active);
 }

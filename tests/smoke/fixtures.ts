@@ -8,6 +8,31 @@ import http from "node:http";
 
 const SMOKE_ROOT = process.env.SMOKE_ROOT ?? path.join(os.tmpdir(), "tf-smoke");
 
+/**
+ * One port per spec, in one place. Two specs sharing a port makes the suite
+ * order-dependent, which stays invisible until it fails on a machine that is slower at
+ * releasing a socket.
+ */
+/**
+ * Console errors we do not control. VitePress' own VPNavBar derives its `home` and `top`
+ * classes from the route and from window.scrollY, which the server cannot know, so the
+ * element ships as `.VPNavBar` in the SSR HTML and hydrates into `.VPNavBar.home.top`.
+ * Every built site logs it. Diffing the served HTML against the hydrated DOM shows that
+ * class as the only divergence, on all three sites. Everything else stays fatal.
+ */
+const UPSTREAM_CONSOLE_ERRORS = [
+  /^Hydration completed but contains mismatches\.$/,
+];
+
+export const PORTS = {
+  anaDev: 5174,
+  techDocsDev: 5175,
+  playgroundSidebarMarkers: 5176,
+  playgroundDarkMode: 5177,
+  techDocsPreview: 4173,
+  anaPreview: 4174,
+} as const;
+
 interface Sandboxes {
   tgz: string;
   techDocsHostDir: string;
@@ -130,25 +155,42 @@ export const test = base.extend<Fixtures>({
     }
   },
 
-  assertCleanRender: async ({}, use) => {
+  /**
+   * Listeners attach during fixture setup, which Playwright runs before the test body.
+   * Attaching them inside the returned function instead would miss everything the
+   * initial `page.goto` produced, so whether a real error was seen depended on timing.
+   */
+  assertCleanRender: async ({ page }, use) => {
+    const pageErrors: string[] = [];
+    const consoleErrors: string[] = [];
+    const responses: { url: string; status: number }[] = [];
+
+    page.on("pageerror", (err) => pageErrors.push(err.message));
+    page.on("console", (msg) => {
+      if (msg.type() === "error") consoleErrors.push(msg.text());
+    });
+    page.on("response", (res) => {
+      responses.push({ url: res.url(), status: res.status() });
+    });
+
     await use(async (page, opts) => {
-      const pageErrors: string[] = [];
-      const consoleErrors: string[] = [];
-      const badResponses: { url: string; status: number }[] = [];
       const maxStatus = opts.maxResponseStatus ?? 399;
 
-      page.on("pageerror", (err) => pageErrors.push(err.message));
-      page.on("console", (msg) => {
-        if (msg.type() === "error") consoleErrors.push(msg.text());
-      });
-      page.on("response", (res) => {
-        if (res.status() > maxStatus) {
-          badResponses.push({ url: res.url(), status: res.status() });
-        }
-      });
-
-      // page.goto already happened in the test; just wait for the network to settle.
       await page.waitForLoadState("networkidle");
+
+      // Only the site under test. The theme loads Google Fonts, and asserting on
+      // third-party responses makes the suite fail when that CDN throttles or blips,
+      // which says nothing about the build these specs exist to check.
+      let origin: string | null = null;
+      try {
+        origin = new URL(page.url()).origin;
+      } catch {
+        origin = null;
+      }
+      const badResponses = responses.filter(
+        (r) =>
+          r.status > maxStatus && (origin === null || r.url.startsWith(origin)),
+      );
 
       const bodyText = await page.evaluate(() => document.body.innerText);
       const minChars = opts.minBodyChars ?? 100;
@@ -171,9 +213,12 @@ export const test = base.extend<Fixtures>({
           `${pageErrors.length} uncaught page error(s):\n  - ${pageErrors.join("\n  - ")}`,
         );
       }
-      if (consoleErrors.length > 0) {
+      const ourConsoleErrors = consoleErrors.filter(
+        (e) => !UPSTREAM_CONSOLE_ERRORS.some((re) => re.test(e.trim())),
+      );
+      if (ourConsoleErrors.length > 0) {
         failures.push(
-          `${consoleErrors.length} console error(s):\n  - ${consoleErrors.join("\n  - ")}`,
+          `${ourConsoleErrors.length} console error(s):\n  - ${ourConsoleErrors.join("\n  - ")}`,
         );
       }
       if (badResponses.length > 0) {

@@ -5,25 +5,13 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { allMdFiles } from "./docs-files.js";
 
 const args = process.argv.slice(2);
 const rootArg = args.find((a) => a.startsWith("--root="))?.split("=")[1];
 const root = rootArg ?? "docs";
 const DOCS_ROOT = path.resolve(process.cwd(), root);
 const FIELD_ORDER = ["title", "status", "updated_at"];
-
-function allMdFiles(dir: string): string[] {
-  const results: string[] = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory() && entry.name !== ".vitepress") {
-      results.push(...allMdFiles(full));
-    } else if (entry.isFile() && entry.name.endsWith(".md")) {
-      results.push(full);
-    }
-  }
-  return results.sort();
-}
 
 interface Block {
   key: string;

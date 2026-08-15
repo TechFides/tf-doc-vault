@@ -62,9 +62,20 @@ function hostName(url: string): string {
 
 <style scoped>
 .brand-footer {
-  margin-top: 24px;
-  padding: 24px;
+  position: relative;
+  margin-top: var(--tf-spacing-lg);
+  padding: var(--tf-spacing-6);
   text-align: center;
+}
+
+/* The same fading accent hairline that opens every section, closing the page. */
+.brand-footer::before {
+  content: "";
+  position: absolute;
+  inset: 0 var(--tf-spacing-6) auto;
+  height: 1px;
+  background: var(--tf-grad-line);
+  opacity: var(--tf-dim);
 }
 
 .brand-footer__inner {
@@ -72,14 +83,15 @@ function hostName(url: string): string {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--vp-c-text-2);
+  gap: var(--tf-spacing-2);
+  font-size: var(--tf-text-caption);
+  color: var(--tf-color-muted);
 }
 
 .brand-footer__link {
-  color: var(--brand-primary);
+  color: var(--vp-c-brand-1);
   text-decoration: none;
+  transition: var(--tf-t-base);
 }
 
 .brand-footer__link:hover {
@@ -88,26 +100,25 @@ function hostName(url: string): string {
 }
 
 .brand-footer__sep {
-  color: var(--vp-c-text-3);
+  color: var(--tf-color-disabled);
 }
 
 .brand-footer__address {
-  color: var(--vp-c-text-2);
+  color: var(--tf-color-muted);
 }
 
 .dark .brand-footer__link {
-  color: var(--brand-secondary);
+  color: var(--tf-color-accent-2);
 }
 
 .dark .brand-footer__link:hover {
-  color: var(--brand-secondary);
-  opacity: 0.85;
+  color: color-mix(in oklab, var(--tf-color-accent-2) 78%, white);
 }
 
 @media (max-width: 639px) {
   .brand-footer__inner {
     flex-direction: column;
-    gap: 16px;
+    gap: var(--tf-spacing-4);
   }
 
   .brand-footer__sep {

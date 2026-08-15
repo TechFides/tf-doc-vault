@@ -1,12 +1,12 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { test, expect } from "./fixtures";
+import { test, expect, PORTS } from "./fixtures";
 
 const REPO_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../..",
 );
-const PORT = 5175;
+const PORT = PORTS.playgroundDarkMode;
 
 test("dark-mode navbar chrome paints over VitePress internals", async ({
   page,

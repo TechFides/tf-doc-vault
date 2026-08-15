@@ -9,12 +9,27 @@ import TableEnhancer from "./components/TableEnhancer.vue";
 import WidthToggle from "./components/WidthToggle.vue";
 import BrandHero from "./components/BrandHero.vue";
 import FeatureCards from "./components/FeatureCards.vue";
+import FeatureCard from "./components/FeatureCard.vue";
+import Spotlight from "./components/Spotlight.vue";
+import AuthorCard from "./components/AuthorCard.vue";
+import StepCard from "./components/StepCard.vue";
+import ReferenceCard from "./components/ReferenceCard.vue";
+import Timeline from "./components/Timeline.vue";
+import TimelineItem from "./components/TimelineItem.vue";
 import BrandFooter from "./components/BrandFooter.vue";
 import NotFound from "./components/NotFound.vue";
+import PageBackdrop from "./components/PageBackdrop.vue";
 import { i18n, resolveLocale } from "./i18n/index.js";
 import SidebarDefaultEmoji from "./components/SidebarDefaultEmoji.vue";
+// Import order is the cascade order: base maps and overrides VitePress, patterns
+// are last so an author-facing class wins over chrome. tokens.css is not listed
+// because base.css @imports it; pulling it here as well would inline the token
+// block into a consumer's bundle twice.
 import "./styles/print.css";
+import "./styles/icons.css";
+import "./styles/backdrop.css";
 import "./styles/base.css";
+import "./styles/patterns.css";
 
 export interface CreateThemeOptions {
   /** Show the WidthToggle button in the navbar. Default: false. */
@@ -25,10 +40,16 @@ export interface CreateThemeOptions {
    * it off regardless.
    */
   brandFooter?: boolean;
+  /**
+   * Mount PageBackdrop, the nebula and star field behind the site. Default: true.
+   * The star field is dark-mode only; tune either half with
+   * `--tf-nebula-opacity` and `--tf-stars-opacity`.
+   */
+  backdrop?: boolean;
 }
 
 export function createTheme(options: CreateThemeOptions = {}): Theme {
-  const { widthToggle = false, brandFooter = true } = options;
+  const { widthToggle = false, brandFooter = true, backdrop = true } = options;
 
   return {
     extends: DefaultTheme,
@@ -42,6 +63,10 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
       const showFooter = brandFooter && footerConfigured;
 
       const slots: Record<string, () => VNode> = {
+        // layout-top, so the backdrop mounts once per layout rather than per route:
+        // remounting would restart the nebula drift on every navigation.
+        "layout-top": (): VNode =>
+          backdrop ? h(PageBackdrop) : h(Fragment, null, []),
         "doc-before": (): VNode =>
           h("div", { class: "doc-meta-wrapper" }, [
             h(DocMeta),
@@ -73,6 +98,13 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
       app.component("PrintLayout", PrintLayout);
       app.component("BrandHero", BrandHero);
       app.component("FeatureCards", FeatureCards);
+      app.component("FeatureCard", FeatureCard);
+      app.component("Spotlight", Spotlight);
+      app.component("AuthorCard", AuthorCard);
+      app.component("StepCard", StepCard);
+      app.component("ReferenceCard", ReferenceCard);
+      app.component("Timeline", Timeline);
+      app.component("TimelineItem", TimelineItem);
     },
   };
 }
@@ -86,8 +118,16 @@ export {
   WidthToggle,
   BrandHero,
   FeatureCards,
+  FeatureCard,
+  Spotlight,
+  AuthorCard,
+  StepCard,
+  ReferenceCard,
+  Timeline,
+  TimelineItem,
   BrandFooter,
   NotFound,
+  PageBackdrop,
 };
 export { useScrollSpy } from "./composables/useScrollSpy.js";
 export { i18n } from "./i18n/index.js";

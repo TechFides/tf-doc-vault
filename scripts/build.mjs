@@ -24,6 +24,7 @@ const STATIC_EXTENSIONS = new Set([
   ".svg",
   ".jpg",
   ".webp",
+  ".woff2",
   ".cjs",
 ]);
 const WATCH = process.argv.includes("--watch");

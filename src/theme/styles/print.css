@@ -20,6 +20,28 @@
     width: 100% !important;
   }
 
+  /* On screen the reading column sits on a panel. Paper is already the panel, so
+     the frame, the lift and the tint all come off, and the figures that bleed into
+     the panel padding come back into the column. */
+  .VPDoc .content-container {
+    background: none !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .vp-doc .tf-table,
+  .vp-doc div[class*="language-"],
+  .vp-doc .mermaid {
+    margin-inline: 0 !important;
+  }
+
+  .tf-backdrop,
+  .brand-hero__glow {
+    display: none !important;
+  }
+
   /* An <hr> in the source doubles as a page-break marker. */
   hr {
     page-break-after: always;

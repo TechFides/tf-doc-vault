@@ -75,8 +75,7 @@
       "types": "./dist/theme/index.d.ts",
       "default": "./dist/theme/index.js"
     },
-    "./theme/styles/print.css": "./dist/theme/styles/print.css",
-    "./theme/styles/base.css": "./dist/theme/styles/base.css",
+    "./theme/styles/*": "./dist/theme/styles/*",
     "./scripts/*": "./dist/scripts/*.js",
     "./eslint": "./configs/eslint.config.js",
     "./prettier": "./configs/prettier.json",

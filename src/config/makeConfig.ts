@@ -109,10 +109,10 @@ export interface Branding {
    */
   favicon?: string | false;
   /**
-   * How to load Open Sans and Noto Color Emoji.
+   * How to load Inter (headings), IBM Plex Sans (body) and Noto Color Emoji.
    * - `"google"` (default): bundled `<link>` tags to fonts.googleapis.com.
    * - `"none"`: skip injection; the consumer self-hosts, e.g. with
-   *   `@fontsource/open-sans` imported from their own config. Emoji then
+   *   `@fontsource/inter` imported from their own config. Emoji then
    *   fall back to the reader's OS font and stop being platform-neutral.
    */
   fonts?: "google" | "none";
@@ -163,7 +163,7 @@ function buildHead(opts: MakeConfigOptions): HeadConfig[] {
         "link",
         {
           rel: "stylesheet",
-          href: "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&family=Noto+Color+Emoji&display=swap",
+          href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Color+Emoji&display=swap",
         },
       ],
     );
@@ -410,10 +410,10 @@ export function makeConfig(
       theme: "base",
       /* Mermaid writes its own `#mermaid-N { font-family: ... }` into the SVG,
          an ID selector CSS cannot outrank, so the emoji font has to be set
-         here. "Open Sans" must stay ahead of it: Noto carries `0`-`9` for
+         here. "IBM Plex Sans" must stay ahead of it: Noto carries `0`-`9` for
          keycaps and would otherwise render digits as emoji. */
       fontFamily:
-        '"trebuchet ms", verdana, arial, "Open Sans", "Noto Color Emoji", sans-serif',
+        '"IBM Plex Sans", "Inter", system-ui, "Noto Color Emoji", sans-serif',
       flowchart: {
         curve: "basis",
         useMaxWidth: true,
