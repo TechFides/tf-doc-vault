@@ -21,10 +21,11 @@ import NotFound from "./components/NotFound.vue";
 import PageBackdrop from "./components/PageBackdrop.vue";
 import { i18n, resolveLocale } from "./i18n/index.js";
 import SidebarDefaultEmoji from "./components/SidebarDefaultEmoji.vue";
-// Import order is the cascade order: tokens define, base maps and overrides
-// VitePress, patterns are last so an author-facing class wins over chrome.
+// Import order is the cascade order: base maps and overrides VitePress, patterns
+// are last so an author-facing class wins over chrome. tokens.css is not listed
+// because base.css @imports it; pulling it here as well would inline the token
+// block into a consumer's bundle twice.
 import "./styles/print.css";
-import "./styles/tokens.css";
 import "./styles/icons.css";
 import "./styles/backdrop.css";
 import "./styles/base.css";

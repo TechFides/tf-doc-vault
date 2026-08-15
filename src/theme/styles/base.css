@@ -1,9 +1,13 @@
 /*
  * VitePress chrome overrides and Markdown element styling. Every value comes
- * from a token in tokens.css, which is imported ahead of this file by
- * theme/index.ts; the author-facing pattern classes come after it in
- * patterns.css. Nothing here may define a token.
+ * from a token in tokens.css; the author-facing pattern classes come after this
+ * file in patterns.css. Nothing here may define a token.
+ *
+ * The @import is what keeps `@techfides/tf-doc-vault/theme/styles/base.css`, a
+ * published export, usable on its own: without it every var() below resolves to
+ * nothing for a consumer who imports this file rather than calling createTheme().
  */
+@import "./tokens.css";
 
 /* Navbar chrome. These reach into VitePress' internal DOM
    (`.VPNavBar > .wrapper > .container > ...`), which is not public API: a minor

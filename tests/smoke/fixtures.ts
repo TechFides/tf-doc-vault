@@ -14,10 +14,11 @@ const SMOKE_ROOT = process.env.SMOKE_ROOT ?? path.join(os.tmpdir(), "tf-smoke");
  * releasing a socket.
  */
 /**
- * Console errors we do not control. VitePress' own VPLocalNavOutlineDropdown renders its
- * button label as text during SSR and as spans on the client, so every built site logs
- * one hydration mismatch. Verified against origin/master: the same build without any of
- * this theme's changes logs it too. Everything else stays fatal.
+ * Console errors we do not control. VitePress' own VPNavBar derives its `home` and `top`
+ * classes from the route and from window.scrollY, which the server cannot know, so the
+ * element ships as `.VPNavBar` in the SSR HTML and hydrates into `.VPNavBar.home.top`.
+ * Every built site logs it. Diffing the served HTML against the hydrated DOM shows that
+ * class as the only divergence, on all three sites. Everything else stays fatal.
  */
 const UPSTREAM_CONSOLE_ERRORS = [
   /^Hydration completed but contains mismatches\.$/,
