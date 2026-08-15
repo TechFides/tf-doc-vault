@@ -228,8 +228,15 @@
   --tf-stars-opacity: 0;
   /* Light clouds darken the glass they sit on rather than lighting it, so the hero's bloom
      runs quieter here than the wash behind the page. */
-  --tf-hero-bloom-opacity: 0.38;
+  --tf-hero-bloom-opacity: 0.24;
   --tf-hero-stars-opacity: 0;
+  /* The bloom shades in light instead of tinting. It cannot be brighter than a near-white
+     panel, only more saturated, and on white the eye tracks a wash by hue long before it
+     tracks it by brightness: the accent version moved luminance by 1.21:1 and still read as
+     a blue corner. Navy moves the same luminance at near-zero chroma. Dark keeps the accent,
+     where the layer really is lighter than what it sits on and glows. */
+  --tf-hero-bloom-1: color-mix(in oklab, var(--brand-navy) 15%, transparent);
+  --tf-hero-bloom-2: color-mix(in oklab, var(--brand-navy) 8%, transparent);
   /* Cloud 2 is the pair that lands on the outline column, which has no panel of its own,
      so its muted links sit straight on the sky. That is what caps it this far below the
      other two; see backdrop.css for which cloud goes where. */
@@ -501,10 +508,20 @@
      pulse. Stars are points and read brighter than their opacity suggests; past about 0.3
      they stop being grain and start being lights. */
   --tf-stars-opacity: 0.22;
-  /* Lowest of the three: the bloom sits inside the hero panel, and at full strength it lit
-     its right half far brighter than its left and flattened the stars in it. */
-  --tf-hero-bloom-opacity: 0.6;
+  /* The bloom lights one half of the hero panel against the other, so it runs below the
+     wash behind the page. */
+  --tf-hero-bloom-opacity: 0.17;
   --tf-hero-stars-opacity: 0.38;
+  --tf-hero-bloom-1: color-mix(
+    in oklab,
+    var(--tf-color-accent-2) 42%,
+    transparent
+  );
+  --tf-hero-bloom-2: color-mix(
+    in oklab,
+    var(--tf-color-accent) 30%,
+    transparent
+  );
   --tf-nebula-1: color-mix(in oklab, var(--tf-color-accent) 28%, transparent);
   /* Cloud 2 lands on the outline column, which has no panel of its own, so it stays the
      faintest of the three: those labels sit straight on whatever it leaves behind them. */

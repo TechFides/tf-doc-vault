@@ -10,8 +10,7 @@ const eyebrow = computed(
 </script>
 
 <template>
-  <!-- data-tf-edge is the swept gradient rim from patterns.css, used only here. -->
-  <div v-if="frontmatter.hero" class="brand-hero" data-tf-edge>
+  <div v-if="frontmatter.hero" class="brand-hero">
     <div class="brand-hero__bloom" aria-hidden="true" />
     <div class="brand-hero__field" aria-hidden="true">
       <span class="brand-hero__stars brand-hero__stars--near" />
@@ -42,19 +41,15 @@ const eyebrow = computed(
   margin-top: 0;
   margin-bottom: var(--tf-spacing-6);
   padding: var(--tf-spacing-lg) var(--tf-spacing-8);
+  border: 1px solid var(--tf-color-line);
   border-radius: var(--tf-radius-xl);
   background: var(--tf-color-panel-glass);
   backdrop-filter: var(--tf-glass-filter);
   box-shadow: var(--tf-shadow-2);
 }
 
-/* patterns.css puts the rim at z-index 0, which paints it in the same step as the bloom
-   and the field, and so under them in DOM order. */
-.brand-hero::before {
-  z-index: 2;
-}
-
-/* Two gradients on one layer: a wide wash, and a tighter core it comes from. */
+/* Two gradients on one layer: a wide wash, and a tighter core it comes from. Both colours
+   come from tokens because the two modes do not mix them from the same hue; see tokens.css. */
 .brand-hero__bloom {
   position: absolute;
   inset: -30% -10%;
@@ -62,14 +57,10 @@ const eyebrow = computed(
   background-image:
     radial-gradient(
       42% 58% at 74% 44%,
-      color-mix(in oklab, var(--tf-color-accent-2) 42%, transparent),
+      var(--tf-hero-bloom-1),
       transparent 68%
     ),
-    radial-gradient(
-      68% 84% at 88% 22%,
-      color-mix(in oklab, var(--tf-color-accent) 30%, transparent),
-      transparent 72%
-    );
+    radial-gradient(68% 84% at 88% 22%, var(--tf-hero-bloom-2), transparent 72%);
   opacity: var(--tf-hero-bloom-opacity);
   animation: tf-bloom-drift 90s ease-in-out infinite;
   will-change: transform;

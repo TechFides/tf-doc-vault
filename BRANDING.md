@@ -230,6 +230,26 @@ down there, in both modes, and the page keeps its flat colour.
 The page colour is on `html`, and `body` plus the VitePress containers are pinned
 transparent: the layer paints at `z-index: -1` and any fill above it would bury it.
 
+#### Hero bloom
+
+`BrandHero` carries its own wash, two soft radial gradients inside the panel, separate
+from the page nebula behind it.
+
+| Token                     | Light      | Dark          | Effect                     |
+| ------------------------- | ---------- | ------------- | -------------------------- |
+| `--tf-hero-bloom-opacity` | `0.24`     | `0.17`        | Strength of the whole wash |
+| `--tf-hero-bloom-1/2`     | navy 15/8% | accent 42/30% | The two gradients          |
+| `--tf-hero-stars-opacity` | `0`        | `0.38`        | The hero's own star field  |
+
+The two modes mix the bloom from different hues on purpose. Dark uses the accent, where
+the layer is lighter than the panel under it and therefore glows. Light cannot glow: it
+cannot be brighter than a near-white panel, only more saturated, and on white the eye
+tracks a wash by hue long before it tracks it by brightness. The accent version moved
+luminance across the card by only 1.21:1 and still read as a blue corner, which is why
+light shades with `--brand-navy` instead and lands at a chroma of about 5 rather than 36.
+Lowering the opacity alone never fixes this: it scales hue and brightness together, so the
+tint stays blue all the way down until it disappears.
+
 #### Frosted surfaces
 
 Surfaces that lie on the backdrop are glass rather than opaque, so the nebula reads

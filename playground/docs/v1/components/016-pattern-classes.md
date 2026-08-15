@@ -202,11 +202,11 @@ elements. Use the `dl` where the pairs really are terms and definitions.
 
 ## Attributes
 
-| Attribute          | Effect                                                               |
-| ------------------ | -------------------------------------------------------------------- |
-| `data-tf-edge`     | The swept gradient rim. Used by `BrandHero`; available to any panel. |
-| `data-tf-reveal`   | Fades this element's children in as they enter the viewport.         |
-| `data-tf-skeleton` | Shimmering placeholder block, for content that is still loading.     |
+| Attribute          | Effect                                                                 |
+| ------------------ | ---------------------------------------------------------------------- |
+| `data-tf-edge`     | The swept gradient rim. Author-facing only; no core component uses it. |
+| `data-tf-reveal`   | Fades this element's children in as they enter the viewport.           |
+| `data-tf-skeleton` | Shimmering placeholder block, for content that is still loading.       |
 
 <div class="tf-card" data-tf-edge>
   <p>A card carrying the swept rim.</p>
