@@ -96,11 +96,9 @@ const eyebrow = computed(
   position: absolute;
   inset: 0;
   background-repeat: no-repeat;
-  animation: tf-star-pulse var(--tf-ease-out) infinite;
 }
 
 .brand-hero__stars--near {
-  animation-duration: 13s;
   background-image:
     radial-gradient(
       circle closest-side,
@@ -137,8 +135,6 @@ const eyebrow = computed(
 }
 
 .brand-hero__stars--far {
-  animation-duration: 19s;
-  animation-delay: 4s;
   background-image:
     radial-gradient(
       circle closest-side,
@@ -249,10 +245,6 @@ const eyebrow = computed(
   .brand-hero__bloom {
     animation: none;
     will-change: auto;
-  }
-
-  .brand-hero__field {
-    display: none;
   }
 }
 </style>

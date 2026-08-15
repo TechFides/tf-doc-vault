@@ -63,7 +63,7 @@ export function createTheme(options: CreateThemeOptions = {}): Theme {
 
       const slots: Record<string, () => VNode> = {
         // layout-top, so the backdrop mounts once per layout rather than per route:
-        // remounting would restart the star cycles on every navigation.
+        // remounting would restart the nebula drift on every navigation.
         "layout-top": (): VNode =>
           backdrop ? h(PageBackdrop) : h(Fragment, null, []),
         "doc-before": (): VNode =>

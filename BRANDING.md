@@ -187,20 +187,28 @@ cannot be recoloured, and a mode-aware plate would leave dark line-work on near-
 ### Page backdrop
 
 `PageBackdrop` mounts a fixed layer behind the whole site: a nebula of four soft accent
-clouds that drifts and breathes on a 150 second cycle, plus a star field of four layers
-that fade in and out on 11, 14, 17 and 21 second cycles. The staggered periods are what
-make the field scintillate rather than blink in unison, and the nebula is slow enough
-that you never catch it moving, only notice the sky is not where you left it. Turn the
-whole thing off with `createTheme({ backdrop: false })`.
+clouds that drifts and breathes on a 150 second cycle, plus a static star field of four
+layers. The nebula is slow enough that you never catch it moving, only notice the sky is
+not where you left it. Turn the whole thing off with `createTheme({ backdrop: false })`.
+
+The star field does not twinkle, and the four layers differ only in dot size and colour.
+A documentation site is read for twenty minutes at a time, and anything blinking in the
+corner of the eye over that span is read as a fault rather than as decoration. The drift
+is the only motion here, and it is under the threshold where you notice it happening.
 
 The nebula layer is inset `-8%` so the drift has slack; at inset 0 the translate would
 walk the clouds' soft edges into view along the viewport border.
 
 | Token                 | Light      | Dark       | Effect                       |
 | --------------------- | ---------- | ---------- | ---------------------------- |
-| `--tf-nebula-opacity` | `1`        | `1`        | Strength of the whole nebula |
-| `--tf-stars-opacity`  | `0`        | `1`        | Strength of the star field   |
-| `--tf-nebula-1/2/3`   | 55/11/38 % | 46/30/38 % | The three clouds             |
+| `--tf-nebula-opacity` | `1`        | `0.32`     | Strength of the whole nebula |
+| `--tf-stars-opacity`  | `0`        | `0.22`     | Strength of the star field   |
+| `--tf-nebula-1/2/3`   | 55/11/38 % | 28/20/24 % | The three clouds             |
+
+Dark runs every one of these well under light's, because a light cloud shades a near-white
+page while a dark one glows against near-black, and a glow is the half that draws the eye.
+Raising `--tf-stars-opacity` much past `0.3` is where the field stops reading as grain and
+starts reading as lights.
 
 The drift keyframes scale their opacity from `--tf-nebula-opacity` rather than setting it
 outright, because a keyframe outranks the element's own declaration and a literal there

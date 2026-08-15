@@ -51,7 +51,6 @@
 .tf-backdrop__stars > * {
   position: absolute;
   border-radius: 50%;
-  animation: tf-star-pulse var(--tf-ease-out) infinite;
 }
 
 .tf-backdrop__stars {
@@ -60,18 +59,15 @@
   opacity: var(--tf-stars-opacity);
 }
 
-/* Four layers rather than four dozen dots: each is one dot repeated by box-shadow, and
-   a period and delay per layer is what makes the field scintillate. */
+/* Four layers rather than four dozen dots: each is one dot repeated by box-shadow, and the
+   four sizes are what give the field depth. It does not twinkle: movement in the corner of
+   the eye is read as a fault by someone trying to read a specification. */
 .tf-backdrop__stars > .tf-star-a {
   left: 6vw;
   top: 10vh;
   width: 4px;
   height: 4px;
   background: var(--tf-color-accent);
-  filter: drop-shadow(
-    0 0 5px color-mix(in oklab, var(--tf-color-accent) 60%, transparent)
-  );
-  animation-duration: 11s;
   box-shadow:
     18vw 32vh currentColor,
     41vw 8vh currentColor,
@@ -88,8 +84,6 @@
   width: 3px;
   height: 3px;
   background: var(--tf-color-fg);
-  animation-duration: 14s;
-  animation-delay: 2.5s;
   box-shadow:
     22vw 9vh currentColor,
     47vw 33vh currentColor,
@@ -107,8 +101,6 @@
   width: 2px;
   height: 2px;
   background: var(--tf-color-fg);
-  animation-duration: 17s;
-  animation-delay: 5s;
   box-shadow:
     16vw 22vh currentColor,
     37vw 47vh currentColor,
@@ -127,11 +119,6 @@
   width: 3px;
   height: 3px;
   background: var(--tf-color-accent-2);
-  filter: drop-shadow(
-    0 0 5px color-mix(in oklab, var(--tf-color-accent-2) 55%, transparent)
-  );
-  animation-duration: 21s;
-  animation-delay: 8s;
   box-shadow:
     30vw 20vh currentColor,
     50vw 32vh currentColor,
@@ -150,14 +137,10 @@
   }
 }
 
-/* The nebula holds at its mid-cycle opacity; the stars would freeze mid-pulse. */
+/* The nebula holds at its mid-cycle opacity. The star field is static either way. */
 @media (prefers-reduced-motion: reduce) {
   .tf-backdrop__nebula {
     animation: none;
     will-change: auto;
-  }
-
-  .tf-backdrop__stars {
-    display: none;
   }
 }

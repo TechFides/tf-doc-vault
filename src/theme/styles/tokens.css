@@ -494,21 +494,22 @@
   --tf-shadow-2: 0 16px 40px -16px rgba(0, 0, 0, 0.8);
   --tf-shadow-3: 0 24px 60px -24px rgba(0, 0, 0, 0.85);
 
-  /* Held under full strength: against #0e0f14 the clouds glow rather than shade, and at 1
-     they cast a blue over the top band and the outline column. */
-  --tf-nebula-opacity: 0.65;
-  /* Lower again, because stars are points and read brighter than their opacity suggests.
-     Under about 0.45 they stop registering as a field at all. */
-  --tf-stars-opacity: 0.55;
+  /* The clouds are a depth cue, not a light source: against #0e0f14 anything past about 0.5
+     casts a visible blue over the top band and the outline column. */
+  --tf-nebula-opacity: 0.32;
+  /* The field is static, so this is its literal brightness rather than the ceiling of a
+     pulse. Stars are points and read brighter than their opacity suggests; past about 0.3
+     they stop being grain and start being lights. */
+  --tf-stars-opacity: 0.22;
   /* Lowest of the three: the bloom sits inside the hero panel, and at full strength it lit
      its right half far brighter than its left and flattened the stars in it. */
   --tf-hero-bloom-opacity: 0.6;
-  --tf-hero-stars-opacity: 1;
-  --tf-nebula-1: color-mix(in oklab, var(--tf-color-accent) 46%, transparent);
-  /* Cloud 2 lands on the outline column, which has no panel of its own. At 34% it took the
-     outline's labels to 4.3:1; this holds them near 4.7:1. */
-  --tf-nebula-2: color-mix(in oklab, var(--tf-color-accent-2) 30%, transparent);
-  --tf-nebula-3: color-mix(in oklab, var(--tf-color-accent) 38%, transparent);
+  --tf-hero-stars-opacity: 0.38;
+  --tf-nebula-1: color-mix(in oklab, var(--tf-color-accent) 28%, transparent);
+  /* Cloud 2 lands on the outline column, which has no panel of its own, so it stays the
+     faintest of the three: those labels sit straight on whatever it leaves behind them. */
+  --tf-nebula-2: color-mix(in oklab, var(--tf-color-accent-2) 20%, transparent);
+  --tf-nebula-3: color-mix(in oklab, var(--tf-color-accent) 24%, transparent);
 
   --brand-tip: oklch(0.75 0.14 165);
 
@@ -565,18 +566,6 @@
   }
   50% {
     opacity: 1;
-  }
-}
-
-/* Opacity only. A star layer draws its cluster as box-shadow copies of one dot, so
-   scaling the element scales the offsets and the field breathes instead of twinkling. */
-@keyframes tf-star-pulse {
-  0%,
-  100% {
-    opacity: 0.14;
-  }
-  50% {
-    opacity: 0.85;
   }
 }
 
