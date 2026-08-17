@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.5.1
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.0...v0.5.1)
+
+### 🩹 Fixes
+
+- **theme:** Let the layout modes outrank the doc column cap again ([3763964](https://github.com/TechFides/tf-doc-vault/commit/3763964))
+
+### 🏡 Chore
+
+- Add Vercel deployment config for the playground ([aa62f34](https://github.com/TechFides/tf-doc-vault/commit/aa62f34))
+
+### ❤️ Contributors
+
+- Ondřej Misák <ondrej.misak@techfides.cz>
+- Václav Mičulka ([@VaclavMiculka](https://github.com/VaclavMiculka))
+
 ## v0.5.0
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.4.1...v0.5.0)
