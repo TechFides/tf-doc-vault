@@ -29,6 +29,7 @@ export const PORTS = {
   techDocsDev: 5175,
   playgroundSidebarMarkers: 5176,
   playgroundDarkMode: 5177,
+  playgroundWidthToggle: 5178,
   techDocsPreview: 4173,
   anaPreview: 4174,
 } as const;

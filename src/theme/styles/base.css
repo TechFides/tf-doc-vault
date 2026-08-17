@@ -454,7 +454,7 @@ body,
    off (the mobile rule above, print.css). */
 .VPDoc .content-container:has(.brand-hero),
 .VPDoc.has-aside .content-container:has(.brand-hero),
-.VPDoc:not(.has-sidebar) .content:has(.brand-hero) {
+.VPDoc:not(.has-sidebar) > .container > .content:has(.brand-hero) {
   max-width: var(--layout-max-width-content) !important;
   background-color: transparent;
   backdrop-filter: none;
@@ -475,7 +475,11 @@ body,
 
 /* VPDoc.vue is <style scoped> (specificity 0,4,0), so its own max-width needs an
    !important to beat, which in turn means the panel width has to be restated
-   here rather than left to the .content-container rule above. */
+   here rather than left to the .content-container rule above.
+   The child combinator keeps this off the aside's own .content, and it also puts the
+   selector at 0,4,0. Anything that has to widen the doc column past the panel must
+   spell out the same > .container > .content, or it loses the cascade to this rule:
+   the hero rule above and both layout-* rules below all depend on that. */
 .VPDoc.has-aside .content-container,
 .VPDoc:not(.has-sidebar) > .container > .content {
   max-width: var(--tf-panel-max) !important;
@@ -499,7 +503,7 @@ html.layout-max {
 }
 
 html.layout-max .VPDoc .content-container,
-html.layout-max .VPDoc .content {
+html.layout-max .VPDoc > .container > .content {
   max-width: 100% !important;
 }
 
