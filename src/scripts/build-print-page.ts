@@ -48,13 +48,37 @@ function slugFor(filePath: string): string {
     .toLowerCase();
 }
 
-function rewriteLinks(content: string, fromFile: string): string {
+const ASSET = /\.(svg|png|jpe?g|gif|webp|pdf|json|ya?ml|txt|zip)$/i;
+
+/**
+ * Rewrites an internal link into an anchor inside this document. Links are
+ * written the way VitePress resolves them, so the extension is optional and a
+ * directory means its index.md. A target this document does not emit keeps its
+ * text and loses the link: there is nothing here to jump to, and leaving the
+ * relative path in would fail the build as a dead link.
+ */
+function rewriteLinks(
+  content: string,
+  fromFile: string,
+  slugByPath: Map<string, string>,
+): string {
   return content.replace(
-    /\[([^\]]+)\]\((\.[^)]+\.md[^)]*)\)/g,
-    (_, text, href) => {
-      const target = href.split("#")[0] as string;
-      const abs = path.resolve(path.dirname(fromFile), target);
-      return `[${text}](#${slugFor(abs)})`;
+    /(?<!!)\[([^\]]+)\]\((\.{1,2}\/[^)\s]+|\/[^)\s]+)\)/g,
+    (whole: string, text: string, href: string) => {
+      const target = href.split("#")[0] ?? "";
+      if (target === "" || ASSET.test(target)) return whole;
+
+      const base = target.startsWith("/")
+        ? path.join(DOCS_ROOT, target)
+        : path.resolve(path.dirname(fromFile), target);
+      const candidates = target.endsWith(".md")
+        ? [base]
+        : [`${base}.md`, path.join(base, "index.md")];
+
+      const slug = candidates
+        .map((candidate) => slugByPath.get(candidate))
+        .find((found) => found !== undefined);
+      return slug === undefined ? text : `[${text}](#${slug})`;
     },
   );
 }
@@ -140,9 +164,11 @@ for (const entry of toc) {
   );
 }
 
+const slugByPath = new Map(pages.map((p) => [p.filePath, p.slug]));
+
 for (const page of pages) {
   const raw = fs.readFileSync(page.filePath, "utf-8");
-  const body = rewriteLinks(stripFrontmatter(raw), page.filePath);
+  const body = rewriteLinks(stripFrontmatter(raw), page.filePath, slugByPath);
 
   parts.push(`\n<div class="page-break"></div>\n`);
   parts.push(`<a id="${page.slug}"></a>\n`);

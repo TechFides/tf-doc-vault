@@ -119,3 +119,50 @@ describe("build-print-page", () => {
     expect(out).not.toContain("**index**");
   });
 });
+
+describe("internal links", () => {
+  const out = (): string =>
+    runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/sekce/index.md": page("Sekce", 1, "sekce"),
+      "v1/sekce/alfa.md": page(
+        "Alfa",
+        1,
+        [
+          "[no extension](./beta)",
+          "[with extension](./beta.md)",
+          "[root absolute](/v1/sekce/beta)",
+          "[with anchor](./beta#nadpis)",
+          "[a group index](./skupina/)",
+          "[an asset](/diagram.svg)",
+          "![an image](./picture.png)",
+        ].join("\n\n"),
+      ),
+      "v1/sekce/beta.md": page("Beta", 2, "cíl"),
+      "v1/sekce/skupina/index.md": page("Skupina", 3, "skupina"),
+      "v1/sekce/skupina/list.md": page("List", 1, "list"),
+    });
+
+  test("rewrites every form of a link to an emitted page into one anchor", () => {
+    const printed = out();
+
+    expect(printed).toContain("[no extension](#v1-sekce-beta)");
+    expect(printed).toContain("[with extension](#v1-sekce-beta)");
+    expect(printed).toContain("[root absolute](#v1-sekce-beta)");
+    expect(printed).toContain("[with anchor](#v1-sekce-beta)");
+  });
+
+  test("drops the link but keeps the text when the target is not emitted", () => {
+    const printed = out();
+
+    expect(printed).toContain("a group index");
+    expect(printed).not.toContain("(./skupina/)");
+  });
+
+  test("leaves assets and images alone", () => {
+    const printed = out();
+
+    expect(printed).toContain("[an asset](/diagram.svg)");
+    expect(printed).toContain("![an image](./picture.png)");
+  });
+});
