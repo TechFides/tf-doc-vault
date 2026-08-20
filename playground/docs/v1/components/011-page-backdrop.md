@@ -2,6 +2,7 @@
 title: PageBackdrop
 status: published
 updated_at: 2026-08-13
+order: 12
 ---
 
 You are looking at it. The nebula behind this page and, in dark mode, the star field over it

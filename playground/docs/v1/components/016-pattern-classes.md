@@ -2,6 +2,7 @@
 title: Pattern classes
 status: published
 updated_at: 2026-08-13
+order: 17
 ---
 
 The theme's author-facing CSS. These are classes you write in Markdown, not Vue components,

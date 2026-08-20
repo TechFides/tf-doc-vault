@@ -2,6 +2,7 @@
 title: <1.11.N Czech scenario name, e.g. 1.11.1 Přihlášení uživatele>
 status: draft
 updated_at: <YYYY-MM-DD>
+order: <integer from proposed-structure.md, unique among siblings>
 module: <module, e.g. auth, billing, core>
 axis: <optional fallback axis, e.g. admin, user, read, write>
 ---

@@ -2,6 +2,7 @@
 title: <Czech title with numbering, e.g. 2.4.1 Komponentový diagram>
 status: draft
 updated_at: <YYYY-MM-DD>
+order: <N, unique among siblings>
 ---
 
 <!--

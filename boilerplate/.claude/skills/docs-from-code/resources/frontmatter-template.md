@@ -11,6 +11,7 @@ they will appear in the final docs (§7 of `CLAUDE.md`).
 title: Název stránky
 status: draft
 updated_at: 2026-04-23
+order: 1
 ---
 
 <!--
@@ -80,7 +81,7 @@ Krátký úvodní odstavec.
 | `title`      | Czech, with diacritics                        | required                     |
 | `status`     | `published` / `draft` / `review` / `archived` | default `draft`              |
 | `updated_at` | `YYYY-MM-DD` or `YYYY-MM-DD HH:MM`            | required; from `currentDate` |
-| `order`      | integer, only on `index.md`                   | required on `index.md`       |
+| `order`      | integer                                       | required                     |
 
 ## Confluence mark rules (§6 of CLAUDE.md)
 

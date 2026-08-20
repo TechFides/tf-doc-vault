@@ -2,6 +2,7 @@
 title: NotFound
 status: published
 updated_at: 2026-08-13
+order: 15
 ---
 
 The 404 page, mounted into VitePress' `not-found` slot so it replaces the default one.

@@ -397,6 +397,13 @@ export function makeConfig(
       ssr: {
         noExternal: ["@techfides/tf-doc-vault"],
       },
+      // Mermaid is loaded through a dynamic import, so the dev optimizer does not
+      // discover it and serves its CommonJS deps raw, which dies in the browser on
+      // "does not provide an export named 'default'". Pre-bundling mermaid pulls
+      // those deps in whatever they happen to be in the installed version.
+      optimizeDeps: {
+        include: ["mermaid"],
+      },
       plugins: [dynamicNavReload(docsRoot, configFile)],
       ...overrideVite,
     },

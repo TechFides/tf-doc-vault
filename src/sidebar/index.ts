@@ -1,49 +1,29 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { DefaultTheme } from "vitepress";
-
-const IGNORE = new Set([".vitepress", "node_modules", "public"]);
-
-/** `title` from the YAML frontmatter, falling back to the filename. */
-function extractTitle(filePath: string): string {
-  const content = fs.readFileSync(filePath, "utf-8");
-  const match = content.match(/^---\s*\n([\s\S]*?)\n---/);
-  const body = match?.[1];
-  if (body) {
-    const titleLine = body
-      .split("\n")
-      .find((l: string) => l.startsWith("title:"));
-    if (titleLine) return titleLine.replace(/^title:\s*/, "").trim();
-  }
-  return path.basename(filePath, ".md");
-}
+import { readTitle } from "../shared/frontmatter.js";
+import {
+  pageEntries,
+  siblingEntries,
+  sortSiblings,
+  subDirEntries,
+} from "../shared/ordering.js";
 
 function mdFilesIn(dir: string): string[] {
-  return fs
-    .readdirSync(dir)
-    .filter((f: string) => f.endsWith(".md"))
-    .sort((a: string, b: string) => {
-      if (a === "index.md") return -1;
-      if (b === "index.md") return 1;
-      return a.localeCompare(b, "cs");
-    });
+  return sortSiblings(dir, pageEntries(dir)).map((e) => e.name);
 }
 
 function subDirs(dir: string): string[] {
-  if (!fs.existsSync(dir)) return [];
-  return fs
-    .readdirSync(dir, { withFileTypes: true })
-    .filter(
-      (e: fs.Dirent) =>
-        e.isDirectory() && !IGNORE.has(e.name) && !e.name.startsWith("."),
-    )
-    .map((e: fs.Dirent) => e.name)
-    .sort((a: string, b: string) => a.localeCompare(b, "cs"));
+  return sortSiblings(dir, subDirEntries(dir)).map((e) => e.name);
 }
 
 /** Each top-level directory in `docs/` is a documentation version. */
 export function getVersions(docsRoot: string): string[] {
-  return subDirs(docsRoot);
+  // Alphabetical on purpose: v1, v2, v3 is already chronological, so versions
+  // are the one level `order` does not govern.
+  return subDirEntries(docsRoot)
+    .map((e) => e.name)
+    .sort((a, b) => a.localeCompare(b, "cs"));
 }
 
 /** Top-level dirs in `docs/<version>/` become navbar items. */
@@ -59,21 +39,19 @@ export function generateNav(
       const indexPath = path.join(versionRoot, section, "index.md");
       return {
         text: fs.existsSync(indexPath)
-          ? extractTitle(indexPath)
+          ? readTitle(indexPath)
           : section.charAt(0).toUpperCase() + section.slice(1),
         link: `/${version}/${section}/`,
       };
     });
   }
 
-  return mdFilesIn(versionRoot)
-    .filter((f) => f !== "index.md")
-    .map(
-      (f): DefaultTheme.NavItemWithLink => ({
-        text: extractTitle(path.join(versionRoot, f)),
-        link: `/${version}/${f.replace(/\.md$/, "")}`,
-      }),
-    );
+  return mdFilesIn(versionRoot).map(
+    (f): DefaultTheme.NavItemWithLink => ({
+      text: readTitle(path.join(versionRoot, f)),
+      link: `/${version}/${f.replace(/\.md$/, "")}`,
+    }),
+  );
 }
 
 /**
@@ -84,14 +62,7 @@ function buildSidebarItems(
   dir: string,
   urlBase: string,
 ): DefaultTheme.SidebarItem[] {
-  const entries = fs
-    .readdirSync(dir, { withFileTypes: true })
-    .filter(
-      (e: fs.Dirent) =>
-        (e.isFile() && e.name.endsWith(".md") && e.name !== "index.md") ||
-        (e.isDirectory() && !IGNORE.has(e.name) && !e.name.startsWith(".")),
-    )
-    .sort((a: fs.Dirent, b: fs.Dirent) => a.name.localeCompare(b.name, "cs"));
+  const entries = sortSiblings(dir, siblingEntries(dir));
 
   return entries.map((e: fs.Dirent): DefaultTheme.SidebarItem => {
     if (e.isDirectory()) {
@@ -99,14 +70,14 @@ function buildSidebarItems(
       const indexPath = path.join(subDir, "index.md");
       const subBase = `${urlBase}${e.name}/`;
       return {
-        text: fs.existsSync(indexPath) ? extractTitle(indexPath) : e.name,
+        text: fs.existsSync(indexPath) ? readTitle(indexPath) : e.name,
         link: fs.existsSync(indexPath) ? subBase : undefined,
         collapsed: true,
         items: buildSidebarItems(subDir, subBase),
       };
     }
     return {
-      text: extractTitle(path.join(dir, e.name)),
+      text: readTitle(path.join(dir, e.name)),
       link: `${urlBase}${e.name.replace(/\.md$/, "")}`,
     };
   });
@@ -133,12 +104,11 @@ export function generateSidebar(
       const rootItems: DefaultTheme.SidebarItem[] = [];
       const rootIndex = path.join(versionRoot, "index.md");
       if (fs.existsSync(rootIndex)) {
-        rootItems.push({ text: extractTitle(rootIndex), link: versionBase });
+        rootItems.push({ text: readTitle(rootIndex), link: versionBase });
       }
       for (const file of mdFilesIn(versionRoot)) {
-        if (file === "index.md") continue;
         rootItems.push({
-          text: extractTitle(path.join(versionRoot, file)),
+          text: readTitle(path.join(versionRoot, file)),
           link: `${versionBase}${file.replace(/\.md$/, "")}`,
         });
       }
@@ -149,7 +119,7 @@ export function generateSidebar(
     const items: DefaultTheme.SidebarItem[] = [];
     const indexPath = path.join(versionRoot, "index.md");
     if (fs.existsSync(indexPath)) {
-      items.push({ text: extractTitle(indexPath), link: versionBase });
+      items.push({ text: readTitle(indexPath), link: versionBase });
     }
     items.push(...buildSidebarItems(versionRoot, versionBase));
     sidebar[versionBase] = items;

@@ -35,6 +35,7 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 ## Repo map
 
 - `src/config/`: VitePress config factory (`makeConfig`)
+- `src/shared/`: frontmatter reader and sibling-ordering primitive shared by the sidebar generator, the print script and `docs:validate`
 - `src/sidebar/`: sidebar / nav generator (`generateNav`, `generateSidebar`, `getVersions`)
 - `src/theme/`: Vue theme: components, composables, styles
 - `src/scripts/`: docs tooling scripts (`validate-docs`, `normalize-docs`, `export-pdf`, …)
@@ -48,7 +49,7 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 - `tests/smoke/`: Playwright specs
 - `infra/terraform/`: published Terraform module
 - `docker/`: Dockerfile + nginx configs
-- `specs/`: internal implementation plans; excluded from the published package via `files` in `package.json`
+- `specs/`: internal implementation plans and design specs; every spec written before a change goes here, one Markdown file per topic. Excluded from the published package via `files` in `package.json`
 
 ## Conventions
 
@@ -121,9 +122,10 @@ See [`docs/TESTING.md`](docs/TESTING.md). In short: Vitest for pure logic in `sr
 ## Workflow for agents
 
 1. Smallest coherent diff that satisfies the goal, with no drive-by refactors or new tooling.
-2. Code + tests + docs change together when behaviour changes.
-3. Before opening / updating a PR run `pnpm lint && pnpm typecheck && pnpm test` and report results.
-4. If a check fails, fix the root cause; do not disable it or pass `--no-verify`.
-5. Never commit secrets. Publish auth is OIDC; there is no `NPM_TOKEN` in this repo.
-6. Do not bypass the `npm-publish` environment approval: releases require a named reviewer (see `CONTRIBUTING.md` → Releasing).
-7. In a fresh git worktree run `pnpm install` before the first commit. The hook lives in the shared `.git/hooks`, but without `node_modules` it cannot find lefthook, prints `Can't find lefthook in PATH` and lets the commit through unvalidated. Never work around that with `LEFTHOOK=0`; check a message with `npx commitlint --edit` if in doubt.
+2. A design or implementation plan agreed before coding is written to `specs/<topic>.md`, not to a scratch folder elsewhere.
+3. Code + tests + docs change together when behaviour changes.
+4. Before opening / updating a PR run `pnpm lint && pnpm typecheck && pnpm test` and report results.
+5. If a check fails, fix the root cause; do not disable it or pass `--no-verify`.
+6. Never commit secrets. Publish auth is OIDC; there is no `NPM_TOKEN` in this repo.
+7. Do not bypass the `npm-publish` environment approval: releases require a named reviewer (see `CONTRIBUTING.md` → Releasing).
+8. In a fresh git worktree run `pnpm install` before the first commit. The hook lives in the shared `.git/hooks`, but without `node_modules` it cannot find lefthook, prints `Can't find lefthook in PATH` and lets the commit through unvalidated. Never work around that with `LEFTHOOK=0`; check a message with `npx commitlint --edit` if in doubt.

@@ -2,6 +2,7 @@
 title: Byznys specifikace
 status: draft
 updated_at: 2026-04-27
+order: 1
 ---
 
 # Byznys specifikace

@@ -88,11 +88,17 @@ For every planned file:
    dedicated template exists, fall back to
    `resources/templates/generic-page.md`.
 3. Produce the page following the template.
-4. For anything that cannot be derived from evidence, write
+4. Fill in `order` in the frontmatter: the page's position among its
+   siblings, from `resources/proposed-structure.md` where the page is
+   listed there, otherwise from the generation plan. `order` is a
+   required field checked by `docs:validate`, and files and subfolders
+   in the same folder share one number space, so the value must be
+   unique among them.
+5. For anything that cannot be derived from evidence, write
    `⚠️ TODO: [what is missing]`; **NEVER** invent.
-5. **ALWAYS include at least one example** per non-trivial concept (code
+6. **ALWAYS include at least one example** per non-trivial concept (code
    snippet, request/response, config excerpt, or concrete scenario).
-6. Save the file. Unless `auto_mode` is on, pause and ask:
+7. Save the file. Unless `auto_mode` is on, pause and ask:
    > "File `<path>` is written. Review and confirm to continue (y / edit /
    > stop)."
 

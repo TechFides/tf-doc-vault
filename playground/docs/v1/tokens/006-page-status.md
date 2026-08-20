@@ -2,6 +2,7 @@
 title: Page status
 status: published
 updated_at: 2026-06-11
+order: 6
 ---
 
 The `DocMeta` component renders a status badge and last-updated date at the top

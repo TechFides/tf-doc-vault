@@ -2,6 +2,7 @@
 title: Leaf page
 status: published
 updated_at: 2026-07-30
+order: 1
 ---
 
 A plain page inside a group. Its sidebar label starts with a letter, so

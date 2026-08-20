@@ -2,6 +2,7 @@
 title: Deeper group
 status: published
 updated_at: 2026-07-30
+order: 3
 ---
 
 A group inside a group: `buildSidebarItems()` recurses, so nesting has no

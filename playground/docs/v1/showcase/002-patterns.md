@@ -2,6 +2,7 @@
 title: Pattern classes
 status: published
 updated_at: 2026-08-13
+order: 2
 ---
 
 The classes in `src/theme/styles/patterns.css`, written straight into Markdown.

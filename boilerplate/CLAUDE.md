@@ -74,8 +74,10 @@ docs/
   subfolders lists its files directly, a section with subfolders groups them
   into collapsible groups.
 - Folder and file names: `kebab-case`.
-- Alphabetical order by default; use `order:` in `index.md` frontmatter or
-  `01-`, `02-` prefixes when a fixed order is required.
+- Sibling order comes from `order:` in frontmatter (§5): `index.md` is always
+  listed first, then items with a valid `order` ascending, then the rest
+  alphabetically. Numeric filename prefixes (`01-`, `02-`) no longer control
+  order by themselves; `order` wins.
 - When adding or removing files, update the links in the affected `index.md`.
 - Shared images: `docs/public/images/`, referenced absolutely as
   `/images/foo.png`. Local images: next to the `.md` file.
@@ -90,6 +92,7 @@ Every `.md` file starts with:
 title: Název stránky (in Czech)
 status: draft
 updated_at: 2026-04-23
+order: 1
 ---
 ```
 
@@ -98,8 +101,16 @@ updated_at: 2026-04-23
 | `title`      | Shown in navigation and as tab heading        |
 | `status`     | `published` / `draft` / `review` / `archived` |
 | `updated_at` | `YYYY-MM-DD` or `YYYY-MM-DD HH:MM`            |
+| `order`      | integer                                       |
 
-- `index.md` files additionally include `order: <number>` for menu ordering.
+- `order` is required on every page inside a version folder
+  (`docs/<version>/...`). A file sitting directly in `docs/` (including
+  `docs/index.md`) and each version's own `index.md` are exempt: neither
+  sits in a sibling set that anything sorts.
+- A folder's position among its siblings is carried by its `index.md`; a
+  page's position is its own `order`.
+- Siblings in the same folder, pages and subfolders alike, share one number
+  space: a page and a subfolder in the same folder cannot both be `order: 2`.
 - If the user does not specify `status`, use `draft`.
 - `updated_at` is taken from the system context (`currentDate`) and is
   refreshed on every content change of the file.

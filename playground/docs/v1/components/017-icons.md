@@ -2,6 +2,7 @@
 title: Icons
 status: published
 updated_at: 2026-08-13
+order: 18
 ---
 
 Two ways to put a glyph on a page, and they are not interchangeable. The icon font covers

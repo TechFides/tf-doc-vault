@@ -1,6 +1,6 @@
 ---
 title: Config & sidebar
-order: 3
+order: 2
 ---
 
 How `makeConfig()` assembles the VitePress config and how
