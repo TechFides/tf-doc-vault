@@ -378,12 +378,21 @@ export function gitignoreEntries(docsPath: string): string[] {
   return [`${docsPath}/.vitepress/dist/`, `${docsPath}/.vitepress/cache/`];
 }
 
+/** The host repo may be non-Node (a .NET service, say) and own no package.json. */
+function ensureHostPackageJson(dir: string): void {
+  const pkgPath = path.join(dir, "package.json");
+  if (fs.existsSync(pkgPath)) return;
+  fs.writeFileSync(
+    pkgPath,
+    JSON.stringify({ private: true }, null, 2) + "\n",
+    "utf-8",
+  );
+  console.log("  package.json created (host repo had none)");
+}
+
 export function updatePackageJson(dir: string, docsPath: string): void {
   const pkgPath = path.join(dir, "package.json");
-  if (!fs.existsSync(pkgPath)) {
-    console.warn("  ⚠ package.json not found; scripts not added.");
-    return;
-  }
+  ensureHostPackageJson(dir);
   const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as {
     scripts?: Record<string, string>;
   };
@@ -434,10 +443,7 @@ export function updateDevDependencies(
   peers: Record<string, string>,
 ): void {
   const pkgPath = path.join(dir, "package.json");
-  if (!fs.existsSync(pkgPath)) {
-    console.warn("  ⚠ package.json not found; dependencies not added.");
-    return;
-  }
+  ensureHostPackageJson(dir);
   const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as HostPackageJson;
   const missing = missingDependencies(peers, pkg);
   const added = Object.keys(missing).length;
