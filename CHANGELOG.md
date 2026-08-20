@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.5.2
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.1...v0.5.2)
+
+### 🚀 Enhancements
+
+- **sidebar:** Sort nav, sidebar and print page by frontmatter order ([80e20e1](https://github.com/TechFides/tf-doc-vault/commit/80e20e1))
+
+### 🩹 Fixes
+
+- **hooks:** Quote the commit-msg path so a repo path with spaces works ([b60dbe3](https://github.com/TechFides/tf-doc-vault/commit/b60dbe3))
+- **config:** Pre-bundle mermaid so its CommonJS deps reach the browser as ESM ([70c61c2](https://github.com/TechFides/tf-doc-vault/commit/70c61c2))
+- **print:** Resolve every internal link form into an in-document anchor ([744f9ee](https://github.com/TechFides/tf-doc-vault/commit/744f9ee))
+- **print:** Rewrite a link whose target is a bare ./ or ../ too ([2b13004](https://github.com/TechFides/tf-doc-vault/commit/2b13004))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.5.1
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.0...v0.5.1)
