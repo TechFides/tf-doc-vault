@@ -1,6 +1,6 @@
 ---
 title: Design tokens
-order: 2
+order: 4
 ---
 
 CSS custom properties defined in `src/theme/styles/base.css`. Every

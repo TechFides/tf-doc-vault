@@ -2,6 +2,7 @@
 title: VersionSwitcher
 status: review
 updated_at: 2026-08-13
+order: 16
 ---
 
 A dropdown that switches between doc versions. Complete, shipped in the package, and

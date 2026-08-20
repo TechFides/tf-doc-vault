@@ -2,6 +2,7 @@
 title: FeatureCards
 status: published
 updated_at: 2026-08-13
+order: 10
 features:
   - icon: business
     title: Components

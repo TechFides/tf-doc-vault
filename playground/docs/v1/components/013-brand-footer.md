@@ -2,6 +2,7 @@
 title: BrandFooter
 status: published
 updated_at: 2026-08-13
+order: 14
 ---
 
 Scroll to the bottom of this page. The website link and the email address there are

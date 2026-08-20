@@ -2,6 +2,7 @@
 title: <1.X Czech page title, e.g. 1.3 Glosář>
 status: draft
 updated_at: <YYYY-MM-DD>
+order: <integer from proposed-structure.md, unique among siblings>
 ---
 
 <!--

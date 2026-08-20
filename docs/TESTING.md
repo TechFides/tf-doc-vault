@@ -6,6 +6,7 @@ Two tiers. Add new tests in the tier whose boundary you crossed.
 
 Pure-logic tests for code that does not shell out, spawn processes, or build a site. Layout mirrors `src/`:
 
+- `tests/unit/shared/`: the primitives in `src/shared/` that the sidebar and the doc-tooling scripts both build on (frontmatter parsing, sibling ordering)
 - `tests/unit/sidebar/`: sidebar/nav generation against in-memory file trees
 - `tests/unit/scripts/`: doc-tooling helpers (`normalize-docs`, `validate-docs`) and the boilerplate-sync file resolution (`sync-template`)
 - `tests/unit/cli/`: CLI logic that needs neither a real repo nor a TTY. `utils.test.ts` covers the helpers in `src/cli/utils.ts` (arg parsing, `copyDir`, placeholder substitution); `scaffold.test.ts` covers template manifest parsing and validation, the copy plan and its rename and exclude rules; `setup.test.ts` covers the wizard, from flag and answer resolution through a fake prompt layer to the host `package.json` and `.gitignore` integration; `git-context.test.ts` covers detecting an ancestor git repo and parsing its `origin` remote (real `git init` in a temp dir, no network)
@@ -74,7 +75,7 @@ Good to know:
 
 ## When to add which
 
-- Touching `src/sidebar`, `src/scripts`, or pure helpers in `src/cli/`: **unit test** in the matching `tests/unit/<area>/` folder.
+- Touching `src/shared`, `src/sidebar`, `src/scripts`, or pure helpers in `src/cli/`: **unit test** in the matching `tests/unit/<area>/` folder. A change in `src/shared` reaches every consumer of the primitive, so cover it there as well as wherever the behaviour is visible.
 - Touching `src/cli/*` user-visible CLI behaviour, or anything that affects how a scaffolded site boots: **smoke test** in `tests/smoke/`.
 - Touching `src/confluence/**` or the Confluence importer: cover it with a `tests/unit/confluence/` spec and follow **Confluence importer verification** above.
 - Touching a boilerplate file with real logic (`middleware.ts`): **unit test** in `tests/unit/boilerplate/`, importing it directly.

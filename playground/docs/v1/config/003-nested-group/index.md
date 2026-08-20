@@ -2,6 +2,7 @@
 title: Nested group
 status: published
 updated_at: 2026-08-13
+order: 3
 ---
 
 This folder exists so the sidebar renders a **collapsible group**. Look at the left

@@ -2,6 +2,7 @@
 title: Second-level leaf
 status: published
 updated_at: 2026-07-30
+order: 1
 ---
 
 The deepest page in the playground. Reached at

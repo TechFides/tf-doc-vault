@@ -7,6 +7,7 @@ import {
   buildPathMap,
   flattenTree,
   rewriteConfluenceLinks,
+  buildOrderMap,
 } from "../../../src/confluence/layout.js";
 import { type TreeNode } from "../../../src/confluence/types.js";
 
@@ -158,5 +159,28 @@ describe("rewriteConfluenceLinks", () => {
     expect(rewriteConfluenceLinks(md, map, titles, docsRoot)).toBe(
       "[[BAT] One](/v1/page) a [[BAT] Two](/v1/section/index)",
     );
+  });
+});
+
+describe("buildOrderMap", () => {
+  test("numbers children by their position in the tree", () => {
+    const tree = node("1", "Root", [
+      node("2", "Zeta"),
+      node("3", "Alfa", [node("4", "Leaf")]),
+    ]);
+
+    const map = new Map<string, number>();
+    buildOrderMap(tree, map);
+
+    expect(map.get("2")).toBe(1);
+    expect(map.get("3")).toBe(2);
+    expect(map.get("4")).toBe(1);
+  });
+
+  test("the root has no siblings and gets no entry", () => {
+    const map = new Map<string, number>();
+    buildOrderMap(node("1", "Root"), map);
+
+    expect(map.has("1")).toBe(false);
   });
 });

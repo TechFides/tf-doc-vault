@@ -9,7 +9,10 @@ Existing Confluence spaces can be migrated into any of the other use cases ([tec
 1. The command authenticates to the Confluence REST API using an Atlassian API token.
 2. It fetches the entire page tree rooted at `--root-page-id`, recursively following child pages (paginated, with retry/backoff and a bounded concurrency pool).
 3. Each page is converted from Confluence's ADF (Atlassian Document Format) to Markdown and written as a `.md` file with correct frontmatter (`title`, `status`,
-   `updated_at`). Attachments are downloaded alongside into `public/images/`.
+   `updated_at`, `order`). `order` follows the page's position among its Confluence siblings, so the tree's original order survives the import. With `--output`
+   pointing at a version root such as `docs/v1`, a fresh import passes the Order group of `docs:validate` with no `docs:normalize` pass first; the other groups
+   can still report findings (markdown lint, links, images). Importing into a nested folder instead leaves the imported root `index.md` deeper than the
+   exemption reaches, so that file is reported as missing `order`. Attachments are downloaded alongside into `public/images/`.
 4. Inter-page links are rewritten to point to the generated `.md` files (links to pages outside the import stay as Confluence URLs).
 
 ```bash
@@ -52,6 +55,7 @@ The importer reports everything it skips in a grouped summary at the end of the 
 - **Anchors to sub-headings** within a linked page are dropped (the link still resolves to the page); Confluence "tiny links" (`/wiki/x/…`) are left as Confluence URLs.
 - **External (URL) images** are turned into links rather than embedded.
 - An **API token** is required for image downloads via the REST attachment endpoint; conversion of a single page can also be sanity-checked offline.
+- **A re-import rewrites the frontmatter** of every page it touches; only `status: published` survives. An `order` edited by hand after the first import is reset to the page's position in the Confluence tree.
 
 ## Verifying a run
 

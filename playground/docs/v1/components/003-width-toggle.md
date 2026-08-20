@@ -2,6 +2,7 @@
 title: WidthToggle
 status: published
 updated_at: 2026-05-22
+order: 3
 ---
 
 Opt-in navbar button that cycles content width: **default → wide → max**.

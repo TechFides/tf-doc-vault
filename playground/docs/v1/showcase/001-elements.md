@@ -2,6 +2,7 @@
 title: Every element
 status: published
 updated_at: 2026-08-13
+order: 1
 ---
 
 One page holding every construct the theme paints, so a change to the type scale

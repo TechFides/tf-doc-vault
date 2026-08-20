@@ -2,6 +2,7 @@
 title: PrintLayout
 status: published
 updated_at: 2026-08-13
+order: 11
 ---
 
 The layout the print and PDF export renders into. Not a component you drop into a page: it

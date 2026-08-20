@@ -2,6 +2,7 @@
 title: DocPageTitle
 status: published
 updated_at: 2026-08-13
+order: 13
 ---
 
 The `DocPageTitle` heading is the one at the top of this page. It renders the page title from

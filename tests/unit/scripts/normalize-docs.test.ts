@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll, afterAll } from "vitest";
+import { describe, test, expect, beforeAll, afterAll, afterEach } from "vitest";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -142,5 +142,160 @@ describe("normalize-docs (nested frontmatter)", () => {
     const nameIdx = lines.findIndex((l) => /^\s*name:\s+Project/.test(l));
     expect(nameIdx).toBeGreaterThan(-1);
     expect(lines[nameIdx]!.startsWith("  ")).toBe(true);
+  });
+});
+
+let isolated: string[] = [];
+
+afterEach(() => {
+  for (const dir of isolated) fs.rmSync(dir, { recursive: true, force: true });
+  isolated = [];
+});
+
+/**
+ * Its own tree, not the shared `workdir`: normalize numbers a whole folder at
+ * once, so what the tests above left there would shift the values asserted here.
+ */
+function normalizeTree(tree: Record<string, string>): Record<string, string> {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "normalize-order-"));
+  isolated.push(dir);
+  for (const [rel, content] of Object.entries(tree)) {
+    const full = path.join(dir, "docs", rel);
+    fs.mkdirSync(path.dirname(full), { recursive: true });
+    fs.writeFileSync(full, content);
+  }
+  const r = spawnSync("node", [SCRIPT, "--root=docs"], {
+    cwd: dir,
+    encoding: "utf-8",
+  });
+  // Without this a crash would turn every `not.toContain` below into a pass.
+  expect(r.status, r.stderr).toBe(0);
+  return Object.fromEntries(
+    Object.keys(tree).map((rel) => [
+      rel,
+      fs.readFileSync(path.join(dir, "docs", rel), "utf-8"),
+    ]),
+  );
+}
+
+describe("order backfill", () => {
+  test("numbers a folder that has no order at all", () => {
+    const files = normalizeTree({
+      "v1/index.md": "---\ntitle: V1\n---\n\nbody\n",
+      "v1/beta.md": "---\ntitle: Beta\n---\n\nbody\n",
+      "v1/alfa.md": "---\ntitle: Alfa\n---\n\nbody\n",
+    });
+
+    expect(files["v1/alfa.md"]).toContain("order: 1");
+    expect(files["v1/beta.md"]).toContain("order: 2");
+    expect(files["v1/index.md"]).not.toContain("order:");
+  });
+
+  test("appends above the highest existing order and keeps it", () => {
+    const files = normalizeTree({
+      "v1/index.md": "---\ntitle: V1\n---\n\nbody\n",
+      "v1/alfa.md": "---\ntitle: Alfa\norder: 7\n---\n\nbody\n",
+      "v1/beta.md": "---\ntitle: Beta\n---\n\nbody\n",
+    });
+
+    expect(files["v1/alfa.md"]).toContain("order: 7");
+    expect(files["v1/beta.md"]).toContain("order: 8");
+  });
+
+  test("a directory gets its order written into index.md", () => {
+    const files = normalizeTree({
+      "v1/index.md": "---\ntitle: V1\n---\n\nbody\n",
+      "v1/sekce/index.md": "---\ntitle: Sekce\n---\n\nbody\n",
+      "v1/sekce/page.md": "---\ntitle: Stránka\n---\n\nbody\n",
+    });
+
+    expect(files["v1/sekce/index.md"]).toContain("order: 1");
+    expect(files["v1/sekce/page.md"]).toContain("order: 1");
+  });
+
+  test("an invalid order is replaced, not duplicated", () => {
+    const files = normalizeTree({
+      "v1/index.md": "---\ntitle: V1\n---\n\nbody\n",
+      "v1/alfa.md": "---\ntitle: Alfa\norder: abc\n---\n\nbody\n",
+    });
+
+    expect(files["v1/alfa.md"]).toContain("order: 1");
+    expect(files["v1/alfa.md"]).not.toContain("order: abc");
+    expect(files["v1/alfa.md"].match(/^order:/gm)).toHaveLength(1);
+  });
+
+  test("order lands right after updated_at", () => {
+    const files = normalizeTree({
+      "v1/index.md": "---\ntitle: V1\n---\n\nbody\n",
+      "v1/alfa.md":
+        "---\nconfluence_id: 12\ntitle: Alfa\nstatus: draft\nupdated_at: 2026-01-01\n---\n\nbody\n",
+    });
+
+    expect(files["v1/alfa.md"]).toContain(
+      "title: Alfa\nstatus: draft\nupdated_at: 2026-01-01\norder: 1\nconfluence_id: 12",
+    );
+  });
+
+  test("running twice changes nothing the second time", () => {
+    const tree = {
+      "v1/index.md": "---\ntitle: V1\n---\n\nbody\n",
+      "v1/alfa.md": "---\ntitle: Alfa\n---\n\nbody\n",
+    };
+    const once = normalizeTree(tree);
+    const twice = normalizeTree(once);
+
+    expect(twice).toEqual(once);
+  });
+  test("keeps a negative existing order and numbers the rest above it", () => {
+    const files = normalizeTree({
+      "v1/index.md": "---\ntitle: V1\n---\n\nbody\n",
+      "v1/alfa.md": "---\ntitle: Alfa\norder: -5\n---\n\nbody\n",
+      "v1/beta.md": "---\ntitle: Beta\n---\n\nbody\n",
+      "v1/gama.md": "---\ntitle: Gama\n---\n\nbody\n",
+    });
+
+    expect(files["v1/alfa.md"]).toContain("order: -5");
+    expect(files["v1/beta.md"]).toContain("order: 1");
+    expect(files["v1/gama.md"]).toContain("order: 2");
+  });
+
+  test("stops at a sibling directory that has no index.md to write into", () => {
+    const files = normalizeTree({
+      "v1/index.md": "---\ntitle: V1\n---\n\nbody\n",
+      "v1/alfa.md": "---\ntitle: Alfa\n---\n\nbody\n",
+      "v1/bravo/page.md": "---\ntitle: Page\n---\n\nbody\n",
+      "v1/charlie.md": "---\ntitle: Charlie\n---\n\nbody\n",
+    });
+
+    // bravo/ renders in the alphabetical tail but cannot carry a value, so
+    // charlie must stay behind it instead of leapfrogging it.
+    expect(files["v1/alfa.md"]).toContain("order: 1");
+    expect(files["v1/charlie.md"]).not.toContain("order:");
+    // Its own children are still numbered: that cannot move bravo/ itself.
+    expect(files["v1/bravo/page.md"]).toContain("order: 1");
+  });
+
+  test("stops at a sibling that has no frontmatter block to write into", () => {
+    const plain = "# Bravo\n\nbody\n";
+    const files = normalizeTree({
+      "v1/index.md": "---\ntitle: V1\n---\n\nbody\n",
+      "v1/alfa.md": "---\ntitle: Alfa\n---\n\nbody\n",
+      "v1/bravo.md": plain,
+      "v1/charlie.md": "---\ntitle: Charlie\n---\n\nbody\n",
+    });
+
+    expect(files["v1/alfa.md"]).toContain("order: 1");
+    expect(files["v1/bravo.md"]).toBe(plain);
+    expect(files["v1/charlie.md"]).not.toContain("order:");
+  });
+
+  test("rewriting an invalid order keeps the block's continuation lines", () => {
+    const files = normalizeTree({
+      "v1/index.md": "---\ntitle: V1\n---\n\nbody\n",
+      "v1/alfa.md":
+        "---\ntitle: Alfa\norder: abc\n# why this page is first\n---\n\nbody\n",
+    });
+
+    expect(files["v1/alfa.md"]).toContain("order: 1\n# why this page is first");
   });
 });

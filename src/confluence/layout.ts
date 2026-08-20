@@ -63,6 +63,14 @@ export function flattenTree(node: TreeNode, acc: TreeNode[] = []): TreeNode[] {
   return acc;
 }
 
+/** 1-based. `buildTree` already dropped failed pages, so the run stays contiguous. */
+export function buildOrderMap(node: TreeNode, map: Map<string, number>): void {
+  node.children.forEach((child, index) => {
+    map.set(child.page.id, index + 1);
+    buildOrderMap(child, map);
+  });
+}
+
 /**
  * Rewrite Confluence page links to absolute VitePress paths such as `/v1/page`;
  * VitePress prepends the site `base` at render time. Links to pages outside the

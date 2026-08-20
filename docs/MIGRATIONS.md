@@ -89,3 +89,21 @@ the theme's. Rename yours rather than relying on that order.
 **Pattern classes ship for Markdown authors.** `patterns.css` adds classes a page can use without a component or an inline style (`tf-cards`, `tf-card`,
 `tf-stat`, `tf-tile`, `tf-chip`, `tf-step`, `tf-checks`, `tf-btn`, `tf-rows`, `tf-divider`, `tf-logos`), plus the `data-tf-edge` and `data-tf-reveal`
 attributes. All of it is additive and nothing existing changes.
+
+## Migration to 0.5.2
+
+Version 0.5.2 makes `order` in frontmatter the real sort key for the sidebar, the top nav and the print page, instead of a value only `title` extraction bothered to read. The field also becomes required, so the break lands on `docs:validate` rather than on the rendered site.
+
+**The sidebar and the nav render identically for a repo that has no `order` field anywhere**, because a folder with nothing ordered still falls back to today's alphabetical order. **The print page is the exception.** The same release fixes the print collector, which stopped two directory levels down and silently dropped anything below that, so `print.md` and the PDF built from it can gain pages that were missing before: this repo's own playground goes from 36 pages to 39. A nested group heading in the print page also changes, from the directory name to the group's title, and the table of contents becomes a nested list that mirrors the sidebar tree instead of a flat run of bold headings.
+
+**`docs:validate` starts failing until you normalize.** A missing `order`, a non-integer value, or two siblings claiming the same one are now lint errors, and a repo scaffolded before this change has no `order` field at all, so the first `docs:validate` after upgrading fails outright. Fix it in place, without touching what the site renders:
+
+```bash
+pnpm docs:normalize && pnpm docs:validate
+```
+
+`docs:normalize` fills in `order` for every page and folder that lacks it, walking each folder in its current alphabetical order so the assigned numbers preserve the position already on screen. It never overwrites a page that already carries a valid `order`.
+
+**A directory with no `index.md` is now a `docs:validate` error, even though the sidebar keeps rendering it fine as an unlinked group label.** There is nowhere for such a directory to carry its own `order`, so lint refuses to leave it in the alphabetical tail forever, and `docs:normalize` cannot fix it for you either: reaching a directory or a `.md` file it cannot write `order` into (no `index.md`, or a file with no frontmatter block at all) makes it stop numbering the rest of that folder's alphabetical tail, rather than number around the problem and shift that item in the render. So on a tree with either case, the upgrade recipe becomes a loop, not one shot: run `docs:normalize`, run `docs:validate`, fix whatever it reports (add the missing `index.md` with a `title` and `order`, or add the missing frontmatter block), and repeat both commands until `docs:validate` is clean.
+
+**Numeric filename prefixes keep working.** A page named `001-intro.md` still resolves fine: `order` in frontmatter wins over the filename, so the prefix becomes redundant rather than wrong. Dropping the prefixes is optional and manual; renaming the file changes its URL, so track down and fix every link to it yourself, internal or external. There is no tool for that part.

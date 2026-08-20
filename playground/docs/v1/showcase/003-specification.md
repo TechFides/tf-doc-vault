@@ -2,6 +2,7 @@
 title: Example specification
 status: review
 updated_at: 2026-08-11
+order: 3
 ---
 
 A specification of the length a real one reaches, written to give the vertical

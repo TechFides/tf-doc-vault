@@ -1,14 +1,20 @@
 /**
- * Generates docs/print.md: a title page, a table of contents, and every page's
- * content in sidebar order with frontmatter stripped.
+ * Generates docs/print.md in sidebar order, frontmatter stripped. Every
+ * `index.md`, and every page sitting directly under `docs/<version>/`, is
+ * left out.
  */
 
 import fs from "node:fs";
 import path from "node:path";
+import { readFrontmatter, readTitle } from "../shared/frontmatter.js";
+import {
+  siblingEntries,
+  sortSiblings,
+  subDirEntries,
+} from "../shared/ordering.js";
 
 const DOCS_ROOT = path.resolve(process.cwd(), "docs");
 const OUTPUT = path.join(DOCS_ROOT, "print.md");
-const IGNORE = new Set([".vitepress", "node_modules", "public"]);
 const PRAGUE_DATE = new Intl.DateTimeFormat("cs-CZ", {
   timeZone: "Europe/Prague",
   day: "numeric",
@@ -19,39 +25,27 @@ const PRAGUE_DATE = new Intl.DateTimeFormat("cs-CZ", {
 }).format(new Date());
 
 function subDirs(dir: string): string[] {
-  return fs
-    .readdirSync(dir, { withFileTypes: true })
-    .filter(
-      (e) => e.isDirectory() && !IGNORE.has(e.name) && !e.name.startsWith("."),
-    )
-    .map((e) => e.name)
-    .sort((a, b) => a.localeCompare(b, "cs"));
+  return sortSiblings(dir, subDirEntries(dir)).map((e) => e.name);
 }
 
-function mdFilesIn(dir: string): string[] {
-  return fs
-    .readdirSync(dir)
-    .filter((f) => f.endsWith(".md"))
-    .sort((a, b) => {
-      if (a === "index.md") return -1;
-      if (b === "index.md") return 1;
-      return a.localeCompare(b, "cs");
-    });
+function versionDirs(dir: string): string[] {
+  // Alphabetical on purpose, mirroring `getVersions`: versions are the one
+  // level `order` does not govern.
+  return subDirEntries(dir)
+    .map((e) => e.name)
+    .sort((a, b) => a.localeCompare(b, "cs"));
 }
 
 function stripFrontmatter(content: string): string {
   return content.replace(/^---\s*\n[\s\S]*?\n---\s*\n?/, "").trimStart();
 }
 
-function extractTitle(filePath: string): string {
-  const content = fs.readFileSync(filePath, "utf-8");
-  const match = /^---\s*\n([\s\S]*?)\n---/.exec(content);
-  const body = match?.[1];
-  if (body) {
-    const line = body.split("\n").find((l) => l.startsWith("title:"));
-    if (line) return line.replace(/^title:\s*/, "").trim();
-  }
-  return path.basename(filePath, ".md");
+function slugFor(filePath: string): string {
+  return path
+    .relative(DOCS_ROOT, filePath)
+    .replace(/\.md$/, "")
+    .replace(/\//g, "-")
+    .toLowerCase();
 }
 
 function rewriteLinks(content: string, fromFile: string): string {
@@ -60,56 +54,71 @@ function rewriteLinks(content: string, fromFile: string): string {
     (_, text, href) => {
       const target = href.split("#")[0] as string;
       const abs = path.resolve(path.dirname(fromFile), target);
-      const slug = path
-        .relative(DOCS_ROOT, abs)
-        .replace(/\.md$/, "")
-        .replace(/\//g, "-")
-        .toLowerCase();
-      return `[${text}](#${slug})`;
+      return `[${text}](#${slugFor(abs)})`;
     },
   );
 }
 
 interface Page {
   filePath: string;
-  section: string;
-  group: string;
   title: string;
   slug: string;
 }
 
-function collectPages(): Page[] {
+type TocEntry =
+  | { kind: "group"; label: string; depth: number }
+  | { kind: "page"; label: string; depth: number; slug: string };
+
+/** `readTitle` would fall back to the string "index", never to the folder. */
+function groupLabel(groupDir: string): string {
+  const title = readFrontmatter(path.join(groupDir, "index.md"))?.["title"];
+  return title && title.length > 0 ? title : path.basename(groupDir);
+}
+
+/**
+ * One `sortSiblings` call per level, so pages and subdirectories interleave the
+ * way `buildSidebarItems` renders them.
+ */
+function walkPages(dir: string, depth: number, pages: Page[]): TocEntry[] {
+  const toc: TocEntry[] = [];
+
+  for (const entry of sortSiblings(dir, siblingEntries(dir))) {
+    if (entry.isDirectory()) {
+      toc.push(...walkGroup(path.join(dir, entry.name), depth, pages));
+      continue;
+    }
+    const filePath = path.join(dir, entry.name);
+    const title = readTitle(filePath);
+    const slug = slugFor(filePath);
+    pages.push({ filePath, title, slug });
+    toc.push({ kind: "page", label: title, depth, slug });
+  }
+
+  return toc;
+}
+
+function walkGroup(dir: string, depth: number, pages: Page[]): TocEntry[] {
+  const nested = walkPages(dir, depth + 1, pages);
+  if (nested.length === 0) return [];
+  return [{ kind: "group", label: groupLabel(dir), depth }, ...nested];
+}
+
+function collectPages(): { pages: Page[]; toc: TocEntry[] } {
   const pages: Page[] = [];
+  const toc: TocEntry[] = [];
 
-  for (const section of subDirs(DOCS_ROOT)) {
-    const sectionDir = path.join(DOCS_ROOT, section);
+  for (const version of versionDirs(DOCS_ROOT)) {
+    const versionRoot = path.join(DOCS_ROOT, version);
 
-    for (const group of subDirs(sectionDir)) {
-      const groupDir = path.join(sectionDir, group);
-
-      for (const file of mdFilesIn(groupDir).filter((f) => f !== "index.md")) {
-        const filePath = path.join(groupDir, file);
-        const slug = path
-          .relative(DOCS_ROOT, filePath)
-          .replace(/\.md$/, "")
-          .replace(/\//g, "-")
-          .toLowerCase();
-
-        pages.push({
-          filePath,
-          section,
-          group,
-          title: extractTitle(filePath),
-          slug,
-        });
-      }
+    for (const section of subDirs(versionRoot)) {
+      toc.push(...walkGroup(path.join(versionRoot, section), 0, pages));
     }
   }
 
-  return pages;
+  return { pages, toc };
 }
 
-const pages = collectPages();
+const { pages, toc } = collectPages();
 const parts: string[] = [];
 
 parts.push(
@@ -120,16 +129,15 @@ parts.push(`**Generováno:** ${PRAGUE_DATE}\n`);
 parts.push(`**Počet stránek:** ${pages.length}\n`);
 
 parts.push(`\n## Obsah\n`);
-let currentGroup = "";
-for (const page of pages) {
-  const groupKey = `${page.section}/${page.group}`;
-  if (groupKey !== currentGroup) {
-    parts.push(
-      `\n**${page.group.charAt(0).toUpperCase() + page.group.slice(1)}**\n`,
-    );
-    currentGroup = groupKey;
-  }
-  parts.push(`- [${page.title}](#${page.slug})\n`);
+// One tight list: a blank line between items would split it into several lists
+// and flatten the hierarchy the indentation carries.
+for (const entry of toc) {
+  const indent = "  ".repeat(entry.depth);
+  parts.push(
+    entry.kind === "group"
+      ? `${indent}- **${entry.label}**`
+      : `${indent}- [${entry.label}](#${entry.slug})`,
+  );
 }
 
 for (const page of pages) {

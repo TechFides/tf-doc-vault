@@ -1,17 +1,20 @@
 /**
  * Rewrites frontmatter across docs/ into the canonical field order (title,
- * status, updated_at, then the rest) and trims whitespace from values.
+ * status, updated_at, order, then the rest) and backfills a missing `order`
+ * without changing the order the site renders.
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import { allMdFiles } from "./docs-files.js";
+import { readFrontmatter, parseOrder } from "../shared/frontmatter.js";
+import { pageEntries, subDirEntries } from "../shared/ordering.js";
 
 const args = process.argv.slice(2);
 const rootArg = args.find((a) => a.startsWith("--root="))?.split("=")[1];
 const root = rootArg ?? "docs";
 const DOCS_ROOT = path.resolve(process.cwd(), root);
-const FIELD_ORDER = ["title", "status", "updated_at"];
+const FIELD_ORDER = ["title", "status", "updated_at", "order"];
 
 interface Block {
   key: string;
@@ -82,10 +85,75 @@ function normalize(blocks: Block[]): Block[] {
 
 function blocksEqual(a: Block[], b: Block[]): boolean {
   if (a.length !== b.length) return false;
-  return a.every((blk, i) => b[i]?.key === blk.key);
+  return a.every(
+    (blk, i) =>
+      b[i]?.key === blk.key && b[i]?.lines.join("\n") === blk.lines.join("\n"),
+  );
+}
+
+/**
+ * Keyed by the file that carries the value: a page, or a directory's index.md.
+ * Missing values go above the folder's highest existing order, in the
+ * alphabetical order the tail already renders in, so the render is unchanged.
+ * A sibling this script cannot write to keeps rendering in that tail, so
+ * numbering anything behind it would move it: it ends the folder's run.
+ */
+function planOrders(root: string): Map<string, number> {
+  const assigned = new Map<string, number>();
+
+  const walk = (dir: string, depth: number): void => {
+    const dirs = subDirEntries(dir);
+    const files = pageEntries(dir);
+
+    // depth 0 is the docs root, whose children are versions: neither is ordered.
+    if (depth >= 1) {
+      const siblings = [...files, ...dirs].map((e) => {
+        const carrier = e.isDirectory()
+          ? path.join(dir, e.name, "index.md")
+          : path.join(dir, e.name);
+        // Null on a missing file and on a missing frontmatter block alike,
+        // matching what the write loop below refuses to touch.
+        const fields = readFrontmatter(carrier);
+        return {
+          name: e.name,
+          carrier,
+          writable: fields !== null,
+          order: parseOrder(fields?.["order"]),
+        };
+      });
+
+      let next =
+        siblings.reduce(
+          (max, s) => (s.order !== null && s.order > max ? s.order : max),
+          0,
+        ) + 1;
+
+      for (const sibling of siblings
+        .filter((s) => s.order === null)
+        .sort((a, b) => a.name.localeCompare(b.name, "cs"))) {
+        if (!sibling.writable) break;
+        assigned.set(sibling.carrier, next++);
+      }
+    }
+
+    for (const sub of dirs) walk(path.join(dir, sub.name), depth + 1);
+  };
+
+  walk(root, 0);
+  return assigned;
+}
+
+function withOrder(blocks: Block[], value: number): Block[] {
+  const line = `order: ${value}`;
+  const existing = blocks.find((b) => b.key === "order");
+  if (!existing) return [...blocks, { key: "order", lines: [line] }];
+  return blocks.map((b) =>
+    b === existing ? { key: "order", lines: [line, ...b.lines.slice(1)] } : b,
+  );
 }
 
 const files = allMdFiles(DOCS_ROOT);
+const orders = planOrders(DOCS_ROOT);
 console.log(`Normalizing ${files.length} file(s) in ${root}/\n`);
 
 let changed = 0;
@@ -102,7 +170,10 @@ for (const file of files) {
     continue;
   }
 
-  const normalized = normalize(parsed.blocks);
+  const assigned = orders.get(file);
+  const blocks =
+    assigned === undefined ? parsed.blocks : withOrder(parsed.blocks, assigned);
+  const normalized = normalize(blocks);
 
   if (blocksEqual(parsed.blocks, normalized)) {
     skipped++;

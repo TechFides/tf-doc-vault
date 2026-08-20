@@ -26,7 +26,7 @@ You'll find the root page ID in the Confluence page URL: `.../pages/**1184333837
 - Slugifies file names (lowercase, no diacritics, no `[SERVICE_ID]` prefixes)
 - Downloads image attachments into `docs/public/images/`
 - Rewrites internal Confluence links to relative MD paths
-- Generates frontmatter: `title`, `status: review`, `updated_at`
+- Generates frontmatter: `title`, `status: review`, `updated_at`, `order` (position among Confluence siblings)
 - **Idempotent:** an existing file with `status: published` keeps its status
 
 ## Output structure
