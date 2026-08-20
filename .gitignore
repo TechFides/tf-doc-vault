@@ -23,3 +23,6 @@ lefthook-local.yml
 # Playground: ignore VitePress generated artifacts, not config sources
 /playground/docs/.vitepress/cache/
 /playground/docs/.vitepress/dist/
+
+# Superpowers SDD scratch workspace
+.superpowers/
