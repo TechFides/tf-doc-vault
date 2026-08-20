@@ -1018,12 +1018,15 @@ describe("host repository integration", () => {
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
-  test("warns instead of failing when the host has no package.json", () => {
+  test("creates a private package.json when the host has none", () => {
     const dir = tempDir();
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(console, "log").mockImplementation(() => {});
     updatePackageJson(dir, "sub/docs");
-    expect(warn.mock.calls.flat().join("\n")).toMatch(/package.json not found/);
-    expect(fs.existsSync(path.join(dir, "package.json"))).toBe(false);
+    const pkg = JSON.parse(
+      fs.readFileSync(path.join(dir, "package.json"), "utf-8"),
+    ) as { private?: boolean; scripts: Record<string, string> };
+    expect(pkg.private).toBe(true);
+    expect(pkg.scripts["docs:dev"]).toBe("vitepress dev sub/docs");
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
@@ -1360,12 +1363,13 @@ describe("host documentation dependencies", () => {
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
-  test("warns instead of failing when the host has no package.json", () => {
+  test("creates a private package.json when the host has none", () => {
     const dir = tempDir();
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(console, "log").mockImplementation(() => {});
     updateDevDependencies(dir, PEERS);
-    expect(warn.mock.calls.flat().join("\n")).toMatch(/package.json not found/);
-    expect(fs.existsSync(path.join(dir, "package.json"))).toBe(false);
+    const pkg = hostPkg(dir);
+    expect(pkg.private).toBe(true);
+    expect(pkg.devDependencies).toEqual(PEERS);
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
