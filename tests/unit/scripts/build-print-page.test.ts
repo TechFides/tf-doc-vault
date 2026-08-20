@@ -135,6 +135,7 @@ describe("internal links", () => {
           "[with anchor](./beta#nadpis)",
           "[a group index](./skupina/)",
           "[an asset](/diagram.svg)",
+          "[a bare parent](../)",
           "![an image](./picture.png)",
         ].join("\n\n"),
       ),
@@ -157,6 +158,8 @@ describe("internal links", () => {
 
     expect(printed).toContain("a group index");
     expect(printed).not.toContain("(./skupina/)");
+    expect(printed).toContain("a bare parent");
+    expect(printed).not.toContain("(../)");
   });
 
   test("leaves assets and images alone", () => {

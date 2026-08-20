@@ -63,7 +63,7 @@ function rewriteLinks(
   slugByPath: Map<string, string>,
 ): string {
   return content.replace(
-    /(?<!!)\[([^\]]+)\]\((\.{1,2}\/[^)\s]+|\/[^)\s]+)\)/g,
+    /(?<!!)\[([^\]]+)\]\((\.{1,2}\/[^)\s]*|\/[^)\s]*)\)/g,
     (whole: string, text: string, href: string) => {
       const target = href.split("#")[0] ?? "";
       if (target === "" || ASSET.test(target)) return whole;
