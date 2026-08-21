@@ -25,7 +25,8 @@ that blocks the end of any Claude Code turn with changed files until the
 file `claude-comment-audit-state` lives in the checkout's git directory (per
 clone and per worktree, never committed); one audit per diff state. The hook
 fails open: any script error lets the turn end. The harness caps a Stop hook at
-8 consecutive blocks, so it cannot loop forever.
+8 consecutive blocks, so it cannot loop forever. The skill can also be run
+manually at any time via `/comment-audit`, outside of the hook.
 
 ## Adding a template
 

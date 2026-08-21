@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, writeSync } from "node:fs";
 import { join } from "node:path";
 
 const RELEVANT = /\.(ts|vue|css|ya?ml|sh|md)$/;
@@ -61,12 +61,12 @@ try {
   try {
     audited = readFileSync(stateFile, "utf8");
   } catch {
-    // No state yet: first audit for this clone.
+    // No state yet: first audit for this checkout.
   }
 
   if (stateHash(root) === audited) process.exit(0);
 
-  process.stderr.write(MESSAGE);
+  writeSync(2, MESSAGE);
   process.exit(2);
 } catch {
   process.exit(0);

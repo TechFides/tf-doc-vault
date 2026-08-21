@@ -12,7 +12,8 @@ sadu změn, deterministicky, s fail-open chováním při chybě.
 zapojený v commitnutém `.claude/settings.json`) blokuje ukončení turnu přes
 exit 2 a odkáže agenta na skill `.claude/skills/comment-audit`, který nese
 striktní checklist auditu. Stav "tahle sada změn už prošla" drží hash
-v `.git/claude-comment-audit-state`.
+ve stavovém souboru `claude-comment-audit-state`, který leží v git adresáři
+checkoutu (`git rev-parse --absolute-git-dir`).
 
 **Stack:** Node >= 24 (bez bash logiky, bez jq/shasum), Vitest subprocess
 testy, markdown skill + úpravy AGENTS.md a CONTRIBUTING.md.
@@ -31,7 +32,8 @@ testy, markdown skill + úpravy AGENTS.md a CONTRIBUTING.md.
 - Sdílený kontrakt (žádný celek ho nesmí přejmenovat):
   - skill: `comment-audit`, soubor `.claude/skills/comment-audit/SKILL.md`;
   - hook: `.claude/hooks/comment-audit-gate.mjs`;
-  - stavový soubor: `.git/claude-comment-audit-state`;
+  - stavový soubor: `claude-comment-audit-state` v git adresáři checkoutu
+    (`git rev-parse --absolute-git-dir`);
   - stderr zpráva hooku, doslova: `Changed files detected. Invoke the
 comment-audit skill (.claude/skills/comment-audit) on the changed files,
 then finish.`;
@@ -64,6 +66,9 @@ integrační kontrola.
 ---
 
 ## Celek 1: Stop hook + testy
+
+_Pozn.: kód níže je původní zadání; finální hook ukládá stav přes
+`git rev-parse --absolute-git-dir` (fix 795f2ce)._
 
 **Model:** Opus. **Vlna:** 1.
 

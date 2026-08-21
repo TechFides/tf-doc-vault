@@ -27,7 +27,8 @@ Postup, který skill předepisuje:
    (`git ls-files --others --exclude-standard`). Filtr:
    - kód: `.ts`, `.vue`, `.css`, `.yml`, `.yaml`, `.sh` kdekoli mimo `dist/`
      a `node_modules/` (včetně `boilerplate/` a `templates/`, pravidla tam platí);
-   - markdown: `docs/**`, `specs/**`, root `*.md`, `templates/**/*.md`.
+   - markdown kdekoli mimo `dist/` a `node_modules/` (docs, specs, root,
+     templates i boilerplate stejně).
 2. Na každý **přidaný** komentářový řádek v diffu aplikovat oba testy
    z AGENTS.md (věděl by to kompetentní čtenář z kódu? rozbije něco jeho
    smazání?). Při pochybnosti smazat, ne nechat.
@@ -58,7 +59,8 @@ bez závislosti na jq/shasum. Logika (stdin = JSON od harness):
 3. Hash stavu změn == uložený hash (tahle sada změn už audit prošla):
    `exit 0`.
 4. Jinak `exit 2` a na stderr instrukce: "Changed files detected. Invoke the
-   comment-audit skill on the changed files before finishing."
+   comment-audit skill (.claude/skills/comment-audit) on the changed files,
+   then finish."
 
 Hash = SHA-256 nad `git diff HEAD` + obsahem untracked relevantních souborů.
 Stavový soubor `claude-comment-audit-state` leží v git adresáři checkoutu
