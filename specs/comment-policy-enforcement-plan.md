@@ -33,8 +33,8 @@ testy, markdown skill + úpravy AGENTS.md a CONTRIBUTING.md.
   - hook: `.claude/hooks/comment-audit-gate.mjs`;
   - stavový soubor: `.git/claude-comment-audit-state`;
   - stderr zpráva hooku, doslova: `Changed files detected. Invoke the
-    comment-audit skill (.claude/skills/comment-audit) on the changed files,
-    then finish.`;
+comment-audit skill (.claude/skills/comment-audit) on the changed files,
+then finish.`;
   - filtr relevantních souborů: přípony `ts|vue|css|yml|yaml|sh|md`, mimo
     `dist/` a `node_modules/`.
 
@@ -44,12 +44,12 @@ Celky na sobě nezávisí a nesdílí jediný soubor; kontrakt (názvy, cesty,
 zpráva) je zafixovaný výše. Všechny tři jedou paralelně ve vlně 1, vlna 2 je
 integrační kontrola.
 
-| vlna | celek                        | soubory                                                             | model     | proč ten model                                                                 |
-| ---- | ---------------------------- | ------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------ |
-| 1    | 1. Stop hook + testy         | `.claude/hooks/comment-audit-gate.mjs`, `.claude/settings.json`, `tests/unit/hooks/comment-audit-gate.test.ts` | Opus      | stavová logika hash/stop_hook_active, fail-open, subprocess testy v temp repu |
-| 1    | 2. Skill comment-audit       | `.claude/skills/comment-audit/SKILL.md`                              | Sonnet    | próza podle hotového zadání, ale nese striktnost celého řešení                 |
-| 1    | 3. Dokumentace pravidel      | `AGENTS.md`, `CONTRIBUTING.md`                                       | Sonnet    | próza v domácím stylu, nulová logika                                           |
-| 2    | 4. Integrace                 | žádné nové soubory                                                   | Haiku 4.5 | spustit brány a ruční smoke hooku, ověřit výstupy                              |
+| vlna | celek                   | soubory                                                                                                        | model     | proč ten model                                                                |
+| ---- | ----------------------- | -------------------------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------- |
+| 1    | 1. Stop hook + testy    | `.claude/hooks/comment-audit-gate.mjs`, `.claude/settings.json`, `tests/unit/hooks/comment-audit-gate.test.ts` | Opus      | stavová logika hash/stop_hook_active, fail-open, subprocess testy v temp repu |
+| 1    | 2. Skill comment-audit  | `.claude/skills/comment-audit/SKILL.md`                                                                        | Sonnet    | próza podle hotového zadání, ale nese striktnost celého řešení                |
+| 1    | 3. Dokumentace pravidel | `AGENTS.md`, `CONTRIBUTING.md`                                                                                 | Sonnet    | próza v domácím stylu, nulová logika                                          |
+| 2    | 4. Integrace            | žádné nové soubory                                                                                             | Haiku 4.5 | spustit brány a ruční smoke hooku, ověřit výstupy                             |
 
 ```text
    ┌─────────┐  ┌─────────┐  ┌─────────┐
@@ -109,8 +109,14 @@ const HOOK = fileURLToPath(
   new URL("../../../.claude/hooks/comment-audit-gate.mjs", import.meta.url),
 );
 
-const STOP_IDLE = JSON.stringify({ hook_event_name: "Stop", stop_hook_active: false });
-const STOP_ACTIVE = JSON.stringify({ hook_event_name: "Stop", stop_hook_active: true });
+const STOP_IDLE = JSON.stringify({
+  hook_event_name: "Stop",
+  stop_hook_active: false,
+});
+const STOP_ACTIVE = JSON.stringify({
+  hook_event_name: "Stop",
+  stop_hook_active: true,
+});
 
 function runHook(cwd: string, input: string) {
   return spawnSync("node", [HOOK], { cwd, input, encoding: "utf8" });
