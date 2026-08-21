@@ -46,12 +46,10 @@ export function generateNav(
     });
   }
 
-  return mdFilesIn(versionRoot).map(
-    (f): DefaultTheme.NavItemWithLink => ({
-      text: readTitle(path.join(versionRoot, f)),
-      link: `/${version}/${f.replace(/\.md$/, "")}`,
-    }),
-  );
+  return mdFilesIn(versionRoot).map((f): DefaultTheme.NavItemWithLink => ({
+    text: readTitle(path.join(versionRoot, f)),
+    link: `/${version}/${f.replace(/\.md$/, "")}`,
+  }));
 }
 
 /**

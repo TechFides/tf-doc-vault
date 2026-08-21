@@ -184,7 +184,7 @@ is (0,1,1), `:is()` taking the specificity of its heaviest argument.
   <dt>Runtime</dt>
   <dd>Node 24</dd>
   <dt>Package manager</dt>
-  <dd>pnpm 11.1.3</dd>
+  <dd>pnpm 11.22.0</dd>
 </dl>
 
 <hr class="tf-divider" />

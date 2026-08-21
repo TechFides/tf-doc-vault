@@ -9,7 +9,7 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 
 ## Tech stack
 
-- Node >=24, pnpm 11.1.3 (pinned via `packageManager` in `package.json`)
+- Node >=24, pnpm 11.22.0 (pinned via `packageManager` in `package.json`)
 - TypeScript 6, strict + `noUncheckedIndexedAccess`, `module`/`moduleResolution` `NodeNext`, ESM only (`"type": "module"`)
 - `dist/` is emitted by `tsc`
 - VitePress 1.6 + Vue 3.5 (theme), Mermaid via `vitepress-plugin-mermaid`
