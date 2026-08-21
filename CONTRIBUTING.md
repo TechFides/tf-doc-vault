@@ -17,6 +17,17 @@ pnpm dev       # watch mode: tsc --watch + asset copy
 - Run `pnpm typecheck && pnpm lint` before submitting a PR.
 - Releases: see [Releasing](#releasing) below.
 
+### Comment audit hook
+
+`.claude/settings.json` wires a Stop hook (`.claude/hooks/comment-audit-gate.mjs`)
+that blocks the end of any Claude Code turn with changed files until the
+`comment-audit` skill has cleaned comments and prose per AGENTS.md. The state
+file `claude-comment-audit-state` lives in the checkout's git directory (per
+clone and per worktree, never committed); one audit per diff state. The hook
+fails open: any script error lets the turn end. The harness caps a Stop hook at
+8 consecutive blocks, so it cannot loop forever. The skill can also be run
+manually at any time via `/comment-audit`, outside of the hook.
+
 ## Adding a template
 
 A template is a folder under `templates/<name>/`: Markdown content plus a `_template.md` manifest (YAML frontmatter, never copied to a scaffold). The manifest declares the template's label, target location, which fields from the wizard's field catalog to prompt for, which `boilerplate/` files to exclude, and any post-scaffold steps (`git init`, pre-generating `pnpm-lock.yaml`, merging `docs:*` scripts into the host `package.json`, merging the pnpm settings into its `pnpm-workspace.yaml`, and so on). Adding a template never touches `src/**`: `tf-doc-vault setup` reads `templates/*/_template.md` at startup and lists whatever it finds. A wizard field with no existing entry in the field catalog (`FIELD_CATALOG` in `src/cli/scaffold.ts`) needs that catalog extended first.
