@@ -45,7 +45,10 @@ function stateHash(root) {
 try {
   const input = JSON.parse(readFileSync(0, "utf8"));
   const root = git("rev-parse", "--show-toplevel").trim();
-  const stateFile = join(root, ".git", "claude-comment-audit-state");
+  // In a linked worktree `.git` is a file, so the state has to go to the
+  // per-worktree gitdir this resolves to.
+  const gitDir = git("rev-parse", "--absolute-git-dir").trim();
+  const stateFile = join(gitDir, "claude-comment-audit-state");
 
   if (input.stop_hook_active === true) {
     writeFileSync(stateFile, stateHash(root));

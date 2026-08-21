@@ -74,6 +74,33 @@ describe("comment-audit-gate", () => {
     expect(runHook(repo, STOP_IDLE).status).toBe(2);
   });
 
+  test("a linked worktree stores its state in its own gitdir", () => {
+    const parent = fs.mkdtempSync(
+      path.join(os.tmpdir(), "comment-audit-gate-wt-"),
+    );
+    const worktree = path.join(parent, "wt");
+    try {
+      git("worktree", "add", worktree, "-b", "wt-branch");
+      fs.appendFileSync(path.join(worktree, "a.ts"), "export const b = 2;\n");
+
+      expect(runHook(worktree, STOP_ACTIVE).status).toBe(0);
+      expect(
+        fs.existsSync(
+          path.join(
+            repo,
+            ".git",
+            "worktrees",
+            "wt",
+            "claude-comment-audit-state",
+          ),
+        ),
+      ).toBe(true);
+      expect(runHook(worktree, STOP_IDLE).status).toBe(0);
+    } finally {
+      fs.rmSync(parent, { recursive: true, force: true });
+    }
+  });
+
   test("broken JSON on stdin fails open", () => {
     fs.appendFileSync(path.join(repo, "a.ts"), "export const b = 2;\n");
     const r = runHook(repo, "not json");

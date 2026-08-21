@@ -21,10 +21,11 @@ pnpm dev       # watch mode: tsc --watch + asset copy
 
 `.claude/settings.json` wires a Stop hook (`.claude/hooks/comment-audit-gate.mjs`)
 that blocks the end of any Claude Code turn with changed files until the
-`comment-audit` skill has cleaned comments and prose per AGENTS.md. State lives
-in `.git/claude-comment-audit-state` (per clone, never committed); one audit per
-diff state. The hook fails open: any script error lets the turn end. The harness
-caps a Stop hook at 8 consecutive blocks, so it cannot loop forever.
+`comment-audit` skill has cleaned comments and prose per AGENTS.md. The state
+file `claude-comment-audit-state` lives in the checkout's git directory (per
+clone and per worktree, never committed); one audit per diff state. The hook
+fails open: any script error lets the turn end. The harness caps a Stop hook at
+8 consecutive blocks, so it cannot loop forever.
 
 ## Adding a template
 
