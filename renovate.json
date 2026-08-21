@@ -15,6 +15,17 @@
       "description": "Auto-merge low-risk updates once CI is green. Major updates stay manual for human review.",
       "matchUpdateTypes": ["minor", "patch", "digest", "pin", "bump"],
       "automerge": true
+    },
+    {
+      "description": "@playwright/test keeps a range instead of the exact pin config:best-practices gives devDependencies. It must resolve to the same version as the runtime `playwright` dependency, which is a caret range: @playwright/test@X depends on playwright@X exactly, so an exact pin falls behind whenever lock file maintenance floats `playwright` forward, pnpm then keeps two Playwright copies and every smoke spec fails with \"two different versions of @playwright/test\".",
+      "matchPackageNames": ["@playwright/test"],
+      "rangeStrategy": "replace"
+    },
+    {
+      "description": "Major Playwright updates land in one PR. Merging one of the two packages without the other recreates the duplicate-version failure above; non-major updates already travel together via group:allNonMajor.",
+      "matchPackageNames": ["playwright", "@playwright/test"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "playwright"
     }
   ],
   "lockFileMaintenance": {

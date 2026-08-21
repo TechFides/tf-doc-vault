@@ -127,7 +127,7 @@
   "devDependencies": {
     "@commitlint/cli": "21.2.2",
     "@commitlint/config-conventional": "21.2.2",
-    "@playwright/test": "1.62.1",
+    "@playwright/test": "^1.62.1",
     "@types/markdown-it-container": "4.0.0",
     "@types/node": "25.9.5",
     "@typescript-eslint/eslint-plugin": "8.67.0",
