@@ -41,6 +41,8 @@ Run:
 
 Config: `playwright.config.ts`. Global setup is in `tests/smoke/global-setup.ts` (builds `dist/` and prepares fixtures).
 
+`@playwright/test` (devDependency) and `playwright` (runtime dependency, used by `export-pdf`) must resolve to the same version, because `@playwright/test@X` depends on `playwright@X` exactly. Both therefore carry a caret range, and `renovate.json` exempts `@playwright/test` from the exact pin devDependencies normally get. Pin it and the next lock refresh floats `playwright` ahead of it, pnpm keeps two Playwright copies and every spec fails to collect with "two different versions of @playwright/test".
+
 Every sandbox installs this package from the tarball `pnpm pack` produced, via `setup --source=file --file-path=<tgz>`. Never let a sandbox resolve `@techfides/tf-doc-vault` from npm: on a `chore(release)` commit the version in `package.json` is not published yet, so the install fails. pnpm resolves every spec already in a manifest before it applies an `add`, so swapping the dependency after scaffolding does not help; the wizard has to write the tarball path in the first place.
 
 ## `middleware.ts`'s Basic auth
