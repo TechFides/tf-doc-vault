@@ -61,8 +61,9 @@ bez závislosti na jq/shasum. Logika (stdin = JSON od harness):
    comment-audit skill on the changed files before finishing."
 
 Hash = SHA-256 nad `git diff HEAD` + obsahem untracked relevantních souborů.
-Stavový soubor `.git/claude-comment-audit-state` (per klon, netrackovaný,
-nepatří do `.gitignore` protože `.git/` se netrackuje z principu).
+Stavový soubor `claude-comment-audit-state` leží v git adresáři checkoutu
+(`git rev-parse --absolute-git-dir`): per klon i per worktree, netrackovaný.
+V linked worktree je `<root>/.git` soubor, přímý zápis do něj by selhal.
 
 Ukládá se až **po** auditu (krok 1), ne při bloku: tím stav konverguje na
 post-audit podobu diffu a další turn bez editací projde bez opakovaného
