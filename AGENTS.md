@@ -84,6 +84,10 @@ JSDoc stays on the published surface (`makeConfig` options, `createTheme`, the s
 - No em dash. Use a colon, parentheses, a semicolon, a comma, or two sentences. This holds for English and Czech, in code comments, CLI output, markdown and skill files. A hyphen in compounds and an en dash in numeric ranges are fine, as is a lone `—` used as an empty-value marker in a table cell.
 - Avoid the "not just X, but Y" construction, filler ("it is important to note"), marketing adjectives ("robust", "seamless", "comprehensive solution") and forced three-item lists.
 
+Markdown in this repo (docs/, specs/, the root files) is held to the same two
+tests as code comments: would a competent reader already know this, and does
+deleting it break anything? When in doubt, delete.
+
 ## Always: an implementation change updates the docs
 
 Any change to behaviour, the manifest schema, CLI flags or prompts, the published API, or what the package ships updates the documentation **in the same commit**. Docs describe reality; stale docs are a bug.
@@ -124,8 +128,11 @@ See [`docs/TESTING.md`](docs/TESTING.md). In short: Vitest for pure logic in `sr
 1. Smallest coherent diff that satisfies the goal, with no drive-by refactors or new tooling.
 2. A design or implementation plan agreed before coding is written to `specs/<topic>.md`, not to a scratch folder elsewhere.
 3. Code + tests + docs change together when behaviour changes.
-4. Before opening / updating a PR run `pnpm lint && pnpm typecheck && pnpm test` and report results.
-5. If a check fails, fix the root cause; do not disable it or pass `--no-verify`.
-6. Never commit secrets. Publish auth is OIDC; there is no `NPM_TOKEN` in this repo.
-7. Do not bypass the `npm-publish` environment approval: releases require a named reviewer (see `CONTRIBUTING.md` → Releasing).
-8. In a fresh git worktree run `pnpm install` before the first commit. The hook lives in the shared `.git/hooks`, but without `node_modules` it cannot find lefthook, prints `Can't find lefthook in PATH` and lets the commit through unvalidated. Never work around that with `LEFTHOOK=0`; check a message with `npx commitlint --edit` if in doubt.
+4. A Stop hook enforces a comment-and-prose audit (the `comment-audit` skill)
+   at the end of any turn that changed files. Run it manually anytime; do not
+   disable the hook.
+5. Before opening / updating a PR run `pnpm lint && pnpm typecheck && pnpm test` and report results.
+6. If a check fails, fix the root cause; do not disable it or pass `--no-verify`.
+7. Never commit secrets. Publish auth is OIDC; there is no `NPM_TOKEN` in this repo.
+8. Do not bypass the `npm-publish` environment approval: releases require a named reviewer (see `CONTRIBUTING.md` → Releasing).
+9. In a fresh git worktree run `pnpm install` before the first commit. The hook lives in the shared `.git/hooks`, but without `node_modules` it cannot find lefthook, prints `Can't find lefthook in PATH` and lets the commit through unvalidated. Never work around that with `LEFTHOOK=0`; check a message with `npx commitlint --edit` if in doubt.
