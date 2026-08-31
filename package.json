@@ -27,7 +27,7 @@
   "engines": {
     "node": ">=24"
   },
-  "packageManager": "pnpm@11.22.0",
+  "packageManager": "pnpm@11.24.0",
   "private": false,
   "files": [
     "dist",
@@ -130,16 +130,16 @@
     "@playwright/test": "^1.62.1",
     "@types/markdown-it-container": "4.0.0",
     "@types/node": "25.9.5",
-    "@typescript-eslint/eslint-plugin": "8.67.0",
-    "@typescript-eslint/parser": "8.67.0",
+    "@typescript-eslint/eslint-plugin": "8.68.0",
+    "@typescript-eslint/parser": "8.68.0",
     "@vercel/functions": "3.9.5",
     "@vitest/coverage-v8": "4.1.11",
     "changelogen": "0.6.2",
-    "eslint": "10.8.1",
+    "eslint": "10.9.1",
     "eslint-config-prettier": "10.1.8",
-    "knip": "6.32.2",
-    "lefthook": "2.1.10",
-    "mermaid": "11.17.0",
+    "knip": "6.33.0",
+    "lefthook": "2.1.12",
+    "mermaid": "11.17.2",
     "prettier": "3.9.6",
     "tf-licence-checker": "1.1.9",
     "tsx": "4.23.12",
@@ -147,6 +147,6 @@
     "vitepress": "1.6.4",
     "vitepress-plugin-mermaid": "2.0.17",
     "vitest": "4.1.11",
-    "vue": "3.5.41"
+    "vue": "3.5.42"
   }
 }
