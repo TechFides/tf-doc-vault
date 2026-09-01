@@ -6,12 +6,15 @@
  */
 
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CLI_DIR = __dirname; // dist/cli
 const SCRIPTS_DIR = path.resolve(__dirname, "..", "scripts"); // dist/scripts
+const PAGE_MAP_FILE = path.resolve(process.cwd(), "artifacts/.pagemap.json");
+const PDF_MAX_PASSES = 3;
 
 const COMMANDS: Record<string, string> = {
   print: "build-print-page.js",
@@ -42,6 +45,59 @@ function runVitepressBuild(): number {
   return result.status ?? 1;
 }
 
+type PageMap = Record<string, number>;
+
+function readPageMap(): PageMap {
+  if (!fs.existsSync(PAGE_MAP_FILE)) return {};
+  return JSON.parse(fs.readFileSync(PAGE_MAP_FILE, "utf-8")) as PageMap;
+}
+
+function pdfPass(withNumbers: boolean): { code: number; map: PageMap } {
+  let code = runScript(
+    "build-print-page.js",
+    withNumbers ? [`--pages=${PAGE_MAP_FILE}`] : [],
+  );
+  if (code === 0) code = runVitepressBuild();
+  if (code === 0) code = runScript("export-pdf.js");
+  return { code, map: code === 0 ? readPageMap() : {} };
+}
+
+/**
+ * Two passes, because a table of contents cannot carry page numbers until the
+ * document has been paginated: the first pass exists to produce the anchor to
+ * page map, the second prints it. Numbering can in principle repaginate the
+ * document, so the loop runs until a pass moves nothing and reports instead of
+ * shipping numbers it knows are stale.
+ */
+function runPdf(): number {
+  fs.rmSync(PAGE_MAP_FILE, { force: true });
+
+  console.log("\n[1/2] paginating\n");
+  let { code, map } = pdfPass(false);
+  if (code !== 0) return code;
+
+  for (let attempt = 2; attempt <= PDF_MAX_PASSES; attempt++) {
+    console.log(`\n[${attempt}/2] contents with page numbers\n`);
+    const next = pdfPass(true);
+    if (next.code !== 0) return next.code;
+
+    const moved = Object.keys(next.map).filter(
+      (slug) => map[slug] !== next.map[slug],
+    );
+    map = next.map;
+    if (moved.length === 0) {
+      console.log("\n✓ Page numbers in the contents match the exported PDF.");
+      return 0;
+    }
+    console.log(`\n… pagination moved (${moved.length} anchors), repeating.`);
+  }
+
+  console.error(
+    `\n✗ Pagination did not settle in ${PDF_MAX_PASSES} passes; contents may be a page out.`,
+  );
+  return 1;
+}
+
 function usage(exitCode = 0): never {
   console.log(`
 tf-doc-vault <command>
@@ -56,7 +112,7 @@ Commands:
                         --output=<dir>            (required) output directory
   print               Generate docs/print.md from sidebar order
   export-pdf          Render artifacts/docs-full.pdf from the /print page
-  pdf                 print → vitepress build docs → export-pdf
+  pdf                 print, build and export, run twice so the contents carry page numbers
   validate            Run frontmatter + link + image + markdown-lint checks
                         --root=<dir>        docs root directory (default: docs)
   normalize           Canonicalize frontmatter field order
@@ -95,12 +151,7 @@ if (cmd === "import-confluence") {
 }
 
 if (cmd === "pdf") {
-  let code = runScript("build-print-page.js");
-  if (code !== 0) process.exit(code);
-  code = runVitepressBuild();
-  if (code !== 0) process.exit(code);
-  code = runScript("export-pdf.js");
-  process.exit(code);
+  process.exit(runPdf());
 }
 
 const script = COMMANDS[cmd];

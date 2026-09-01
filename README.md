@@ -125,6 +125,39 @@ export default createTheme({ widthToggle: true });
 
 To rebrand (colors, logo, fonts, footer) for a non-TechFides project, see [BRANDING.md](./BRANDING.md).
 
+### PDF export
+
+`tf-doc-vault pdf` builds the site and renders `/print` into `artifacts/`. With no
+further setup it produces `docs-full.pdf`: every page in sidebar order, a contents
+list with page numbers, bookmarks that mirror the sidebar, and a running footer.
+
+A project that sends its PDF to a customer adds `tf-doc-vault.json` in its root
+to get a cover page and a letterhead:
+
+```json
+{
+  "pdf": {
+    "fileName": "TechFides-nabidka-acme.pdf",
+    "mark": "TechFides",
+    "footerLabel": "Nabídka pro Acme",
+    "cover": {
+      "eyebrow": "Návrh spolupráce pro Acme",
+      "title": "Název nabídky",
+      "subtitle": "Jedna věta o tom, co nabídka řeší.",
+      "vendor": "TechFides Solutions s.r.o.",
+      "website": "techfides.cz",
+      "recipient": "Acme",
+      "validUntil": "30. září 2026",
+      "contact": "Jméno · e-mail",
+      "confidentiality": "Důvěrné."
+    }
+  }
+}
+```
+
+Only `cover.title` is required; every other row is left off the imprint when it is
+not set. Design notes and limits are in [specs/pdf-export.md](./specs/pdf-export.md).
+
 ---
 
 ## Documentation
