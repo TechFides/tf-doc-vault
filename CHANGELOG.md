@@ -1,5 +1,39 @@
 # Changelog
 
+## v0.5.3
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.2...v0.5.3)
+
+### 🚀 Enhancements
+
+- **pdf:** Client-ready export with cover, contents page numbers and outline ([4105cd2](https://github.com/TechFides/tf-doc-vault/commit/4105cd2))
+
+### 🩹 Fixes
+
+- **setup:** Create a host package.json when the repo has none ([f583b86](https://github.com/TechFides/tf-doc-vault/commit/f583b86))
+- Store comment-audit state in the checkout git dir for worktrees ([795f2ce](https://github.com/TechFides/tf-doc-vault/commit/795f2ce))
+- Flush the hook message synchronously, align docs with the worktree fix ([9746067](https://github.com/TechFides/tf-doc-vault/commit/9746067))
+- **deps:** Keep playwright and @playwright/test on one version ([9abfe05](https://github.com/TechFides/tf-doc-vault/commit/9abfe05))
+- **pdf:** Make the print tokens, the cover and the base path actually apply ([19d973b](https://github.com/TechFides/tf-doc-vault/commit/19d973b))
+- **hooks:** Audit comments in every worktree the session dirtied, not just cwd ([95052f3](https://github.com/TechFides/tf-doc-vault/commit/95052f3))
+
+### 📖 Documentation
+
+- Add comment policy enforcement spec and plan ([080b92d](https://github.com/TechFides/tf-doc-vault/commit/080b92d))
+- Hold repo markdown to the comment tests, document the audit hook ([1a876dc](https://github.com/TechFides/tf-doc-vault/commit/1a876dc))
+- State file lives in the checkout git dir, align spec with the fix ([dd17916](https://github.com/TechFides/tf-doc-vault/commit/dd17916))
+- Format the enforcement spec and plan ([322e665](https://github.com/TechFides/tf-doc-vault/commit/322e665))
+
+### 🏡 Chore
+
+- Add comment-audit skill with the strict cleanup checklist ([e387f9d](https://github.com/TechFides/tf-doc-vault/commit/e387f9d))
+- Force a comment audit via Stop hook when files changed ([99dde2a](https://github.com/TechFides/tf-doc-vault/commit/99dde2a))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+- Václav Mičulka ([@VaclavMiculka](https://github.com/VaclavMiculka))
+
 ## v0.5.2
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.1...v0.5.2)
