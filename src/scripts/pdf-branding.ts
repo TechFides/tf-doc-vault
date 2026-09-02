@@ -1,8 +1,8 @@
 /**
- * Per-project PDF branding, read from `tf-doc-vault.json` in the project root.
- * The print generator and the PDF exporter are separate Node processes that
- * never load the VitePress config, so this is the only channel between an
- * offer's identity and its export.
+ * Per-project PDF branding, read from `tf-doc-vault.json` in the project root,
+ * plus the escape both consumers put its values through. The print generator and
+ * the PDF exporter are separate Node processes that never load the VitePress
+ * config, so this is the only channel between an offer's identity and its export.
  */
 
 import fs from "node:fs";
@@ -35,6 +35,13 @@ export interface PdfBranding {
 }
 
 const CONFIG_FILE = "tf-doc-vault.json";
+
+export function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
 
 /**
  * A missing file is the documented way to opt out, so it yields defaults. A file

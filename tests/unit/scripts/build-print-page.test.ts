@@ -125,6 +125,35 @@ describe("build-print-page", () => {
     expect(out).toContain("obsah hluboko");
   });
 
+  test("names a group that has no index.md and keeps its pages one level in", () => {
+    const out = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/sekce/list.md": page("List", 1, "obsah listu"),
+    });
+
+    const toc = out.slice(
+      out.indexOf('<div class="tf-print-toc">'),
+      out.indexOf("</div>", out.indexOf('<div class="tf-print-toc">')),
+    );
+    expect(toc).toContain("tf-toc-label--group");
+    expect(toc).toContain(">sekce<");
+    expect(toc).toContain("  - [");
+    expect(toc).not.toContain("    - [");
+  });
+
+  test("indents the first contents row no further than a nested list", () => {
+    const out = runPrint({
+      "v1/alfa/beta/list.md": page("List", 1, "obsah listu"),
+    });
+
+    const rows = out
+      .slice(out.indexOf('<div class="tf-print-toc">'))
+      .split("\n")
+      .filter((line) => line.trimStart().startsWith("- "));
+    // Four spaces with no list open above it is an indented code block.
+    expect(rows[0]).toBe(rows[0]!.trimStart());
+  });
+
   test("a group whose index.md has no title falls back to the folder name", () => {
     const out = runPrint({
       "v1/index.md": page("Verze", 1, "root"),
@@ -178,6 +207,20 @@ describe("build-print-page", () => {
     expect(out).toContain("##### Podnadpis");
   });
 
+  test("keeps a page's own h1 below the page title of a nested page", () => {
+    const out = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/sekce/index.md": page("Sekce", 1, "sekce"),
+      "v1/sekce/skupina/index.md": page("Skupina", 1, "skupina"),
+      "v1/sekce/skupina/list.md": page("List", 1, "# Vlastní H1"),
+    });
+
+    expect(out).toContain(
+      '<h3 class="tf-page-title tf-page-title--d2">List</h3>',
+    );
+    expect(out).toContain("#### Vlastní H1");
+  });
+
   test("leaves a heading inside a fenced block alone", () => {
     const out = runPrint({
       "v1/index.md": page("Verze", 1, "root"),
@@ -205,6 +248,20 @@ describe("build-print-page", () => {
     expect(figure).toContain("**Obrázek 1** – popisek.");
     // The paragraph introducing the figure stays above it.
     expect(out.indexOf("uvodni odstavec")).toBeLessThan(out.indexOf("<figure"));
+  });
+
+  test("leaves a caption inside a fenced block alone", () => {
+    const out = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/sekce/index.md": page(
+        "Sekce",
+        1,
+        "```markdown\n**Obrázek 1** – popisek.\n![alt](/a.svg)\n```",
+      ),
+    });
+
+    expect(out).not.toContain("<figure");
+    expect(out).toContain("**Obrázek 1** – popisek.\n![alt](/a.svg)");
   });
 
   test("leaves a caption in place when no image follows it", () => {

@@ -3,10 +3,12 @@
  * browser's own Ctrl+P produces the same document.
  *
  * The cover block sits outside the media query: the /print route is also read on
- * screen while an offer is being written.
+ * screen while an offer is being written. Its selectors still carry
+ * `.print-layout`, for weight rather than reach: `.print-layout h1` and
+ * `.print-layout p` below would otherwise win on the cover.
  */
 
-.tf-cover {
+.print-layout .tf-cover {
   display: flex;
   flex-direction: column;
   /* The A4 text column at the exporter's margins, a hair short so a rounding
@@ -15,19 +17,19 @@
   min-height: 258mm;
 }
 
-.tf-cover__logo {
+.print-layout .tf-cover__logo {
   width: 26mm;
   height: auto;
   fill: var(--brand-primary);
 }
 
-.tf-cover__lead {
+.print-layout .tf-cover__lead {
   margin-top: 40mm;
   padding-top: 7mm;
   border-top: 2.5pt solid var(--brand-navy);
 }
 
-.tf-cover__eyebrow {
+.print-layout .tf-cover__eyebrow {
   margin: 0;
   font-size: 9.5pt;
   font-weight: 600;
@@ -36,7 +38,7 @@
   color: var(--brand-primary);
 }
 
-.tf-cover__title {
+.print-layout .tf-cover__title {
   margin: 4mm 0 0;
   font-size: 40pt;
   font-weight: 700;
@@ -46,7 +48,7 @@
   border: none;
 }
 
-.tf-cover__subtitle {
+.print-layout .tf-cover__subtitle {
   margin: 7mm 0 0;
   max-width: 115mm;
   font-size: 12pt;
@@ -54,21 +56,21 @@
   color: #3d4b5c;
 }
 
-.tf-cover__imprint {
+.print-layout .tf-cover__imprint {
   margin-top: auto;
   padding: 7mm 8mm;
   background: #eef3f8;
   border-left: 2.5pt solid var(--brand-navy);
 }
 
-.tf-cover__meta {
+.print-layout .tf-cover__meta {
   display: grid;
   grid-template-columns: 32mm 1fr;
   row-gap: 2.4mm;
   margin: 0;
 }
 
-.tf-cover__meta dt {
+.print-layout .tf-cover__meta dt {
   padding-top: 0.6mm;
   font-size: 7.5pt;
   letter-spacing: 0.09em;
@@ -76,14 +78,14 @@
   color: #6b7a8d;
 }
 
-.tf-cover__meta dd {
+.print-layout .tf-cover__meta dd {
   margin: 0;
   font-size: 9.5pt;
   font-weight: 600;
   color: var(--brand-navy);
 }
 
-.tf-cover__note {
+.print-layout .tf-cover__note {
   margin: 6mm 0 0;
   font-size: 8pt;
   color: #6b7a8d;
@@ -163,6 +165,17 @@
   html,
   body {
     background: var(--tf-print-paper);
+  }
+
+  /* Ctrl+P on an ordinary page never reaches `.print-layout`, and `.vp-doc p`
+     sets no size of its own, so without this it prints at the screen size. */
+  .vp-doc {
+    font-size: var(--tf-text-body);
+    color: var(--tf-print-ink);
+  }
+
+  .vp-doc a {
+    color: var(--tf-print-link);
   }
 
   /* PrintLayout's standing header repeats the site title above the cover, and is
@@ -361,6 +374,11 @@
   .print-layout .tf-toc-label--section {
     font-weight: 600;
     color: var(--tf-print-heading);
+  }
+
+  /* Not a link, so nothing else sets this row apart from the pages under it. */
+  .print-layout .tf-toc-label--group {
+    font-weight: 600;
   }
 
   .print-layout .tf-toc-leader {

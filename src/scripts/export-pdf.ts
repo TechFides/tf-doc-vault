@@ -13,19 +13,19 @@ import { spawn } from "node:child_process";
 import type { ChildProcess } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { readPdfBranding } from "./pdf-branding.js";
+import { escapeHtml, readPdfBranding } from "./pdf-branding.js";
 
 const PORT = 4173;
-const BASE_URL = `http://localhost:${PORT}`;
-const PRINT_URL = `${BASE_URL}/print`;
+const ORIGIN = `http://localhost:${PORT}`;
 const PROJECT_ROOT = process.cwd();
 const ARTIFACTS_DIR = path.resolve(PROJECT_ROOT, "artifacts");
 const SERVER_TIMEOUT_MS = 20_000;
 
 const branding = readPdfBranding();
+// basename, so a configured name cannot write outside artifacts/.
 const OUTPUT_FILE = path.join(
   ARTIFACTS_DIR,
-  branding.fileName ?? "docs-full.pdf",
+  path.basename(branding.fileName ?? "docs-full.pdf"),
 );
 const PAGE_MAP_FILE = path.join(ARTIFACTS_DIR, ".pagemap.json");
 
@@ -46,14 +46,15 @@ function headerTemplate(): string {
   return `
 <div style="width:100%;box-sizing:border-box;padding:${HEADER_TOP} 16mm 0;font-family:${FURNITURE_FONT};">
   <div style="width:100%;display:flex;justify-content:flex-end;border-bottom:0.5pt solid #dde3ea;padding-bottom:2mm;font-size:7pt;letter-spacing:0.08em;text-transform:uppercase;color:#9aa7b5;">
-    <span>${branding.mark}</span>
+    <span>${escapeHtml(branding.mark)}</span>
   </div>
 </div>`;
 }
 
 function footerTemplate(): string {
   const left = [branding.footerLabel, branding.cover?.confidentiality]
-    .filter(Boolean)
+    .filter((part): part is string => !!part)
+    .map(escapeHtml)
     .join(" &nbsp;·&nbsp; ");
   return `
 <div style="width:100%;box-sizing:border-box;padding:${FOOTER_TOP} 16mm 0;font-family:${FURNITURE_FONT};">
@@ -129,6 +130,16 @@ async function readPageMap(file: string): Promise<Record<string, number>> {
   return map;
 }
 
+/**
+ * `vitepress preview` serves the site under its configured `base` and 404s
+ * everything outside it, so the origin alone is not a URL. Read off a built page
+ * because this process never loads the config: every asset URL carries the base.
+ */
+function resolveBase(dir: string): string {
+  const html = fs.readFileSync(path.join(dir, "print.html"), "utf-8");
+  return /(?:href|src)="(\/[^"]*?)assets\//.exec(html)?.[1] ?? "/";
+}
+
 const distDir = path.resolve(PROJECT_ROOT, "docs/.vitepress/dist");
 if (!fs.existsSync(distDir)) {
   console.error(
@@ -137,14 +148,17 @@ if (!fs.existsSync(distDir)) {
   process.exit(1);
 }
 
+const baseUrl = `${ORIGIN}${resolveBase(distDir)}`;
+const printUrl = `${baseUrl}print`;
+
 fs.mkdirSync(ARTIFACTS_DIR, { recursive: true });
 
 console.log("Starting preview server...");
 const server = startPreviewServer();
 
 try {
-  await waitForServer(BASE_URL, SERVER_TIMEOUT_MS);
-  console.log(`✓ Server running at ${BASE_URL}`);
+  await waitForServer(baseUrl, SERVER_TIMEOUT_MS);
+  console.log(`✓ Server running at ${baseUrl}`);
 
   const browser = await chromium.launch();
   const page = await browser.newPage({
@@ -156,8 +170,8 @@ try {
   // first sheet. It also makes this export and the browser's Ctrl+P agree.
   await page.emulateMedia({ media: "print", colorScheme: "light" });
 
-  console.log(`Loading ${PRINT_URL}...`);
-  await page.goto(PRINT_URL, { waitUntil: "networkidle" });
+  console.log(`Loading ${printUrl}...`);
+  await page.goto(printUrl, { waitUntil: "networkidle" });
 
   await page.evaluate(() => document.fonts.ready);
 

@@ -34,6 +34,8 @@ function runScript(scriptName: string, extraArgs: string[] = []): number {
   const result = spawnSync(process.execPath, [scriptPath, ...extraArgs], {
     stdio: "inherit",
   });
+  // A spawn that never started has no exit code and printed nothing itself.
+  if (result.error) console.error(`✗ ${scriptName}: ${result.error.message}`);
   return result.status ?? 1;
 }
 
@@ -42,6 +44,8 @@ function runVitepressBuild(): number {
     stdio: "inherit",
     shell: process.platform === "win32",
   });
+  if (result.error)
+    console.error(`✗ vitepress build docs: ${result.error.message}`);
   return result.status ?? 1;
 }
 
@@ -49,7 +53,12 @@ type PageMap = Record<string, number>;
 
 function readPageMap(): PageMap {
   if (!fs.existsSync(PAGE_MAP_FILE)) return {};
-  return JSON.parse(fs.readFileSync(PAGE_MAP_FILE, "utf-8")) as PageMap;
+  try {
+    return JSON.parse(fs.readFileSync(PAGE_MAP_FILE, "utf-8")) as PageMap;
+  } catch {
+    // An export cut short mid-write leaves a truncated file behind.
+    return {};
+  }
 }
 
 function pdfPass(withNumbers: boolean): { code: number; map: PageMap } {
@@ -72,12 +81,14 @@ function pdfPass(withNumbers: boolean): { code: number; map: PageMap } {
 function runPdf(): number {
   fs.rmSync(PAGE_MAP_FILE, { force: true });
 
-  console.log("\n[1/2] paginating\n");
+  console.log(`\n[1/${PDF_MAX_PASSES}] paginating\n`);
   let { code, map } = pdfPass(false);
   if (code !== 0) return code;
 
   for (let attempt = 2; attempt <= PDF_MAX_PASSES; attempt++) {
-    console.log(`\n[${attempt}/2] contents with page numbers\n`);
+    console.log(
+      `\n[${attempt}/${PDF_MAX_PASSES}] contents with page numbers\n`,
+    );
     const next = pdfPass(true);
     if (next.code !== 0) return next.code;
 
@@ -93,7 +104,7 @@ function runPdf(): number {
   }
 
   console.error(
-    `\n✗ Pagination did not settle in ${PDF_MAX_PASSES} passes; contents may be a page out.`,
+    `\n✗ Pagination did not settle in ${PDF_MAX_PASSES} passes. The PDF on disk has a contents that may be a page out; do not send it.`,
   );
   return 1;
 }

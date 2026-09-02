@@ -16,7 +16,7 @@ import {
   subDirEntries,
 } from "../shared/ordering.js";
 import { LOGO_SHAPES, LOGO_VIEW_BOX } from "../theme/icons/logoSymbol.js";
-import { readPdfBranding, type PdfCover } from "./pdf-branding.js";
+import { escapeHtml, readPdfBranding, type PdfCover } from "./pdf-branding.js";
 
 const DOCS_ROOT = path.resolve(process.cwd(), "docs");
 const OUTPUT = path.join(DOCS_ROOT, "print.md");
@@ -32,9 +32,9 @@ const PRAGUE_DATE = new Intl.DateTimeFormat("cs-CZ", {
 const TOC_HEADINGS = new Set(["obsah", "obsah skupiny"]);
 
 /**
- * A page title occupies h1 to h3 by its depth, so shifting a page's own headings
- * by 2 always clears them. Being a constant rather than the depth is what keeps
- * a `##` looking the same wherever its page sits in the tree.
+ * A page title occupies h1 to h3 by its depth, so a body heading counted from h2
+ * and shifted by 2 always lands below it. Being a constant rather than the depth
+ * is what keeps a `##` looking the same wherever its page sits in the tree.
  */
 const HEADING_SHIFT = 2;
 
@@ -53,6 +53,13 @@ interface Page {
   title: string;
   slug: string;
   depth: number;
+}
+
+/** No `slug` means a group without an `index.md`: nothing to link the row to. */
+interface TocEntry {
+  label: string;
+  depth: number;
+  slug?: string;
 }
 
 function versionDirs(dir: string): string[] {
@@ -75,11 +82,20 @@ function stripFrontmatter(content: string): string {
   return content.replace(/^---\s*\n[\s\S]*?\n---\s*\n?/, "").trimStart();
 }
 
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+/**
+ * True on a fence delimiter and inside one. Stateful: one call per line, in order.
+ */
+function fenceTracker(): (line: string) => boolean {
+  let open: string | null = null;
+
+  return (line: string): boolean => {
+    const marker = FENCE.exec(line)?.[1];
+    if (marker === undefined) return open !== null;
+    if (open === null) open = marker;
+    else if (marker.startsWith(open[0]!) && marker.length >= open.length)
+      open = null;
+    return true;
+  };
 }
 
 /** `readTitle` would fall back to the string "index", never to the folder. */
@@ -91,56 +107,66 @@ function titleOf(filePath: string): string {
     : path.basename(filePath, ".md");
 }
 
-function pageOf(filePath: string, depth: number): Page {
-  return {
+function addPage(
+  filePath: string,
+  depth: number,
+  pages: Page[],
+  toc: TocEntry[],
+): void {
+  const page: Page = {
     filePath,
     title: titleOf(filePath),
     slug: slugFor(filePath),
     depth,
   };
+  pages.push(page);
+  toc.push({ label: page.title, depth, slug: page.slug });
 }
 
-/** Pages and groups interleave the way `buildSidebarItems` renders them. */
-function walk(dir: string, depth: number, pages: Page[]): void {
+/**
+ * Pages and groups interleave the way `buildSidebarItems` renders them. A group
+ * without an `index.md` still gets a row: the contents indents by depth, so a
+ * level that contributes none leaves its children hanging one level up.
+ */
+function walk(
+  dir: string,
+  depth: number,
+  pages: Page[],
+  toc: TocEntry[],
+): void {
   for (const entry of sortSiblings(dir, siblingEntries(dir))) {
     const full = path.join(dir, entry.name);
     if (!entry.isDirectory()) {
-      pages.push(pageOf(full, depth));
+      addPage(full, depth, pages, toc);
       continue;
     }
     const groupIndex = path.join(full, "index.md");
-    if (fs.existsSync(groupIndex)) pages.push(pageOf(groupIndex, depth));
-    walk(full, depth + 1, pages);
+    if (fs.existsSync(groupIndex)) addPage(groupIndex, depth, pages, toc);
+    else toc.push({ label: entry.name, depth });
+    walk(full, depth + 1, pages, toc);
   }
 }
 
-function collectPages(): Page[] {
+function collectPages(): { pages: Page[]; toc: TocEntry[] } {
   const pages: Page[] = [];
+  const toc: TocEntry[] = [];
   for (const version of versionDirs(DOCS_ROOT)) {
     const versionRoot = path.join(DOCS_ROOT, version);
     const versionIndex = path.join(versionRoot, "index.md");
-    if (fs.existsSync(versionIndex)) pages.push(pageOf(versionIndex, 0));
-    walk(versionRoot, 0, pages);
+    if (fs.existsSync(versionIndex)) addPage(versionIndex, 0, pages, toc);
+    walk(versionRoot, 0, pages, toc);
   }
-  return pages;
+  return { pages, toc };
 }
 
 /** Drops a heading and everything under it, up to the next heading of its level. */
 function dropTocSections(body: string): string {
   const kept: string[] = [];
-  let fence: string | null = null;
+  const inFence = fenceTracker();
   let dropUntilLevel: number | null = null;
 
   for (const line of body.split("\n")) {
-    const fenceMatch = FENCE.exec(line);
-    if (fenceMatch) {
-      const marker = fenceMatch[1]!;
-      if (fence === null) fence = marker;
-      else if (marker.startsWith(fence[0]!) && marker.length >= fence.length)
-        fence = null;
-    }
-
-    if (fence === null) {
+    if (!inFence(line)) {
       const heading = HEADING.exec(line);
       if (heading) {
         const level = heading[1]!.length;
@@ -163,24 +189,18 @@ function dropTocSections(body: string): string {
 }
 
 function shiftHeadings(body: string, by: number): string {
-  let fence: string | null = null;
+  const inFence = fenceTracker();
 
   return body
     .split("\n")
     .map((line) => {
-      const fenceMatch = FENCE.exec(line);
-      if (fenceMatch) {
-        const marker = fenceMatch[1]!;
-        if (fence === null) fence = marker;
-        else if (marker.startsWith(fence[0]!) && marker.length >= fence.length)
-          fence = null;
-        return line;
-      }
-      if (fence !== null) return line;
+      if (inFence(line)) return line;
 
       const heading = HEADING.exec(line);
       if (!heading) return line;
-      return `${"#".repeat(Math.min(heading[1]!.length + by, 6))} ${heading[2]}`;
+      // From h2: a `#` shifted from its own level lands on a depth-2 page title.
+      const level = Math.max(heading[1]!.length, 2);
+      return `${"#".repeat(Math.min(level + by, 6))} ${heading[2]}`;
     })
     .join("\n");
 }
@@ -192,12 +212,13 @@ function shiftHeadings(body: string, by: number): string {
  */
 function bindFigureCaptions(body: string): string {
   const lines = body.split("\n");
+  const inFence = fenceTracker();
   const out: string[] = [];
   let i = 0;
 
   while (i < lines.length) {
     const caption = lines[i]!;
-    if (!FIGURE_CAPTION.test(caption)) {
+    if (inFence(caption) || !FIGURE_CAPTION.test(caption)) {
       out.push(caption);
       i++;
       continue;
@@ -347,7 +368,7 @@ function readPageMap(): Record<string, number> {
 
 const branding = readPdfBranding();
 const cover = branding.cover;
-const pages = collectPages();
+const { pages, toc } = collectPages();
 const slugByPath = new Map(pages.map((p) => [p.filePath, p.slug]));
 const pageMap = readPageMap();
 const parts: string[] = [];
@@ -374,15 +395,22 @@ parts.push(`<div class="tf-print-toc">\n`);
 
 // One tight list: a blank line between items would split it into several lists
 // and flatten the hierarchy the indentation carries.
-for (const page of pages) {
-  const sectionClass = page.depth === 0 ? " tf-toc-label--section" : "";
-  const label = `<span class="tf-toc-label${sectionClass}">${escapeHtml(page.title)}</span>`;
-  const number = pageMap[page.slug];
+for (const entry of toc) {
+  const indent = "  ".repeat(entry.depth);
+  const sectionClass = entry.depth === 0 ? " tf-toc-label--section" : "";
+  if (entry.slug === undefined) {
+    parts.push(
+      `${indent}- <span class="tf-toc-label${sectionClass} tf-toc-label--group">${escapeHtml(entry.label)}</span>`,
+    );
+    continue;
+  }
+  const label = `<span class="tf-toc-label${sectionClass}">${escapeHtml(entry.label)}</span>`;
+  const number = pageMap[entry.slug];
   const tail =
     number === undefined
       ? ""
       : `<span class="tf-toc-leader"></span><span class="tf-toc-page">${number}</span>`;
-  parts.push(`${"  ".repeat(page.depth)}- [${label}${tail}](#${page.slug})`);
+  parts.push(`${indent}- [${label}${tail}](#${entry.slug})`);
 }
 
 parts.push(`\n</div>`);

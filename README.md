@@ -156,7 +156,8 @@ to get a cover page and a letterhead:
 ```
 
 Only `cover.title` is required; every other row is left off the imprint when it is
-not set. Design notes and limits are in [specs/pdf-export.md](./specs/pdf-export.md).
+not set. `fileName` is a name, not a path: the PDF always lands in `artifacts/`.
+Design notes and limits are in [specs/pdf-export.md](./specs/pdf-export.md).
 
 ---
 
