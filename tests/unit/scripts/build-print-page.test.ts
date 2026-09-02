@@ -396,3 +396,78 @@ describe("internal links", () => {
     expect(printed).toContain("![an image](./picture.png)");
   });
 });
+
+describe("heading anchors", () => {
+  test("qualifies a repeated id so the combined document keeps it unique", () => {
+    const printed = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/alfa.md": page("Alfa", 1, "## Chybové stavy {#chybove-stavy}"),
+      "v1/beta.md": page("Beta", 2, "## Chybové stavy {#chybove-stavy}"),
+    });
+
+    expect(printed).toContain("{#v1-alfa-chybove-stavy}");
+    expect(printed).toContain("{#v1-beta-chybove-stavy}");
+    expect(printed).not.toContain("{#chybove-stavy}");
+  });
+
+  test("moves a same-page link onto the qualified id", () => {
+    const printed = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/alfa.md": page(
+        "Alfa",
+        1,
+        ["## Chybové stavy {#chybove-stavy}", "[viz](#chybove-stavy)"].join(
+          "\n\n",
+        ),
+      ),
+    });
+
+    expect(printed).toContain("[viz](#v1-alfa-chybove-stavy)");
+  });
+
+  test("leaves an anchor belonging to another page alone", () => {
+    const printed = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/alfa.md": page("Alfa", 1, "[jinam](#nikde)"),
+    });
+
+    expect(printed).toContain("[jinam](#nikde)");
+  });
+
+  test("leaves an id inside a fenced block alone", () => {
+    const printed = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/alfa.md": page(
+        "Alfa",
+        1,
+        ["```markdown", "## Ukázka {#priklad}", "```"].join("\n"),
+      ),
+    });
+
+    expect(printed).toContain("## Ukázka {#priklad}");
+  });
+
+  // Chromium writes a name token it cannot address once the anchor passes 127
+  // bytes, which silently breaks that link inside the PDF.
+  test("falls back to a hashed prefix when the slug would overflow the token", () => {
+    const deep =
+      "v1/" +
+      Array.from({ length: 6 }, (_, i) => `uroven-${i}-s-dlouhym-nazvem`).join(
+        "/",
+      );
+    const printed = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      [`${deep}/stranka.md`]: page(
+        "Hluboko",
+        1,
+        "## Nadpis {#velmi-dlouhy-identifikator-nadpisu-ktery-uz-se-tam-nevejde}",
+      ),
+    });
+
+    const anchor = /\{#([^}]+)\}/.exec(printed)?.[1] ?? "";
+    expect(Buffer.byteLength(anchor)).toBeLessThanOrEqual(127);
+    expect(anchor).toMatch(
+      /^[0-9a-f]{8}-velmi-dlouhy-identifikator-nadpisu-ktery-uz-se-tam-nevejde$/,
+    );
+  });
+});
