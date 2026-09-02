@@ -129,8 +129,11 @@ See [`docs/TESTING.md`](docs/TESTING.md). In short: Vitest for pure logic in `sr
 2. A design or implementation plan agreed before coding is written to `specs/<topic>.md`, not to a scratch folder elsewhere.
 3. Code + tests + docs change together when behaviour changes.
 4. A Stop hook enforces a comment-and-prose audit (the `comment-audit` skill)
-   at the end of any turn that changed files. Run it manually anytime; do not
-   disable the hook.
+   at the end of any turn that changed files, in any worktree of the repo this
+   session dirtied and not only the one it started in. A SessionStart hook
+   records what each worktree looked like at the start, so a worktree somebody
+   else left dirty does not nag you. Run the audit manually anytime; do not
+   disable either hook.
 5. Before opening / updating a PR run `pnpm lint && pnpm typecheck && pnpm test` and report results.
 6. If a check fails, fix the root cause; do not disable it or pass `--no-verify`.
 7. Never commit secrets. Publish auth is OIDC; there is no `NPM_TOKEN` in this repo.

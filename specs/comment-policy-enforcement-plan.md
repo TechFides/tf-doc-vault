@@ -67,8 +67,13 @@ integrační kontrola.
 
 ## Celek 1: Stop hook + testy
 
-_Pozn.: kód níže je původní zadání; finální hook ukládá stav přes
-`git rev-parse --absolute-git-dir` (fix 795f2ce)._
+_Pozn.: kód níže je původní zadání. Finální hook ukládá stav přes
+`git rev-parse --absolute-git-dir` (fix 795f2ce) a nekontroluje jen cwd, ale
+každý worktree repozitáře; sdílené pomocné funkce jsou v
+`comment-audit-state.mjs`. Aby cizí rozdělaná práce neblokovala, hook na
+`SessionStart` zapíše baseline všech worktree a gate hlásí jen ty, které se od
+startu session změnily. Detekce podle cwd nechala bez pojistky každou session,
+která edituje jiný tree, než ve kterém běží._
 
 **Model:** Opus. **Vlna:** 1.
 

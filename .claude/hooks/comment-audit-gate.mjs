@@ -1,72 +1,85 @@
-import { execFileSync } from "node:child_process";
-import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync, writeSync } from "node:fs";
-import { join } from "node:path";
-
-const RELEVANT = /\.(ts|vue|css|ya?ml|sh|md)$/;
-const EXCLUDED = /^(dist|node_modules)\//;
+import { readFileSync, realpathSync, writeFileSync, writeSync } from "node:fs";
+import {
+  auditedFile,
+  baselineFile,
+  changedFiles,
+  git,
+  stateHash,
+  worktrees,
+} from "./comment-audit-state.mjs";
 
 const MESSAGE =
   "Changed files detected. Invoke the comment-audit skill " +
   "(.claude/skills/comment-audit) on the changed files, then finish.";
 
-function git(...args) {
-  return execFileSync("git", args, { encoding: "utf8" });
-}
-
-function relevantUntracked() {
-  return git("ls-files", "--others", "--exclude-standard")
-    .split("\n")
-    .filter((f) => f && RELEVANT.test(f) && !EXCLUDED.test(f));
-}
-
-function changedFiles() {
-  const tracked = git("diff", "--name-only", "HEAD")
-    .split("\n")
-    .filter((f) => f && RELEVANT.test(f) && !EXCLUDED.test(f));
-  return [...tracked, ...relevantUntracked()];
-}
-
-function stateHash(root) {
-  const hash = createHash("sha256");
-  hash.update(git("diff", "HEAD"));
-  for (const file of relevantUntracked()) {
-    hash.update(file);
-    try {
-      hash.update(readFileSync(join(root, file)));
-    } catch {
-      // Deleted between listing and reading; the name alone is enough.
-    }
+function readOr(file, fallback) {
+  try {
+    return readFileSync(file, "utf8");
+  } catch {
+    return fallback;
   }
-  return hash.digest("hex");
+}
+
+/** Null, not `{}`: without a baseline a foreign worktree cannot be attributed. */
+function readBaseline(cwd, sessionId) {
+  const file = baselineFile(cwd, sessionId);
+  if (file === null) return null;
+  const raw = readOr(file, null);
+  if (raw === null) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function message(outside) {
+  if (outside.length === 0) return MESSAGE;
+  return `${MESSAGE} These worktrees changed during this session, so collect the changed files in each of them too: ${outside.join(", ")}.`;
 }
 
 // Any unexpected failure lets the stop through: a broken hook must never block work.
 try {
   const input = JSON.parse(readFileSync(0, "utf8"));
-  const root = git("rev-parse", "--show-toplevel").trim();
-  // In a linked worktree `.git` is a file, so the state has to go to the
-  // per-worktree gitdir this resolves to.
-  const gitDir = git("rev-parse", "--absolute-git-dir").trim();
-  const stateFile = join(gitDir, "claude-comment-audit-state");
+  const cwd = process.cwd();
+  const own = realpathSync(git(cwd, "rev-parse", "--show-toplevel").trim());
+  const trees = worktrees(cwd);
 
   if (input.stop_hook_active === true) {
-    writeFileSync(stateFile, stateHash(root));
+    for (const tree of trees) {
+      try {
+        if (changedFiles(tree).length > 0) {
+          writeFileSync(auditedFile(tree), stateHash(tree));
+        }
+      } catch {
+        // Worktree went away mid-audit.
+      }
+    }
     process.exit(0);
   }
 
-  if (changedFiles().length === 0) process.exit(0);
+  const baseline = readBaseline(cwd, input.session_id);
+  const pending = [];
 
-  let audited = "";
-  try {
-    audited = readFileSync(stateFile, "utf8");
-  } catch {
-    // No state yet: first audit for this checkout.
+  for (const tree of trees) {
+    let hash;
+    try {
+      if (changedFiles(tree).length === 0) continue;
+      hash = stateHash(tree);
+    } catch {
+      continue;
+    }
+    if (hash === readOr(auditedFile(tree), "")) continue;
+    // A worktree the session is not sitting in counts only once this session is
+    // what changed it. No entry means it did not exist at session start.
+    if (tree !== own && (baseline === null || baseline[tree] === hash))
+      continue;
+    pending.push(tree);
   }
 
-  if (stateHash(root) === audited) process.exit(0);
+  if (pending.length === 0) process.exit(0);
 
-  writeSync(2, MESSAGE);
+  writeSync(2, message(pending.filter((tree) => tree !== own)));
   process.exit(2);
 } catch {
   process.exit(0);
