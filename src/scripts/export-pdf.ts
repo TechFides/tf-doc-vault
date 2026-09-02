@@ -14,6 +14,7 @@ import type { ChildProcess } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { escapeHtml, readPdfBranding } from "./pdf-branding.js";
+import { waitForDiagrams, type DiagramState } from "./wait-for-diagrams.js";
 
 const PORT = 4173;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -63,6 +64,16 @@ function footerTemplate(): string {
     <span>strana <span class="pageNumber"></span> / <span class="totalPages"></span></span>
   </div>
 </div>`;
+}
+
+function readDiagramState(): DiagramState {
+  const blocks = [...document.querySelectorAll(".mermaid")];
+  return {
+    total: blocks.length,
+    rendered: blocks.filter((el) => el.querySelector("svg")).length,
+    failed: blocks.filter((el) => /Syntax error/i.test(el.textContent ?? ""))
+      .length,
+  };
 }
 
 async function waitForServer(url: string, timeoutMs: number): Promise<void> {
@@ -155,6 +166,7 @@ fs.mkdirSync(ARTIFACTS_DIR, { recursive: true });
 
 console.log("Starting preview server...");
 const server = startPreviewServer();
+let unsettledDiagrams = false;
 
 try {
   await waitForServer(baseUrl, SERVER_TIMEOUT_MS);
@@ -174,6 +186,18 @@ try {
   await page.goto(printUrl, { waitUntil: "networkidle" });
 
   await page.evaluate(() => document.fonts.ready);
+
+  const diagrams = await waitForDiagrams(() => page.evaluate(readDiagramState));
+  unsettledDiagrams = !diagrams.settled;
+  if (!diagrams.settled) {
+    console.error(
+      `✗ Diagrams did not settle: ${diagrams.rendered}/${diagrams.total} rendered, ` +
+        `${diagrams.failed} reporting a syntax error. The PDF below carries Mermaid's ` +
+        `error graphic where those diagrams belong.`,
+    );
+  } else if (diagrams.total > 0) {
+    console.log(`✓ ${diagrams.total} diagram(s) rendered`);
+  }
 
   console.log("Generating PDF...");
   await page.pdf({
@@ -203,3 +227,8 @@ try {
 } finally {
   server.kill();
 }
+
+// A PDF carrying Mermaid's error graphic is not shippable, and the `pdf` chain
+// has to stop rather than run a second pass over it. The file stays on disk:
+// looking at it is how the author finds the diagram to fix.
+if (unsettledDiagrams) process.exit(1);
