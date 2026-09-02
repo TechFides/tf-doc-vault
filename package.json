@@ -121,6 +121,7 @@
     "extended-markdown-adf-parser": "2.4.0",
     "markdown-it-container": "^4.0.0",
     "markdownlint": "^0.41.0",
+    "pdfjs-dist": "^6.3.289",
     "playwright": "^1.59.1",
     "vue-i18n": "^11.4.4"
   },

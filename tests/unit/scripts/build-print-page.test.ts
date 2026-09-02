@@ -17,8 +17,17 @@ beforeAll(() => {
   }
 });
 
+interface RunOptions {
+  /** Written to the project root rather than under docs/, e.g. tf-doc-vault.json. */
+  rootFiles?: Record<string, string>;
+  args?: string[];
+}
+
 /** docs/ is hardcoded relative to the cwd, so each test needs its own temp tree. */
-function runPrint(files: Record<string, string>): string {
+function runPrint(
+  files: Record<string, string>,
+  options: RunOptions = {},
+): string {
   const workdir = fs.mkdtempSync(path.join(os.tmpdir(), "print-"));
   workdirs.push(workdir);
   for (const [rel, content] of Object.entries(files)) {
@@ -26,7 +35,15 @@ function runPrint(files: Record<string, string>): string {
     fs.mkdirSync(path.dirname(full), { recursive: true });
     fs.writeFileSync(full, content);
   }
-  const r = spawnSync("node", [SCRIPT], { cwd: workdir, encoding: "utf-8" });
+  for (const [rel, content] of Object.entries(options.rootFiles ?? {})) {
+    const full = path.join(workdir, rel);
+    fs.mkdirSync(path.dirname(full), { recursive: true });
+    fs.writeFileSync(full, content);
+  }
+  const r = spawnSync("node", [SCRIPT, ...(options.args ?? [])], {
+    cwd: workdir,
+    encoding: "utf-8",
+  });
   if (r.status !== 0) {
     throw new Error(`build-print-page exited ${r.status}: ${r.stderr}`);
   }
@@ -83,16 +100,17 @@ describe("build-print-page", () => {
       "v1/sekce/treti.md": page("Třetí", 3, "obsah treti"),
     });
 
-    const contents = out.slice(out.indexOf("## Obsah"), out.indexOf("<div"));
-    expect(contents).toContain("**Sekce**");
-    expect(contents).toContain("**Skupina**");
-    expect(contents.match(/\*\*Sekce\*\*/g)).toHaveLength(1);
+    const tocStart = out.indexOf('<div class="tf-print-toc">');
+    const contents = out.slice(tocStart, out.indexOf("</div>", tocStart));
+    expect(contents).toContain(">Sekce<");
+    expect(contents).toContain(">Skupina<");
+    expect(contents.match(/>Sekce</g)).toHaveLength(1);
 
-    expect(contents.indexOf("První")).toBeLessThan(
-      contents.indexOf("**Skupina**"),
+    expect(contents.indexOf(">První<")).toBeLessThan(
+      contents.indexOf(">Skupina<"),
     );
-    expect(contents.indexOf("**Skupina**")).toBeLessThan(
-      contents.indexOf("Třetí"),
+    expect(contents.indexOf(">Skupina<")).toBeLessThan(
+      contents.indexOf(">Třetí<"),
     );
   });
 
@@ -107,6 +125,35 @@ describe("build-print-page", () => {
     expect(out).toContain("obsah hluboko");
   });
 
+  test("names a group that has no index.md and keeps its pages one level in", () => {
+    const out = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/sekce/list.md": page("List", 1, "obsah listu"),
+    });
+
+    const toc = out.slice(
+      out.indexOf('<div class="tf-print-toc">'),
+      out.indexOf("</div>", out.indexOf('<div class="tf-print-toc">')),
+    );
+    expect(toc).toContain("tf-toc-label--group");
+    expect(toc).toContain(">sekce<");
+    expect(toc).toContain("  - [");
+    expect(toc).not.toContain("    - [");
+  });
+
+  test("indents the first contents row no further than a nested list", () => {
+    const out = runPrint({
+      "v1/alfa/beta/list.md": page("List", 1, "obsah listu"),
+    });
+
+    const rows = out
+      .slice(out.indexOf('<div class="tf-print-toc">'))
+      .split("\n")
+      .filter((line) => line.trimStart().startsWith("- "));
+    // Four spaces with no list open above it is an indented code block.
+    expect(rows[0]).toBe(rows[0]!.trimStart());
+  });
+
   test("a group whose index.md has no title falls back to the folder name", () => {
     const out = runPrint({
       "v1/index.md": page("Verze", 1, "root"),
@@ -115,8 +162,188 @@ describe("build-print-page", () => {
       "v1/sekce/skupina/list.md": page("List", 1, "obsah listu"),
     });
 
-    expect(out).toContain("**skupina**");
-    expect(out).not.toContain("**index**");
+    expect(out).toContain(">skupina<");
+    expect(out).not.toContain(">index<");
+  });
+
+  test("includes a page sitting directly under the version directory", () => {
+    const out = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/rovnou.md": page("Rovnou", 1, "obsah rovnou"),
+      "v1/sekce/index.md": page("Sekce", 2, "obsah sekce"),
+    });
+
+    expect(out).toContain("obsah rovnou");
+    expect(out).toContain("obsah sekce");
+  });
+
+  test("a page title takes the heading level its depth implies", () => {
+    const out = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/sekce/index.md": page("Sekce", 1, "sekce"),
+      "v1/sekce/list.md": page("List", 1, "list"),
+      "v1/sekce/skupina/index.md": page("Skupina", 2, "skupina"),
+      "v1/sekce/skupina/hloubka.md": page("Hloubka", 1, "hloubka"),
+    });
+
+    expect(out).toContain(
+      '<h1 class="tf-page-title tf-page-title--d0">Sekce</h1>',
+    );
+    expect(out).toContain(
+      '<h2 class="tf-page-title tf-page-title--d1">List</h2>',
+    );
+    expect(out).toContain(
+      '<h3 class="tf-page-title tf-page-title--d2">Hloubka</h3>',
+    );
+  });
+
+  test("pushes a page's own headings below every page-title level", () => {
+    const out = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/sekce/index.md": page("Sekce", 1, "## Nadpis\n\n### Podnadpis"),
+    });
+
+    expect(out).toContain("#### Nadpis");
+    expect(out).toContain("##### Podnadpis");
+  });
+
+  test("keeps a page's own h1 below the page title of a nested page", () => {
+    const out = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/sekce/index.md": page("Sekce", 1, "sekce"),
+      "v1/sekce/skupina/index.md": page("Skupina", 1, "skupina"),
+      "v1/sekce/skupina/list.md": page("List", 1, "# Vlastní H1"),
+    });
+
+    expect(out).toContain(
+      '<h3 class="tf-page-title tf-page-title--d2">List</h3>',
+    );
+    expect(out).toContain("#### Vlastní H1");
+  });
+
+  test("leaves a heading inside a fenced block alone", () => {
+    const out = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/sekce/index.md": page("Sekce", 1, "```\n## uvnitr kodu\n```"),
+    });
+
+    expect(out).toContain("## uvnitr kodu");
+  });
+
+  test("binds a figure caption to the image below it", () => {
+    const out = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/sekce/index.md": page(
+        "Sekce",
+        1,
+        "**Obrázek 1** – popisek.\n\nuvodni odstavec\n\n![alt](/a.svg)",
+      ),
+    });
+
+    const figure = out.slice(
+      out.indexOf('<figure class="tf-figure">'),
+      out.indexOf("</figure>"),
+    );
+    expect(figure).toContain("![alt](/a.svg)");
+    expect(figure).toContain("**Obrázek 1** – popisek.");
+    // The paragraph introducing the figure stays above it.
+    expect(out.indexOf("uvodni odstavec")).toBeLessThan(out.indexOf("<figure"));
+  });
+
+  test("leaves a caption inside a fenced block alone", () => {
+    const out = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/sekce/index.md": page(
+        "Sekce",
+        1,
+        "```markdown\n**Obrázek 1** – popisek.\n![alt](/a.svg)\n```",
+      ),
+    });
+
+    expect(out).not.toContain("<figure");
+    expect(out).toContain("**Obrázek 1** – popisek.\n![alt](/a.svg)");
+  });
+
+  test("leaves a caption in place when no image follows it", () => {
+    const out = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/sekce/index.md": page(
+        "Sekce",
+        1,
+        "**Obrázek 1** – popisek.\n\n## Jiny nadpis\n\n![alt](/a.svg)",
+      ),
+    });
+
+    expect(out).not.toContain("<figure");
+    expect(out).toContain("**Obrázek 1** – popisek.");
+  });
+
+  test("drops a hand-written contents section", () => {
+    const out = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/sekce/index.md": page(
+        "Sekce",
+        1,
+        "uvod\n\n## Obsah\n\n- rucni odkaz\n\n## Cil\n\ncil sekce",
+      ),
+    });
+
+    expect(out).not.toContain("rucni odkaz");
+    expect(out).toContain("uvod");
+    expect(out).toContain("cil sekce");
+  });
+
+  test("prints page numbers in the contents when given a map", () => {
+    const out = runPrint(
+      {
+        "v1/index.md": page("Verze", 1, "root"),
+        "v1/sekce/index.md": page("Sekce", 1, "sekce"),
+      },
+      {
+        rootFiles: { "pagemap.json": JSON.stringify({ "v1-sekce-index": 7 }) },
+        args: ["--pages=pagemap.json"],
+      },
+    );
+
+    expect(out).toContain('<span class="tf-toc-page">7</span>');
+    expect(out).toContain('<span class="tf-toc-leader"></span>');
+  });
+});
+
+describe("cover page", () => {
+  const docs = {
+    "v1/index.md": page("Verze", 1, "root"),
+    "v1/sekce/index.md": page("Sekce", 1, "sekce"),
+  };
+
+  test("is left out when the project declares no branding", () => {
+    const out = runPrint(docs);
+
+    expect(out).not.toContain("tf-cover");
+    expect(out).toContain("Dokumentační portál");
+  });
+
+  test("is emitted from tf-doc-vault.json, with optional rows left off", () => {
+    const out = runPrint(docs, {
+      rootFiles: {
+        "tf-doc-vault.json": JSON.stringify({
+          pdf: {
+            cover: {
+              title: "Nabídka",
+              eyebrow: "Pro Acme",
+              recipient: "Acme",
+              vendor: "TechFides",
+            },
+          },
+        }),
+      },
+    });
+
+    expect(out).toContain('<div class="tf-cover">');
+    expect(out).toContain('<h1 class="tf-cover__title">Nabídka</h1>');
+    expect(out).toContain("<dt>Pro</dt><dd>Acme</dd>");
+    expect(out).not.toContain("<dt>Platnost</dt>");
+    expect(out).toContain("title: Nabídka – Pro Acme");
   });
 });
 

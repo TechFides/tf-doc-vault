@@ -1,4 +1,122 @@
+/*
+ * Paper treatment. `export-pdf` renders the /print page with print media, so a
+ * browser's own Ctrl+P produces the same document.
+ *
+ * The cover block sits outside the media query: the /print route is also read on
+ * screen while an offer is being written. Its selectors still carry
+ * `.print-layout`, for weight rather than reach: `.print-layout h1` and
+ * `.print-layout p` below would otherwise win on the cover.
+ */
+
+.print-layout .tf-cover {
+  display: flex;
+  flex-direction: column;
+  /* The A4 text column at the exporter's margins, a hair short so a rounding
+     difference cannot spill the cover onto a second sheet. Seats the imprint at
+     the foot instead of floating it. */
+  min-height: 258mm;
+}
+
+.print-layout .tf-cover__logo {
+  width: 26mm;
+  height: auto;
+  fill: var(--brand-primary);
+}
+
+.print-layout .tf-cover__lead {
+  margin-top: 40mm;
+  padding-top: 7mm;
+  border-top: 2.5pt solid var(--brand-navy);
+}
+
+.print-layout .tf-cover__eyebrow {
+  margin: 0;
+  font-size: 9.5pt;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brand-primary);
+}
+
+.print-layout .tf-cover__title {
+  margin: 4mm 0 0;
+  font-size: 40pt;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: var(--brand-navy);
+  border: none;
+}
+
+.print-layout .tf-cover__subtitle {
+  margin: 7mm 0 0;
+  max-width: 115mm;
+  font-size: 12pt;
+  line-height: 1.45;
+  color: #3d4b5c;
+}
+
+.print-layout .tf-cover__imprint {
+  margin-top: auto;
+  padding: 7mm 8mm;
+  background: #eef3f8;
+  border-left: 2.5pt solid var(--brand-navy);
+}
+
+.print-layout .tf-cover__meta {
+  display: grid;
+  grid-template-columns: 32mm 1fr;
+  row-gap: 2.4mm;
+  margin: 0;
+}
+
+.print-layout .tf-cover__meta dt {
+  padding-top: 0.6mm;
+  font-size: 7.5pt;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #6b7a8d;
+}
+
+.print-layout .tf-cover__meta dd {
+  margin: 0;
+  font-size: 9.5pt;
+  font-weight: 600;
+  color: var(--brand-navy);
+}
+
+.print-layout .tf-cover__note {
+  margin: 6mm 0 0;
+  font-size: 8pt;
+  color: #6b7a8d;
+}
+
 @media print {
+  /*
+   * Not built from the `--tf-color-*` tokens: those flip with the theme, so
+   * printing from a dark-mode browser would put pale ink on white paper.
+   * `--brand-navy` and `--brand-primary` are mode-independent inputs.
+   */
+  :root {
+    --tf-print-paper: #fff;
+    --tf-print-ink: #1f2933;
+    --tf-print-heading: var(--brand-navy);
+    --tf-print-muted: #6b7a8d;
+    --tf-print-caption: #44546a;
+    --tf-print-rule: #dde3ea;
+    --tf-print-rule-soft: #e3e8ee;
+    --tf-print-rule-strong: #b9c5d2;
+    --tf-print-leader: #c2cdd9;
+    --tf-print-band: var(--brand-navy);
+    --tf-print-band-ink: #fff;
+    --tf-print-tint: #eef3f8;
+    --tf-print-link: color-mix(
+      in oklab,
+      var(--brand-primary) 70%,
+      var(--brand-navy)
+    );
+  }
+
   .VPNav,
   .VPLocalNav,
   .VPSidebar,
@@ -42,11 +160,381 @@
     display: none !important;
   }
 
+  /* The site tints the page ground to lift the reading column off it; on paper
+     the tint shows up as a grey slab wherever the column ends short. */
+  html,
+  body {
+    background: var(--tf-print-paper);
+  }
+
+  /* Ctrl+P on an ordinary page never reaches `.print-layout`, and `.vp-doc p`
+     sets no size of its own, so without this it prints at the screen size. */
+  .vp-doc {
+    font-size: var(--tf-text-body);
+    color: var(--tf-print-ink);
+  }
+
+  .vp-doc a {
+    color: var(--tf-print-link);
+  }
+
+  /* PrintLayout's standing header repeats the site title above the cover, and is
+     redundant next to the running footer the exporter draws on every sheet. */
+  .print-header {
+    display: none;
+  }
+
   /* An <hr> in the source doubles as a page-break marker. */
   hr {
     page-break-after: always;
     border: none;
     margin: 0;
+  }
+
+  /*
+   * patterns.css and every theme component sizes itself from these tokens, so
+   * this block carries the whole design system down to paper. Without it a page
+   * mixes 9pt prose with 14px cards.
+   */
+  :root {
+    --tf-text-display: 24pt;
+    --tf-text-h1: 20pt;
+    --tf-text-h2: 14pt;
+    --tf-text-h3: 12pt;
+    --tf-text-h4: 10.5pt;
+    --tf-text-lead: 11pt;
+    --tf-text-body: 10pt;
+    --tf-text-body-sm: 9pt;
+    --tf-text-caption: 8.5pt;
+    --tf-text-caption-sm: 8pt;
+    --tf-leading-body: 1.5;
+
+    --tf-spacing-4: 10px;
+    --tf-spacing-5: 12px;
+    --tf-spacing-6: 14px;
+    --tf-spacing-7: 16px;
+    --tf-spacing-8: 18px;
+    --tf-spacing-lg: 24px;
+    --tf-spacing-xl: 32px;
+    --tf-spacing-2xl: 40px;
+
+    /* A drop shadow prints as a grey smear around the box it was lifting. */
+    --tf-shadow-1: none;
+    --tf-shadow-2: none;
+    --tf-shadow-3: none;
+  }
+
+  .print-layout {
+    font-family: var(--tf-font-body);
+    font-size: 10pt;
+    line-height: 1.5;
+    color: var(--tf-print-ink);
+  }
+
+  .print-layout h1,
+  .print-layout h2,
+  .print-layout h3,
+  .print-layout h4,
+  .print-layout h5,
+  .print-layout h6 {
+    font-family: var(--tf-font-display);
+    color: var(--tf-print-heading);
+    break-after: avoid;
+    break-inside: avoid;
+  }
+
+  /*
+   * h1 to h3 are page titles and nothing else: the generator emits them at the
+   * level its position in the tree demands, so the PDF outline mirrors the
+   * sidebar. Size therefore comes from the depth class, or a group opener would
+   * shrink into a body heading.
+   */
+  .print-layout .tf-page-title {
+    line-height: 1.15;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  /* A section always opens a fresh sheet, so it needs no space above it. */
+  .print-layout .tf-page-title--d0 {
+    font-size: 22pt;
+    margin: 0 0 3.5mm;
+  }
+
+  .print-layout .tf-page-title--d1 {
+    font-size: 17pt;
+    margin: 11mm 0 3mm;
+  }
+
+  .print-layout .tf-page-title--d2 {
+    font-size: 14pt;
+    margin: 9mm 0 2.5mm;
+  }
+
+  /* h4 to h6 are a page's own headings, pushed down two levels by the generator
+     so they nest under the page. They keep one look at every depth. */
+  .print-layout h4 {
+    font-size: 12.5pt;
+    line-height: 1.25;
+    margin: 6mm 0 2mm;
+    padding-bottom: 1mm;
+    border-bottom: 1px solid var(--tf-print-rule);
+  }
+
+  /* The banded table head is a rule of its own. */
+  .print-layout h4:has(+ .tf-table),
+  .print-layout h4:has(+ table) {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .print-layout h5 {
+    font-size: 11pt;
+    margin: 4.5mm 0 1.5mm;
+  }
+
+  .print-layout h6 {
+    font-size: 10pt;
+    margin: 3.5mm 0 1mm;
+  }
+
+  .print-layout p,
+  .print-layout li {
+    orphans: 3;
+    widows: 3;
+  }
+
+  .print-layout p {
+    margin: 0 0 2.4mm;
+  }
+
+  /* VitePress resets `list-style` globally and restores it under `.vp-doc`, which
+     PrintLayout does not render, so every bullet list loses its markers. */
+  .print-layout ul,
+  .print-layout ol {
+    margin: 0 0 2.4mm;
+    padding-left: 5mm;
+    list-style: revert;
+  }
+
+  .print-layout li {
+    margin-bottom: 0.8mm;
+  }
+
+  .print-layout li::marker {
+    color: var(--tf-print-muted);
+  }
+
+  .print-layout blockquote {
+    margin: 2.5mm 0;
+    padding: 1mm 3mm;
+  }
+
+  .print-layout code,
+  .print-layout pre {
+    font-size: 8.5pt;
+  }
+
+  .print-layout pre {
+    break-inside: avoid;
+  }
+
+  /* At one cross reference every few lines, VitePress' web blue speckles the
+     page; the brand accent at ink weight still reads as a link. */
+  .print-layout .print-content a {
+    color: var(--tf-print-link);
+  }
+
+  .print-layout .tf-print-toc ul {
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .print-layout .tf-print-toc ul ul {
+    padding-left: 6mm;
+  }
+
+  .print-layout .tf-print-toc li {
+    margin-bottom: 1.4mm;
+  }
+
+  .print-layout .tf-print-toc > ul > li {
+    margin-top: 2.5mm;
+  }
+
+  /* `li` is here for weight: the accent rule above targets every link in the
+     content and would otherwise recolour the whole contents list. */
+  .print-layout .tf-print-toc li a {
+    display: flex;
+    align-items: baseline;
+    color: var(--tf-print-ink);
+    text-decoration: none;
+  }
+
+  .print-layout .tf-toc-label--section {
+    font-weight: 600;
+    color: var(--tf-print-heading);
+  }
+
+  /* Not a link, so nothing else sets this row apart from the pages under it. */
+  .print-layout .tf-toc-label--group {
+    font-weight: 600;
+  }
+
+  .print-layout .tf-toc-leader {
+    flex: 1;
+    margin: 0 2mm;
+    border-bottom: 0.5pt dotted var(--tf-print-leader);
+    transform: translateY(-0.9mm);
+  }
+
+  .print-layout .tf-toc-page {
+    color: var(--tf-print-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .print-layout .custom-block {
+    font-size: 9pt;
+    line-height: 1.45;
+    margin: 3mm 0;
+    padding: 3mm 4mm;
+    break-inside: avoid;
+  }
+
+  .print-layout .custom-block p {
+    margin: 0 0 1.5mm;
+  }
+
+  .print-layout .custom-block p:last-child {
+    margin-bottom: 0;
+  }
+
+  .print-layout .custom-block-title {
+    font-size: 8pt;
+    margin-bottom: 1.5mm;
+  }
+
+  /*
+   * `break-inside: avoid` on a table strands whatever introduced it: a table
+   * taller than the space left moves whole and leaves a two-line sheet behind.
+   * Split the table, repeat its header, forbid the break only inside a row.
+   */
+  .print-layout table {
+    break-inside: auto;
+    font-size: 8.5pt;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .print-layout thead {
+    display: table-header-group;
+  }
+
+  .print-layout tr {
+    break-inside: avoid;
+  }
+
+  .print-layout th {
+    background: var(--tf-print-band);
+    color: var(--tf-print-band-ink);
+    border: none;
+    padding: 1.8mm 2mm;
+    font-size: 7.5pt;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .print-layout td {
+    border: none;
+    border-bottom: 0.5pt solid var(--tf-print-rule-soft);
+    padding: 1.6mm 2mm;
+  }
+
+  .print-layout tr:nth-child(even) td {
+    background: none;
+  }
+
+  .print-layout tbody tr:last-child td {
+    border-bottom: 0.75pt solid var(--tf-print-rule-strong);
+  }
+
+  /* A row bold at both ends is a totals row; bold only at the start is a label. */
+  .print-layout
+    tbody
+    tr:has(td:first-child > strong):has(td:last-child > strong)
+    td {
+    border-top: 1pt solid var(--tf-print-band);
+    border-bottom: none;
+    background: var(--tf-print-tint);
+    padding-top: 2mm;
+    padding-bottom: 2mm;
+  }
+
+  /* The wrapper the markdown plugin adds owns horizontal scroll on screen, and an
+     overflow container cannot fragment, so no page break could land inside it. */
+  .print-layout .tf-table,
+  .print-layout .tf-table-scroll {
+    overflow: visible;
+  }
+
+  /* Uncapped, a tall wireframe claims a sheet of its own and leaves the rest of
+     it blank. */
+  .print-layout p > img,
+  .print-layout .tf-figure img,
+  .print-layout .print-content > img {
+    display: block;
+    max-width: 100%;
+    max-height: 115mm;
+    height: auto;
+    margin: 2.5mm auto 0;
+    break-inside: avoid;
+  }
+
+  .print-layout .tf-figure {
+    margin: 3mm 0 5mm;
+    break-inside: avoid;
+  }
+
+  .print-layout .tf-figure p {
+    margin: 0;
+  }
+
+  /* Last child, not `p + p`: a theme-dependent diagram is a raw tag pair, so the
+     caption is then the only paragraph in the figure. */
+  .print-layout .tf-figure > p:last-child {
+    margin-top: 1.8mm;
+    font-size: 8pt;
+    line-height: 1.35;
+    color: var(--tf-print-muted);
+    text-align: center;
+  }
+
+  .print-layout .tf-figure > p:last-child strong {
+    color: var(--tf-print-caption);
+    font-weight: 600;
+  }
+
+  /* Badges and client logos are furniture inside a grid, not figures. */
+  .print-layout .tf-logos img,
+  .print-layout .reference-card img {
+    max-height: none;
+    margin: 0;
+  }
+
+  /* A stat tile is three words wide; the track width a feature card needs left
+     the fourth one stranded on a second row. */
+  .print-layout .tf-cards:has(> .tf-stat) {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  }
+
+  .print-layout .tf-card,
+  .print-layout .tf-stat,
+  .print-layout .tf-chip,
+  .print-layout .feature-card,
+  .print-layout .reference-card,
+  .print-layout .timeline-item,
+  .print-layout .tf-step {
+    break-inside: avoid;
   }
 
   h1,
@@ -55,19 +543,7 @@
     page-break-after: avoid;
   }
 
-  pre,
-  table {
-    page-break-inside: avoid;
-  }
-
   a {
     text-decoration: none;
-    color: inherit;
-  }
-
-  body {
-    font-size: 11pt;
-    line-height: 1.5;
-    color: #000;
   }
 }

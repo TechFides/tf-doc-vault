@@ -22,14 +22,16 @@ import PageBackdrop from "./components/PageBackdrop.vue";
 import { i18n, resolveLocale } from "./i18n/index.js";
 import SidebarDefaultEmoji from "./components/SidebarDefaultEmoji.vue";
 // Import order is the cascade order: base maps and overrides VitePress, patterns
-// are last so an author-facing class wins over chrome. tokens.css is not listed
-// because base.css @imports it; pulling it here as well would inline the token
-// block into a consumer's bundle twice.
-import "./styles/print.css";
+// come next so an author-facing class wins over chrome, and print.css is last
+// because it redefines the same `:root` tokens as tokens.css and a tie between
+// two `:root` blocks is settled by order alone. tokens.css is not listed because
+// base.css @imports it; pulling it here as well would inline the token block
+// into a consumer's bundle twice.
 import "./styles/icons.css";
 import "./styles/backdrop.css";
 import "./styles/base.css";
 import "./styles/patterns.css";
+import "./styles/print.css";
 
 export interface CreateThemeOptions {
   /** Show the WidthToggle button in the navbar. Default: false. */

@@ -149,13 +149,14 @@ pnpm install         # once after cloning
 pnpm dev:docs        # → http://localhost:5173
 ```
 
-Then edit, for example, `src/theme/components/DocMeta.vue` or one of the four
+Then edit, for example, `src/theme/components/DocMeta.vue` or one of the six
 stylesheets in `src/theme/styles/`; the browser re-renders without restart. The
 stylesheets are imported in cascade order by `src/theme/index.ts` and each has one
 job: `tokens.css` defines tokens, `icons.css` carries the icon font, `backdrop.css`
 draws the nebula and star field, `base.css` maps tokens onto VitePress and styles
-Markdown, `patterns.css` holds the author-facing classes and must stay last so they
-outrank the chrome.
+Markdown, `patterns.css` holds the author-facing classes and must outrank the
+chrome, and `print.css` is last because it redefines the same tokens on the same
+`:root` as `tokens.css`, where order alone decides the winner.
 
 Sample content lives under `playground/docs/v1/`. `showcase/001-elements` holds
 every Markdown construct on one page, `showcase/002-patterns` every pattern class,
