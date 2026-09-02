@@ -8,18 +8,33 @@ import { fileURLToPath } from "node:url";
 const HOOK = fileURLToPath(
   new URL("../../../.claude/hooks/comment-audit-gate.mjs", import.meta.url),
 );
+const BASELINE_HOOK = fileURLToPath(
+  new URL("../../../.claude/hooks/comment-audit-baseline.mjs", import.meta.url),
+);
+
+const SESSION = "test-session";
 
 const STOP_IDLE = JSON.stringify({
   hook_event_name: "Stop",
   stop_hook_active: false,
+  session_id: SESSION,
 });
 const STOP_ACTIVE = JSON.stringify({
   hook_event_name: "Stop",
   stop_hook_active: true,
+  session_id: SESSION,
+});
+const SESSION_START = JSON.stringify({
+  hook_event_name: "SessionStart",
+  session_id: SESSION,
 });
 
 function runHook(cwd: string, input: string) {
   return spawnSync("node", [HOOK], { cwd, input, encoding: "utf8" });
+}
+
+function runBaseline(cwd: string, input = SESSION_START) {
+  return spawnSync("node", [BASELINE_HOOK], { cwd, input, encoding: "utf8" });
 }
 
 describe("comment-audit-gate", () => {
@@ -99,6 +114,70 @@ describe("comment-audit-gate", () => {
     } finally {
       fs.rmSync(parent, { recursive: true, force: true });
     }
+  });
+
+  describe("a worktree the session is not sitting in", () => {
+    let parent: string;
+    let worktree: string;
+
+    beforeEach(() => {
+      parent = fs.mkdtempSync(path.join(os.tmpdir(), "comment-audit-other-"));
+      worktree = path.join(parent, "wt");
+      git("worktree", "add", worktree, "-b", "other");
+    });
+
+    afterEach(() => {
+      fs.rmSync(parent, { recursive: true, force: true });
+    });
+
+    test("blocks and names it when the session dirtied it", () => {
+      runBaseline(repo);
+      fs.appendFileSync(path.join(worktree, "a.ts"), "export const b = 2;\n");
+
+      const r = runHook(repo, STOP_IDLE);
+      expect(r.status).toBe(2);
+      expect(r.stderr).toContain(fs.realpathSync(worktree));
+    });
+
+    test("does not block when it was already dirty at session start", () => {
+      fs.appendFileSync(path.join(worktree, "a.ts"), "export const b = 2;\n");
+      runBaseline(repo);
+
+      expect(runHook(repo, STOP_IDLE).status).toBe(0);
+    });
+
+    test("blocks when it did not exist at session start", () => {
+      const late = path.join(parent, "late");
+      runBaseline(repo);
+      git("worktree", "add", late, "-b", "late");
+      fs.appendFileSync(path.join(late, "a.ts"), "export const b = 2;\n");
+
+      expect(runHook(repo, STOP_IDLE).status).toBe(2);
+    });
+
+    test("does not block without a baseline, so a stale hook config cannot nag", () => {
+      fs.appendFileSync(path.join(worktree, "a.ts"), "export const b = 2;\n");
+
+      expect(runHook(repo, STOP_IDLE).status).toBe(0);
+    });
+
+    test("the audit clears it, a further edit blocks again", () => {
+      runBaseline(repo);
+      fs.appendFileSync(path.join(worktree, "a.ts"), "export const b = 2;\n");
+
+      expect(runHook(repo, STOP_ACTIVE).status).toBe(0);
+      expect(runHook(repo, STOP_IDLE).status).toBe(0);
+
+      fs.writeFileSync(path.join(worktree, "c.md"), "# more\n");
+      expect(runHook(repo, STOP_IDLE).status).toBe(2);
+    });
+
+    test("the session's own tree still blocks on dirt older than the session", () => {
+      fs.appendFileSync(path.join(repo, "a.ts"), "export const b = 2;\n");
+      runBaseline(repo);
+
+      expect(runHook(repo, STOP_IDLE).status).toBe(2);
+    });
   });
 
   test("broken JSON on stdin fails open", () => {

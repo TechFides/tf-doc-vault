@@ -27,6 +27,10 @@ Combine both lists into one set of candidate files. Keep only files whose
 extension is one of `ts`, `vue`, `css`, `yml`, `yaml`, `sh`, `md`. Drop any
 path under `dist/` or `node_modules/`, regardless of extension.
 
+Run both commands again with `git -C <worktree>` for every worktree the Stop
+hook named, and add what they report to the same set. Paths from a worktree stay
+relative to that worktree, so keep them apart from the ones collected here.
+
 If the filtered set is empty, stop here and report the empty result (see
 Step 5); there is nothing to audit.
 

@@ -1,5 +1,15 @@
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/comment-audit-baseline.mjs\""
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
