@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.5.4
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.3...v0.5.4)
+
+### 🩹 Fixes
+
+- **frontmatter:** Read a quoted scalar as its value, not with the quotes ([f77d4e5](https://github.com/TechFides/tf-doc-vault/commit/f77d4e5))
+- **print:** Qualify heading ids with the page they came from ([2e39bfc](https://github.com/TechFides/tf-doc-vault/commit/2e39bfc))
+- **pdf:** Wait for Mermaid to render before printing ([62b0de2](https://github.com/TechFides/tf-doc-vault/commit/62b0de2))
+- **pdf:** Read Mermaid failure off its error graphic, qualify ids inside an attrs block ([a4b328f](https://github.com/TechFides/tf-doc-vault/commit/a4b328f))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+- Václav Mičulka ([@VaclavMiculka](https://github.com/VaclavMiculka))
+
 ## v0.5.3
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.2...v0.5.3)
