@@ -1,5 +1,6 @@
-import { describe, test, expect } from "vitest";
+import { describe, test, expect, vi, afterEach } from "vitest";
 import {
+  readDiagramState,
   waitForDiagrams,
   type DiagramState,
 } from "../../../src/scripts/wait-for-diagrams.js";
@@ -67,5 +68,44 @@ describe("waitForDiagrams", () => {
     );
 
     expect(result).toMatchObject({ settled: false, rendered: 2 });
+  });
+});
+
+/** One `.mermaid` block, described by what its subtree would match. */
+function block(...matching: string[]) {
+  return {
+    querySelector: (selector: string) =>
+      selector.split(",").some((part) => matching.includes(part.trim()))
+        ? {}
+        : null,
+  };
+}
+
+function stubDocument(...blocks: ReturnType<typeof block>[]) {
+  vi.stubGlobal("document", {
+    querySelectorAll: (selector: string) =>
+      selector === ".mermaid" ? blocks : [],
+  });
+}
+
+describe("readDiagramState", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  test("counts a block as rendered once it carries an svg", () => {
+    stubDocument(block("svg"), block());
+
+    expect(readDiagramState()).toEqual({ total: 2, rendered: 1, failed: 0 });
+  });
+
+  test("counts only Mermaid's own error graphic as failed", () => {
+    stubDocument(
+      block("svg"),
+      block("svg", 'svg[aria-roledescription="error"]'),
+      block("svg", ".error-icon"),
+    );
+
+    expect(readDiagramState()).toEqual({ total: 3, rendered: 3, failed: 2 });
   });
 });

@@ -410,6 +410,34 @@ describe("heading anchors", () => {
     expect(printed).not.toContain("{#chybove-stavy}");
   });
 
+  test("qualifies the id inside a block that also carries classes", () => {
+    const printed = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/alfa.md": page(
+        "Alfa",
+        1,
+        "## Chybové stavy {#chybove-stavy .zvyraznene}",
+      ),
+      "v1/beta.md": page(
+        "Beta",
+        2,
+        "## Chybové stavy {.zvyraznene #chybove-stavy}",
+      ),
+    });
+
+    expect(printed).toContain("{#v1-alfa-chybove-stavy .zvyraznene}");
+    expect(printed).toContain("{.zvyraznene #v1-beta-chybove-stavy}");
+  });
+
+  test("leaves a trailing brace block that carries no id alone", () => {
+    const printed = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/alfa.md": page("Alfa", 1, '## Tvar {"a": 1}'),
+    });
+
+    expect(printed).toContain('#### Tvar {"a": 1}');
+  });
+
   test("moves a same-page link onto the qualified id", () => {
     const printed = runPrint({
       "v1/index.md": page("Verze", 1, "root"),

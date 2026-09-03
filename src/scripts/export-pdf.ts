@@ -14,7 +14,7 @@ import type { ChildProcess } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { escapeHtml, readPdfBranding } from "./pdf-branding.js";
-import { waitForDiagrams, type DiagramState } from "./wait-for-diagrams.js";
+import { readDiagramState, waitForDiagrams } from "./wait-for-diagrams.js";
 
 const PORT = 4173;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -64,16 +64,6 @@ function footerTemplate(): string {
     <span>strana <span class="pageNumber"></span> / <span class="totalPages"></span></span>
   </div>
 </div>`;
-}
-
-function readDiagramState(): DiagramState {
-  const blocks = [...document.querySelectorAll(".mermaid")];
-  return {
-    total: blocks.length,
-    rendered: blocks.filter((el) => el.querySelector("svg")).length,
-    failed: blocks.filter((el) => /Syntax error/i.test(el.textContent ?? ""))
-      .length,
-  };
 }
 
 async function waitForServer(url: string, timeoutMs: number): Promise<void> {
@@ -228,7 +218,6 @@ try {
   server.kill();
 }
 
-// A PDF carrying Mermaid's error graphic is not shippable, and the `pdf` chain
-// has to stop rather than run a second pass over it. The file stays on disk:
+// Non-zero stops the `pdf` chain before its second pass. The file stays on disk:
 // looking at it is how the author finds the diagram to fix.
 if (unsettledDiagrams) process.exit(1);

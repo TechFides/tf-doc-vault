@@ -40,8 +40,9 @@ const TOC_HEADINGS = new Set(["obsah", "obsah skupiny"]);
 const HEADING_SHIFT = 2;
 
 const HEADING = /^(#{1,6})\s+(.*)$/;
-/** The `{#id}` markdown-it-attrs reads off the end of a heading. */
-const EXPLICIT_ID = /\{#([^}\s]+)\}\s*$/;
+/** markdown-it-attrs reads a trailing `{...}`; `#id` is one token inside it. */
+const ATTR_BLOCK = /(^|\s)\{([^{}]*)\}(\s*)$/;
+const ATTR_ID = /(^|\s)#(\S+)/;
 const ANCHOR_LINK = /\]\(#([^)]+)\)/g;
 /** Chromium turns every anchor into a PDF name token, capped at 127 bytes. */
 const MAX_ANCHOR_BYTES = 127;
@@ -198,7 +199,6 @@ function shortHash(value: string): string {
   return createHash("sha1").update(value).digest("hex").slice(0, 8);
 }
 
-/** Page slug spelled out while it fits the token, hashed once it does not. */
 function anchorFor(slug: string, id: string): string {
   const readable = `${slug}-${id}`;
   if (Buffer.byteLength(readable) <= MAX_ANCHOR_BYTES) return readable;
@@ -217,9 +217,9 @@ function anchorFor(slug: string, id: string): string {
 
 /**
  * A heading id is unique per page, not across the single document assembled
- * here: VitePress refuses to build on the second `{#id}` it meets, so one
- * `{#chybove-stavy}` per scenario page is enough to fail the whole export.
- * Same-page links move with the ids they point at.
+ * here, and VitePress refuses to build on the second `{#id}` it meets.
+ * Same-page links to a qualified id move with it; a link to an id VitePress
+ * generates from the heading text is left alone.
  */
 function qualifyAnchors(body: string, slug: string): string {
   const headingFence = fenceTracker();
@@ -230,11 +230,17 @@ function qualifyAnchors(body: string, slug: string): string {
     const heading = HEADING.exec(line);
     if (!heading) return line;
 
-    const id = EXPLICIT_ID.exec(heading[2]!)?.[1];
+    const attrs = ATTR_BLOCK.exec(heading[2]!);
+    const id = attrs ? ATTR_ID.exec(attrs[2]!)?.[2] : undefined;
     if (id === undefined) return line;
     const anchor = renamed.get(id) ?? anchorFor(slug, id);
     renamed.set(id, anchor);
-    return line.replace(EXPLICIT_ID, `{#${anchor}}`);
+    // Only the id token: the block's classes and key=value pairs have to survive.
+    return line.replace(
+      ATTR_BLOCK,
+      (_whole, lead: string, inner: string, trail: string) =>
+        `${lead}{${inner.replace(ATTR_ID, (_t, before: string) => `${before}#${anchor}`)}}${trail}`,
+    );
   });
   if (renamed.size === 0) return body;
 

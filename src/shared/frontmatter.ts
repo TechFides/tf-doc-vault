@@ -14,7 +14,6 @@ const DOUBLE_QUOTE_ESCAPES: Record<string, string> = {
   "/": "/",
 };
 
-/** Null when the body is not a well-formed double-quoted scalar. */
 function readDoubleQuoted(body: string): string | null {
   let out = "";
   for (let i = 0; i < body.length; i++) {
@@ -32,7 +31,6 @@ function readDoubleQuoted(body: string): string | null {
   return out;
 }
 
-/** Null when the body is not a well-formed single-quoted scalar. */
 function readSingleQuoted(body: string): string | null {
   let out = "";
   for (let i = 0; i < body.length; i++) {
@@ -49,10 +47,9 @@ function readSingleQuoted(body: string): string | null {
 }
 
 /**
- * YAML quotes a scalar whose content would otherwise change its meaning, a
- * `title` holding a colon above all. Left in, those quotes reach the sidebar and
- * the print page as literal text. A value that merely starts and ends with a
- * quote (`'a' or 'b'`) is not a quoted scalar and stays as it is.
+ * Left in, the quotes YAML needs around a `title` holding a colon reach the
+ * sidebar and the print page as literal text. A value that merely starts and
+ * ends with a quote (`'a' or 'b'`) is not a quoted scalar and stays as it is.
  */
 function unquoteScalar(value: string): string {
   const quote = value[0];

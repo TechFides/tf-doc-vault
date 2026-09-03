@@ -10,6 +10,23 @@ export interface DiagramState {
   failed: number;
 }
 
+/**
+ * Runs in the browser, so nothing here may reach outside the body, arguments
+ * included: `page.evaluate` ships the source and drops the closure. Failure is
+ * two markers rather than the rendered text, which a label reading "Syntax
+ * error" would trip, and such a diagram then never settles.
+ */
+export function readDiagramState(): DiagramState {
+  const blocks = Array.from(document.querySelectorAll(".mermaid"));
+  return {
+    total: blocks.length,
+    rendered: blocks.filter((el) => el.querySelector("svg")).length,
+    failed: blocks.filter((el) =>
+      el.querySelector('svg[aria-roledescription="error"], .error-icon'),
+    ).length,
+  };
+}
+
 export interface DiagramWaitOptions {
   timeoutMs?: number;
   pollMs?: number;
@@ -24,10 +41,8 @@ const DEFAULTS = {
 } satisfies Required<DiagramWaitOptions>;
 
 /**
- * Polls until every diagram carries an SVG and none reports a syntax error, then
- * holds that reading for `steadyMs`. Reports the last state rather than throwing
- * on a timeout: a diagram Mermaid cannot parse is the author's bug, and the
- * caller is the one that decides what to do about it.
+ * Reports the last state rather than throwing on a timeout: a diagram Mermaid
+ * cannot parse is the author's bug, and the caller decides what to do about it.
  */
 export async function waitForDiagrams(
   read: () => Promise<DiagramState>,
