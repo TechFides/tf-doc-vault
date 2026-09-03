@@ -144,7 +144,7 @@
     "prettier": "3.9.6",
     "tf-licence-checker": "1.1.9",
     "tsx": "4.23.12",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "vitepress": "1.6.4",
     "vitepress-plugin-mermaid": "2.0.17",
     "vitest": "4.1.11",
