@@ -58,6 +58,45 @@ describe("parseFrontmatter", () => {
     // `features:` itself carries no scalar value, so it is not a field either.
     expect(parseFrontmatter(content)).toEqual({ title: "FeatureCards" });
   });
+
+  test("drops the quoting YAML needs around a value holding a colon", () => {
+    expect(
+      parseFrontmatter('---\ntitle: "S1: cache a škálování"\n---\n'),
+    ).toEqual({ title: "S1: cache a škálování" });
+  });
+
+  test("drops single quotes and undoubles the quote they escape", () => {
+    expect(parseFrontmatter("---\ntitle: 'It''s: fine'\n---\n")).toEqual({
+      title: "It's: fine",
+    });
+  });
+
+  test("resolves the escapes of a double-quoted scalar", () => {
+    expect(parseFrontmatter('---\ntitle: "a \\"b\\" \\\\ c"\n---\n')).toEqual({
+      title: 'a "b" \\ c',
+    });
+  });
+
+  test("leaves a value that only begins and ends with a quote", () => {
+    expect(parseFrontmatter(`---\ntitle: "a" or "b"\n---\n`)).toEqual({
+      title: '"a" or "b"',
+    });
+    expect(parseFrontmatter("---\ntitle: 'a' or 'b'\n---\n")).toEqual({
+      title: "'a' or 'b'",
+    });
+  });
+
+  test("leaves an unquoted value alone", () => {
+    expect(parseFrontmatter('---\ntitle: 5" disk\n---\n')).toEqual({
+      title: '5" disk',
+    });
+  });
+
+  test("reads an order that carries quotes", () => {
+    expect(
+      parseOrder(parseFrontmatter('---\norder: "3"\n---\n')?.["order"]),
+    ).toBe(3);
+  });
 });
 
 describe("readFrontmatter", () => {

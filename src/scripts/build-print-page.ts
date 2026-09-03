@@ -7,6 +7,7 @@
  * whole chain twice for that reason.
  */
 
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { readFrontmatter } from "../shared/frontmatter.js";
@@ -39,6 +40,12 @@ const TOC_HEADINGS = new Set(["obsah", "obsah skupiny"]);
 const HEADING_SHIFT = 2;
 
 const HEADING = /^(#{1,6})\s+(.*)$/;
+/** markdown-it-attrs reads a trailing `{...}`; `#id` is one token inside it. */
+const ATTR_BLOCK = /(^|\s)\{([^{}]*)\}(\s*)$/;
+const ATTR_ID = /(^|\s)#(\S+)/;
+const ANCHOR_LINK = /\]\(#([^)]+)\)/g;
+/** Chromium turns every anchor into a PDF name token, capped at 127 bytes. */
+const MAX_ANCHOR_BYTES = 127;
 const FENCE = /^\s*(`{3,}|~{3,})/;
 const ASSET = /\.(svg|png|jpe?g|gif|webp|pdf|json|ya?ml|txt|zip)$/i;
 
@@ -186,6 +193,67 @@ function dropTocSections(body: string): string {
   }
 
   return kept.join("\n").trim();
+}
+
+function shortHash(value: string): string {
+  return createHash("sha1").update(value).digest("hex").slice(0, 8);
+}
+
+function anchorFor(slug: string, id: string): string {
+  const readable = `${slug}-${id}`;
+  if (Buffer.byteLength(readable) <= MAX_ANCHOR_BYTES) return readable;
+
+  const hashed = `${shortHash(slug)}-${id}`;
+  if (Buffer.byteLength(hashed) <= MAX_ANCHOR_BYTES) return hashed;
+
+  // Trimmed by code point: ids carry diacritics, and half a UTF-8 sequence
+  // would both mangle the anchor and mis-count its size.
+  const suffix = `-${shortHash(readable)}`;
+  const room = MAX_ANCHOR_BYTES - suffix.length;
+  const head = [...hashed];
+  while (head.length > 0 && Buffer.byteLength(head.join("")) > room) head.pop();
+  return `${head.join("")}${suffix}`;
+}
+
+/**
+ * A heading id is unique per page, not across the single document assembled
+ * here, and VitePress refuses to build on the second `{#id}` it meets.
+ * Same-page links to a qualified id move with it; a link to an id VitePress
+ * generates from the heading text is left alone.
+ */
+function qualifyAnchors(body: string, slug: string): string {
+  const headingFence = fenceTracker();
+  const renamed = new Map<string, string>();
+
+  const lines = body.split("\n").map((line) => {
+    if (headingFence(line)) return line;
+    const heading = HEADING.exec(line);
+    if (!heading) return line;
+
+    const attrs = ATTR_BLOCK.exec(heading[2]!);
+    const id = attrs ? ATTR_ID.exec(attrs[2]!)?.[2] : undefined;
+    if (id === undefined) return line;
+    const anchor = renamed.get(id) ?? anchorFor(slug, id);
+    renamed.set(id, anchor);
+    // Only the id token: the block's classes and key=value pairs have to survive.
+    return line.replace(
+      ATTR_BLOCK,
+      (_whole, lead: string, inner: string, trail: string) =>
+        `${lead}{${inner.replace(ATTR_ID, (_t, before: string) => `${before}#${anchor}`)}}${trail}`,
+    );
+  });
+  if (renamed.size === 0) return body;
+
+  const linkFence = fenceTracker();
+  return lines
+    .map((line) => {
+      if (linkFence(line)) return line;
+      return line.replace(ANCHOR_LINK, (whole, id: string) => {
+        const anchor = renamed.get(id);
+        return anchor === undefined ? whole : `](#${anchor})`;
+      });
+    })
+    .join("\n");
 }
 
 function shiftHeadings(body: string, by: number): string {
@@ -428,7 +496,9 @@ for (const page of pages) {
   if (page.depth === 0) parts.push(`\n<div class="page-break"></div>\n`);
   parts.push(`<a id="${page.slug}"></a>\n`);
   parts.push(`${titleHeading(page)}\n`);
-  parts.push(shiftHeadings(body, HEADING_SHIFT).trimEnd());
+  parts.push(
+    shiftHeadings(qualifyAnchors(body, page.slug), HEADING_SHIFT).trimEnd(),
+  );
   parts.push(`\n`);
 }
 

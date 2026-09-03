@@ -14,6 +14,7 @@ import type { ChildProcess } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { escapeHtml, readPdfBranding } from "./pdf-branding.js";
+import { readDiagramState, waitForDiagrams } from "./wait-for-diagrams.js";
 
 const PORT = 4173;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -155,6 +156,7 @@ fs.mkdirSync(ARTIFACTS_DIR, { recursive: true });
 
 console.log("Starting preview server...");
 const server = startPreviewServer();
+let unsettledDiagrams = false;
 
 try {
   await waitForServer(baseUrl, SERVER_TIMEOUT_MS);
@@ -174,6 +176,18 @@ try {
   await page.goto(printUrl, { waitUntil: "networkidle" });
 
   await page.evaluate(() => document.fonts.ready);
+
+  const diagrams = await waitForDiagrams(() => page.evaluate(readDiagramState));
+  unsettledDiagrams = !diagrams.settled;
+  if (!diagrams.settled) {
+    console.error(
+      `✗ Diagrams did not settle: ${diagrams.rendered}/${diagrams.total} rendered, ` +
+        `${diagrams.failed} reporting a syntax error. The PDF below carries Mermaid's ` +
+        `error graphic where those diagrams belong.`,
+    );
+  } else if (diagrams.total > 0) {
+    console.log(`✓ ${diagrams.total} diagram(s) rendered`);
+  }
 
   console.log("Generating PDF...");
   await page.pdf({
@@ -203,3 +217,7 @@ try {
 } finally {
   server.kill();
 }
+
+// Non-zero stops the `pdf` chain before its second pass. The file stays on disk:
+// looking at it is how the author finds the diagram to fix.
+if (unsettledDiagrams) process.exit(1);
