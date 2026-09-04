@@ -13,7 +13,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { boilerplateName } from "../cli/scaffold.js";
 import { isEntryModule } from "../cli/utils.js";
-import { readText, writeTextPreservingEol } from "../shared/text-file.js";
+import { readText, writeText } from "../shared/text-file.js";
 
 const PROJECT_ROOT = process.cwd();
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -97,15 +97,18 @@ function renderTemplate(
   return out;
 }
 
-/** Both sides go to disk as LF, or a CRLF consumer file diffs as every line. */
-function unifiedDiff(actualPath: string, expected: string): string {
+function unifiedDiff(
+  actualPath: string,
+  actual: string,
+  expected: string,
+): string {
   const stem = path.join(
     os.tmpdir(),
     `sync-${Date.now()}-${Math.random().toString(36).slice(2)}`,
   );
   const actualTmp = `${stem}.actual.tmp`;
   const expectedTmp = `${stem}.expected.tmp`;
-  fs.writeFileSync(actualTmp, readText(actualPath));
+  fs.writeFileSync(actualTmp, actual);
   fs.writeFileSync(expectedTmp, expected);
   try {
     const r = spawnSync(
@@ -158,16 +161,20 @@ function inspect(rel: string, placeholders: Record<string, string>): Result {
   return {
     rel,
     status: "drift",
-    diff: unifiedDiff(consumerPath, expected),
+    diff: unifiedDiff(consumerPath, actual, expected),
     expected,
   };
 }
+
+// Only `.gitignore` is the host's; every other baseline is ours and goes out LF.
+const HOST_OWNED = new Set([".gitignore"]);
 
 function applyResult(r: Result): void {
   if (r.expected === undefined) return;
   const consumerPath = path.join(PROJECT_ROOT, r.rel);
   fs.mkdirSync(path.dirname(consumerPath), { recursive: true });
-  writeTextPreservingEol(consumerPath, r.expected);
+  if (HOST_OWNED.has(r.rel)) writeText(consumerPath, r.expected);
+  else fs.writeFileSync(consumerPath, r.expected, "utf-8");
 }
 
 function main(): void {

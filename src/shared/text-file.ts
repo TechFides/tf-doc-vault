@@ -1,21 +1,26 @@
 import fs from "node:fs";
 
-/** `\r\n?` and not `\r\n`: an old Mac-style lone CR would otherwise survive. */
 export function readText(filePath: string): string {
-  return fs.readFileSync(filePath, "utf-8").replace(/\r\n?/g, "\n");
+  return fs
+    .readFileSync(filePath, "utf-8")
+    .replace(/^\uFEFF/, "")
+    .replace(/\r\n?/g, "\n");
 }
 
-export function writeTextPreservingEol(
-  filePath: string,
-  content: string,
-): void {
+/** Unlike `readText`, this keeps the line endings the file already has. */
+export function writeText(filePath: string, content: string): void {
   const body = content.replace(/\r\n?/g, "\n");
-  const crlf =
-    fs.existsSync(filePath) &&
-    fs.readFileSync(filePath, "utf-8").includes("\r\n");
   fs.writeFileSync(
     filePath,
-    crlf ? body.replace(/\n/g, "\r\n") : body,
+    hasCrlfMajority(filePath) ? body.replace(/\n/g, "\r\n") : body,
     "utf-8",
   );
+}
+
+function hasCrlfMajority(filePath: string): boolean {
+  if (!fs.existsSync(filePath)) return false;
+  const existing = fs.readFileSync(filePath, "utf-8");
+  const crlf = existing.split("\r\n").length - 1;
+  const lines = existing.split("\n").length - 1;
+  return crlf * 2 > lines;
 }

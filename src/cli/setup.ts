@@ -43,7 +43,7 @@ import {
   type WorkspaceSettings,
 } from "./scaffold.js";
 import { detectHostRepo } from "./git-context.js";
-import { readText, writeTextPreservingEol } from "../shared/text-file.js";
+import { readText, writeText } from "../shared/text-file.js";
 
 export class CancelledError extends Error {}
 
@@ -410,7 +410,7 @@ export function updatePackageJson(dir: string, docsPath: string): void {
     return;
   }
   pkg.scripts = scripts;
-  writeTextPreservingEol(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
+  writeText(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
   console.log(`  package.json updated (+${added} scripts)`);
 }
 
@@ -459,7 +459,7 @@ export function updateDevDependencies(
       a.localeCompare(b),
     ),
   );
-  writeTextPreservingEol(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
+  writeText(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
   console.log(`  package.json updated (+${added} devDependencies)`);
 }
 
@@ -647,7 +647,7 @@ export function updatePnpmWorkspace(
     console.log(`  ${WORKSPACE_FILE}: pnpm settings already present; skipped.`);
     return;
   }
-  writeTextPreservingEol(file, merge.content);
+  writeText(file, merge.content);
   console.log(
     `  ${WORKSPACE_FILE} ${existed ? "updated" : "created"} (+${merge.added.length} entries)`,
   );
@@ -661,10 +661,7 @@ export function updateGitignore(dir: string, docsPath: string): void {
   );
   if (missing.length === 0) return;
   const prefix = existing.length > 0 && !existing.endsWith("\n") ? "\n" : "";
-  writeTextPreservingEol(
-    gitignorePath,
-    existing + prefix + missing.join("\n") + "\n",
-  );
+  writeText(gitignorePath, existing + prefix + missing.join("\n") + "\n");
   console.log(`  .gitignore updated (+${missing.length} entries)`);
 }
 
@@ -798,7 +795,7 @@ export function enableAnalytics(targetDir: string): void {
       "@vercel/analytics": VERCEL_ANALYTICS_VERSION,
     }).sort(([a], [b]) => a.localeCompare(b)),
   );
-  writeTextPreservingEol(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
+  writeText(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
 
   const themePath = path.join(targetDir, "docs/.vitepress/theme/index.ts");
   const theme = readText(themePath);
@@ -816,7 +813,7 @@ export function enableAnalytics(targetDir: string): void {
       `Could not wire up @vercel/analytics: "export default createTheme" not found in ${themePath}`,
     );
   }
-  writeTextPreservingEol(themePath, injected);
+  writeText(themePath, injected);
   console.log("  @vercel/analytics enabled (dependency + theme wiring)");
 }
 

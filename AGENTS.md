@@ -35,7 +35,7 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 ## Repo map
 
 - `src/config/`: VitePress config factory (`makeConfig`)
-- `src/shared/`: frontmatter reader, sibling-ordering primitive and `text-file` (`readText` / `writeTextPreservingEol`) shared by the sidebar generator, the print script and `docs:validate`
+- `src/shared/`: frontmatter reader, sibling-ordering primitive and `text-file` (`readText` / `writeText`) shared by the sidebar generator, the print script and `docs:validate`
 - `src/sidebar/`: sidebar / nav generator (`generateNav`, `generateSidebar`, `getVersions`)
 - `src/theme/`: Vue theme: components, composables, styles
 - `src/scripts/`: docs tooling scripts (`validate-docs`, `normalize-docs`, `export-pdf`, …)
@@ -57,11 +57,11 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 
 ### Line endings
 
-LF everywhere, enforced at three levels: `.gitattributes` (`* text=auto eol=lf`, shipped to scaffolds as `boilerplate/_gitattributes`), `endOfLine: "lf"` in `configs/prettier.json`, and `tf-doc-vault ensure-lf` for repos that predate them.
+Read text through `readText` from `src/shared/text-file.ts`, never `fs.readFileSync(f, "utf-8")`: `split("\n")` leaves a CR on every line and neither `.` nor `$` matches across it, so a CRLF checkout silently breaks any parser reading raw. It also strips a UTF-8 BOM, which a file written by Notepad or `>` in PowerShell carries and which keeps a `^---` frontmatter matcher from matching. Three files read raw on purpose and must stay that way: `ensure-lf` (through `readText` it would see LF and turn into a no-op that reports success), `replacePlaceholders` in `src/cli/utils.ts`, and `replace-wireframes.cjs`.
 
-Read text through `readText` from `src/shared/text-file.ts`, never `fs.readFileSync(f, "utf-8")`. A `$`-anchored line matcher does not match across a CR and `split("\n")` leaves one on every line, so a CRLF checkout silently breaks any parser reading the file raw. Three places read raw on purpose: `ensure-lf` has to see the CRLF it removes, and `replacePlaceholders` (`src/cli/utils.ts`) and `replace-wireframes.cjs` substitute inside a file they must otherwise return byte for byte.
+Write a file this package does not own (a host `.gitignore`, `pnpm-workspace.yaml`, `package.json` or theme file) through `writeText`; anything the package generates itself is LF.
 
-Files this package edits but does not own (a host `.gitignore`, `pnpm-workspace.yaml` or theme file) keep the endings they came with: write them through `writeTextPreservingEol`. Anything this package generates itself is LF.
+`.gitattributes` is duplicated as `boilerplate/_gitattributes`. Change both.
 
 ### Comments
 

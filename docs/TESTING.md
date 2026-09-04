@@ -82,7 +82,7 @@ Good to know:
 - Touching `src/confluence/**` or the Confluence importer: cover it with a `tests/unit/confluence/` spec and follow **Confluence importer verification** above.
 - Touching a boilerplate file with real logic (`middleware.ts`): **unit test** in `tests/unit/boilerplate/`, importing it directly.
 - Fixing a bug: add a regression test in the tier that would have caught it before fixing the code.
-- Adding or changing a text parser: run its fixtures through both line endings. `frontmatter.test.ts` shows the shape: one `for (const [label, eol] of EOLS)` around the suite and `.replaceAll("\\n", eol)` on each fixture. CI runs on `ubuntu-latest` only, so nothing else exercises the CRLF path.
+- Adding or changing a text parser: read the file through `readText`, and add its fixtures to the LF/CRLF matrix that runs the read path with both line endings (`frontmatter.test.ts`: `EOLS` × `FIXTURES`, above the direct-parser block, which stays as it is). A leading BOM gets its own case there too. CI runs on `ubuntu-latest` only, so nothing else exercises those inputs.
 
 ## External dependencies
 

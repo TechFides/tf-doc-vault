@@ -2,10 +2,7 @@ import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import {
-  readText,
-  writeTextPreservingEol,
-} from "../../../src/shared/text-file.js";
+import { readText, writeText } from "../../../src/shared/text-file.js";
 
 let dir: string;
 
@@ -34,30 +31,51 @@ describe("readText", () => {
   test("leaves an LF file byte for byte", () => {
     expect(readText(write("lf.md", "a\nb\n"))).toBe("a\nb\n");
   });
+
+  test("strips a leading BOM", () => {
+    expect(readText(write("bom.md", "\uFEFFa\r\nb\r\n"))).toBe("a\nb\n");
+  });
+
+  test("keeps a BOM that is not the first character", () => {
+    expect(readText(write("mid.md", "a\uFEFFb"))).toBe("a\uFEFFb");
+  });
 });
 
-describe("writeTextPreservingEol", () => {
+describe("writeText", () => {
   test("a CRLF file keeps CRLF", () => {
     const file = write("crlf.yaml", "a: 1\r\n");
-    writeTextPreservingEol(file, "a: 1\nb: 2\n");
+    writeText(file, "a: 1\nb: 2\n");
     expect(fs.readFileSync(file, "utf-8")).toBe("a: 1\r\nb: 2\r\n");
   });
 
   test("an LF file keeps LF", () => {
     const file = write("lf.yaml", "a: 1\n");
-    writeTextPreservingEol(file, "a: 1\nb: 2\n");
+    writeText(file, "a: 1\nb: 2\n");
     expect(fs.readFileSync(file, "utf-8")).toBe("a: 1\nb: 2\n");
   });
 
   test("a file that does not exist yet is written LF", () => {
     const file = path.join(dir, "new.yaml");
-    writeTextPreservingEol(file, "a: 1\n");
+    writeText(file, "a: 1\n");
     expect(fs.readFileSync(file, "utf-8")).toBe("a: 1\n");
   });
 
   test("CRLF in the content does not survive twice", () => {
     const file = write("crlf.yaml", "a: 1\r\n");
-    writeTextPreservingEol(file, "a: 1\r\nb: 2\r\n");
+    writeText(file, "a: 1\r\nb: 2\r\n");
+    expect(fs.readFileSync(file, "utf-8")).toBe("a: 1\r\nb: 2\r\n");
+  });
+
+  test("a mostly-LF file keeps LF", () => {
+    const file = write("mixed.yaml", "a: 1\r\n" + "b: 2\n".repeat(40));
+    writeText(file, "a: 1\n" + "b: 2\n".repeat(40) + "c: 3\n");
+    const after = fs.readFileSync(file, "utf-8");
+    expect(after).not.toContain("\r");
+  });
+
+  test("a mostly-CRLF file keeps CRLF", () => {
+    const file = write("mixed2.yaml", "a: 1\n" + "b: 2\r\n".repeat(40));
+    writeText(file, "a: 1\nb: 2\n");
     expect(fs.readFileSync(file, "utf-8")).toBe("a: 1\r\nb: 2\r\n");
   });
 });
