@@ -15,6 +15,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { escapeHtml, readPdfBranding } from "./pdf-branding.js";
 import { readDiagramState, waitForDiagrams } from "./wait-for-diagrams.js";
+import { readText } from "../shared/text-file.js";
 
 const PORT = 4173;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -109,9 +110,9 @@ function startPreviewServer(): ChildProcess {
  */
 async function readPageMap(file: string): Promise<Record<string, number>> {
   const printPage = path.resolve(PROJECT_ROOT, "docs/print.md");
-  const slugs = [
-    ...fs.readFileSync(printPage, "utf-8").matchAll(/<a id="([^"]+)"><\/a>/g),
-  ].map((m) => m[1]!);
+  const slugs = [...readText(printPage).matchAll(/<a id="([^"]+)"><\/a>/g)].map(
+    (m) => m[1]!,
+  );
 
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
   const doc = await pdfjs.getDocument({
@@ -137,7 +138,7 @@ async function readPageMap(file: string): Promise<Record<string, number>> {
  * because this process never loads the config: every asset URL carries the base.
  */
 function resolveBase(dir: string): string {
-  const html = fs.readFileSync(path.join(dir, "print.html"), "utf-8");
+  const html = readText(path.join(dir, "print.html"));
   return /(?:href|src)="(\/[^"]*?)assets\//.exec(html)?.[1] ?? "/";
 }
 

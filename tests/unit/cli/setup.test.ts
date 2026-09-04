@@ -46,6 +46,7 @@ import {
   type PromptFn,
   type PromptRequest,
 } from "../../../src/cli/setup.js";
+import { readText } from "../../../src/shared/text-file.js";
 
 const CTX = { version: "9.9.9", packageDir: "/abs/pkg" };
 
@@ -1107,9 +1108,8 @@ describe("host pnpm workspace settings", () => {
 
   // Reproducing the boilerplate byte for byte is what keeps one source of truth.
   test("renders the boilerplate file it was read from", () => {
-    const shipped = fs.readFileSync(
+    const shipped = readText(
       path.join(REPO_ROOT, "boilerplate/_pnpm-workspace.yaml"),
-      "utf-8",
     );
     expect(renderWorkspaceSettings(boilerplateWorkspaceSettings())).toBe(
       shipped,
@@ -1187,6 +1187,41 @@ allowBuilds:
     const second = mergeWorkspaceSettings(first.content, SETTINGS);
     expect(second.added).toEqual([]);
     expect(second.content).toBe(first.content);
+  });
+
+  test("a CRLF host workspace file keeps CRLF and is not double-appended", () => {
+    const dir = tempDir();
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    const file = path.join(dir, "pnpm-workspace.yaml");
+    fs.writeFileSync(file, "publicHoistPattern:\r\n  - dayjs\r\n");
+
+    const settings = {
+      publicHoistPattern: ["dayjs", "debug"],
+      allowBuilds: {},
+    };
+    updatePnpmWorkspace(dir, settings);
+    expect(fs.readFileSync(file, "utf-8")).toBe(
+      "publicHoistPattern:\r\n  - dayjs\r\n  - debug\r\n",
+    );
+
+    updatePnpmWorkspace(dir, settings);
+    expect(fs.readFileSync(file, "utf-8")).toBe(
+      "publicHoistPattern:\r\n  - dayjs\r\n  - debug\r\n",
+    );
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("a CRLF host .gitignore keeps CRLF", () => {
+    const dir = tempDir();
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    const file = path.join(dir, ".gitignore");
+    fs.writeFileSync(file, "node_modules/\r\n");
+
+    updateGitignore(dir, "docs");
+    expect(fs.readFileSync(file, "utf-8")).toBe(
+      "node_modules/\r\ndocs/.vitepress/dist/\r\ndocs/.vitepress/cache/\r\n",
+    );
+    fs.rmSync(dir, { recursive: true, force: true });
   });
 
   test("a key with no entries yet is filled in", () => {
