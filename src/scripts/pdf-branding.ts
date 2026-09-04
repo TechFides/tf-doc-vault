@@ -7,6 +7,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { readText } from "../shared/text-file.js";
 
 export interface PdfCover {
   /** Set above the title, in caps. */
@@ -53,10 +54,7 @@ export function readPdfBranding(root: string = process.cwd()): PdfBranding {
   if (!fs.existsSync(file)) return {};
 
   try {
-    return (
-      (JSON.parse(fs.readFileSync(file, "utf-8")) as { pdf?: PdfBranding })
-        .pdf ?? {}
-    );
+    return (JSON.parse(readText(file)) as { pdf?: PdfBranding }).pdf ?? {};
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
     console.error(`✗ ${CONFIG_FILE} could not be read: ${reason}`);

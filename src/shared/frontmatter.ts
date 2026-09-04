@@ -1,9 +1,8 @@
-import fs from "node:fs";
 import path from "node:path";
+import { readText } from "./text-file.js";
 
 const FRONTMATTER = /^---\s*\n([\s\S]*?)\n---/;
-// `\s*$` and not `$`: lines come from a `\n` split and `.` matches no CR.
-const KEY_VALUE = /^(\w+):\s*(.+?)\s*$/;
+const KEY_VALUE = /^(\w+):\s*(.+)$/;
 const INTEGER = /^-?\d+$/;
 
 const DOUBLE_QUOTE_ESCAPES: Record<string, string> = {
@@ -87,7 +86,7 @@ export function readFrontmatter(
   filePath: string,
 ): Record<string, string> | null {
   try {
-    return parseFrontmatter(fs.readFileSync(filePath, "utf-8"));
+    return parseFrontmatter(readText(filePath));
   } catch {
     return null;
   }

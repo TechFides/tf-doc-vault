@@ -35,7 +35,7 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 ## Repo map
 
 - `src/config/`: VitePress config factory (`makeConfig`)
-- `src/shared/`: frontmatter reader and sibling-ordering primitive shared by the sidebar generator, the print script and `docs:validate`
+- `src/shared/`: frontmatter reader, sibling-ordering primitive and `text-file` (`readText` / `writeTextPreservingEol`) shared by the sidebar generator, the print script and `docs:validate`
 - `src/sidebar/`: sidebar / nav generator (`generateNav`, `generateSidebar`, `getVersions`)
 - `src/theme/`: Vue theme: components, composables, styles
 - `src/scripts/`: docs tooling scripts (`validate-docs`, `normalize-docs`, `export-pdf`, …)
@@ -54,6 +54,14 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 ## Conventions
 
 - Commit messages follow Conventional Commits. Enforced by Lefthook `commit-msg` → `commitlint` (`lefthook.yml`). `changelogen` derives the next version and `CHANGELOG.md` entries from these, so keep them well-formed.
+
+### Line endings
+
+LF everywhere, enforced at three levels: `.gitattributes` (`* text=auto eol=lf`, shipped to scaffolds as `boilerplate/_gitattributes`), `endOfLine: "lf"` in `configs/prettier.json`, and `tf-doc-vault ensure-lf` for repos that predate them.
+
+Read text through `readText` from `src/shared/text-file.ts`, never `fs.readFileSync(f, "utf-8")`. A `$`-anchored line matcher does not match across a CR and `split("\n")` leaves one on every line, so a CRLF checkout silently breaks any parser reading the file raw. Three places read raw on purpose: `ensure-lf` has to see the CRLF it removes, and `replacePlaceholders` (`src/cli/utils.ts`) and `replace-wireframes.cjs` substitute inside a file they must otherwise return byte for byte.
+
+Files this package edits but does not own (a host `.gitignore`, `pnpm-workspace.yaml` or theme file) keep the endings they came with: write them through `writeTextPreservingEol`. Anything this package generates itself is LF.
 
 ### Comments
 

@@ -70,7 +70,8 @@ describe("normalize-docs (flat frontmatter)", () => {
     expect(lines[4]).toBe("custom: value");
   });
 
-  test("reorders a CRLF file and leaves its endings CRLF", () => {
+  // Our own canonicalization tool, not an editor of a file somebody else owns.
+  test("reorders a CRLF file and writes it back as LF", () => {
     const file = path.join(docsRoot, "crlf.md");
     fs.writeFileSync(
       file,
@@ -89,8 +90,8 @@ describe("normalize-docs (flat frontmatter)", () => {
     expect(runNormalize().exitCode).toBe(0);
 
     const after = fs.readFileSync(file, "utf-8");
-    expect(after.split("\r\n")[1]).toBe("title: Test");
-    expect(/[^\r]\n/.test(after)).toBe(false);
+    expect(after).not.toContain("\r");
+    expect(after.split("\n")[1]).toBe("title: Test");
   });
 
   test("leaves already-canonical files unchanged", () => {

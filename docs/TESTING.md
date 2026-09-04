@@ -6,7 +6,7 @@ Two tiers. Add new tests in the tier whose boundary you crossed.
 
 Pure-logic tests for code that does not shell out, spawn processes, or build a site. Layout mirrors `src/`:
 
-- `tests/unit/shared/`: the primitives in `src/shared/` that the sidebar and the doc-tooling scripts both build on (frontmatter parsing, sibling ordering)
+- `tests/unit/shared/`: the primitives in `src/shared/` that the sidebar and the doc-tooling scripts both build on (frontmatter parsing, sibling ordering, text-file reading)
 - `tests/unit/sidebar/`: sidebar/nav generation against in-memory file trees
 - `tests/unit/scripts/`: doc-tooling helpers (`normalize-docs`, `validate-docs`) and the boilerplate-sync file resolution (`sync-template`)
 - `tests/unit/cli/`: CLI logic that needs neither a real repo nor a TTY. `utils.test.ts` covers the helpers in `src/cli/utils.ts` (arg parsing, `copyDir`, placeholder substitution); `scaffold.test.ts` covers template manifest parsing and validation, the copy plan and its rename and exclude rules; `setup.test.ts` covers the wizard, from flag and answer resolution through a fake prompt layer to the host `package.json` and `.gitignore` integration; `git-context.test.ts` covers detecting an ancestor git repo and parsing its `origin` remote (real `git init` in a temp dir, no network)
@@ -82,6 +82,7 @@ Good to know:
 - Touching `src/confluence/**` or the Confluence importer: cover it with a `tests/unit/confluence/` spec and follow **Confluence importer verification** above.
 - Touching a boilerplate file with real logic (`middleware.ts`): **unit test** in `tests/unit/boilerplate/`, importing it directly.
 - Fixing a bug: add a regression test in the tier that would have caught it before fixing the code.
+- Adding or changing a text parser: run its fixtures through both line endings. `frontmatter.test.ts` shows the shape: one `for (const [label, eol] of EOLS)` around the suite and `.replaceAll("\\n", eol)` on each fixture. CI runs on `ubuntu-latest` only, so nothing else exercises the CRLF path.
 
 ## External dependencies
 

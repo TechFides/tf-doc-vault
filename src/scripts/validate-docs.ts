@@ -10,6 +10,7 @@ import { lint as markdownlint } from "markdownlint/sync";
 import { parseFrontmatter, parseOrder } from "../shared/frontmatter.js";
 import { IGNORED_DIRS, isDocsDir, subDirEntries } from "../shared/ordering.js";
 import { allMdFiles } from "./docs-files.js";
+import { readText } from "../shared/text-file.js";
 
 const args = process.argv.slice(2);
 const rootArg = args.find((a) => a.startsWith("--root="))?.split("=")[1];
@@ -48,7 +49,7 @@ interface Issue {
 function checkFrontmatter(files: string[]): Issue[] {
   const issues: Issue[] = [];
   for (const file of files) {
-    const content = fs.readFileSync(file, "utf-8");
+    const content = readText(file);
     const fm = parseFrontmatter(content);
     const rel = slugOf(file);
 
@@ -93,7 +94,7 @@ function checkDuplicateSlugs(files: string[]): Issue[] {
 function checkBrokenLinks(files: string[]): Issue[] {
   const issues: Issue[] = [];
   for (const file of files) {
-    const content = fs.readFileSync(file, "utf-8");
+    const content = readText(file);
     const currentDir = path.dirname(file);
 
     for (const target of extractInternalLinks(content)) {
@@ -133,7 +134,7 @@ function checkMissingImages(files: string[]): Issue[] {
     /!\[.*?\]\((?!https?:\/\/)([^)]+\.(svg|png|jpg|jpeg|gif|webp))\)/gi;
   const issues: Issue[] = [];
   for (const file of files) {
-    const content = fs.readFileSync(file, "utf-8");
+    const content = readText(file);
     let m: RegExpExecArray | null;
     while ((m = imgRe.exec(content)) !== null) {
       const src = m[1]!.trim();
@@ -207,7 +208,7 @@ function checkOrder(files: string[]): Issue[] {
   for (const file of files) {
     if (isInIgnoredDir(file) || isOrderExempt(file)) continue;
     const rel = slugOf(file);
-    const fm = parseFrontmatter(fs.readFileSync(file, "utf-8"));
+    const fm = parseFrontmatter(readText(file));
     // A file with no frontmatter at all is already reported by checkFrontmatter.
     if (!fm) continue;
 

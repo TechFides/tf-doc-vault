@@ -13,6 +13,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { boilerplateName } from "../cli/scaffold.js";
 import { isEntryModule } from "../cli/utils.js";
+import { readText, writeTextPreservingEol } from "../shared/text-file.js";
 
 const PROJECT_ROOT = process.cwd();
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -31,6 +32,7 @@ export const TRACKED_FILES: string[] = [
   "middleware.ts",
   ".github/workflows/ci.yml",
   ".gitignore",
+  ".gitattributes",
   ".prettierrc",
   ".prettierignore",
   "eslint.config.js",
@@ -59,7 +61,7 @@ function parseFlags(argv: string[]): CliFlags {
 
 function readJSON(p: string): Record<string, unknown> | null {
   try {
-    return JSON.parse(fs.readFileSync(p, "utf-8"));
+    return JSON.parse(readText(p));
   } catch {
     return null;
   }
@@ -95,12 +97,16 @@ function renderTemplate(
   return out;
 }
 
+/** Both sides go to disk as LF, or a CRLF consumer file diffs as every line. */
 function unifiedDiff(actualPath: string, expected: string): string {
-  const tmp = path.join(
+  const stem = path.join(
     os.tmpdir(),
-    `sync-${Date.now()}-${Math.random().toString(36).slice(2)}.tmp`,
+    `sync-${Date.now()}-${Math.random().toString(36).slice(2)}`,
   );
-  fs.writeFileSync(tmp, expected);
+  const actualTmp = `${stem}.actual.tmp`;
+  const expectedTmp = `${stem}.expected.tmp`;
+  fs.writeFileSync(actualTmp, readText(actualPath));
+  fs.writeFileSync(expectedTmp, expected);
   try {
     const r = spawnSync(
       "diff",
@@ -110,14 +116,15 @@ function unifiedDiff(actualPath: string, expected: string): string {
         actualPath,
         "--label",
         "(template, rendered)",
-        actualPath,
-        tmp,
+        actualTmp,
+        expectedTmp,
       ],
       { encoding: "utf-8" },
     );
     return r.stdout ?? "";
   } finally {
-    fs.unlinkSync(tmp);
+    fs.unlinkSync(actualTmp);
+    fs.unlinkSync(expectedTmp);
   }
 }
 
@@ -139,16 +146,13 @@ function inspect(rel: string, placeholders: Record<string, string>): Result {
   // Reporting a lost baseline as "ok" would keep the regression silent.
   if (!fs.existsSync(boilerplatePath)) return { rel, status: "no-baseline" };
 
-  const expected = renderTemplate(
-    fs.readFileSync(boilerplatePath, "utf-8"),
-    placeholders,
-  );
+  const expected = renderTemplate(readText(boilerplatePath), placeholders);
 
   if (!fs.existsSync(consumerPath)) {
     return { rel, status: "missing", expected };
   }
 
-  const actual = fs.readFileSync(consumerPath, "utf-8");
+  const actual = readText(consumerPath);
   if (actual === expected) return { rel, status: "ok" };
 
   return {
@@ -163,7 +167,7 @@ function applyResult(r: Result): void {
   if (r.expected === undefined) return;
   const consumerPath = path.join(PROJECT_ROOT, r.rel);
   fs.mkdirSync(path.dirname(consumerPath), { recursive: true });
-  fs.writeFileSync(consumerPath, r.expected);
+  writeTextPreservingEol(consumerPath, r.expected);
 }
 
 function main(): void {

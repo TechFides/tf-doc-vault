@@ -107,13 +107,6 @@ describe("manifest parsing", () => {
     expect(manifest.description).toBe("Prose body of the manifest.");
   });
 
-  test("reads a manifest checked out with CRLF endings", () => {
-    const manifest = fixtureManifest(MANIFEST.replace(/\n/g, "\r\n"));
-    expect(manifest.label).toBe("Demo template");
-    expect(manifest.fields).toEqual(["project", "repo"]);
-    expect(manifest.description).toBe("Prose body of the manifest.");
-  });
-
   // An unknown key is a typo in a config nobody reads back, so it fails loudly.
   test("rejects an unknown key", () => {
     expect(() => fixtureManifest(MANIFEST.replace("base:", "bass:"))).toThrow(
@@ -349,6 +342,23 @@ describe("scanTemplates", () => {
     expect(names.length).toBeGreaterThan(0);
   });
 
+  // A CRLF manifest read as having no frontmatter, which emptied the wizard.
+  test("reads a manifest checked out with CRLF endings", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "scaffold-crlf-"));
+    write(path.join(dir, "demo/_template.md"), MANIFEST.replace(/\n/g, "\r\n"));
+    write(path.join(dir, "demo/docs/index.md"), "# Index\n");
+
+    const scan = scanTemplates({
+      templatesDir: dir,
+      boilerplateDir: boilerplate,
+    });
+    expect(scan.unavailable).toEqual([]);
+    expect(scan.templates[0]?.label).toBe("Demo template");
+    expect(scan.templates[0]?.fields).toEqual(["project", "repo"]);
+    expect(scan.templates[0]?.description).toBe("Prose body of the manifest.");
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
   // An eager parse of every folder lets one bad manifest take the whole command
   // down, `--help` included.
   test("reports a broken folder as unavailable and keeps the rest usable", () => {
@@ -438,6 +448,7 @@ describe("scaffold renames", () => {
   // `npm pack` strips these names, hence the underscore-prefixed sources.
   test("restores the names the package cannot ship", () => {
     expect(consumerName("_gitignore")).toBe(".gitignore");
+    expect(consumerName("_gitattributes")).toBe(".gitattributes");
     expect(consumerName("_npmrc")).toBe(".npmrc");
     expect(consumerName("_pnpm-workspace.yaml")).toBe("pnpm-workspace.yaml");
     expect(consumerName("_tsconfig.json")).toBe("tsconfig.json");
@@ -449,6 +460,7 @@ describe("scaffold renames", () => {
   test("the inverse covers exactly the same entries", () => {
     for (const source of [
       "_gitignore",
+      "_gitattributes",
       "_npmrc",
       "_pnpm-workspace.yaml",
       "_tsconfig.json",
