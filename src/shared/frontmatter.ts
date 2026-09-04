@@ -2,7 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 
 const FRONTMATTER = /^---\s*\n([\s\S]*?)\n---/;
-const KEY_VALUE = /^(\w+):\s*(.+)$/;
+// `\s*$` and not `$`: lines come from a `\n` split and `.` matches no CR.
+const KEY_VALUE = /^(\w+):\s*(.+?)\s*$/;
 const INTEGER = /^-?\d+$/;
 
 const DOUBLE_QUOTE_ESCAPES: Record<string, string> = {

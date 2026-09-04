@@ -712,7 +712,9 @@ export function parseTemplateManifest(
   dir: string,
   boilerplateDir: string,
 ): TemplateManifest {
-  const match = /^---\s*\n([\s\S]*?)\n---[ \t]*(?:\n([\s\S]*))?$/.exec(source);
+  const match = /^---\s*\n([\s\S]*?)\n---[ \t]*(?:\n([\s\S]*))?$/.exec(
+    source.replace(/\r\n/g, "\n"),
+  );
   if (!match) fail(templateName, "missing YAML frontmatter block");
 
   let raw: Record<string, YamlValue>;

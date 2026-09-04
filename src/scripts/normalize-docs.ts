@@ -24,18 +24,21 @@ interface Block {
 interface ParsedFile {
   blocks: Block[];
   body: string;
+  eol: string;
 }
 
 const TOP_LEVEL_KEY = /^([A-Za-z_][\w-]*)\s*:/;
 
 function parse(content: string): ParsedFile | null {
-  const match = /^---\s*\n([\s\S]*?)\n---\n?([\s\S]*)$/.exec(content);
+  const match = /^---\s*\n([\s\S]*?)\r?\n---[ \t]*\r?\n?([\s\S]*)$/.exec(
+    content,
+  );
   if (!match) return null;
 
   const blocks: Block[] = [];
   let current: Block | null = null;
 
-  for (const line of match[1]!.split("\n")) {
+  for (const line of match[1]!.split(/\r?\n/)) {
     const isTopLevel =
       line.length > 0 &&
       !line.startsWith(" ") &&
@@ -53,12 +56,16 @@ function parse(content: string): ParsedFile | null {
   }
   if (current) blocks.push(current);
 
-  return { blocks, body: match[2]! };
+  return {
+    blocks,
+    body: match[2]!,
+    eol: content.includes("\r\n") ? "\r\n" : "\n",
+  };
 }
 
-function serialize(blocks: Block[], body: string): string {
-  const fm = blocks.map((b) => b.lines.join("\n")).join("\n");
-  return `---\n${fm}\n---\n${body}`;
+function serialize(blocks: Block[], body: string, eol: string): string {
+  const fm = blocks.map((b) => b.lines.join(eol)).join(eol);
+  return `---${eol}${fm}${eol}---${eol}${body}`;
 }
 
 function normalize(blocks: Block[]): Block[] {
@@ -180,7 +187,11 @@ for (const file of files) {
     continue;
   }
 
-  fs.writeFileSync(file, serialize(normalized, parsed.body), "utf-8");
+  fs.writeFileSync(
+    file,
+    serialize(normalized, parsed.body, parsed.eol),
+    "utf-8",
+  );
   console.log(`  updated: ${rel}`);
   changed++;
 }

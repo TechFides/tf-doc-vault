@@ -486,7 +486,7 @@ parts.push(`\n</div>`);
 // Only a section opens a fresh sheet. Breaking before every page is what leaves
 // two-line sheets behind.
 for (const page of pages) {
-  const raw = fs.readFileSync(page.filePath, "utf-8");
+  const raw = fs.readFileSync(page.filePath, "utf-8").replace(/\r\n/g, "\n");
   const body = rewriteLinks(
     bindFigureCaptions(dropTocSections(stripFrontmatter(raw))),
     page.filePath,

@@ -107,6 +107,13 @@ describe("manifest parsing", () => {
     expect(manifest.description).toBe("Prose body of the manifest.");
   });
 
+  test("reads a manifest checked out with CRLF endings", () => {
+    const manifest = fixtureManifest(MANIFEST.replace(/\n/g, "\r\n"));
+    expect(manifest.label).toBe("Demo template");
+    expect(manifest.fields).toEqual(["project", "repo"]);
+    expect(manifest.description).toBe("Prose body of the manifest.");
+  });
+
   // An unknown key is a typo in a config nobody reads back, so it fails loudly.
   test("rejects an unknown key", () => {
     expect(() => fixtureManifest(MANIFEST.replace("base:", "bass:"))).toThrow(

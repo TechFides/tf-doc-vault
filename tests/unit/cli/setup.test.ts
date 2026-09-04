@@ -1189,6 +1189,18 @@ allowBuilds:
     expect(second.content).toBe(first.content);
   });
 
+  test("a CRLF host file keeps CRLF, and its entries are still recognized", () => {
+    const existing = "publicHoistPattern:\r\n  - dayjs\r\n";
+    const merge = mergeWorkspaceSettings(existing, {
+      publicHoistPattern: ["dayjs", "debug"],
+      allowBuilds: {},
+    });
+    expect(merge.added).toEqual(["debug"]);
+    expect(merge.content).toBe(
+      "publicHoistPattern:\r\n  - dayjs\r\n  - debug\r\n",
+    );
+  });
+
   test("a key with no entries yet is filled in", () => {
     const merge = mergeWorkspaceSettings(
       "publicHoistPattern:\nallowBuilds:\n",

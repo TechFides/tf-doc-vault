@@ -92,6 +92,12 @@ describe("parseFrontmatter", () => {
     });
   });
 
+  test("reads the fields of a CRLF file", () => {
+    expect(
+      parseFrontmatter('---\r\ntitle: "S1: A"\r\norder: 3\r\n---\r\n\r\nbody'),
+    ).toEqual({ title: "S1: A", order: "3" });
+  });
+
   test("reads an order that carries quotes", () => {
     expect(
       parseOrder(parseFrontmatter('---\norder: "3"\n---\n')?.["order"]),
@@ -102,6 +108,14 @@ describe("parseFrontmatter", () => {
 describe("readFrontmatter", () => {
   test("reads the fields of a file on disk", () => {
     const file = write("page.md", "---\ntitle: Nadpis\norder: 2\n---\n\nbody");
+    expect(readFrontmatter(file)).toEqual({ title: "Nadpis", order: "2" });
+  });
+
+  test("reads a file written with CRLF line endings", () => {
+    const file = write(
+      "crlf.md",
+      "---\r\ntitle: Nadpis\r\norder: 2\r\n---\r\n\r\nbody",
+    );
     expect(readFrontmatter(file)).toEqual({ title: "Nadpis", order: "2" });
   });
 

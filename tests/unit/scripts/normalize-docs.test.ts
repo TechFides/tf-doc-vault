@@ -70,6 +70,29 @@ describe("normalize-docs (flat frontmatter)", () => {
     expect(lines[4]).toBe("custom: value");
   });
 
+  test("reorders a CRLF file and leaves its endings CRLF", () => {
+    const file = path.join(docsRoot, "crlf.md");
+    fs.writeFileSync(
+      file,
+      [
+        "---",
+        "status: published",
+        "title: Test",
+        "updated_at: 2026-01-01",
+        "---",
+        "",
+        "body",
+        "",
+      ].join("\r\n"),
+    );
+
+    expect(runNormalize().exitCode).toBe(0);
+
+    const after = fs.readFileSync(file, "utf-8");
+    expect(after.split("\r\n")[1]).toBe("title: Test");
+    expect(/[^\r]\n/.test(after)).toBe(false);
+  });
+
   test("leaves already-canonical files unchanged", () => {
     const file = path.join(docsRoot, "canonical.md");
     const original = [

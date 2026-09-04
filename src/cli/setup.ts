@@ -589,7 +589,8 @@ export function mergeWorkspaceSettings(
     };
   }
 
-  const lines = existing.replace(/\n+$/, "").split("\n");
+  const eol = existing.includes("\r\n") ? "\r\n" : "\n";
+  const lines = existing.replace(/(\r?\n)+$/, "").split(/\r?\n/);
   for (const key of [HOIST_KEY, BUILDS_KEY]) {
     const at = keyLine(lines, key);
     if (at !== -1 && inlineValue(lines, at, key) !== "") {
@@ -618,7 +619,7 @@ export function mergeWorkspaceSettings(
   );
 
   return {
-    content: `${lines.join("\n")}\n`,
+    content: `${lines.join(eol)}${eol}`,
     added: [...missingHoist, ...missingBuilds.map(([name]) => name)],
     manual: false,
   };
