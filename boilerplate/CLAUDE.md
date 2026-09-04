@@ -1,229 +1,78 @@
-# CLAUDE.md: documentation generation rules
+# Documentation portal rules — v2
 
 This folder holds the documentation of the **__PROJECT__** project. When it sits
-inside a larger repository, these rules govern this folder only; the
-surrounding repository has its own.
+inside a larger repository, these rules govern this folder only; the surrounding
+repository has its own.
 
-Binding rules for **all documentation generation** here
-(whatever the source: code, screenshots, sales input, pre-code design, …).
-Every documentation skill and command inherits these rules automatically, so
-do not repeat them in individual skill files.
+These rules apply to every analytical documentation portal using the v2 skills.
+They intentionally contain only project-wide invariants. Exact structures,
+templates, scoring, and examples belong to the relevant skill.
 
-The **scope** of a run (which documentation type is generated and in which
-order) is decided by the **command**, not by this file.
+The skills are not shipped with this scaffold. They live in the TechFides skills
+library, which is their single source of truth, and are installed per project:
 
----
-
-## 1. Core principle: reflect reality
-
-- **NEVER** invent behavior, fields, endpoints, states, flows, or UI that are
-  not present in the source provided by the user (code, config files,
-  screenshots, existing docs, interview notes, etc.).
-- **ALWAYS** derive content from the actual provided source.
-- **IMPORTANT**: if something cannot be unambiguously derived, mark it:
-
-  ```markdown
-  > ⚠️ TODO: [short description of the gap]
-  ```
-
-- Do not fill gaps with "reasonable assumptions". A TODO is always preferred
-  over invented content.
-
-## 2. TODO resolution flow
-
-At the **end of each generation run** (one command = one run), Claude must:
-
-1. Collect every `⚠️ TODO` marker produced in that run.
-2. Present the list to the user and for each item ask which action to take:
-   - **a)** Skip: remove the TODO block and the surrounding section if empty.
-   - **b)** User input: the user provides the missing information and Claude
-     inserts it verbatim and removes the TODO marker.
-   - **c)** Keep TODO: leave the `⚠️ TODO` block in the file as-is.
-3. Apply the chosen action, then re-run the small review checklist (§10)
-   for that phase before finishing.
-
-## 3. Human-in-the-loop and incremental mode
-
-- Default mode: Claude pauses after every generated file for user review.
-- After several successful iterations with the same command, the user may
-  explicitly opt-in to reduced pausing (e.g. `--auto` flag or confirmation
-  in chat). **NEVER** reduce pausing without explicit user opt-in.
-- Diagrams and wireframes are always generated **after** the textual content
-  they describe is confirmed stable by the user, but the exact phase order
-  is defined by the command, not here.
-
-## 4. Output structure
-
-```
-docs/
-  v1/                          ← documentation version
-    <section>/                 ← top-menu item (e.g. functional-documentation)
-      index.md                 ← section index: Czech menu label + order
-      <group>/                 ← collapsible group in left menu (e.g. use-cases)
-        index.md               ← group index: Czech label, not listed as page
-        <page>.md              ← content page (e.g. use-case-1.md)
-  v2/                          ← next version
+```bash
+tf-skills install docs
 ```
 
-- A new documentation version lives in its own `vN/` folder; VitePress adds
-  it to the version dropdown automatically.
-- `<section>/index.md` and `<group>/index.md` are **mandatory**; they
-  provide the Czech menu label and explicit ordering (`order:` in
-  frontmatter). They are not rendered as regular pages.
-- The sidebar is generated from the directory structure: a section without
-  subfolders lists its files directly, a section with subfolders groups them
-  into collapsible groups.
-- Folder and file names: `kebab-case`.
-- Sibling order comes from `order:` in frontmatter (§5): `index.md` is always
-  listed first, then items with a valid `order` ascending, then the rest
-  alphabetically. Numeric filename prefixes (`01-`, `02-`) no longer control
-  order by themselves; `order` wins.
-- When adding or removing files, update the links in the affected `index.md`.
-- Shared images: `docs/public/images/`, referenced absolutely as
-  `/images/foo.png`. Local images: next to the `.md` file.
-- `print.md` is generated: do not edit it, and it is not versioned.
+Sections 1 to 6 below are kept identical to `Analysis/CLAUDE.md` in that
+library. Change them there first, then copy them here; never only here.
 
-## 5. Mandatory frontmatter
+## 1. Resolve the documentation contract
 
-Every `.md` file starts with:
+- Before creating, changing, or reviewing portal documentation, load
+  `docs/README.md` through `docs-base`.
+- The `documentation` object in that file is the persistent contract for the
+  active version. Run inputs such as source paths and requested scope are not
+  persisted there.
+- If the contract is missing, invalid, or inactive, use `docs-workflow` to
+  repair it before changing content.
+- The filesystem below `docs/<active_version>/` is the exact menu. README gives
+  orientation; it never duplicates the complete page tree.
 
-```markdown
----
-title: Název stránky (in Czech)
-status: draft
-updated_at: 2026-04-23
-order: 1
----
-```
+## 2. Write top-down
 
-| Field        | Values                                        |
-| ------------ | --------------------------------------------- |
-| `title`      | Shown in navigation and as tab heading        |
-| `status`     | `published` / `draft` / `review` / `archived` |
-| `updated_at` | `YYYY-MM-DD` or `YYYY-MM-DD HH:MM`            |
-| `order`      | integer                                       |
+Every section and page starts with the decision, outcome, or reader value, then
+adds context and detail. Index pages explain what the reader will find and why
+it matters; they are not file inventories.
 
-- `order` is required on every page inside a version folder
-  (`docs/<version>/...`). A file sitting directly in `docs/` (including
-  `docs/index.md`) and each version's own `index.md` are exempt: neither
-  sits in a sibling set that anything sorts.
-- A folder's position among its siblings is carried by its `index.md`; a
-  page's position is its own `order`.
-- Siblings in the same folder, pages and subfolders alike, share one number
-  space: a page and a subfolder in the same folder cannot both be `order: 2`.
-- If the user does not specify `status`, use `draft`.
-- `updated_at` is taken from the system context (`currentDate`) and is
-  refreshed on every content change of the file.
-- The `title` field includes the hierarchical numbering prefix from the
-  skill's `proposed-structure.md` (e.g. `2.4 Architektura systému`,
-  `2.4.1 Komponentový diagram`). Numbering is authoritative in
-  `proposed-structure.md`. Section-level indexes carry **no** numeric
-  prefix (e.g. `title: Technická dokumentace`).
-- Below the frontmatter, add a generation stamp resolved from git tag first,
-  `package.json` second (only for generated content pages, not `index.md`):
+## 3. Reflect evidence
 
-  ```markdown
-  <!-- generated: 2026-04-23 | source: v1.4.2 -->
-  ```
+- Do not invent behavior, fields, integrations, states, benefits, estimates, or
+  implementation detail.
+- Separate current behavior, agreed target behavior, proposals, and unknowns.
+- Mark material gaps explicitly and identify the evidence needed to resolve
+  them.
+- `as-built` makes code and configuration authoritative for the reviewed scope;
+  it does not claim that every page was recently verified.
 
-## 6. Confluence CLI marks
+## 4. Keep one owner for each fact
 
-Every `.md` intended for Confluence sync must include an HTML comment block
-right after the frontmatter describing the target location:
+Shared definitions have one canonical page. Scenario, process, UI, business,
+technical, test, and change-request pages link to one another instead of copying
+the same rules. When sources disagree, surface the contradiction rather than
+silently choosing one.
 
-```markdown
-<!--
-confluence:
-  space: CNG
-  title: Use case (Login)
-  parent: Functional documentation
--->
-```
+## 5. Change safely
 
-The CLI publisher reads these marks; **NEVER** omit them if the file belongs
-to a Confluence-synced section.
+- Preserve unrelated and user-authored changes.
+- Preview structural impact and obtain explicit approval before changing the
+  active version, lifecycle stage, deliverable type, sections, or functional
+  views.
+- Migrate files and links first; update `docs/README.md` last.
+- Removing a section or view means archive or deliberate relocation, never
+  silent deletion.
 
-## 7. Language and style (generated content)
+## 6. Respect tooling boundaries
 
-- All generated documentation content is written in **Czech with diacritics**.
-- Technical terms (class names, method names, endpoint paths, attribute
-  names, enum values) stay in the original language (usually English).
-- Writing style: technical, concise, no filler.
-- **ALWAYS include examples**, not only descriptions: for every non-trivial
-  concept add a code snippet, request/response example, or concrete scenario.
-- Use emphasis keywords in Czech inside the generated docs:
-  `NIKDY` (NEVER), `VŽDY` (ALWAYS), `DŮLEŽITÉ` (IMPORTANT).
+`tf-doc-vault` owns page metadata, navigation generation, validation, print, and
+build mechanics. Skills own documentation meaning and templates. Review reports
+own verification date, evidence scope, findings, and score.
 
-## 8. Diagrams
+## Local toolchain
 
-- **Primary**: Mermaid (inline fenced ` ```mermaid ` blocks).
-- **Fallback**: PlantUML, only when Mermaid cannot express the diagram
-  (e.g. complex deployment diagrams).
-- Every diagram must have a caption and a short textual summary above it so
-  the document stays readable when the diagram fails to render.
-- Diagrams are generated only after the textual content they describe is
-  confirmed stable by the user.
-
-## 9. Wireframes (SVG)
-
-- When this scaffold includes the `.claude/` skills, wireframes are assembled
-  from the shared SVG fragments in `wf-fragments/` at the repository root.
-- **NEVER** include `<script>` elements, `on*` event attributes, `javascript:`
-  URIs, or any executable content inside generated SVG. This must be
-  validated before writing the file.
-- Copy fragments verbatim; replace only `<!-- param-name -->` placeholders.
-- Evaluate numeric expressions in placeholders (e.g. `<!-- y+34 -->`) and
-  substitute the computed value.
-- Circular avatars: always `dominant-baseline="central"` and `y == cy`.
-- Avatar labels: render **below** the circle, outside the colored area.
-- If a new repeating block is introduced, add it as a fragment and register
-  it in `wf-fragments/README.md`.
-- **Screenshots as temporary input**: when the user provides screenshots,
-  they serve as the reference for SVG layout and content. The generated SVG
-  must reflect the screenshot, so **NEVER** add elements not visible on it.
-  Screenshots are input-only and are not stored in `wf-fragments/`.
-
-## 10. Small in-run review
-
-Every skill performs a **lightweight review** at the end of its run:
-
-- All generated files parse as valid Markdown and contain the mandatory
-  frontmatter (and Confluence marks where required).
-- No `⚠️ TODO` marker is left unresolved without a user decision.
-- Internal links point to existing files.
-- Language check: Czech diacritics present, technical terms untouched.
-- Diagrams/wireframes: syntactic validation only (no semantics check).
-- All generated `.md` files pass `npx prettier --check` before finish, using
-  the Prettier config at the repository root (`.prettierrc` when this scaffold
-  ships one, otherwise the surrounding repository's own config).
-- **Skill self-check**: Claude re-reads the `SKILL.md` of the skill it just
-  ran and confirms that every rule and step listed there was applied.
-  Any gap found is reported to the user before the run completes.
-
-A **comprehensive review** is handled by a separate command/skill
-(`/docs-review`, planned) and is **NOT** part of the generation skills.
-
-## 11. File handling
-
-- **NEVER** overwrite an existing file silently. If the target file exists,
-  ask the user whether to overwrite, merge, or skip.
-- **NEVER** modify files outside `/docs/` unless the user explicitly
-  requests it.
-- **NEVER** modify `.vitepress/` configuration without explicit request.
-
-## 12. Commands cheat-sheet
-
-The slash commands below exist only when this scaffold includes the `.claude/`
-skills; check for `.claude/commands/` before reaching for one. Without them,
-ask for the phase you want directly and follow the rules in this file.
-
-| Command                    | Purpose                                        |
-| -------------------------- | ---------------------------------------------- |
-| `/docs-generate-from-code` | Orchestrator for the "docs from code" workflow |
-| `/docs-technical`          | Incremental technical documentation            |
-| `/docs-functional`         | Incremental functional documentation           |
-| `/docs-diagrams`           | Diagrams; run after textual content is stable  |
-| `/docs-wireframes`         | SVG wireframes; the last step                  |
+These commands come from `tf-doc-vault` and are independent of which skills are
+installed.
 
 Local preview:
 

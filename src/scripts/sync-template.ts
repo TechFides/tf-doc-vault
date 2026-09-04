@@ -35,6 +35,13 @@ export const TRACKED_FILES: string[] = [
   ".prettierignore",
   "eslint.config.js",
   "tsconfig.json",
+  // The portal-wide documentation rules. Tracked because a portal scaffolded
+  // before a rule change would otherwise keep the superseded rules forever,
+  // with nothing reporting the gap: no skill reads this file, so stale rules
+  // never fail a run, they only quietly stop applying. Sync reports drift and
+  // only `--apply` overwrites, so a portal that deliberately edited its own
+  // copy sees the diff before anything is replaced.
+  "CLAUDE.md",
 ];
 
 interface CliFlags {
