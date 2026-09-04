@@ -21,6 +21,20 @@ Vercel's git integration (a preview URL per branch, production on merge to `main
 pnpm dlx @techfides/tf-doc-vault@latest setup my_analysis --template=ana-docs
 ```
 
+The scaffold ships the portal and its toolchain, but no documentation skills.
+Those live in the TechFides skills library and are installed per project, so a
+portal always runs the current generation rather than a copy frozen at scaffold
+time:
+
+```bash
+tf-skills install docs
+```
+
+The scaffolded `CLAUDE.md` holds the portal-wide rules the skills assume. It is
+tracked by `sync` / `sync:apply` (see [Syncing the boilerplate to an existing
+repo](#syncing-the-boilerplate-to-an-existing-repo)), so a rule change reaches
+existing portals instead of only new ones.
+
 ## Options
 
 `tf-doc-vault setup <project-name> --template=ana-docs [options]`:
@@ -149,15 +163,17 @@ from a private one, is only a Vercel project settings change, no redeploy of cod
 
 ## Syncing the boilerplate to an existing repo
 
-When the package adds or fixes something in `boilerplate/` (`vercel.json`, `middleware.ts`, the GitHub workflow, lint/format configs), consumer repos don't
-receive the update automatically; those files belong to them. To inspect or apply the diff:
+When the package adds or fixes something in `boilerplate/` (`vercel.json`, `middleware.ts`, the GitHub workflow, lint/format configs, `CLAUDE.md`), consumer
+repos don't receive the update automatically; those files belong to them. To inspect or apply the diff:
 
 ```bash
 pnpm sync           # shows a unified diff of all drifted files
 pnpm sync:apply     # overwrites drifted files with the boilerplate (placeholders are rendered from the current repo)
 ```
 
-User content (`docs/`, `package.json`, README, CLAUDE) is excluded from overwriting.
+User content (`docs/`, `package.json`, README) is excluded from overwriting. `CLAUDE.md` is the exception: it carries the portal-wide documentation rules
+rather than project content, and a portal silently keeping superseded rules is worse than being told its copy drifted. `pnpm sync` shows that diff, and only
+`pnpm sync:apply` replaces the file, so a portal that deliberately edited its own copy sees the change before it happens.
 
 ---
 

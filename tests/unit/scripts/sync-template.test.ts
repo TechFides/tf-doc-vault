@@ -19,6 +19,7 @@ const EXPECTED_TRACKED_FILES = [
   ".prettierignore",
   "eslint.config.js",
   "tsconfig.json",
+  "CLAUDE.md",
 ];
 
 describe("tracked files", () => {
