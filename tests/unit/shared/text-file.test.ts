@@ -55,7 +55,6 @@ describe("writeTextPreservingEol", () => {
     expect(fs.readFileSync(file, "utf-8")).toBe("a: 1\n");
   });
 
-  // Without it, content already carrying CRLF would double up to `\r\r\n`.
   test("CRLF in the content does not survive twice", () => {
     const file = write("crlf.yaml", "a: 1\r\n");
     writeTextPreservingEol(file, "a: 1\r\nb: 2\r\n");

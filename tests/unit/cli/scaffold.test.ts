@@ -342,7 +342,6 @@ describe("scanTemplates", () => {
     expect(names.length).toBeGreaterThan(0);
   });
 
-  // A CRLF manifest read as having no frontmatter, which emptied the wizard.
   test("reads a manifest checked out with CRLF endings", () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "scaffold-crlf-"));
     write(path.join(dir, "demo/_template.md"), MANIFEST.replace(/\n/g, "\r\n"));

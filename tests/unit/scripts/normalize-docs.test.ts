@@ -70,7 +70,6 @@ describe("normalize-docs (flat frontmatter)", () => {
     expect(lines[4]).toBe("custom: value");
   });
 
-  // Our own canonicalization tool, not an editor of a file somebody else owns.
   test("reorders a CRLF file and writes it back as LF", () => {
     const file = path.join(docsRoot, "crlf.md");
     fs.writeFileSync(

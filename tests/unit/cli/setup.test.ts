@@ -1189,7 +1189,6 @@ allowBuilds:
     expect(second.content).toBe(first.content);
   });
 
-  // The host owns this file, so its endings survive the merge.
   test("a CRLF host workspace file keeps CRLF and is not double-appended", () => {
     const dir = tempDir();
     vi.spyOn(console, "log").mockImplementation(() => {});
