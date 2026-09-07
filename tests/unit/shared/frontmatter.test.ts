@@ -24,6 +24,54 @@ function write(name: string, content: string): string {
   return full;
 }
 
+// Above the direct-parser block, not instead of it: every fixture also has to
+// survive the read path with either line ending, parser added later included.
+const EOLS = [
+  ["LF", "\n"],
+  ["CRLF", "\r\n"],
+] as const;
+
+const FIXTURES: [string, string, Record<string, string>][] = [
+  [
+    "scalar fields",
+    "---\ntitle: A\norder: 3\n---\n\nbody",
+    { title: "A", order: "3" },
+  ],
+  ["a colon in the value", "---\ntitle: A: B\n---\n", { title: "A: B" }],
+  [
+    "a quoted value",
+    '---\ntitle: "S1: cache"\norder: "2"\n---\n',
+    { title: "S1: cache", order: "2" },
+  ],
+  [
+    "a nested block below a top-level field",
+    "---\ntitle: Home\nfeatures:\n  - icon: business\n    title: Components\n---\n",
+    { title: "Home" },
+  ],
+];
+
+for (const [label, eol] of EOLS) {
+  describe(`frontmatter on disk (${label})`, () => {
+    for (const [name, source, expected] of FIXTURES) {
+      test(name, () => {
+        const file = write(
+          `${name.replaceAll(" ", "-")}.md`,
+          source.replaceAll("\n", eol),
+        );
+        expect(readFrontmatter(file)).toEqual(expected);
+      });
+    }
+
+    test("a title read back through readTitle", () => {
+      const file = write(
+        "title.md",
+        "---\ntitle: Nadpis\n---\n".replaceAll("\n", eol),
+      );
+      expect(readTitle(file)).toBe("Nadpis");
+    });
+  });
+}
+
 describe("parseFrontmatter", () => {
   test("reads top-level scalar fields", () => {
     expect(parseFrontmatter("---\ntitle: A\norder: 3\n---\n\nbody")).toEqual({
@@ -103,6 +151,13 @@ describe("readFrontmatter", () => {
   test("reads the fields of a file on disk", () => {
     const file = write("page.md", "---\ntitle: Nadpis\norder: 2\n---\n\nbody");
     expect(readFrontmatter(file)).toEqual({ title: "Nadpis", order: "2" });
+  });
+
+  const SOURCE = '---\ntitle: "S1: A"\norder: 2\n---\n\nbody';
+
+  test("reads a file that starts with a BOM", () => {
+    const file = write("bom.md", "\uFEFF" + SOURCE);
+    expect(readFrontmatter(file)).toEqual({ title: "S1: A", order: "2" });
   });
 
   test("returns null for a file that does not exist", () => {

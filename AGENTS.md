@@ -35,7 +35,7 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 ## Repo map
 
 - `src/config/`: VitePress config factory (`makeConfig`)
-- `src/shared/`: frontmatter reader and sibling-ordering primitive shared by the sidebar generator, the print script and `docs:validate`
+- `src/shared/`: frontmatter reader, sibling-ordering primitive and `text-file` (`readText` / `writeText`) shared by the sidebar generator, the print script and `docs:validate`
 - `src/sidebar/`: sidebar / nav generator (`generateNav`, `generateSidebar`, `getVersions`)
 - `src/theme/`: Vue theme: components, composables, styles
 - `src/scripts/`: docs tooling scripts (`validate-docs`, `normalize-docs`, `export-pdf`, …)
@@ -54,6 +54,14 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 ## Conventions
 
 - Commit messages follow Conventional Commits. Enforced by Lefthook `commit-msg` → `commitlint` (`lefthook.yml`). `changelogen` derives the next version and `CHANGELOG.md` entries from these, so keep them well-formed.
+
+### Line endings
+
+Read text through `readText` from `src/shared/text-file.ts`, never `fs.readFileSync(f, "utf-8")`: `split("\n")` leaves a CR on every line and neither `.` nor `$` matches across it, so a CRLF checkout silently breaks any parser reading raw. It also strips a UTF-8 BOM, which a file written by Notepad or `>` in PowerShell carries and which keeps a `^---` frontmatter matcher from matching. Three files read raw on purpose and must stay that way: `ensure-lf` (through `readText` it would see LF and turn into a no-op that reports success), `replacePlaceholders` in `src/cli/utils.ts`, and `replace-wireframes.cjs`.
+
+Write a file this package does not own (a host `.gitignore`, `pnpm-workspace.yaml`, `package.json` or theme file) through `writeText`; anything the package generates itself is LF.
+
+`.gitattributes` is duplicated as `boilerplate/_gitattributes`. Change both.
 
 ### Comments
 

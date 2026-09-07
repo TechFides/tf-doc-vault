@@ -8,6 +8,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { allMdFiles } from "./docs-files.js";
 import { readFrontmatter, parseOrder } from "../shared/frontmatter.js";
+import { readText } from "../shared/text-file.js";
 import { pageEntries, subDirEntries } from "../shared/ordering.js";
 
 const args = process.argv.slice(2);
@@ -161,8 +162,7 @@ let skipped = 0;
 
 for (const file of files) {
   const rel = path.relative(DOCS_ROOT, file);
-  const content = fs.readFileSync(file, "utf-8");
-  const parsed = parse(content);
+  const parsed = parse(readText(file));
 
   if (!parsed) {
     console.log(`  skipped (no frontmatter): ${rel}`);

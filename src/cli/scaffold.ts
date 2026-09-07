@@ -15,6 +15,7 @@ import {
   type ParsedArgs,
 } from "./utils.js";
 import { detectHostRepo } from "./git-context.js";
+import { readText } from "../shared/text-file.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // dist/cli → package root
@@ -862,7 +863,7 @@ export function scanTemplates(
       if (!fs.existsSync(manifestPath)) fail(name, "missing manifest file");
       templates.push(
         parseTemplateManifest(
-          fs.readFileSync(manifestPath, "utf-8"),
+          readText(manifestPath),
           name,
           dir,
           dirs.boilerplateDir,
@@ -942,6 +943,7 @@ export function resolveCopyPlan(
 const SCAFFOLD_RENAMES: Record<string, string> = {
   _npmrc: ".npmrc",
   _gitignore: ".gitignore",
+  _gitattributes: ".gitattributes",
   "_pnpm-workspace.yaml": "pnpm-workspace.yaml",
   "_tsconfig.json": "tsconfig.json",
 };
@@ -963,11 +965,7 @@ export function boilerplateWorkspaceSettings(
   boilerplateDir: string = BOILERPLATE_DIR,
 ): WorkspaceSettings {
   const file = path.join(boilerplateDir, WORKSPACE_SOURCE);
-  const raw = parseYamlMap(
-    tokenizeYaml(fs.readFileSync(file, "utf-8")),
-    0,
-    0,
-  )[0];
+  const raw = parseYamlMap(tokenizeYaml(readText(file)), 0, 0)[0];
   const patterns = raw.publicHoistPattern;
   const builds = raw.allowBuilds;
   if (
@@ -1037,7 +1035,7 @@ export function applyCopyPlan(plan: CopyPlan): CopyDirResult {
 function packageVersion(): string {
   try {
     const pkgPath = path.join(PACKAGE_DIR, "package.json");
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as {
+    const pkg = JSON.parse(readText(pkgPath)) as {
       version?: string;
     };
     return pkg.version ?? "0.1.0";
@@ -1053,16 +1051,16 @@ function packageVersion(): string {
 export function packagePeerDependencies(
   packageDir: string = PACKAGE_DIR,
 ): Record<string, string> {
-  const pkg = JSON.parse(
-    fs.readFileSync(path.join(packageDir, "package.json"), "utf-8"),
-  ) as { peerDependencies?: Record<string, string> };
+  const pkg = JSON.parse(readText(path.join(packageDir, "package.json"))) as {
+    peerDependencies?: Record<string, string>;
+  };
   return pkg.peerDependencies ?? {};
 }
 
 export function packageName(packageDir: string = PACKAGE_DIR): string {
-  const pkg = JSON.parse(
-    fs.readFileSync(path.join(packageDir, "package.json"), "utf-8"),
-  ) as { name?: string };
+  const pkg = JSON.parse(readText(path.join(packageDir, "package.json"))) as {
+    name?: string;
+  };
   if (!pkg.name) fail("package.json", "has no name");
   return pkg.name;
 }

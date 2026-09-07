@@ -207,6 +207,20 @@ describe("build-print-page", () => {
     expect(out).toContain("##### Podnadpis");
   });
 
+  test("shifts the headings of a CRLF page too", () => {
+    const out = runPrint({
+      "v1/index.md": page("Verze", 1, "root"),
+      "v1/sekce/index.md": page(
+        "Sekce",
+        1,
+        "## Nadpis\n\n### Podnadpis",
+      ).replace(/\n/g, "\r\n"),
+    });
+
+    expect(out).toContain("#### Nadpis");
+    expect(out).toContain("##### Podnadpis");
+  });
+
   test("keeps a page's own h1 below the page title of a nested page", () => {
     const out = runPrint({
       "v1/index.md": page("Verze", 1, "root"),

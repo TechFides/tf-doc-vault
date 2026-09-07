@@ -11,6 +11,7 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { readFrontmatter } from "../shared/frontmatter.js";
+import { readText } from "../shared/text-file.js";
 import {
   siblingEntries,
   sortSiblings,
@@ -431,7 +432,7 @@ function readPageMap(): Record<string, number> {
   if (!flag) return {};
   const file = flag.slice("--pages=".length);
   if (!fs.existsSync(file)) return {};
-  return JSON.parse(fs.readFileSync(file, "utf-8")) as Record<string, number>;
+  return JSON.parse(readText(file)) as Record<string, number>;
 }
 
 const branding = readPdfBranding();
@@ -486,7 +487,7 @@ parts.push(`\n</div>`);
 // Only a section opens a fresh sheet. Breaking before every page is what leaves
 // two-line sheets behind.
 for (const page of pages) {
-  const raw = fs.readFileSync(page.filePath, "utf-8");
+  const raw = readText(page.filePath);
   const body = rewriteLinks(
     bindFigureCaptions(dropTocSections(stripFrontmatter(raw))),
     page.filePath,

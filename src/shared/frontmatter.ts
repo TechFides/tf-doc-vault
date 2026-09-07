@@ -1,5 +1,5 @@
-import fs from "node:fs";
 import path from "node:path";
+import { readText } from "./text-file.js";
 
 const FRONTMATTER = /^---\s*\n([\s\S]*?)\n---/;
 const KEY_VALUE = /^(\w+):\s*(.+)$/;
@@ -86,7 +86,7 @@ export function readFrontmatter(
   filePath: string,
 ): Record<string, string> | null {
   try {
-    return parseFrontmatter(fs.readFileSync(filePath, "utf-8"));
+    return parseFrontmatter(readText(filePath));
   } catch {
     return null;
   }

@@ -9,6 +9,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { readText } from "../shared/text-file.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CLI_DIR = __dirname; // dist/cli
@@ -54,7 +55,7 @@ type PageMap = Record<string, number>;
 function readPageMap(): PageMap {
   if (!fs.existsSync(PAGE_MAP_FILE)) return {};
   try {
-    return JSON.parse(fs.readFileSync(PAGE_MAP_FILE, "utf-8")) as PageMap;
+    return JSON.parse(readText(PAGE_MAP_FILE)) as PageMap;
   } catch {
     // An export cut short mid-write leaves a truncated file behind.
     return {};

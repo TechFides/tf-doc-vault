@@ -15,6 +15,7 @@ const EXPECTED_TRACKED_FILES = [
   "middleware.ts",
   ".github/workflows/ci.yml",
   ".gitignore",
+  ".gitattributes",
   ".prettierrc",
   ".prettierignore",
   "eslint.config.js",
@@ -38,7 +39,11 @@ describe("tracked files", () => {
   // Unless sync resolves a renamed file back, it reports a missing baseline for
   // a file the scaffold does ship.
   test("resolves every name the scaffold renames on copy", () => {
-    for (const source of ["_gitignore", "_pnpm-workspace.yaml"]) {
+    for (const source of [
+      "_gitignore",
+      "_gitattributes",
+      "_pnpm-workspace.yaml",
+    ]) {
       expect(resolveBoilerplatePath(consumerName(source))).toBe(
         path.join(BOILERPLATE_DIR, source),
       );

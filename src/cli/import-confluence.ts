@@ -33,6 +33,7 @@ import {
   type TreeNode,
   errorMessage,
 } from "../confluence/types.js";
+import { readText } from "../shared/text-file.js";
 
 interface WriteContext {
   site: string;
@@ -72,7 +73,7 @@ function yamlString(value: string): string {
 
 function preservedStatus(filePath: string): string {
   if (!fs.existsSync(filePath)) return "review";
-  const match = fs.readFileSync(filePath, "utf-8").match(/^status:\s*(.+)$/m);
+  const match = readText(filePath).match(/^status:\s*(.+)$/m);
   return match?.[1]?.trim() === "published" ? "published" : "review";
 }
 
