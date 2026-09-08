@@ -54,8 +54,6 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 ## Conventions
 
 - Commit messages follow Conventional Commits. Enforced by Lefthook `commit-msg` → `commitlint` (`lefthook.yml`). `changelogen` derives the next version and `CHANGELOG.md` entries from these, so keep them well-formed.
-- Never add yourself (the agent) as a commit co-author.
-- Write the commit subject line only, no commit body.
 
 ### Line endings
 
