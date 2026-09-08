@@ -1,6 +1,6 @@
 ---
 name: docs-wireframes-from-code
-description: "Generates SVG wireframes for already-generated documentation pages. Attaches wireframes at the `<!-- wireframe-anchor: <id> -->` markers placed by the functional phase (typically inside scenario files); it does NOT invent wireframes for pages without anchors. Inputs include the codebase, already-generated docs, shared SVG fragments from `wf-fragments/`, and optional user-provided screenshots used as layout reference. ALWAYS runs as the last phase, AFTER text and diagrams are confirmed stable. Invoked by the docs-from-code orchestrator or by /docs-wireframes. DO NOT trigger for text generation, diagrams, sales, or pre-code design. Always inherits rules from CLAUDE.md."
+description: "Generates SVG wireframes for already-generated documentation pages. Attaches wireframes at the `<!-- wireframe-anchor: <id> -->` markers placed by the functional phase (typically inside scenario files); it does NOT invent wireframes for pages without anchors. Inputs include the codebase, already-generated docs, shared SVG fragments from `wf-fragments/`, and optional user-provided screenshots used as layout reference. ALWAYS runs as the last phase, AFTER text and diagrams are confirmed stable. Invoked by the docs-from-code orchestrator or by /docs-wireframes. DO NOT trigger for text generation, diagrams, sales, or pre-code design. Always inherits rules from AGENTS.md."
 ---
 
 # docs-wireframes-from-code: Wireframes phase
@@ -39,7 +39,7 @@ This skill uses up to **four** sources:
    I/O data tables describe fields.
 3. **Shared SVG fragments**: `wf-fragments/` at repo root. Canonical
    snippets for shells, avatars, buttons, inputs, conversation rows,
-   etc. (§9 of CLAUDE.md).
+   etc. (§9 of AGENTS.md).
 4. **User-provided screenshots (optional, temporary)**: when supplied,
    they are the **layout reference**: the SVG must reflect the
    screenshot's layout and content, and **NEVER** add elements not
@@ -223,7 +223,7 @@ wireframes in Step 4:
    repeated SVG blocks produced across wireframes that were not sourced
    from an existing fragment. If a block appears ≥3 times, propose
    extracting it into a new fragment under `wf-fragments/` and
-   registering it in `wf-fragments/README.md` (§9 of CLAUDE.md).
+   registering it in `wf-fragments/README.md` (§9 of AGENTS.md).
 
 3. **Retrospective fragment update from approved wireframes.** Review
    every wireframe the user approved in Step 4 of this run. For each
@@ -274,11 +274,11 @@ Return:
   Do **NOT** invent wireframes for scenario pages without anchors.
 - **Fragment-first**: always start from shared fragments. Introduce new
   fragments when a block repeats; do not duplicate inline.
-- **No JavaScript / executable content** in SVG: per §9 of CLAUDE.md
+- **No JavaScript / executable content** in SVG: per §9 of AGENTS.md
   and Step 2 item 6. This rule is hard-enforced by the validator.
 - **Reflect reality**: screenshots, scenario page, and code are the only
   sources of layout and content. No decorative invention.
-- **Czech field labels, original technical terms**: per §7 of CLAUDE.md.
+- **Czech field labels, original technical terms**: per §7 of AGENTS.md.
 - **TODOs live in the host Markdown, never inside the SVG**.
 - **Consistency with host text required** before leaving Step 3.
 

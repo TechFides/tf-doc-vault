@@ -26,12 +26,12 @@ generated or updated. That covers:
 One file per API. **NEVER** bundle multiple APIs into a single page;
 one consumer / one exposed API = one `.md` file.
 
-## Project-specific rules (inherit from CLAUDE.md)
+## Project-specific rules (inherit from AGENTS.md)
 
 These override anything in the generic patterns below when they
 conflict:
 
-- **Evidence-first** (§1 CLAUDE.md). Every endpoint, field, code,
+- **Evidence-first** (§1 AGENTS.md). Every endpoint, field, code,
   status, and rate-limit value must be traceable to code / OpenAPI
   spec / config. Values that cannot be cited get `⚠️ TODO: …`; never
   invented.

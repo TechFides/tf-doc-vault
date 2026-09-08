@@ -112,4 +112,4 @@ Report:
   (`applied / edited / skipped / deferred / already-present / error`),
 - review table for all touched files,
 - self-check result,
-- any deferred `CLAUDE.md`-implying entries surfaced for the user.
+- any deferred `AGENTS.md`-implying entries surfaced for the user.

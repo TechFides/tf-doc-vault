@@ -6,7 +6,7 @@ argument-hint: [scope] # optional: technical | functional | diagrams | wireframe
 # /docs-generate-from-code
 
 You are starting a **documentation generation run from an existing
-codebase**. Follow the rules in `CLAUDE.md` at project root (they
+codebase**. Follow the rules in `AGENTS.md` at project root (they
 override any conflicting defaults).
 
 ## Scope selection
@@ -32,7 +32,7 @@ If `$ARGUMENTS` contains anything else, stop and ask the user to clarify.
    e. `screenshots`: only when scope includes `wireframes`: ALWAYS ask
    even if the user did not mention them.
 3. Detect `docs/` state. If files would be overwritten, list them and
-   ask per §11 of CLAUDE.md.
+   ask per §11 of AGENTS.md.
 4. Produce a **run context** summary and show it to the user before
    starting:
 
@@ -65,7 +65,7 @@ orchestrator's Step 2:
 
 For `full`, after each phase completes:
 
-1. Run the small in-run review (§10 of CLAUDE.md) on the files that
+1. Run the small in-run review (§10 of AGENTS.md) on the files that
    phase produced.
 2. Show the review table to the user.
 3. Ask: "Phase `<X>` finished. Review the generated files. Proceed to
@@ -76,7 +76,7 @@ For `full`, after each phase completes:
 ## TODO resolution (always run at the end of the run)
 
 After the last phase of this run finishes, execute the TODO resolution
-flow from §2 of CLAUDE.md:
+flow from §2 of AGENTS.md:
 
 1. Collect every `⚠️ TODO` marker produced in this run, grouped by
    kind:
@@ -163,7 +163,7 @@ Report to the user:
 
 - counts per phase (files generated, TODOs by kind, TODOs resolved),
 - the small-review table for the whole run,
-- the skill self-check result (§10 of CLAUDE.md): every skill that ran
+- the skill self-check result (§10 of AGENTS.md): every skill that ran
   was re-read and confirmed to have applied its rules.
 - path and entry count of the session-notes file, or `discarded` if the
   user chose not to keep it.

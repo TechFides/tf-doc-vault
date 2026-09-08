@@ -1,6 +1,6 @@
 ---
 name: docs-from-code
-description: Orchestrator skill for generating project documentation from an existing codebase. Drives the full workflow, from preflight and phase selection through delegation to phase skills (technical, functional, diagrams, wireframes), TODO resolution, and the small in-run review. Trigger when the user asks to generate documentation from code or from an existing codebase, or invokes /docs-generate-from-code. DO NOT trigger for pre-code design docs, sales or marketing documentation, or documentation/analysis review; those scopes have their own skills. Always inherits rules from CLAUDE.md.
+description: Orchestrator skill for generating project documentation from an existing codebase. Drives the full workflow, from preflight and phase selection through delegation to phase skills (technical, functional, diagrams, wireframes), TODO resolution, and the small in-run review. Trigger when the user asks to generate documentation from code or from an existing codebase, or invokes /docs-generate-from-code. DO NOT trigger for pre-code design docs, sales or marketing documentation, or documentation/analysis review; those scopes have their own skills. Always inherits rules from AGENTS.md.
 ---
 
 # docs-from-code: Orchestrator
@@ -41,9 +41,9 @@ deferred by the user.
 
 ### Step 1: Preflight
 
-- Read `CLAUDE.md` at project root. Apply all rules from it.
+- Read `AGENTS.md` at project root. Apply all rules from it.
 - Detect existing `docs/` structure. If files would be overwritten, list them
-  and ask the user per §11 of CLAUDE.md.
+  and ask the user per §11 of AGENTS.md.
 - Record current date (`currentDate`) and source version into a run context
   that every generated file's header must use.
 
@@ -64,17 +64,17 @@ For `full`, pause after each phase and ask the user:
 > "Phase X finished. Review the generated files. Proceed to phase Y? (y/n/stop)"
 
 **NEVER** auto-advance between phases without user confirmation, unless the
-user explicitly activated `--auto` mode for this run (§3 of CLAUDE.md).
+user explicitly activated `--auto` mode for this run (§3 of AGENTS.md).
 
 ### Step 3: TODO resolution
 
 After the last phase of the run completes, perform the TODO resolution flow
-described in §2 of CLAUDE.md. The orchestrator owns this step; phase skills
+described in §2 of AGENTS.md. The orchestrator owns this step; phase skills
 only produce TODOs, they do not resolve them.
 
 ### Step 4: Small in-run review
 
-Run the review checklist from §10 of CLAUDE.md **for every generated file**.
+Run the review checklist from §10 of AGENTS.md **for every generated file**.
 Report the result as a compact table:
 
 ```
@@ -133,4 +133,4 @@ them upfront (progressive disclosure).
 - Comprehensive review (handled by `/docs-review`, not yet implemented).
 - Any code changes outside `docs/`.
 - Publishing to Confluence (CLI handles this; this skill only writes the
-  marks described in §6 of CLAUDE.md).
+  marks described in §6 of AGENTS.md).

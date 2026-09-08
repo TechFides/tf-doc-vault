@@ -53,10 +53,10 @@ Append a one-line flag under the diff when any of these hold:
   the target file; default to `skip`.
 - `⚠ out-of-tree target`: the file is outside `.claude/skills/` and
   `.claude/commands/`; require an explicit `y` acknowledging the
-  out-of-tree write (§11 of CLAUDE.md).
+  out-of-tree write (§11 of AGENTS.md).
 - `⚠ contradicts entry <j>`: another entry earlier in the plan
   proposed the opposite change; show both excerpts before asking.
-- `⚠ implies CLAUDE.md change`: the excerpt targets project-wide
+- `⚠ implies AGENTS.md change`: the excerpt targets project-wide
   rules; default to `defer`, never `y`.
 
 ## After the user replies

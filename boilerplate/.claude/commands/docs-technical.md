@@ -7,7 +7,7 @@ argument-hint: [auto] # optional: pass 'auto' to reduce file-by-file pausing (op
 
 You are running the **technical documentation phase** from an existing
 codebase, as a single phase without the other phases. Follow the rules
-in `CLAUDE.md` at project root (they override any conflicting defaults).
+in `AGENTS.md` at project root (they override any conflicting defaults).
 
 This command is appropriate when:
 
@@ -25,7 +25,7 @@ pre-code analyses, or reviews; those have their own commands.
   review.
 - `auto` → `auto_mode = true`. **Only** valid if the user has already
   iterated several successful runs of this command and explicitly opts
-  in (§3 of CLAUDE.md). If the current session has no prior successful
+  in (§3 of AGENTS.md). If the current session has no prior successful
   runs of this command, refuse `auto` and fall back to the default.
 
 ## Preflight (ALWAYS)
@@ -39,7 +39,7 @@ pre-code analyses, or reviews; those have their own commands.
    d. `current_date`: from system context.
    e. `auto_mode`: from the argument, with the safety rule above.
 3. Detect the current state of `docs/<version>/technical/`. If files
-   would be overwritten, list them and ask per §11 of CLAUDE.md.
+   would be overwritten, list them and ask per §11 of AGENTS.md.
 4. Produce a **run context** summary:
 
    ```
@@ -71,7 +71,7 @@ Follow the workflow in `docs-technical-from-code/SKILL.md`:
 
 ## TODO resolution (always run at the end)
 
-Execute the TODO resolution flow from §2 of CLAUDE.md:
+Execute the TODO resolution flow from §2 of AGENTS.md:
 
 1. Collect every `⚠️ TODO` marker produced in this run, grouped by kind
    (for a single-phase run, typically `missing-evidence` only; any
@@ -106,7 +106,7 @@ Report:
 - TODO counts per file (and total), split by kind,
 - list of skipped proposed groups and the reason,
 - list of non-proposed groups created in this run (if any),
-- small-review table (§10 of CLAUDE.md),
+- small-review table (§10 of AGENTS.md),
 - skill self-check result,
 - path and entry count of the session-notes file, or `discarded`.
 

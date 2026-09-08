@@ -1,6 +1,6 @@
 ---
 name: docs-technical-from-code
-description: Generates technical documentation from an existing codebase, covering the full technical menu (tech stack, infrastructure, CI/CD, architecture, security, integrations, roles, jobs, testing, SLA, monitoring, scaling, feature toggles, caching, localization, disaster recovery, accessibility, audit, guides, and any project-specific technical concerns). Works file-by-file (text only, no diagrams and no wireframes), pausing after each generated page for user review. Invoked by the docs-from-code orchestrator or by /docs-technical. DO NOT trigger for functional docs, diagrams, wireframes, sales, or pre-code design. Always inherits rules from CLAUDE.md.
+description: Generates technical documentation from an existing codebase, covering the full technical menu (tech stack, infrastructure, CI/CD, architecture, security, integrations, roles, jobs, testing, SLA, monitoring, scaling, feature toggles, caching, localization, disaster recovery, accessibility, audit, guides, and any project-specific technical concerns). Works file-by-file (text only, no diagrams and no wireframes), pausing after each generated page for user review. Invoked by the docs-from-code orchestrator or by /docs-technical. DO NOT trigger for functional docs, diagrams, wireframes, sales, or pre-code design. Always inherits rules from AGENTS.md.
 ---
 
 # docs-technical-from-code: Technical documentation phase
@@ -143,8 +143,8 @@ Return to the orchestrator:
 - **No diagrams in this phase**: if a diagram is expected later, insert
   only the anchor `<!-- diagram-anchor: <name> -->`; do not produce
   Mermaid / PlantUML here.
-- **Czech content, original technical terms**: per §7 of CLAUDE.md.
-- **Confluence marks required**: per §6 of CLAUDE.md.
+- **Czech content, original technical terms**: per §7 of AGENTS.md.
+- **Confluence marks required**: per §6 of AGENTS.md.
 
 Per-group nuances (what to emphasize for architecture vs. security vs.
 tests vs. guides, etc.) are captured inside the corresponding templates,

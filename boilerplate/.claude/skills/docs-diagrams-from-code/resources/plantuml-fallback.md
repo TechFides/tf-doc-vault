@@ -1,7 +1,7 @@
 # PlantUML fallback
 
 Mermaid is the primary diagram language in this project (§8 of
-`CLAUDE.md`). PlantUML is a **fallback**, used only when Mermaid
+`AGENTS.md`). PlantUML is a **fallback**, used only when Mermaid
 cannot express a specific diagram cleanly. Every PlantUML block must
 carry a one-line comment above it explaining _why_ Mermaid was
 insufficient, so future maintainers can re-evaluate.

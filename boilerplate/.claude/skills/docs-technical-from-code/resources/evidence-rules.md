@@ -85,6 +85,6 @@ the conflict spelled out.
 - **NEVER** cite a file you have not opened and read.
 - **ALWAYS** prefer `path:line` over `path` for specific claims.
 - **ALWAYS** include at least one example per non-trivial concept, drawn
-  from the code (§7 of `CLAUDE.md`).
+  from the code (§7 of `AGENTS.md`).
 - **ALWAYS** keep technical terms in their original language; only
   surrounding prose is Czech.

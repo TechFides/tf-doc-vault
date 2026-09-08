@@ -6,7 +6,7 @@ argument-hint: [auto] # optional: pass 'auto' to reduce per-wireframe pausing (o
 # /docs-wireframes
 
 You are running the **wireframes phase** as a single phase. Follow the
-rules in `CLAUDE.md` at project root (they override any conflicting
+rules in `AGENTS.md` at project root (they override any conflicting
 defaults).
 
 This command is appropriate when:
@@ -50,7 +50,7 @@ Record the answer as `screenshots` in the run context.
   review.
 - `auto` → `auto_mode = true`. **Only** valid if the user has already
   iterated several successful runs of this command and explicitly opts
-  in (§3 of CLAUDE.md). If the current session has no prior successful
+  in (§3 of AGENTS.md). If the current session has no prior successful
   runs of this command, refuse `auto` and fall back to the default.
   Note: the screenshots question is asked EVEN WHEN `auto_mode` is on.
 
@@ -123,7 +123,7 @@ c) skip`. On `a` or `b`, write/update `wf-fragments/<path>` and
 
 ## TODO resolution (always run at the end)
 
-Execute the TODO resolution flow from §2 of CLAUDE.md:
+Execute the TODO resolution flow from §2 of AGENTS.md:
 
 1. Collect every `⚠️ TODO` marker produced in this run, grouped by
    kind:
@@ -171,7 +171,7 @@ Report:
   backfilled host pages),
 - confirmation that all temporary screenshots were discarded,
 - SVG validation result per file (pass / fail + reason),
-- small-review table (§10 of CLAUDE.md),
+- small-review table (§10 of AGENTS.md),
 - skill self-check result,
 - path and entry count of the session-notes file, or `discarded`.
 

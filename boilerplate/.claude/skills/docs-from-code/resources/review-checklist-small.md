@@ -2,7 +2,7 @@
 
 Used in two places by the orchestrator:
 
-- **Step 4**: small review (§10 of `CLAUDE.md`) over files touched in
+- **Step 4**: small review (§10 of `AGENTS.md`) over files touched in
   the run.
 - **Step 5**: the skill self-check.
 
