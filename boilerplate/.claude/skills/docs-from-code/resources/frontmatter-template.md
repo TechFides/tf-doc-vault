@@ -2,7 +2,7 @@
 
 Canonical frontmatter and HTML-comment blocks for every `.md` file the
 skills generate. All example labels are in Czech with diacritics, as
-they will appear in the final docs (§7 of `CLAUDE.md`).
+they will appear in the final docs (§7 of `AGENTS.md`).
 
 ## Content page (general)
 
@@ -50,7 +50,7 @@ confluence:
 Krátký úvodní odstavec (1–2 věty).
 ```
 
-No `<!-- generated: … -->` stamp on index files (§5 of `CLAUDE.md`).
+No `<!-- generated: … -->` stamp on index files (§5 of `AGENTS.md`).
 
 ## Group index: `<section>/<group>/index.md`
 
@@ -83,7 +83,7 @@ Krátký úvodní odstavec.
 | `updated_at` | `YYYY-MM-DD` or `YYYY-MM-DD HH:MM`            | required; from `currentDate` |
 | `order`      | integer                                       | required                     |
 
-## Confluence mark rules (§6 of CLAUDE.md)
+## Confluence mark rules (§6 of AGENTS.md)
 
 - `space`: Confluence space key (project decides; default `CNG`).
 - `title`: matches the page title for top-level synced pages.
@@ -92,7 +92,7 @@ Krátký úvodní odstavec.
 - **NEVER** omit the Confluence mark on files that belong to a synced
   section.
 
-## Generation stamp rules (§5 of CLAUDE.md)
+## Generation stamp rules (§5 of AGENTS.md)
 
 - Only on content pages, not on `index.md`.
 - Format: `<!-- generated: YYYY-MM-DD | source: vX.Y.Z -->`.

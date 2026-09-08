@@ -3,7 +3,7 @@
 Procedure for Step 2 when the anchor's `Layout source = screenshot`.
 Screenshots are the highest-fidelity input for a wireframe, but they
 are **input-only**: not stored in `wf-fragments/`, discarded after the
-run, and never added to the repository (§9 CLAUDE.md).
+run, and never added to the repository (§9 AGENTS.md).
 
 ## Screenshot kinds: example vs. real app
 

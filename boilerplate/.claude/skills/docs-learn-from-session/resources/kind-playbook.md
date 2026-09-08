@@ -10,7 +10,7 @@ into a concrete, minimal edit to the target file.
 - Prefer the smallest possible edit. One new bullet beats a rewritten
   section.
 - Never paraphrase in a way that changes the meaning of the user's
-  words (§1 of CLAUDE.md).
+  words (§1 of AGENTS.md).
 - If the target block cannot be located unambiguously, ask the user
   before drafting the diff.
 

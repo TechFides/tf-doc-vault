@@ -1,6 +1,6 @@
 ---
 name: docs-functional-from-code
-description: Generates functional documentation from an existing codebase AND from any already-generated technical documentation in the current version folder. Covers the full functional menu (overview, product structure, glossary, actors, personas, screens, scenarios list, business rules, notifications, reports, and scenario details with wireframe anchors). Code is the ultimate source of truth; the technical section, when available, is used as a faster, already-digested lookup for APIs, roles, components, data model, feature toggles, and metrics. Works file-by-file (text only, no diagrams and no wireframes), pausing after each generated page for user review. Invoked by the docs-from-code orchestrator or by /docs-functional. DO NOT trigger for technical docs, diagrams, wireframes, sales, or pre-code design. Always inherits rules from CLAUDE.md.
+description: Generates functional documentation from an existing codebase AND from any already-generated technical documentation in the current version folder. Covers the full functional menu (overview, product structure, glossary, actors, personas, screens, scenarios list, business rules, notifications, reports, and scenario details with wireframe anchors). Code is the ultimate source of truth; the technical section, when available, is used as a faster, already-digested lookup for APIs, roles, components, data model, feature toggles, and metrics. Works file-by-file (text only, no diagrams and no wireframes), pausing after each generated page for user review. Invoked by the docs-from-code orchestrator or by /docs-functional. DO NOT trigger for technical docs, diagrams, wireframes, sales, or pre-code design. Always inherits rules from AGENTS.md.
 ---
 
 # docs-functional-from-code: Functional documentation phase
@@ -223,8 +223,8 @@ Return to the orchestrator:
   wireframe anchor → main flow → I/O data table → triggers → business
   logic → feature toggle → metrics), and emit `⚠️ TODO` for any section
   without evidence.
-- **Czech content, original technical terms**: per §7 of CLAUDE.md.
-- **Confluence marks required**: per §6 of CLAUDE.md.
+- **Czech content, original technical terms**: per §7 of AGENTS.md.
+- **Confluence marks required**: per §6 of AGENTS.md.
 
 ## Resources
 
