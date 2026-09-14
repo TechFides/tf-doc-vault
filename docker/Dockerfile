@@ -15,7 +15,7 @@
 ARG SERVER_TYPE=nginx
 
 # ── Stage 1: build ────────────────────────────────────────────────────────────
-FROM node:24-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e AS builder
+FROM node:24-slim@sha256:2fe369e969550cde8e867afc3fe370b260140cab4a23d467074295b42163d553 AS builder
 
 WORKDIR /app
 
@@ -36,7 +36,7 @@ COPY tsconfig.json ./
 RUN pnpm run docs:print && pnpm run docs:build
 
 # ── Stage 2a: nginx (no auth) ─────────────────────────────────────────────────
-FROM node:24-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e AS runner-nginx
+FROM node:24-slim@sha256:2fe369e969550cde8e867afc3fe370b260140cab4a23d467074295b42163d553 AS runner-nginx
 
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends nginx \
@@ -50,7 +50,7 @@ EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
 
 # ── Stage 2b: nginx + Basic auth ──────────────────────────────────────────────
-FROM node:24-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e AS runner-nginx-auth
+FROM node:24-slim@sha256:2fe369e969550cde8e867afc3fe370b260140cab4a23d467074295b42163d553 AS runner-nginx-auth
 
 ARG BASIC_AUTH_USER
 ARG BASIC_AUTH_PASS
