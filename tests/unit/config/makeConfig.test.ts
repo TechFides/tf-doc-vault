@@ -232,3 +232,28 @@ describe("makeConfig markdown options", () => {
     expect(typeof config.markdown?.config).toBe("function");
   });
 });
+
+describe("makeConfig srcExclude", () => {
+  function srcExcludeOf(
+    opts: Parameters<typeof makeConfig>[0],
+  ): string[] | undefined {
+    return (
+      makeConfig({ ...opts, mermaid: false }) as unknown as {
+        srcExclude?: string[];
+      }
+    ).srcExclude;
+  }
+
+  test("docs/README.md is never rendered as a page: it is the v2 documentation contract", () => {
+    expect(srcExcludeOf({ configDir })).toContain("README.md");
+  });
+
+  test("a consumer's override.srcExclude is merged, not replaced", () => {
+    const list = srcExcludeOf({
+      configDir,
+      override: { srcExclude: ["drafts/**"] },
+    });
+    expect(list).toContain("README.md");
+    expect(list).toContain("drafts/**");
+  });
+});
