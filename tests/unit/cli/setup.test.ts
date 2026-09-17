@@ -1716,3 +1716,55 @@ describe("enableAnalytics", () => {
     fs.rmSync(dir, { recursive: true, force: true });
   });
 });
+
+describe("skills bundle wiring", () => {
+  const RECOVERY =
+    "npx --yes @techfides/tf-skills-manager@latest install --bundle docs --target /tmp/probe/.claude/skills";
+  const ctx = {
+    manifest: manifest({ skillsBundle: "docs" }),
+    answers: { name: "probe" },
+    targetDir: "/tmp/probe",
+    cwd: "/tmp",
+    dependency: "^0.5.0",
+    gitInitialized: false,
+  };
+
+  test("--no-skills is a known flag", () => {
+    expect(unknownFlags({ "no-skills": true })).toEqual([]);
+  });
+
+  test("a failed skills install becomes the first next step, with the recovery command", () => {
+    const epilogue = nextSteps({
+      ...ctx,
+      skills: {
+        attempted: true,
+        ok: false,
+        command: RECOVERY,
+        claudeMd: "kept",
+        reason: "no GitHub token",
+      },
+    });
+    expect(epilogue).toContain(RECOVERY);
+    expect(epilogue).toContain("gh auth login");
+    expect(epilogue.indexOf(RECOVERY)).toBeLessThan(
+      epilogue.indexOf("pnpm install"),
+    );
+  });
+
+  test("a kept CLAUDE.md after a successful install is called out", () => {
+    const epilogue = nextSteps({
+      ...ctx,
+      skills: {
+        attempted: true,
+        ok: true,
+        command: RECOVERY,
+        claudeMd: "kept",
+      },
+    });
+    expect(epilogue).toContain("docs-base/references/CLAUDE.md");
+  });
+
+  test("no attempt, no skills text", () => {
+    expect(nextSteps(ctx)).not.toContain("tf-skills-manager");
+  });
+});

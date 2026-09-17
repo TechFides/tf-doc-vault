@@ -92,7 +92,7 @@ It asks which template to use, then prompts for the fields that template needs. 
 
 - **Migrating from Confluence?** → [Import from Confluence](./docs/confluence-import.md)
 
-Adding a template of your own means adding a folder under `templates/<name>/` with a `_template.md` manifest (target location, fields to prompt for, which boilerplate files to exclude): no code change, the wizard lists it automatically.
+Adding a template of your own means adding a folder under `templates/<name>/` with a `_template.md` manifest (target location, fields to prompt for, which boilerplate files to exclude, which skills bundle to install): no code change, the wizard lists it automatically.
 
 ## Configuration
 

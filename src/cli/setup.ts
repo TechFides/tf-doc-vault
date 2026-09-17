@@ -5,6 +5,7 @@
  * `scaffold.ts` reads, so a new template is a new folder and no code change.
  */
 
+import { installSkills, type SkillsInstall } from "./install-skills.js";
 import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
@@ -114,7 +115,7 @@ function checkSupplied(field: FieldSpec, value: Answer): Answer {
 }
 
 export function knownFlagKeys(): Set<string> {
-  const keys = new Set(["template", "help"]);
+  const keys = new Set(["template", "help", "no-skills"]);
   for (const field of FIELD_CATALOG) {
     if (!field.flag.startsWith("[")) keys.add(field.key);
     if (field.type === "confirm") keys.add(`no-${field.key}`);
@@ -891,6 +892,10 @@ function usage(exitCode = 0): never {
     ...table([
       ["--template=<name>", "Template to scaffold, from the list above"],
       ...rowsFor(options),
+      [
+        "--no-skills",
+        "Skip installing the template's skills bundle through tf-skills",
+      ],
       ["--help, -h", "Print this help and exit"],
     ]),
     "",
@@ -933,6 +938,7 @@ export function nextSteps(ctx: {
   cwd: string;
   dependency: string;
   gitInitialized: boolean;
+  skills?: SkillsInstall;
 }): string {
   const relative = posix(path.relative(ctx.cwd, ctx.targetDir)) || ".";
   // The host-driven flavour runs its scripts from the repository root, every
@@ -942,6 +948,16 @@ export function nextSteps(ctx: {
   const fromHere = (entry: string): string =>
     insideTarget ? entry : posix(path.join(relative, entry));
   const blocks: string[] = [];
+
+  if (ctx.skills?.attempted && !ctx.skills.ok) {
+    blocks.push(`Switch to the current TechFides documentation skills (needs a GitHub
+token with access to the skills library: \`gh auth login\` or GITHUB_TOKEN):
+  ${ctx.skills.command}`);
+  } else if (ctx.skills?.ok && ctx.skills.claudeMd === "kept") {
+    blocks.push(`The installed skills bundle shipped no portal CLAUDE.md. Once the library
+does, copy it over the bundled one:
+  cp ${fromHere(".claude/skills/docs-base/references/CLAUDE.md")} ${fromHere("CLAUDE.md")}`);
+  }
 
   if (ctx.dependency.startsWith("file:")) {
     // Printed before the cd instruction, so it is relative to the cwd.
@@ -1146,6 +1162,30 @@ async function run(): Promise<void> {
     }),
   );
 
+  // Skills are additive: a failed install keeps the bundled set and the
+  // scaffold still succeeds, with the recovery command in the epilogue.
+  let skills: SkillsInstall = {
+    attempted: false,
+    ok: false,
+    command: "",
+    claudeMd: "kept",
+  };
+  if (manifest.skillsBundle && flags["no-skills"] !== true) {
+    console.log(
+      `  installing skills bundle "${manifest.skillsBundle}" via tf-skills…`,
+    );
+    skills = installSkills(manifest.skillsBundle, targetDir);
+    if (!skills.ok) {
+      process.stderr.write(
+        `⚠  Skills bundle not installed (${skills.reason ?? "unknown"}); keeping the bundled default skills.\n`,
+      );
+    } else if (skills.claudeMd === "kept") {
+      process.stderr.write(
+        "⚠  The installed bundle ships no docs-base/references/CLAUDE.md; the bundled CLAUDE.md was kept.\n",
+      );
+    }
+  }
+
   // Read before the host steps: `host.pnpmWorkspace` writes a workspace file of
   // its own into the cwd, which is an ancestor of the target.
   const ancestorWorkspace = findAncestorFile(targetDir, WORKSPACE_FILE);
@@ -1184,6 +1224,7 @@ async function run(): Promise<void> {
     cwd,
     dependency,
     gitInitialized,
+    skills,
   });
   console.log(`\n✓ Done.\n\n${epilogue}\n`);
   if (interactive) clack.outro("Happy documenting.");
