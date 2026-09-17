@@ -82,6 +82,14 @@ It asks which template to use, then prompts for the fields that template needs. 
 
   Full guide → [Analytical documentation](./docs/ana-docs.md)
 
+- **Sales offer inside the offers monorepo** (one folder per offer; `git init` and section navigation off):
+
+  ```bash
+  pnpm dlx @techfides/tf-doc-vault@latest setup nabidka-acme --template=sales-docs
+  ```
+
+  Full guide → [Sales offers](./docs/ana-docs.md#sales-offers-sales-docs)
+
 - **Docs inside an existing service** (published by the service repo's own pipeline):
 
   ```bash
@@ -131,14 +139,15 @@ To rebrand (colors, logo, fonts, footer) for a non-TechFides project, see [BRAND
 
 Task-focused guides live in **[`docs/`](./docs/README.md)**:
 
-| Guide                                                        | What it covers                                                                                                                                      |
-| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Technical documentation (`tech-docs`)](./docs/tech-docs.md) | Docs living inside a service repo, scaffolded via `setup --template=tech-docs`; the service repo publishes them itself.                             |
-| [Analytical documentation (`*_ana`)](./docs/ana-docs.md)     | Standalone analysis docs scaffolded via `setup --template=ana-docs`, deployed to Vercel, including the auth middleware and syncing the boilerplate. |
-| [Import from Confluence](./docs/confluence-import.md)        | Migrate a Confluence space into Markdown (`import-confluence`).                                                                                     |
-| [Editing &amp; publishing docs](./docs/updating-docs.md)     | The day-to-day edit → preview → validate → publish loop.                                                                                            |
-| [Testing](./docs/TESTING.md)                                 | How the package itself is tested (unit + smoke).                                                                                                    |
-| [Migrations](./docs/MIGRATIONS.md)                           | Breaking-change guides for major package versions.                                                                                                  |
+| Guide                                                                     | What it covers                                                                                                                                      |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Technical documentation (`tech-docs`)](./docs/tech-docs.md)              | Docs living inside a service repo, scaffolded via `setup --template=tech-docs`; the service repo publishes them itself.                             |
+| [Analytical documentation (`*_ana`)](./docs/ana-docs.md)                  | Standalone analysis docs scaffolded via `setup --template=ana-docs`, deployed to Vercel, including the auth middleware and syncing the boilerplate. |
+| [Sales offers (`sales-docs`)](./docs/ana-docs.md#sales-offers-sales-docs) | The `ana-docs` scaffold with the defaults a folder in `tf-sales-private-offers` needs: `git` off, section navigation off, the monorepo as `--repo`. |
+| [Import from Confluence](./docs/confluence-import.md)                     | Migrate a Confluence space into Markdown (`import-confluence`).                                                                                     |
+| [Editing &amp; publishing docs](./docs/updating-docs.md)                  | The day-to-day edit → preview → validate → publish loop.                                                                                            |
+| [Testing](./docs/TESTING.md)                                              | How the package itself is tested (unit + smoke).                                                                                                    |
+| [Migrations](./docs/MIGRATIONS.md)                                        | Breaking-change guides for major package versions.                                                                                                  |
 
 ## Migrations
 

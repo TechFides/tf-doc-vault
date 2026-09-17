@@ -171,3 +171,12 @@ User content (`docs/`, `package.json`, README, CLAUDE) is excluded from overwrit
 Without a token, offline, or on any other failure, the scaffold keeps the bundled default skills and their `CLAUDE.md`, prints a warning, and puts the exact install command into the closing "next steps" so you can run it later. The scaffold itself always succeeds. `--no-skills` skips the attempt altogether.
 
 `pnpm docs:dev` runs `tf-doc-vault dev`, which syncs those skills with the library before starting VitePress. Without a token it does nothing. With one it replaces a bundled set you never touched with the library set, brings library skills that fell behind forward (`tf-skills update`, never `--force`), and only prints the command for anything you edited by hand. `TF_DOC_VAULT_SKILLS=off` turns the sync off, for CI or a quick start; everything after `docs:dev` (`--port`, `--host`) goes to VitePress.
+
+## Sales offers (`sales-docs`)
+
+`--template=sales-docs` is `ana-docs` with the defaults a folder in the `tf-sales-private-offers` monorepo needs: `git` off (the folder sits inside a repository that already exists), section navigation off (offers navigate through the sidebar), and `--repo` pre-set to the monorepo. Everything above applies, skills included: the same `docs` bundle is installed, and "commercial offer" is chosen in the `docs/README.md` contract on first use, not by a different skill set.
+
+```bash
+cd tf-sales-private-offers
+pnpm dlx @techfides/tf-doc-vault@latest setup nabidka-acme --template=sales-docs
+```
