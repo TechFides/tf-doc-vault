@@ -2,6 +2,7 @@
 title: Funkční specifikace
 status: draft
 updated_at: 2026-04-27
+order: 2
 ---
 
 # Funkční specifikace

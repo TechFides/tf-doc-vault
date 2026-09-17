@@ -102,6 +102,64 @@ describe("docs:dev drift", () => {
     });
   });
 
+  test("with --skills-bundle, a current docs:dev keeps its extra arguments", () => {
+    expect(
+      docsDevDrift(
+        { scripts: { "docs:dev": "tf-doc-vault dev --root=docs --port 3000" } },
+        "docs",
+        "docs",
+      ),
+    ).toEqual({
+      actual: "tf-doc-vault dev --root=docs --port 3000",
+      expected: "tf-doc-vault dev --root=docs --skills-bundle=docs --port 3000",
+    });
+  });
+
+  test("the pinned bundle plus extra arguments is not drift", () => {
+    expect(
+      docsDevDrift(
+        {
+          scripts: {
+            "docs:dev":
+              "tf-doc-vault dev --root=docs --skills-bundle=docs --port 3000",
+          },
+        },
+        "docs",
+        "docs",
+      ),
+    ).toBeNull();
+  });
+
+  test("a different bundle is replaced and the rest kept", () => {
+    expect(
+      docsDevDrift(
+        {
+          scripts: {
+            "docs:dev":
+              "tf-doc-vault dev --root=docs --skills-bundle=other --host",
+          },
+        },
+        "docs",
+        "docs",
+      ),
+    ).toEqual({
+      actual: "tf-doc-vault dev --root=docs --skills-bundle=other --host",
+      expected: "tf-doc-vault dev --root=docs --skills-bundle=docs --host",
+    });
+  });
+
+  test("a longer root is not mistaken for the current shape", () => {
+    expect(
+      docsDevDrift(
+        { scripts: { "docs:dev": "tf-doc-vault dev --root=docs2" } },
+        "docs",
+      ),
+    ).toEqual({
+      actual: "tf-doc-vault dev --root=docs2",
+      expected: "tf-doc-vault dev --root=docs",
+    });
+  });
+
   test("apply rewrites only docs:dev and keeps indentation and every other key", () => {
     const before =
       JSON.stringify(

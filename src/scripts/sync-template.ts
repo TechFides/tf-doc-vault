@@ -187,18 +187,29 @@ export function docsDevDrift(
   docsPath: string,
   skillsBundle?: string,
 ): DocsDevDrift | null {
-  const expected = devScript(docsPath, skillsBundle);
   const actual = pkg.scripts?.["docs:dev"];
-  if (actual === expected) return null;
-  // Without --skills-bundle the caller cannot say which bundle the template
-  // installed, so any current form counts; only the legacy shape is drift.
+  const base = devScript(docsPath);
   if (
-    skillsBundle === undefined &&
-    actual?.startsWith(`${devScript(docsPath)} --skills-bundle=`)
+    actual === undefined ||
+    (actual !== base && !actual.startsWith(`${base} `))
+  ) {
+    return { actual, expected: devScript(docsPath, skillsBundle) };
+  }
+  // A current script keeps whatever else it carries (--port, --host); only the
+  // bundle flag is pinned, and only when the caller names the bundle.
+  const extras = actual.slice(base.length).split(/\s+/).filter(Boolean);
+  const bundleFlag = extras.find((t) => t.startsWith("--skills-bundle="));
+  if (
+    skillsBundle === undefined ||
+    bundleFlag === `--skills-bundle=${skillsBundle}`
   ) {
     return null;
   }
-  return { actual, expected };
+  const rest = extras.filter((t) => !t.startsWith("--skills-bundle="));
+  return {
+    actual,
+    expected: [base, `--skills-bundle=${skillsBundle}`, ...rest].join(" "),
+  };
 }
 
 /** Rewrites `scripts["docs:dev"]` and nothing else; indentation follows the file. */
@@ -220,7 +231,13 @@ function applyResult(r: Result): void {
 function main(): void {
   const flags = parseFlags(process.argv.slice(2));
   const placeholders = detectPlaceholders();
-  const tracked = flags.files ?? TRACKED_FILES;
+  // package.json is the host's and is never compared whole; naming it in
+  // --files asks for the docs:dev check alone.
+  const tracked = (flags.files ?? TRACKED_FILES).filter(
+    (rel) => rel !== "package.json",
+  );
+  const checkDocsDev =
+    flags.files === null || flags.files.includes("package.json");
 
   console.log(
     `Comparing ${tracked.length} file(s) against the @techfides/tf-doc-vault boilerplate.`,
@@ -267,10 +284,9 @@ function main(): void {
     }
   }
 
-  // A restricted run (--files) is about those files only.
   const pkgPath = path.join(PROJECT_ROOT, "package.json");
-  if (flags.files === null && fs.existsSync(pkgPath)) {
-    const pkgText = fs.readFileSync(pkgPath, "utf-8");
+  if (checkDocsDev && fs.existsSync(pkgPath)) {
+    const pkgText = readText(pkgPath);
     const pkg = readJSON(pkgPath) as {
       scripts?: Record<string, string>;
     } | null;
@@ -284,7 +300,7 @@ function main(): void {
       console.log(`     is      : ${drift.actual ?? "(missing)"}`);
       console.log(`     expected: ${drift.expected}`);
       if (flags.apply) {
-        fs.writeFileSync(pkgPath, applyDocsDev(pkgText, drift.expected));
+        writeText(pkgPath, applyDocsDev(pkgText, drift.expected));
         console.log(`     → rewritten`);
       }
     }

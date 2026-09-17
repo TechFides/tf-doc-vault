@@ -2,15 +2,17 @@
 
 Breaking-change guides for major package versions. Each is self-contained; skip straight to the version you are upgrading past.
 
-## Upgrading a portal to the library skills (0.6)
+## Upgrading a portal to the library skills
 
-Not a breaking change: a scaffolded portal keeps working untouched. This is the opt-in path to the documentation skills that `setup` now installs from the TechFides skills library (see [Claude skills](./ana-docs.md#claude-skills)).
+Applies from the release that ships `tf-doc-vault dev` and the `sales-docs` template. Not a breaking change: a scaffolded portal keeps working untouched. This is the opt-in path to the documentation skills that `setup` now installs from the TechFides skills library (see [Claude skills](./ana-docs.md#claude-skills)).
 
 ```bash
 pnpm up @techfides/tf-doc-vault@latest
-pnpm exec tf-doc-vault sync --skills-bundle=docs --apply   # docs:dev now runs tf-doc-vault dev
+pnpm exec tf-doc-vault sync --files=package.json --skills-bundle=docs --apply   # docs:dev now runs tf-doc-vault dev
 pnpm docs:dev
 ```
+
+`--files=package.json` limits `sync` to the `docs:dev` script; drop it to bring the rest of the boilerplate (CI workflow, lint configs) up to date in the same run, which a folder inside a monorepo usually does not want.
 
 What the first `docs:dev` does depends on where the portal stands:
 

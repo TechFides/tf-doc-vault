@@ -15,6 +15,7 @@ import {
   type ParsedArgs,
 } from "./utils.js";
 import { detectHostRepo } from "./git-context.js";
+import { BUNDLE_NAME_RE } from "./install-skills.js";
 import { readText } from "../shared/text-file.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -712,8 +713,6 @@ function checkBoilerplateEntries(
     }
   }
 }
-
-const BUNDLE_NAME_RE = /^[a-z0-9][a-z0-9-]*$/;
 
 function asSkillsBundle(
   templateName: string,

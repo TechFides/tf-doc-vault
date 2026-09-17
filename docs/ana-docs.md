@@ -158,19 +158,19 @@ pnpm sync           # shows a unified diff of all drifted files
 pnpm sync:apply     # overwrites drifted files with the boilerplate (placeholders are rendered from the current repo)
 ```
 
-User content (`docs/`, `package.json`, README, CLAUDE) is excluded from overwriting.
+User content (`docs/`, README, `AGENTS.md`, `CLAUDE.md`) is excluded from overwriting. `package.json` is the host's too; the one thing `sync` reads in it is the `docs:dev` script, compared with what the current generator writes: a scaffold's `docs:dev` should run `tf-doc-vault dev` rather than `vitepress dev` directly, or the skills never get synced. Without `--skills-bundle` any current `tf-doc-vault dev` form passes and only the legacy shape is reported; pass `--skills-bundle=<name>` (the bundle the template installed: `docs` for `ana-docs` and `sales-docs`) to pin the bundle flag. Extra VitePress arguments the script carries (`--port`, `--host`) survive the rewrite, and `--apply` rewrites that one script and leaves the rest of `package.json` untouched. `--files=package.json` runs this check alone, so an upgrade can fix `docs:dev` without touching the other tracked files:
 
----
-
-**See also:** [Editing &amp; publishing docs](./updating-docs.md) · [Import from Confluence](./confluence-import.md)
-
-`sync` also compares `package.json`'s `docs:dev` with what the current generator writes. Since `tf-doc-vault dev` exists, a scaffold's `docs:dev` should run it rather than `vitepress dev` directly, or the skills never get synced. Without `--skills-bundle` any current `tf-doc-vault dev` form passes and only the legacy `vitepress dev` shape is reported; pass `--skills-bundle=<name>` (the bundle the template installed: `docs` for `ana-docs` and `sales-docs`) to pin the exact value; `--apply` rewrites that one script and leaves the rest of `package.json` untouched. A run restricted with `--files` skips this check.
+```bash
+pnpm exec tf-doc-vault sync --files=package.json --skills-bundle=docs --apply
+```
 
 ## Claude skills
 
 `setup` installs the TechFides documentation skills into `.claude/skills/`: the library's `docs` bundle, with the portal rules it ships written into `AGENTS.md` (`CLAUDE.md` stays the `@AGENTS.md` pointer) and the bundled slash commands removed (the library set has none). It runs `npx @techfides/tf-skills-manager install --bundle docs`, which needs a GitHub token with read access to the skills library: `gh auth login`, or `GITHUB_TOKEN` / `GH_TOKEN` in the environment.
 
-Without a token, offline, or on any other failure, the scaffold keeps the bundled default skills and rules, prints a warning, and puts the exact install command into the closing "next steps" so you can run it later. The scaffold itself always succeeds. `--no-skills` skips the attempt altogether.
+Without a token, offline, after two minutes without an answer, or on any other failure, the scaffold keeps the bundled default skills and rules, prints a warning, and puts the exact install command into the closing "next steps" so you can run it later. The scaffold itself always succeeds. `--no-skills` skips the attempt altogether.
+
+The swap is all or nothing: the bundled skills, commands and rules files are set aside first and come back as they were if anything fails. A run killed from outside can leave `.claude/.swap-backup-<pid>/` behind with those originals inside; the next install names it and refuses to run until you restore or delete it.
 
 `pnpm docs:dev` runs `tf-doc-vault dev`, which syncs those skills with the library before starting VitePress. Without a token it does nothing. With one it replaces a bundled set you never touched with the library set, brings library skills that fell behind forward (`tf-skills update`, never `--force`), and only prints the command for anything you edited by hand. `TF_DOC_VAULT_SKILLS=off` turns the sync off, for CI or a quick start; everything after `docs:dev` (`--port`, `--host`) goes to VitePress.
 
@@ -182,3 +182,7 @@ Without a token, offline, or on any other failure, the scaffold keeps the bundle
 cd tf-sales-private-offers
 pnpm dlx @techfides/tf-doc-vault@latest setup nabidka-acme --template=sales-docs
 ```
+
+---
+
+**See also:** [Editing &amp; publishing docs](./updating-docs.md) · [Import from Confluence](./confluence-import.md)

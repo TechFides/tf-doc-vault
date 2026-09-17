@@ -155,4 +155,58 @@ describe("installSkills", () => {
       fs.existsSync(path.join(dir, ".claude", "skills", "docs-from-code")),
     ).toBe(true);
   });
+
+  test("an interrupted earlier run blocks the install and is named", () => {
+    const dir = project();
+    fs.mkdirSync(path.join(dir, ".claude", ".swap-backup-123"));
+    let ran = false;
+    const result = installSkills("docs", dir, () => {
+      ran = true;
+      return { status: 0, stderr: "" };
+    });
+    expect(ran).toBe(false);
+    expect(result.ok).toBe(false);
+    expect(result.reason).toContain(".swap-backup-123");
+    expect(read(dir, ".claude/skills/docs-from-code/SKILL.md")).toBe("old");
+    expect(backups(dir)).toEqual([".swap-backup-123"]);
+  });
+
+  test("a throw before the swap leaves the original set where it was", () => {
+    const dir = project();
+    // A directory named AGENTS.md cannot be copied into the backup.
+    fs.rmSync(path.join(dir, "AGENTS.md"));
+    fs.mkdirSync(path.join(dir, "AGENTS.md"));
+    let ran = false;
+    const result = installSkills("docs", dir, () => {
+      ran = true;
+      return { status: 0, stderr: "" };
+    });
+    expect(ran).toBe(false);
+    expect(result.ok).toBe(false);
+    expect(result.reason).toBeTruthy();
+    expect(read(dir, ".claude/skills/docs-from-code/SKILL.md")).toBe("old");
+    expect(backups(dir)).toEqual([]);
+  });
+
+  test("a throw after the install restores skills, commands and rules", () => {
+    const dir = project();
+    const result = installSkills("docs", dir, (_cmd, args) => {
+      const target = args[args.indexOf("--target") + 1]!;
+      // A directory where the rules file should be: copying it throws.
+      fs.mkdirSync(path.join(target, "docs-base", "references", "CLAUDE.md"), {
+        recursive: true,
+      });
+      return { status: 0, stderr: "" };
+    });
+    expect(result.ok).toBe(false);
+    expect(read(dir, ".claude/skills/docs-from-code/SKILL.md")).toBe("old");
+    expect(
+      fs.existsSync(path.join(dir, ".claude", "skills", "docs-base")),
+    ).toBe(false);
+    expect(
+      fs.existsSync(path.join(dir, ".claude", "commands", "docs-technical.md")),
+    ).toBe(true);
+    expect(read(dir, "AGENTS.md")).toBe("v1 rules");
+    expect(backups(dir)).toEqual([]);
+  });
 });
