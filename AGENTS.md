@@ -14,7 +14,7 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 - `dist/` is emitted by `tsc`
 - VitePress 1.6 + Vue 3.5 (theme), Mermaid via `vitepress-plugin-mermaid`
 - Tests: Vitest (unit), Playwright (smoke)
-- Release tooling: `changelogen` + Husky `commit-msg` running `commitlint` (config-conventional)
+- Release tooling: `changelogen` + Lefthook `commit-msg` running `commitlint` (config-conventional)
 
 ## Commands
 
@@ -52,7 +52,7 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 
 ## Conventions
 
-- Commit messages follow Conventional Commits. Enforced by Husky `commit-msg` → `commitlint`. `changelogen` derives the next version and `CHANGELOG.md` entries from these, so keep them well-formed.
+- Commit messages follow Conventional Commits. Enforced by Lefthook `commit-msg` → `commitlint` (`lefthook.yml`). `changelogen` derives the next version and `CHANGELOG.md` entries from these, so keep them well-formed.
 
 ### Comments
 
@@ -126,3 +126,4 @@ See [`docs/TESTING.md`](docs/TESTING.md). In short: Vitest for pure logic in `sr
 4. If a check fails, fix the root cause; do not disable it or pass `--no-verify`.
 5. Never commit secrets. Publish auth is OIDC; there is no `NPM_TOKEN` in this repo.
 6. Do not bypass the `npm-publish` environment approval: releases require a named reviewer (see `CONTRIBUTING.md` → Releasing).
+7. In a fresh git worktree run `pnpm install` before the first commit. The hook lives in the shared `.git/hooks`, but without `node_modules` it cannot find lefthook, prints `Can't find lefthook in PATH` and lets the commit through unvalidated. Never work around that with `LEFTHOOK=0`; check a message with `npx commitlint --edit` if in doubt.

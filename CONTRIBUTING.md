@@ -5,7 +5,7 @@ This is an internal TechFides tooling package. External contributions are welcom
 ## Setup
 
 ```bash
-pnpm install   # installs deps + runs prepare (builds dist/)
+pnpm install   # installs deps + runs prepare (builds dist/, installs the git hooks)
 pnpm dev       # watch mode: tsc --watch + asset copy
 ```
 
@@ -13,6 +13,7 @@ pnpm dev       # watch mode: tsc --watch + asset copy
 
 - Use **pnpm** (enforced via corepack).
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/). `changelogen` derives the next version and changelog entries from these, so keep them well-formed.
+- Git hooks are managed by [Lefthook](https://lefthook.dev) (`lefthook.yml`): the `commit-msg` hook runs `commitlint`. `pnpm install` installs it into `.git/hooks` and clears any local `core.hooksPath` override, `LEFTHOOK=0 git commit …` skips it for one commit, and a git-ignored `lefthook-local.yml` overrides the config on your machine.
 - Run `pnpm typecheck && pnpm lint` before submitting a PR.
 - Releases: see [Releasing](#releasing) below.
 
@@ -137,8 +138,18 @@ pnpm install         # once after cloning
 pnpm dev:docs        # → http://localhost:5173
 ```
 
-Then edit, for example, `src/theme/components/DocMeta.vue` or `src/theme/styles/base.css`; the browser re-renders without restart. Sample content lives in
-`playground/docs/v1/index.md` and covers the common rendering cases (code blocks, tables, DocMeta, outline, inline code).
+Then edit, for example, `src/theme/components/DocMeta.vue` or one of the four
+stylesheets in `src/theme/styles/`; the browser re-renders without restart. The
+stylesheets are imported in cascade order by `src/theme/index.ts` and each has one
+job: `tokens.css` defines tokens, `icons.css` carries the icon font, `backdrop.css`
+draws the nebula and star field, `base.css` maps tokens onto VitePress and styles
+Markdown, `patterns.css` holds the author-facing classes and must stay last so they
+outrank the chrome.
+
+Sample content lives under `playground/docs/v1/`. `showcase/001-elements` holds
+every Markdown construct on one page, `showcase/002-patterns` every pattern class,
+and `showcase/003-specification` a full-length document for judging vertical
+rhythm; `tokens/` and `components/` cover the individual features.
 
 Production build of the playground (useful for sanity-checking the eventual consumer build):
 
@@ -161,7 +172,7 @@ scaffolded project:
 ```bash
 # 1. in the package, once after cloning
 cd tf-doc-vault
-pnpm install                  # deps + "prepare" hook builds dist/
+pnpm install                  # deps + "prepare" script builds dist/ and installs the git hooks
 pnpm dev                      # tsc --watch + auto-copy static assets (.vue/.css/.json/.ico)
 
 # 2. in an adjacent application repo scaffolded with --source=file

@@ -17,4 +17,4 @@ runs:
       shell: bash
       run: pnpm install --frozen-lockfile
       env:
-        HUSKY: "0"
+        LEFTHOOK: "0"

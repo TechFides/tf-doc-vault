@@ -110,31 +110,32 @@ const visible = computed(
 .doc-meta {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-  font-size: 13px;
+  gap: var(--tf-spacing-4);
+  margin-bottom: var(--tf-spacing-6);
+  font-size: var(--tf-text-caption);
   flex-wrap: wrap;
 }
 
 .doc-meta__date {
-  color: var(--vp-c-text-2);
+  color: var(--tf-color-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .doc-meta__author {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  color: var(--brand-primary);
+  gap: var(--tf-spacing-1);
+  color: var(--vp-c-brand-1);
   font-weight: 500;
 }
 
 .doc-meta__check {
-  width: 16px;
-  height: 16px;
+  width: var(--tf-icon-md);
+  height: var(--tf-icon-md);
   flex-shrink: 0;
 }
 
 .dark .doc-meta__author {
-  color: var(--brand-secondary);
+  color: var(--tf-color-accent-2);
 }
 </style>

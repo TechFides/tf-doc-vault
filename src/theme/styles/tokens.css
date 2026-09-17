@@ -1,0 +1,670 @@
+/*
+ * Design tokens. Three layers, and the direction between them is load-bearing:
+ *
+ *   --brand-*  brand inputs. The documented override surface (BRANDING.md);
+ *              a consumer setting --brand-primary in custom.css must recolour
+ *              everything downstream, so nothing here may point the other way.
+ *   --tf-*     the design system derived from those inputs. Names mirror the
+ *              ticket-forge-offer stylesheet 1:1 (--tf-color-panel there is
+ *              --color-panel here) so the two can be diffed; the prefix only
+ *              exists because these share :root with --vp-*.
+ *   --vp-*     what VitePress itself consumes, mapped from the two above.
+ *
+ * Light is not an inversion of dark. Translucent white over near-black lifts a
+ * panel off the page; the same alpha over white would recess it. Light mode
+ * therefore uses opaque panels above a tinted page plus a shadow, and the tint
+ * is pulled from --brand-navy so borders and text stay one family with the
+ * blue rather than drifting to neutral grey.
+ */
+
+:root {
+  --brand-primary: #0074c8;
+  --brand-secondary: #00a0e3;
+  --brand-navy: #092646;
+  --brand-nav-navy: #082850;
+  --brand-surface: #eef2f8;
+
+  --brand-primary-hover: color-mix(in oklab, var(--brand-primary) 88%, black);
+  --brand-primary-active: var(--brand-navy);
+  --brand-primary-soft: color-mix(
+    in oklab,
+    var(--brand-primary) var(--tf-tint),
+    transparent
+  );
+
+  --tf-color-accent: var(--brand-primary);
+  --tf-color-accent-2: var(--brand-secondary);
+  --tf-color-accent-hi: var(--brand-primary-hover);
+  /* The accent as ink rather than as a fill. The brand blue clears 4.5:1 on bare white by
+     0.2, which is gone the moment the text sits on a tint of itself, so anywhere it labels
+     an accent-tinted surface it needs this instead. */
+  --tf-color-accent-ink: color-mix(
+    in oklab,
+    var(--tf-color-accent) 70%,
+    var(--brand-navy)
+  );
+
+  /* The accent as a wash: what a hover, a tinted tile or a chip fills with. */
+  --tf-color-accent-soft: var(--brand-primary-soft);
+
+  /* A ground for third-party artwork that cannot be recoloured: a client logo or an award
+     badge is usually dark line-work on transparency. Light in both modes on purpose, since
+     a mode-aware plate would put that artwork on near-black in dark mode. */
+  --tf-color-plate: #ffffff;
+
+  /* The accent used as a link, which dark mode takes two steps lighter. Every place that
+     reads as a link takes these, so the mode difference is declared once here instead of
+     as a `.dark` override beside each rule. */
+  --tf-color-link: var(--tf-color-accent);
+  --tf-color-link-hover: var(--brand-primary-hover);
+  --tf-color-link-active: var(--brand-primary-active);
+
+  --tf-color-bg: #f7f9fc;
+  --tf-color-surface-1: #eef2f8;
+  --tf-color-panel: #ffffff;
+  --tf-color-panel-2: #fafbfe;
+  --tf-color-panel-hi: #ffffff;
+  /* Frosted glass for surfaces that lie directly on the backdrop. Pair it with a blur:
+     that is what turns a star behind the surface into a glow instead of a speck. */
+  --tf-glass-alpha: 80%;
+  /* The sidebar carries short labels rather than paragraphs, so it can sit lighter than
+     the reading panel and let more of the backdrop through. */
+  --tf-glass-alpha-sidebar: 62%;
+  --tf-color-panel-glass: color-mix(
+    in srgb,
+    #ffffff var(--tf-glass-alpha),
+    transparent
+  );
+  --tf-color-inset: rgba(9, 38, 70, 0.035);
+
+  --tf-color-line: rgba(9, 38, 70, 0.1);
+  --tf-color-line-2: rgba(9, 38, 70, 0.06);
+  --tf-color-line-hi: rgba(9, 38, 70, 0.18);
+
+  --tf-color-fg: #16202e;
+  /* 5.2:1 on --tf-color-bg. The previous #7e8890 was 3.2:1, under AA for the
+     body-sized meta lines that use it. */
+  --tf-color-muted: #5a6678;
+  --tf-color-disabled: #98a3b2;
+  --tf-color-sheen: rgba(255, 255, 255, 0.8);
+
+  --tf-color-scrim: rgba(9, 38, 70, 0.2);
+  --tf-color-backdrop: rgba(247, 249, 252, 0.72);
+
+  /* Set against the worst ground each state lands on: its own tinted chip over the bare page
+     colour, which is the phone layout, where the reading panel carries no fill. */
+  --tf-color-success: oklch(0.47 0.14 155);
+  --tf-color-warning: oklch(0.5 0.13 70);
+  --tf-color-info: oklch(0.49 0.15 245);
+  --tf-color-danger: oklch(0.51 0.19 25);
+
+  --tf-tint: 15%;
+  --tf-tint-hi: 30%;
+  --tf-edge-stops:
+    color-mix(in oklab, var(--tf-color-accent-2) 45%, transparent),
+    var(--tf-color-accent),
+    color-mix(in oklab, var(--tf-color-accent-2) 45%, transparent);
+  --tf-glass-saturate: 140%;
+  --tf-dim: 0.5;
+
+  --tf-grad-accent: linear-gradient(
+    135deg,
+    var(--tf-color-accent-2),
+    var(--tf-color-accent)
+  );
+  --tf-grad-accent-h: linear-gradient(
+    90deg,
+    var(--tf-color-accent-2),
+    var(--tf-color-accent)
+  );
+  --tf-grad-line: linear-gradient(90deg, var(--tf-color-accent), transparent);
+
+  /* Noto Color Emoji goes behind the text faces (they cover the Latin, digits
+     and keycaps it would otherwise claim) but ahead of the system stack. It is in
+     the display stack too: headings and table headers do carry the occasional
+     emoji, and without the entry the platform font would claim it. */
+  --tf-font-display: "Inter", "Noto Color Emoji", system-ui, sans-serif;
+  --tf-font-body:
+    "IBM Plex Sans", "Noto Color Emoji", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  --tf-font-mono:
+    "IBM Plex Mono", ui-monospace, "Menlo", "Monaco", "Consolas",
+    "Liberation Mono", "Courier New", "Noto Color Emoji", monospace;
+
+  /* Same ratios as Forge with the base moved 15px -> 16px: a sales page is
+     scanned, a specification is read for twenty minutes. */
+  --tf-text-display: clamp(34px, 4.5vw, 54px);
+  --tf-text-h1: clamp(30px, 3.4vw, 38px);
+  --tf-text-h2: 28px;
+  --tf-text-h3: 21px;
+  --tf-text-h4: 18px;
+  --tf-text-lead: 18px;
+  --tf-text-body: 16px;
+  --tf-text-body-sm: 14px;
+  --tf-text-caption: 13px;
+  --tf-text-caption-sm: 12px;
+
+  --tf-leading-tight: 1.1;
+  --tf-leading-snug: 1.5;
+  --tf-leading-body: 1.65;
+  --tf-tracking-h: -0.02em;
+  --tf-tracking-label: 0.05em;
+  --tf-tracking-eyebrow: 0.12em;
+
+  /* Prose only. Tables, code blocks and diagrams break out to the container. */
+  --tf-measure: 72ch;
+  /* The reading panel is the measure plus the padding it sits in, so the text inside it
+     is exactly one measure wide whichever selector ends up setting the width. */
+  --tf-panel-max: calc(var(--tf-measure) + 2 * var(--tf-spacing-8));
+
+  --tf-icon-sm: 14px;
+  --tf-icon-md: 16px;
+  --tf-icon-lg: 20px;
+  --tf-icon-xl: 24px;
+  --tf-icon-hero: 84px;
+
+  --tf-size-3xs: 3px;
+  --tf-size-2xs: 6px;
+  --tf-size-xs: 8px;
+  --tf-size-sm: 16px;
+  --tf-size-md: 20px;
+  --tf-size-lg: 24px;
+  --tf-size-xl: 32px;
+  --tf-size-2xl: 40px;
+  --tf-size-3xl: 44px;
+  --tf-size-4xl: 64px;
+
+  --tf-spacing-1: 4px;
+  --tf-spacing-2: 8px;
+  --tf-spacing-3: 12px;
+  --tf-spacing-4: 16px;
+  --tf-spacing-5: 20px;
+  --tf-spacing-6: 24px;
+  --tf-spacing-7: 28px;
+  --tf-spacing-8: 32px;
+  --tf-spacing-lg: 48px;
+  --tf-spacing-xl: 72px;
+  --tf-spacing-2xl: 100px;
+
+  /* Tighter than --tf-radius-xs, for the boxes that read as checkboxes: at 6px a 16px box
+     starts to look like a pill, and the check inside it wants a corner to sit in. Separate from
+     the shared small radius, which inline code, kbd, mark and the colour swatch also use. */
+  --tf-radius-check: 3px;
+  --tf-radius-xs: 6px;
+  --tf-radius-sm: 8px;
+  --tf-radius-lg: 12px;
+  --tf-radius-xl: 16px;
+  --tf-radius-pill: 100px;
+
+  /* The active-item marker: one straight bar on the left edge, used by the sidebar
+     entry, the outline line, the selected search result, the callouts and the pull
+     quote so "this one" is a single shape site-wide.
+     Anything carrying it must square its own left corners. An inset shadow and a
+     border both follow border-radius, so on a rounded element the bar curls into a
+     hook at top and bottom instead of running straight. */
+  --tf-rail-width: 2px;
+  --tf-rail: inset var(--tf-rail-width) 0 0 var(--tf-color-accent);
+
+  /* Tick glyph as a mask, so whatever fills the box behind it shows through and the
+     mark never needs a colour of its own. */
+  --tf-check-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13.5 4.5 6.5 11.5 2.5 7.5' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+
+  --tf-shadow-1:
+    0 1px 2px rgba(9, 38, 70, 0.06), 0 1px 3px rgba(9, 38, 70, 0.04);
+  --tf-shadow-2: 0 8px 24px -8px rgba(9, 38, 70, 0.14);
+  --tf-shadow-3: 0 20px 48px -16px rgba(9, 38, 70, 0.18);
+
+  --tf-blur-panel: 18px;
+  --tf-blur-overlay: 4px;
+  /* What frosts a surface lying on the backdrop. The saturate is half of it: blur alone
+     greys the nebula out, and pushing saturation back up is what keeps the colour behind
+     the glass. Every glass surface takes this, so the recipe is defined once. */
+  --tf-glass-filter: blur(var(--tf-blur-panel))
+    saturate(var(--tf-glass-saturate));
+
+  /* Page backdrop. The star field is dark mode only: white specks on a near-white page
+     read as dust. Raise --tf-stars-opacity in light mode to opt in. */
+  --tf-nebula-opacity: 1;
+  --tf-stars-opacity: 0;
+  /* Light clouds darken the glass they sit on rather than lighting it, so the hero's bloom
+     runs quieter here than the wash behind the page. */
+  --tf-hero-bloom-opacity: 0.24;
+  --tf-hero-stars-opacity: 0;
+  /* The bloom shades in light instead of tinting. It cannot be brighter than a near-white
+     panel, only more saturated, and on white the eye tracks a wash by hue long before it
+     tracks it by brightness: the accent version moved luminance by 1.21:1 and still read as
+     a blue corner. Navy moves the same luminance at near-zero chroma. Dark keeps the accent,
+     where the layer really is lighter than what it sits on and glows. */
+  --tf-hero-bloom-1: color-mix(in oklab, var(--brand-navy) 15%, transparent);
+  --tf-hero-bloom-2: color-mix(in oklab, var(--brand-navy) 8%, transparent);
+  /* Cloud 2 is the pair that lands on the outline column, which has no panel of its own,
+     so its muted links sit straight on the sky. That is what caps it this far below the
+     other two; see backdrop.css for which cloud goes where. */
+  --tf-nebula-1: color-mix(in oklab, var(--tf-color-accent) 55%, transparent);
+  --tf-nebula-2: color-mix(in oklab, var(--tf-color-accent-2) 11%, transparent);
+  --tf-nebula-3: color-mix(
+    in oklab,
+    color-mix(in oklab, var(--brand-navy) 55%, var(--tf-color-accent)) 38%,
+    transparent
+  );
+  --tf-ring-focus: 0 0 0 3px
+    color-mix(in oklab, var(--tf-color-accent) var(--tf-tint-hi), transparent);
+
+  --tf-dur-1: 140ms;
+  --tf-dur-2: 240ms;
+  --tf-dur-3: 600ms;
+  --tf-ease-out: cubic-bezier(0.16, 0.8, 0.3, 1);
+  --tf-ease-spring: cubic-bezier(0.34, 1.56, 0.5, 1);
+  --tf-t-base:
+    background var(--tf-dur-1) var(--tf-ease-out),
+    border-color var(--tf-dur-1) var(--tf-ease-out),
+    color var(--tf-dur-1) var(--tf-ease-out),
+    transform var(--tf-dur-1) var(--tf-ease-out),
+    box-shadow var(--tf-dur-1) var(--tf-ease-out),
+    opacity var(--tf-dur-1) var(--tf-ease-out);
+
+  --layout-max-width-narrow: 800px;
+  --layout-max-width-content: 1440px;
+  --layout-max-width-wide: 1800px;
+  --layout-side-padding-sm: 24px;
+  --layout-side-padding-md: 48px;
+  --layout-side-padding-lg: 64px;
+
+  --brand-text-default: var(--tf-color-fg);
+  --brand-text-muted: var(--tf-color-muted);
+  --brand-text-disabled: var(--tf-color-disabled);
+
+  --brand-bg-page: var(--tf-color-bg);
+  --brand-bg-subtle: var(--tf-color-surface-1);
+  --brand-border-default: var(--tf-color-line);
+  --brand-border-strong: var(--tf-color-line-hi);
+
+  --brand-success: var(--tf-color-success);
+  --brand-warning: var(--tf-color-warning);
+  --brand-danger: var(--tf-color-danger);
+  --brand-info: var(--tf-color-info);
+  /* Kept distinct from success only because the two custom blocks sit next to
+     each other often enough that identical colours read as a mistake. */
+  --brand-tip: oklch(0.47 0.13 165);
+
+  --brand-success-bg: color-mix(
+    in oklab,
+    var(--brand-success) 10%,
+    transparent
+  );
+  --brand-warning-bg: color-mix(
+    in oklab,
+    var(--brand-warning) 10%,
+    transparent
+  );
+  --brand-danger-bg: color-mix(in oklab, var(--brand-danger) 10%, transparent);
+  --brand-info-bg: color-mix(in oklab, var(--brand-info) 10%, transparent);
+  --brand-tip-bg: color-mix(in oklab, var(--brand-tip) 10%, transparent);
+
+  --brand-badge-published-bg: color-mix(
+    in oklab,
+    var(--tf-color-success) 12%,
+    transparent
+  );
+  --brand-badge-published-text: var(--tf-color-success);
+  --brand-badge-published-border: color-mix(
+    in oklab,
+    var(--tf-color-success) 30%,
+    transparent
+  );
+  --brand-badge-draft-bg: color-mix(
+    in oklab,
+    var(--tf-color-warning) 12%,
+    transparent
+  );
+  --brand-badge-draft-text: var(--tf-color-warning);
+  --brand-badge-draft-border: color-mix(
+    in oklab,
+    var(--tf-color-warning) 30%,
+    transparent
+  );
+  --brand-badge-review-bg: color-mix(
+    in oklab,
+    var(--tf-color-info) 12%,
+    transparent
+  );
+  --brand-badge-review-text: var(--tf-color-info);
+  --brand-badge-review-border: color-mix(
+    in oklab,
+    var(--tf-color-info) 30%,
+    transparent
+  );
+  --brand-badge-archived-bg: color-mix(
+    in oklab,
+    var(--tf-color-muted) 12%,
+    transparent
+  );
+  --brand-badge-archived-text: var(--tf-color-muted);
+  --brand-badge-archived-border: color-mix(
+    in oklab,
+    var(--tf-color-muted) 30%,
+    transparent
+  );
+
+  /* TO-BE tags. Literal hues rather than derived ones: they mark a planned addition and a
+     planned removal, and that pair has to stay readable whatever the brand accent is. */
+  --brand-tobe-add: #ff5630;
+  --brand-tobe-del: #97a0af;
+
+  /* Mermaid renders to SVG and takes fills and strokes, not backgrounds, so it cannot use
+     the surface tokens directly. These are the six values its diagrams differ by between
+     the two modes; everything else it draws is mode-independent. */
+  --tf-mermaid-surface: var(--brand-surface);
+  --tf-mermaid-ink: var(--brand-text-default);
+  --tf-mermaid-label-bg: var(--brand-bg-page);
+  --tf-mermaid-edge-bg: var(--brand-bg-page);
+  --tf-mermaid-note-bg: var(--brand-warning-bg);
+  --tf-mermaid-note-line: var(--brand-warning);
+
+  --vp-c-brand-1: var(--tf-color-accent);
+  --vp-c-brand-2: var(--tf-color-accent-hi);
+  --vp-c-brand-3: var(--brand-primary-active);
+  --vp-c-brand-soft: var(--brand-primary-soft);
+
+  --vp-c-bg: var(--tf-color-bg);
+  --vp-c-bg-alt: var(--tf-color-surface-1);
+  --vp-c-bg-soft: var(--tf-color-surface-1);
+  --vp-c-bg-mute: var(--tf-color-inset);
+  --vp-c-bg-elv: var(--tf-color-panel);
+
+  --vp-c-text-1: var(--tf-color-fg);
+  --vp-c-text-2: var(--tf-color-muted);
+  --vp-c-text-3: var(--tf-color-disabled);
+
+  --vp-c-divider: var(--tf-color-line);
+  --vp-c-border: var(--tf-color-line);
+  --vp-c-gutter: var(--tf-color-line);
+
+  --vp-code-block-bg: color-mix(
+    in srgb,
+    var(--tf-color-surface-1) 72%,
+    transparent
+  );
+
+  --vp-font-family-base: var(--tf-font-body);
+  --vp-font-family-mono: var(--tf-font-mono);
+
+  --vp-layout-max-width: var(--layout-max-width-content);
+  --vp-sidebar-width: 360px;
+  --vp-sidebar-bg-color: color-mix(
+    in srgb,
+    var(--tf-color-surface-1) var(--tf-glass-alpha-sidebar),
+    transparent
+  );
+  --vp-nav-bg-color: var(--tf-color-bg);
+
+  /* The `locales` config carries versions (v1, v2), not languages, so hide the
+     language switcher VitePress would otherwise render. */
+  --vp-nav-translations-display: none;
+
+  /* Local search theming hooks. Preferred over restyling .VPLocalSearchBox rules:
+     the component is lazy-loaded, so its stylesheet is injected after ours and wins
+     any tie on specificity. Anything a variable can express belongs here. */
+  --vp-local-search-bg: var(--tf-color-panel-glass);
+  --vp-local-search-result-bg: transparent;
+  --vp-local-search-result-border: transparent;
+  --vp-local-search-result-selected-bg: color-mix(
+    in oklab,
+    var(--tf-color-accent) 10%,
+    transparent
+  );
+  --vp-local-search-result-selected-border: transparent;
+  /* Default is a solid accent fill with inverse text, which fights the word it
+     marks. A wash keeps the term in the running colour and still points at it. */
+  --vp-local-search-highlight-bg: color-mix(
+    in oklab,
+    var(--tf-color-accent) 22%,
+    transparent
+  );
+  --vp-local-search-highlight-text: var(--tf-color-fg);
+
+  --vp-c-warning-1: var(--brand-warning);
+  --vp-c-warning-2: color-mix(in oklab, var(--brand-warning) 35%, transparent);
+  --vp-c-warning-soft: var(--brand-warning-bg);
+
+  --vp-c-danger-1: var(--brand-danger);
+  --vp-c-danger-2: color-mix(in oklab, var(--brand-danger) 35%, transparent);
+  --vp-c-danger-soft: var(--brand-danger-bg);
+}
+
+/*
+ * Dark takes ticket-forge-offer's surface values verbatim. Its greys are near-neutral so
+ * the blue accent reads against a ground that is not competing with it.
+ */
+.dark {
+  --brand-surface: #14161d;
+  --brand-primary-hover: var(--brand-secondary);
+  /* Ink on a dark tint goes the other way: the lighter accent, not the darker one. */
+  --tf-color-accent-ink: var(--tf-color-accent-2);
+
+  --tf-color-link: var(--tf-color-accent-2);
+  --tf-color-link-hover: color-mix(
+    in oklab,
+    var(--tf-color-accent-2) 78%,
+    white
+  );
+  --tf-color-link-active: var(--tf-color-accent);
+
+  --tf-mermaid-surface: var(--vp-c-bg-soft);
+  /* Pure white, not --tf-color-fg: a diagram's labels are small and sit on a lifted
+     surface, where the page's slightly cooled foreground goes muddy. */
+  --tf-mermaid-ink: #ffffff;
+  --tf-mermaid-label-bg: transparent;
+  --tf-mermaid-edge-bg: var(--vp-c-bg-soft);
+  --tf-mermaid-note-bg: var(--vp-c-bg-mute);
+  --tf-mermaid-note-line: var(--brand-secondary);
+  /* Historically the dark navbar / sidebar navy, and still that hook: it is the
+     only token the nav chrome reads, so overriding it recolours dark chrome. */
+  --brand-nav-navy: #101219;
+
+  --tf-color-bg: #0e0f14;
+  --tf-color-surface-1: #14161d;
+  --tf-color-panel: rgba(255, 255, 255, 0.045);
+  --tf-color-panel-2: rgba(255, 255, 255, 0.025);
+  --tf-color-panel-hi: rgba(255, 255, 255, 0.06);
+  /* The inner mix is the translucent panel tone flattened onto the page, so the glass
+     keeps the panel's colour rather than turning into a grey veil. */
+  --tf-glass-alpha: 72%;
+  --tf-glass-alpha-sidebar: 48%;
+  --tf-color-panel-glass: color-mix(
+    in srgb,
+    color-mix(in srgb, #ffffff 4.5%, var(--tf-color-bg)) var(--tf-glass-alpha),
+    transparent
+  );
+  --tf-color-inset: rgba(255, 255, 255, 0.025);
+
+  --tf-color-line: rgba(255, 255, 255, 0.09);
+  --tf-color-line-2: rgba(255, 255, 255, 0.055);
+  --tf-color-line-hi: rgba(255, 255, 255, 0.16);
+
+  --tf-color-fg: #eef1f6;
+  --tf-color-muted: #98a1b2;
+  --tf-color-disabled: #6b7484;
+  --tf-color-sheen: rgba(255, 255, 255, 0.65);
+
+  --tf-color-scrim: rgba(0, 0, 0, 0.55);
+  --tf-color-backdrop: rgba(6, 7, 10, 0.6);
+
+  --tf-color-success: oklch(0.72 0.15 155);
+  --tf-color-warning: oklch(0.8 0.14 85);
+  --tf-color-info: oklch(0.7 0.14 235);
+  --tf-color-danger: oklch(0.66 0.17 25);
+
+  --tf-glass-saturate: 170%;
+
+  --tf-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --tf-shadow-2: 0 16px 40px -16px rgba(0, 0, 0, 0.8);
+  --tf-shadow-3: 0 24px 60px -24px rgba(0, 0, 0, 0.85);
+
+  /* The clouds are a depth cue, not a light source: against #0e0f14 anything past about 0.5
+     casts a visible blue over the top band and the outline column. */
+  --tf-nebula-opacity: 0.32;
+  /* The field is static, so this is its literal brightness rather than the ceiling of a
+     pulse. Stars are points and read brighter than their opacity suggests; past about 0.3
+     they stop being grain and start being lights. */
+  --tf-stars-opacity: 0.22;
+  /* The bloom lights one half of the hero panel against the other, so it runs below the
+     wash behind the page. */
+  --tf-hero-bloom-opacity: 0.17;
+  --tf-hero-stars-opacity: 0.38;
+  --tf-hero-bloom-1: color-mix(
+    in oklab,
+    var(--tf-color-accent-2) 42%,
+    transparent
+  );
+  --tf-hero-bloom-2: color-mix(
+    in oklab,
+    var(--tf-color-accent) 30%,
+    transparent
+  );
+  --tf-nebula-1: color-mix(in oklab, var(--tf-color-accent) 28%, transparent);
+  /* Cloud 2 lands on the outline column, which has no panel of its own, so it stays the
+     faintest of the three: those labels sit straight on whatever it leaves behind them. */
+  --tf-nebula-2: color-mix(in oklab, var(--tf-color-accent-2) 20%, transparent);
+  --tf-nebula-3: color-mix(in oklab, var(--tf-color-accent) 24%, transparent);
+
+  --brand-tip: oklch(0.75 0.14 165);
+
+  --vp-code-block-bg: color-mix(in srgb, #0a0c11 72%, transparent);
+  --vp-sidebar-bg-color: color-mix(
+    in srgb,
+    var(--brand-nav-navy) var(--tf-glass-alpha-sidebar),
+    transparent
+  );
+  --vp-nav-bg-color: var(--tf-color-bg);
+}
+
+@property --tf-edge {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 135deg;
+}
+
+@keyframes tf-edge-sweep {
+  to {
+    --tf-edge: 495deg;
+  }
+}
+
+@keyframes tf-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes tf-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes tf-shimmer {
+  from {
+    background-position: 180% 0;
+  }
+  to {
+    background-position: -180% 0;
+  }
+}
+
+@keyframes tf-breathe {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Transform rather than background-position, to stay on the compositor. Shared by the hero
+   and the spotlight, each on its own period so no two blooms breathe in step. */
+@keyframes tf-bloom-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-3%, 2%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* The opacities are fractions of --tf-nebula-opacity, not absolutes: a keyframe wins over
+   the element's own declaration, so a literal here would leave that token doing nothing. */
+@keyframes tf-nebula-drift {
+  0% {
+    opacity: calc(var(--tf-nebula-opacity) * 0.78);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    opacity: var(--tf-nebula-opacity);
+    transform: translate3d(1.6%, -1.2%, 0) scale(1.04);
+  }
+  66% {
+    opacity: calc(var(--tf-nebula-opacity) * 0.86);
+    transform: translate3d(-1.2%, 1.4%, 0) scale(1.02);
+  }
+  100% {
+    opacity: calc(var(--tf-nebula-opacity) * 0.78);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes tf-check-pop {
+  0% {
+    transform: scale(0.5);
+  }
+  60% {
+    transform: scale(1.14);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes tf-check-ripple {
+  from {
+    transform: scale(0.8);
+    opacity: 0.45;
+  }
+  to {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+@keyframes tf-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Offsetting a dashed stroke has to land on a multiple of the pattern period or
+   the loop jumps: "3 3" has period 6, "4 4" has 8. */
+@keyframes tf-dash6 {
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+
+@keyframes tf-dash8 {
+  to {
+    stroke-dashoffset: -16;
+  }
+}

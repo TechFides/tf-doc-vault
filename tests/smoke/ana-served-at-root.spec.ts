@@ -58,24 +58,13 @@ test("built ana dist renders cleanly when served at the domain root", async ({
   const distDir = path.join(sandboxes.anaDir, "docs", ".vitepress", "dist");
   expect(fs.existsSync(distDir), `dist not found at ${distDir}`).toBe(true);
 
-  // Assets load before page.goto resolves, so the listener has to be attached
-  // beforehand; assertCleanRender attaches its own later and misses them.
-  const badResponses: string[] = [];
-  page.on("response", (res) => {
-    if (res.status() >= 400) badResponses.push(`${res.status()} ${res.url()}`);
-  });
-
   const server = await serveDistAtRoot(distDir);
   try {
     const { port } = server.address() as AddressInfo;
     await page.goto(`http://127.0.0.1:${port}/`);
-    await page.waitForLoadState("networkidle");
 
-    expect(
-      badResponses,
-      `requests failed; the built base does not match the root serving layout:\n${badResponses.join("\n")}`,
-    ).toEqual([]);
-
+    // A base that does not match this serving layout 404s every asset, which
+    // assertCleanRender reports: it watches responses from before the navigation.
     await assertCleanRender(page, {
       expectedStrings: ["ana_test", "Byznys specifikace"],
     });

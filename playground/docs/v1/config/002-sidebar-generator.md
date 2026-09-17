@@ -42,8 +42,8 @@ frontmatter `title:`. Same for groups (`<group>/index.md`).
 
 A **subdirectory** becomes a collapsible group (`collapsed: true`) and the
 generator recurses into it; a `.md` file becomes a leaf. That is the whole
-rule, and it is what drives the default sidebar markers: ◼️ on a group, ▪️
-on a leaf, nothing when the `title:` already starts with an emoji.
+rule, and it is what drives the default sidebar markers: a square on a group, a
+dot on a leaf, nothing when the `title:` already starts with an emoji.
 
 [Nested group](./003-nested-group/) is the live example, two levels deep,
 with one page overriding the default icon.

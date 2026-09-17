@@ -6,6 +6,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { lint as markdownlint } from "markdownlint/sync";
+import { allMdFiles } from "./docs-files.js";
 
 const args = process.argv.slice(2);
 const rootArg = args.find((a) => a.startsWith("--root="))?.split("=")[1];
@@ -14,23 +15,6 @@ const DOCS_ROOT = path.resolve(process.cwd(), root);
 const PUBLIC_ROOT = path.resolve(DOCS_ROOT, "public");
 const REQUIRED_FIELDS = ["title", "status", "updated_at"] as const;
 const VALID_STATUSES = new Set(["published", "draft", "review", "archived"]);
-
-function allMdFiles(dir: string): string[] {
-  const results: string[] = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory() && entry.name !== ".vitepress") {
-      results.push(...allMdFiles(full));
-    } else if (
-      entry.isFile() &&
-      entry.name.endsWith(".md") &&
-      entry.name !== "print.md"
-    ) {
-      results.push(full);
-    }
-  }
-  return results.sort();
-}
 
 function parseFrontmatter(content: string): Record<string, string> | null {
   const match = /^---\s*\n([\s\S]*?)\n---/.exec(content);
@@ -202,7 +186,7 @@ function checkMarkdownLint(files: string[]): Issue[] {
   return issues;
 }
 
-const files = allMdFiles(DOCS_ROOT);
+const files = allMdFiles(DOCS_ROOT, new Set(["print.md"]));
 console.log(`Checking ${files.length} file(s) in ${root}/\n`);
 
 const checks: { name: string; issues: Issue[] }[] = [

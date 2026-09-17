@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" role="img" aria-label="">
+  <!-- An invented wordmark, so the demo implies no real client. Colours are literal: an SVG
+       loaded through img src cannot read the page's tokens. -->
+  <text
+    x="100"
+    y="32"
+    text-anchor="middle"
+    font-family="Inter, system-ui, sans-serif"
+    font-size="26"
+    font-weight="700"
+    letter-spacing="1"
+  >
+    <tspan fill="#0e0f14">EXAMPLE</tspan><tspan fill="#0074c8">FIN</tspan>
+  </text>
+</svg>

@@ -9,12 +9,12 @@ import { installSkills, type SkillsInstall } from "./install-skills.js";
 import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
 import { styleText } from "node:util";
 import * as clack from "@clack/prompts";
 import {
   SetupError,
   findAncestorFile,
+  isEntryModule,
   parseArgs,
   replacePlaceholders,
   type ParsedArgs,
@@ -1272,16 +1272,4 @@ async function main(): Promise<void> {
   }
 }
 
-// Run main() only when invoked as a CLI, not when a test imports the exported
-// helpers. realpath resolves the bin symlink so node_modules/.bin still matches.
-const invokedAsScript = ((): boolean => {
-  const entry = process.argv[1];
-  if (!entry) return false;
-  try {
-    return fs.realpathSync(entry) === fileURLToPath(import.meta.url);
-  } catch {
-    return false;
-  }
-})();
-
-if (invokedAsScript) await main();
+if (isEntryModule(import.meta.url)) await main();

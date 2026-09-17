@@ -64,3 +64,20 @@ values.
 | 0.2.9   | 2026-07-01 | V. Mičulka | Hero subtitle rendering fix; dropped flaky dind cache layer. |
 | 0.2.0   | 2026-05-22 | V. Mičulka | Introduced design-token pages and status badges.             |
 | 0.1.0   | 2026-04-10 | V. Mičulka | Initial public theme, config factory and sidebar generator.  |
+
+## What the theme decides for you
+
+`TableEnhancer.vue` looks at each column's values on render and tags two kinds:
+
+| Detected                                 | Class         | Effect                         |
+| ---------------------------------------- | ------------- | ------------------------------ |
+| every value is a number                  | `tf-col-num`  | right-aligned, tabular figures |
+| every value is one whitespace-free token | `tf-col-atom` | `white-space: nowrap`          |
+
+The second one is why `2026-07-15` in the version table above stays on one line. A
+hyphen is a line-break opportunity, and cells wrap on `overflow-wrap: break-word`, so
+a date, an ID, a version or a path used to split across two lines. Nothing in CSS can
+tell an atom from a sentence, hence the check in the component.
+
+An explicit Markdown alignment (`:---:`) opts a column out of the numeric pass, and
+the table scrolls horizontally when the columns no longer fit, so nothing is clipped.

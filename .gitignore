@@ -7,6 +7,8 @@ dist/
 *.tgz
 .pnpm-store/
 
+lefthook-local.yml
+
 # Test runners
 /playwright-report/
 /test-results/

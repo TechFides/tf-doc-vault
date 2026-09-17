@@ -1,4 +1,4 @@
-import { test } from "./fixtures";
+import { test, PORTS } from "./fixtures";
 
 // vitepress dev exercises Vite's CJS pre-bundling path, where a regression in
 // publicHoistPattern (mermaid / dayjs / debug / cytoscape) shows up: the page
@@ -12,10 +12,10 @@ test("vitepress dev server hydrates ana scaffold without errors", async ({
 }) => {
   const server = await webServer({
     cmd: "pnpm",
-    args: ["docs:dev", "--port", "5174", "--host", "127.0.0.1"],
+    args: ["docs:dev", "--port", String(PORTS.anaDev), "--host", "127.0.0.1"],
     cwd: sandboxes.anaDir,
     // base is pinned to "/" in the ana template, so dev serves at "/".
-    readyUrl: "http://127.0.0.1:5174/",
+    readyUrl: `http://127.0.0.1:${PORTS.anaDev}/`,
     timeoutSec: 60,
   });
 

@@ -60,12 +60,18 @@ function ticketUrl(base: string, ticket: string): string {
   return `${base.replace(/\/+$/, "")}/${ticket}`;
 }
 
-function openMarker(kind: Kind, ticket: string, base: string): string {
-  const href = ticketUrl(base, ticket);
+function openMarker(
+  md: MarkdownRenderer,
+  kind: Kind,
+  ticket: string,
+  base: string,
+): string {
+  const href = md.utils.escapeHtml(ticketUrl(base, encodeURIComponent(ticket)));
   // &nbsp; so the marker never wraps between the label and the ticket.
   return (
     `<strong class="tf-tobe-marker">{${kind.toUpperCase()}&nbsp;` +
-    `<a href="${href}" target="_blank" rel="noreferrer">${ticket}</a>}</strong>`
+    `<a href="${href}" target="_blank" rel="noreferrer">` +
+    `${md.utils.escapeHtml(ticket)}</a>}</strong>`
   );
 }
 
@@ -145,7 +151,7 @@ function registerRenderers(md: MarkdownRenderer): void {
     }
     return (
       `<span class="tf-tobe tf-tobe-${meta.kind}">` +
-      openMarker(meta.kind, meta.ticket, base)
+      openMarker(md, meta.kind, meta.ticket, base)
     );
   };
 
@@ -169,7 +175,7 @@ function registerContainer(md: MarkdownRenderer, kind: Kind): void {
       const base = configs.get(md)?.jiraBaseUrl ?? "";
       return (
         `<div class="tf-tobe tf-tobe-${kind}">\n<p class="tf-tobe-marker-line">` +
-        `${openMarker(kind, ticket, base)}</p>\n`
+        `${openMarker(md, kind, ticket, base)}</p>\n`
       );
     },
   });

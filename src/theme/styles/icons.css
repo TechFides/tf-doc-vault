@@ -1,0 +1,225 @@
+/*
+ * Phosphor icon font, regular weight, self-hosted. The woff2 carries the whole
+ * 1530-glyph set; a browser only downloads it once an element actually renders a
+ * glyph from the family, so a site that uses no icon pays nothing for it.
+ *
+ * An icon needs a rule here or it renders as nothing at all: the class sets the
+ * family, the codepoint comes from `content`. Codepoints are in the Phosphor
+ * docs (https://phosphoricons.com/). The set below is the one ticket-forge-offer
+ * uses, kept name for name so the two stay comparable.
+ */
+
+@font-face {
+  font-family: "Phosphor";
+  src: url("../assets/fonts/phosphor.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+.ph {
+  font-family: "Phosphor" !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  letter-spacing: 0;
+  font-feature-settings: "liga";
+  font-variant-ligatures: discretionary-ligatures;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: inline-block;
+  font-size: var(--tf-icon-md);
+  vertical-align: -0.125em;
+  pointer-events: none;
+}
+
+.ph-arrow-clockwise::before {
+  content: "\e036";
+}
+
+.ph-arrow-right::before {
+  content: "\e06c";
+}
+
+.ph-arrow-u-up-left::before {
+  content: "\e08a";
+}
+
+.ph-buildings::before {
+  content: "\e102";
+}
+
+.ph-calendar-blank::before {
+  content: "\e10a";
+}
+
+.ph-caret-down::before {
+  content: "\e136";
+}
+
+.ph-caret-left::before {
+  content: "\e138";
+}
+
+.ph-caret-right::before {
+  content: "\e13a";
+}
+
+.ph-check::before {
+  content: "\e182";
+}
+
+.ph-circle-dashed::before {
+  content: "\e602";
+}
+
+.ph-circle-notch::before {
+  content: "\eb44";
+}
+
+.ph-clipboard-text::before {
+  content: "\e198";
+}
+
+.ph-cloud::before {
+  content: "\e1aa";
+}
+
+.ph-code::before {
+  content: "\e1bc";
+}
+
+.ph-cpu::before {
+  content: "\e610";
+}
+
+.ph-envelope-simple::before {
+  content: "\e218";
+}
+
+.ph-facebook-logo::before {
+  content: "\e226";
+}
+
+.ph-file-text::before {
+  content: "\e23a";
+}
+
+.ph-folders::before {
+  content: "\e260";
+}
+
+.ph-git-branch::before {
+  content: "\e278";
+}
+
+.ph-git-pull-request::before {
+  content: "\e282";
+}
+
+.ph-github-logo::before {
+  content: "\e576";
+}
+
+.ph-info::before {
+  content: "\e2ce";
+}
+
+.ph-instagram-logo::before {
+  content: "\e2d0";
+}
+
+.ph-kanban::before {
+  content: "\eb54";
+}
+
+.ph-key::before {
+  content: "\e2d6";
+}
+
+.ph-lifebuoy::before {
+  content: "\e63a";
+}
+
+.ph-lightning::before {
+  content: "\e2de";
+}
+
+.ph-linkedin-logo::before {
+  content: "\e2ee";
+}
+
+.ph-list::before {
+  content: "\e2f0";
+}
+
+.ph-map-pin::before {
+  content: "\e316";
+}
+
+.ph-minus::before {
+  content: "\e32a";
+}
+
+.ph-phone::before {
+  content: "\e3b8";
+}
+
+.ph-plug::before {
+  content: "\e946";
+}
+
+.ph-plus::before {
+  content: "\e3d4";
+}
+
+.ph-robot::before {
+  content: "\e762";
+}
+
+.ph-seal-check::before {
+  content: "\e606";
+}
+
+.ph-shield-check::before {
+  content: "\e40c";
+}
+
+.ph-sliders::before {
+  content: "\e432";
+}
+
+.ph-sparkle::before {
+  content: "\e6a2";
+}
+
+.ph-stack::before {
+  content: "\e466";
+}
+
+.ph-star::before {
+  content: "\e46a";
+}
+
+.ph-tag::before {
+  content: "\e478";
+}
+
+.ph-trash::before {
+  content: "\e4a6";
+}
+
+.ph-trend-up::before {
+  content: "\e4ae";
+}
+
+.ph-user::before {
+  content: "\e4c2";
+}
+
+.ph-x::before {
+  content: "\e4f6";
+}

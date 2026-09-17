@@ -5,7 +5,7 @@ updated_at: 2026-07-30
 ---
 
 A group inside a group: `buildSidebarItems()` recurses, so nesting has no
-depth limit and every level gets its own ◼️.
+depth limit and every level gets its own square marker.
 
 VitePress indents each level and only renders the toggle for `collapsed`
 items, so a deep tree stays readable, but three levels is already a lot to

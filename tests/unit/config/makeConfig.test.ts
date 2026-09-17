@@ -139,10 +139,12 @@ describe("makeConfig fonts option", () => {
       .map(([, attrs]) => attrs["href"] ?? "");
   }
 
-  test("default loads Open Sans and Noto Color Emoji in one request", () => {
+  test("default loads the theme faces and Noto Color Emoji in one request", () => {
     const hrefs = fontHrefs({ configDir });
     expect(hrefs).toHaveLength(1);
-    expect(hrefs[0]).toContain("family=Open+Sans");
+    expect(hrefs[0]).toContain("family=Inter");
+    expect(hrefs[0]).toContain("family=IBM+Plex+Sans");
+    expect(hrefs[0]).toContain("family=IBM+Plex+Mono");
     expect(hrefs[0]).toContain("family=Noto+Color+Emoji");
   });
 
