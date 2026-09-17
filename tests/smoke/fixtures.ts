@@ -95,7 +95,8 @@ export const test = base.extend<Fixtures>({
       const logChunks: string[] = [];
       const proc = spawn(opts.cmd, opts.args, {
         cwd: opts.cwd,
-        env: { ...process.env, HUSKY: "0" },
+        // docs:dev would sync skills against the library; smoke stays offline.
+        env: { ...process.env, HUSKY: "0", TF_DOC_VAULT_SKILLS: "off" },
         stdio: opts.inheritStdio ? "inherit" : ["ignore", "pipe", "pipe"],
       });
       if (!opts.inheritStdio) {

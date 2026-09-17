@@ -59,3 +59,44 @@ test("setup without a TTY and without --template exits 1", ({ sandboxes }) => {
   expect(r.status).toBe(1);
   expect(r.stderr).toContain("--template=<name>");
 });
+
+test("tf-doc-vault --help lists dev", ({ sandboxes }) => {
+  const r = spawnSync("pnpm", ["exec", "tf-doc-vault", "--help"], {
+    cwd: sandboxes.anaDir,
+    encoding: "utf-8",
+  });
+  expect(r.status, r.stderr).toBe(0);
+  expect(r.stdout).toMatch(/^ {2}dev {2,}/m);
+});
+
+// The skills step must never stand between a person and the dev server: with
+// no token it says nothing and hands over to vitepress.
+test("dev without a GitHub token is silent about skills and reaches vitepress", ({
+  sandboxes,
+}) => {
+  const r = spawnSync(
+    "pnpm",
+    [
+      "exec",
+      "tf-doc-vault",
+      "dev",
+      "--root=/nonexistent",
+      "--skills-bundle=docs",
+    ],
+    {
+      cwd: sandboxes.anaDir,
+      encoding: "utf-8",
+      timeout: 30_000,
+      env: {
+        ...process.env,
+        GITHUB_TOKEN: "",
+        GH_TOKEN: "",
+        GH_CONFIG_DIR: "/nonexistent",
+        TF_DOC_VAULT_SKILLS: "",
+      },
+    },
+  );
+  const out = `${r.stdout}${r.stderr}`;
+  expect(out).not.toMatch(/skill/i);
+  expect(r.status !== 0 || /vitepress|localhost/i.test(out)).toBe(true);
+});

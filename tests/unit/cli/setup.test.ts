@@ -967,7 +967,7 @@ describe("host repository integration", () => {
   // still gets consistent scripts and ignores.
   test("the docs scripts point at the scaffolded folder", () => {
     const scripts = docsScripts("sub/docs");
-    expect(scripts["docs:dev"]).toBe("vitepress dev sub/docs");
+    expect(scripts["docs:dev"]).toBe("tf-doc-vault dev --root=sub/docs");
     expect(scripts["docs:validate"]).toBe(
       "tf-doc-vault validate --root=sub/docs",
     );
@@ -996,7 +996,7 @@ describe("host repository integration", () => {
       fs.readFileSync(path.join(dir, "package.json"), "utf-8"),
     ) as { scripts: Record<string, string> };
     expect(pkg.scripts.build).toBe("tsc");
-    expect(pkg.scripts["docs:dev"]).toBe("vitepress dev sub/docs");
+    expect(pkg.scripts["docs:dev"]).toBe("tf-doc-vault dev --root=sub/docs");
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
@@ -1718,6 +1718,15 @@ describe("enableAnalytics", () => {
 });
 
 describe("skills bundle wiring", () => {
+  test("docs:dev points at tf-doc-vault dev, carrying the bundle when the template has one", () => {
+    expect(docsScripts("docs", "docs")["docs:dev"]).toBe(
+      "tf-doc-vault dev --root=docs --skills-bundle=docs",
+    );
+    expect(docsScripts("docs")["docs:dev"]).toBe(
+      "tf-doc-vault dev --root=docs",
+    );
+  });
+
   const RECOVERY =
     "npx --yes @techfides/tf-skills-manager@latest install --bundle docs --target /tmp/probe/.claude/skills";
   const ctx = {

@@ -314,6 +314,9 @@ export function resolvePlaceholders(
   return {
     ...placeholders,
     __DOCS_BASE__: manifest.base,
+    // The standalone boilerplate package.json carries docs:dev as a placeholder
+    // so it cannot drift from what `docsScripts` writes into a host package.json.
+    __DOCS_DEV__: devScript("docs", manifest.skillsBundle),
     __SECTION_NAV__: String(manifest.sectionNav),
     ...placeholderValues(manifest.fields, answers),
     ...extra,
@@ -361,9 +364,24 @@ export function sourceWarnings(
 
 // ─── host repository integration ───
 
-export function docsScripts(docsPath: string): Record<string, string> {
+/**
+ * `tf-doc-vault dev` syncs the documentation skills with the library before
+ * starting VitePress; without a bundle it only starts VitePress.
+ */
+export function devScript(docsPath: string, skillsBundle?: string): string {
+  return [
+    "tf-doc-vault dev",
+    `--root=${docsPath}`,
+    ...(skillsBundle ? [`--skills-bundle=${skillsBundle}`] : []),
+  ].join(" ");
+}
+
+export function docsScripts(
+  docsPath: string,
+  skillsBundle?: string,
+): Record<string, string> {
   return {
-    "docs:dev": `vitepress dev ${docsPath}`,
+    "docs:dev": devScript(docsPath, skillsBundle),
     "docs:build": `vitepress build ${docsPath}`,
     "docs:validate": `tf-doc-vault validate --root=${docsPath}`,
     "docs:normalize": `tf-doc-vault normalize --root=${docsPath}`,
@@ -379,7 +397,11 @@ export function gitignoreEntries(docsPath: string): string[] {
   return [`${docsPath}/.vitepress/dist/`, `${docsPath}/.vitepress/cache/`];
 }
 
-export function updatePackageJson(dir: string, docsPath: string): void {
+export function updatePackageJson(
+  dir: string,
+  docsPath: string,
+  skillsBundle?: string,
+): void {
   const pkgPath = path.join(dir, "package.json");
   if (!fs.existsSync(pkgPath)) {
     console.warn("  ⚠ package.json not found; scripts not added.");
@@ -390,7 +412,9 @@ export function updatePackageJson(dir: string, docsPath: string): void {
   };
   const scripts = pkg.scripts ?? {};
   let added = 0;
-  for (const [key, value] of Object.entries(docsScripts(docsPath))) {
+  for (const [key, value] of Object.entries(
+    docsScripts(docsPath, skillsBundle),
+  )) {
     if (!(key in scripts)) {
       scripts[key] = value;
       added++;
@@ -1195,7 +1219,9 @@ async function run(): Promise<void> {
     "docs",
   );
   if (manifest.host.minimalPackageJson) writeMinimalPackageJson(targetDir);
-  if (manifest.host.packageJsonScripts) updatePackageJson(cwd, docsPath);
+  if (manifest.host.packageJsonScripts) {
+    updatePackageJson(cwd, docsPath, manifest.skillsBundle);
+  }
   if (manifest.host.devDependencies) {
     updateDevDependencies(cwd, documentationDependencies(depFlags, cwd));
   }

@@ -21,6 +21,7 @@ const COMMANDS: Record<string, string> = {
   "ensure-lf": "ensure-lf.js",
   fix: "fix.js",
   sync: "sync-template.js",
+  dev: "dev.js",
   "gen-diagrams": "generate-diagrams.cjs",
   "gen-wireframes": "generate-wireframes.cjs",
   "replace-wireframes": "replace-wireframes.cjs",
@@ -67,6 +68,11 @@ Commands:
   sync                Diff infra/CI/config files against bundled template
                         --apply             overwrite drifted files
                         --files=a,b,c       restrict to a subset
+  dev                 Sync the documentation skills with the library (silent
+                      without a GitHub token; off with TF_DOC_VAULT_SKILLS=off),
+                      then run vitepress dev; other flags go to vitepress
+                        --root=<dir>            docs root directory (default: docs)
+                        --skills-bundle=<name>  bundle to sync against; omit to skip
   gen-diagrams        Generate analysis SVG diagrams to docs/public/images/diagrams/
   gen-wireframes      Generate wireframe SVGs to docs/public/images/wireframes/
   replace-wireframes  Replace ASCII wireframes in docs/v1/index.md with SVG image refs
