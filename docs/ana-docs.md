@@ -168,9 +168,9 @@ User content (`docs/`, `package.json`, README, CLAUDE) is excluded from overwrit
 
 ## Claude skills
 
-`setup` installs the TechFides documentation skills into `.claude/skills/`: the library's `docs` bundle, with the portal `CLAUDE.md` it ships placed at the project root and the bundled slash commands removed (the library set has none). It runs `npx @techfides/tf-skills-manager install --bundle docs`, which needs a GitHub token with read access to the skills library: `gh auth login`, or `GITHUB_TOKEN` / `GH_TOKEN` in the environment.
+`setup` installs the TechFides documentation skills into `.claude/skills/`: the library's `docs` bundle, with the portal rules it ships written into `AGENTS.md` (`CLAUDE.md` stays the `@AGENTS.md` pointer) and the bundled slash commands removed (the library set has none). It runs `npx @techfides/tf-skills-manager install --bundle docs`, which needs a GitHub token with read access to the skills library: `gh auth login`, or `GITHUB_TOKEN` / `GH_TOKEN` in the environment.
 
-Without a token, offline, or on any other failure, the scaffold keeps the bundled default skills and their `CLAUDE.md`, prints a warning, and puts the exact install command into the closing "next steps" so you can run it later. The scaffold itself always succeeds. `--no-skills` skips the attempt altogether.
+Without a token, offline, or on any other failure, the scaffold keeps the bundled default skills and rules, prints a warning, and puts the exact install command into the closing "next steps" so you can run it later. The scaffold itself always succeeds. `--no-skills` skips the attempt altogether.
 
 `pnpm docs:dev` runs `tf-doc-vault dev`, which syncs those skills with the library before starting VitePress. Without a token it does nothing. With one it replaces a bundled set you never touched with the library set, brings library skills that fell behind forward (`tf-skills update`, never `--force`), and only prints the command for anything you edited by hand. `TF_DOC_VAULT_SKILLS=off` turns the sync off, for CI or a quick start; everything after `docs:dev` (`--port`, `--host`) goes to VitePress.
 

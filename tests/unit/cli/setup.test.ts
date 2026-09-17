@@ -1027,7 +1027,7 @@ describe("host repository integration", () => {
       fs.readFileSync(path.join(dir, "package.json"), "utf-8"),
     ) as { private?: boolean; scripts: Record<string, string> };
     expect(pkg.private).toBe(true);
-    expect(pkg.scripts["docs:dev"]).toBe("vitepress dev sub/docs");
+    expect(pkg.scripts["docs:dev"]).toBe("tf-doc-vault dev --root=sub/docs");
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
@@ -1788,7 +1788,7 @@ describe("skills bundle wiring", () => {
         attempted: true,
         ok: false,
         command: RECOVERY,
-        claudeMd: "kept",
+        rules: "kept",
         reason: "no GitHub token",
       },
     });
@@ -1806,7 +1806,7 @@ describe("skills bundle wiring", () => {
         attempted: true,
         ok: true,
         command: RECOVERY,
-        claudeMd: "kept",
+        rules: "kept",
       },
     });
     expect(epilogue).toContain("docs-base/references/CLAUDE.md");

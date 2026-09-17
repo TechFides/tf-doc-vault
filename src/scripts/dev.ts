@@ -126,8 +126,14 @@ const timedRunner: Runner = (command, cmdArgs) => {
 
 function switchFromFallback(target: string, bundleName: string): void {
   const projectDir = process.cwd();
-  const claudeMd = readText(path.join(projectDir, "CLAUDE.md"));
-  const template = readText(path.join(BOILERPLATE, "CLAUDE.md"));
+  // Whatever rules files this package ships (AGENTS.md, the CLAUDE.md pointer)
+  // must read exactly as scaffolded, project name aside.
+  const rulesPristine = ["AGENTS.md", "CLAUDE.md"].every((name) => {
+    const template = readText(path.join(BOILERPLATE, name));
+    if (template === null) return true;
+    const actual = readText(path.join(projectDir, name));
+    return actual !== null && matchesTemplate(actual, template);
+  });
   const pristine =
     isPristine(
       readTree(target),
@@ -137,9 +143,7 @@ function switchFromFallback(target: string, bundleName: string): void {
       readTree(path.join(projectDir, ".claude", "commands")),
       readTree(path.join(BOILERPLATE, ".claude", "commands")),
     ) &&
-    claudeMd !== null &&
-    template !== null &&
-    matchesTemplate(claudeMd, template);
+    rulesPristine;
   if (!pristine) {
     console.log(`\n${switchAdvice(target, bundleName)}\n`);
     return;
@@ -155,9 +159,9 @@ function switchFromFallback(target: string, bundleName: string): void {
     return;
   }
   console.log(
-    result.claudeMd === "replaced"
-      ? "Documentation skills and CLAUDE.md installed from the library: review with git status and commit.\n"
-      : "Documentation skills installed from the library (CLAUDE.md kept, the bundle ships none): review with git status and commit.\n",
+    result.rules === "replaced"
+      ? "Documentation skills and rules installed from the library: review with git status and commit.\n"
+      : "Documentation skills installed from the library (rules kept, the bundle ships none): review with git status and commit.\n",
   );
 }
 

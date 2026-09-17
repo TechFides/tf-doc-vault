@@ -3,7 +3,7 @@
   "entry": ["src/cli/*.ts", "src/scripts/*"],
   "project": ["src/**/*.{ts,cts,mts,cjs,vue}"],
   "ignore": ["src/theme/components/VersionSwitcher.vue"],
-  "ignoreBinaries": ["diff", "tf-doc-vault", "gh"],
+  "ignoreBinaries": ["diff", "tf-doc-vault"],
   "ignoreDependencies": ["tsx"],
   "ignoreExportsUsedInFile": true
 }

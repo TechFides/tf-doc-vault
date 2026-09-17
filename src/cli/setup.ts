@@ -975,10 +975,10 @@ export function nextSteps(ctx: {
     blocks.push(`Switch to the current TechFides documentation skills (needs a GitHub
 token with access to the skills library: \`gh auth login\` or GITHUB_TOKEN):
   ${ctx.skills.command}`);
-  } else if (ctx.skills?.ok && ctx.skills.claudeMd === "kept") {
-    blocks.push(`The installed skills bundle shipped no portal CLAUDE.md. Once the library
+  } else if (ctx.skills?.ok && ctx.skills.rules === "kept") {
+    blocks.push(`The installed skills bundle shipped no portal rules file. Once the library
 does, copy it over the bundled one:
-  cp ${fromHere(".claude/skills/docs-base/references/CLAUDE.md")} ${fromHere("CLAUDE.md")}`);
+  cp ${fromHere(".claude/skills/docs-base/references/CLAUDE.md")} ${fromHere(fs.existsSync(path.join(ctx.targetDir, "AGENTS.md")) ? "AGENTS.md" : "CLAUDE.md")}`);
   }
 
   if (ctx.dependency.startsWith("file:")) {
@@ -1190,7 +1190,7 @@ async function run(): Promise<void> {
     attempted: false,
     ok: false,
     command: "",
-    claudeMd: "kept",
+    rules: "kept",
   };
   if (manifest.skillsBundle && flags["no-skills"] !== true) {
     console.log(
@@ -1201,9 +1201,9 @@ async function run(): Promise<void> {
       process.stderr.write(
         `⚠  Skills bundle not installed (${skills.reason ?? "unknown"}); keeping the bundled default skills.\n`,
       );
-    } else if (skills.claudeMd === "kept") {
+    } else if (skills.rules === "kept") {
       process.stderr.write(
-        "⚠  The installed bundle ships no docs-base/references/CLAUDE.md; the bundled CLAUDE.md was kept.\n",
+        "⚠  The installed bundle ships no docs-base/references/CLAUDE.md; the bundled rules were kept.\n",
       );
     }
   }

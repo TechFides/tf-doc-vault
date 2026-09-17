@@ -8,8 +8,10 @@ import {
   type Runner,
 } from "../../../src/cli/install-skills.js";
 
-/** A scaffolded portal as the boilerplate leaves it: bundled skills, commands, v1 CLAUDE.md. */
-function project(): string {
+const V2 = "# Documentation portal rules — v2";
+
+/** A scaffolded portal as the boilerplate leaves it: bundled skills, commands, AGENTS.md rules, CLAUDE.md pointer. */
+function project(opts: { pointerLayout?: boolean } = {}): string {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "inst-"));
   fs.mkdirSync(path.join(dir, ".claude", "skills", "docs-from-code"), {
     recursive: true,
@@ -23,7 +25,12 @@ function project(): string {
     path.join(dir, ".claude", "commands", "docs-technical.md"),
     "old",
   );
-  fs.writeFileSync(path.join(dir, "CLAUDE.md"), "v1 rules");
+  if (opts.pointerLayout ?? true) {
+    fs.writeFileSync(path.join(dir, "AGENTS.md"), "v1 rules");
+    fs.writeFileSync(path.join(dir, "CLAUDE.md"), "@AGENTS.md\n");
+  } else {
+    fs.writeFileSync(path.join(dir, "CLAUDE.md"), "v1 rules");
+  }
   return dir;
 }
 
@@ -38,6 +45,9 @@ function fakeInstall(files: Record<string, string>): Runner {
     return { status: 0, stderr: "" };
   };
 }
+
+const read = (dir: string, rel: string): string =>
+  fs.readFileSync(path.join(dir, rel), "utf8");
 
 function backups(dir: string): string[] {
   return fs
@@ -54,45 +64,58 @@ describe("skillsCommand", () => {
 });
 
 describe("installSkills", () => {
-  test("success: library set in, v2 CLAUDE.md at root, bundled skills and commands gone", () => {
+  test("success: library set in, rules into AGENTS.md, pointer and commands handled", () => {
     const dir = project();
     const result = installSkills(
       "docs",
       dir,
       fakeInstall({
         "docs-base/SKILL.md": "lib",
-        "docs-base/references/CLAUDE.md": "# Documentation portal rules — v2",
+        "docs-base/references/CLAUDE.md": V2,
       }),
     );
     expect(result).toMatchObject({
       attempted: true,
       ok: true,
-      claudeMd: "replaced",
+      rules: "replaced",
     });
     expect(fs.readdirSync(path.join(dir, ".claude", "skills"))).toEqual([
       "docs-base",
     ]);
     expect(fs.existsSync(path.join(dir, ".claude", "commands"))).toBe(false);
-    expect(fs.readFileSync(path.join(dir, "CLAUDE.md"), "utf8")).toBe(
-      "# Documentation portal rules — v2",
-    );
+    expect(read(dir, "AGENTS.md")).toBe(V2);
+    expect(read(dir, "CLAUDE.md")).toBe("@AGENTS.md\n");
     expect(backups(dir)).toEqual([]);
   });
 
-  test("success without a shipped CLAUDE.md keeps the v1 file and says so", () => {
+  test("a portal without AGENTS.md gets the rules as CLAUDE.md", () => {
+    const dir = project({ pointerLayout: false });
+    const result = installSkills(
+      "docs",
+      dir,
+      fakeInstall({
+        "docs-base/SKILL.md": "lib",
+        "docs-base/references/CLAUDE.md": V2,
+      }),
+    );
+    expect(result.rules).toBe("replaced");
+    expect(read(dir, "CLAUDE.md")).toBe(V2);
+    expect(fs.existsSync(path.join(dir, "AGENTS.md"))).toBe(false);
+  });
+
+  test("success without shipped rules keeps the bundled ones and says so", () => {
     const dir = project();
     const result = installSkills(
       "docs",
       dir,
       fakeInstall({ "docs-base/SKILL.md": "lib" }),
     );
-    expect(result).toMatchObject({ ok: true, claudeMd: "kept" });
-    expect(fs.readFileSync(path.join(dir, "CLAUDE.md"), "utf8")).toBe(
-      "v1 rules",
-    );
+    expect(result).toMatchObject({ ok: true, rules: "kept" });
+    expect(read(dir, "AGENTS.md")).toBe("v1 rules");
+    expect(read(dir, "CLAUDE.md")).toBe("@AGENTS.md\n");
   });
 
-  test("failure: skills, commands and CLAUDE.md restored byte for byte", () => {
+  test("failure: skills, commands, AGENTS.md and CLAUDE.md restored byte for byte", () => {
     const dir = project();
     const result = installSkills("docs", dir, () => ({
       status: 1,
@@ -100,18 +123,12 @@ describe("installSkills", () => {
     }));
     expect(result.ok).toBe(false);
     expect(result.reason).toContain("no GitHub token");
-    expect(
-      fs.readFileSync(
-        path.join(dir, ".claude", "skills", "docs-from-code", "SKILL.md"),
-        "utf8",
-      ),
-    ).toBe("old");
+    expect(read(dir, ".claude/skills/docs-from-code/SKILL.md")).toBe("old");
     expect(
       fs.existsSync(path.join(dir, ".claude", "commands", "docs-technical.md")),
     ).toBe(true);
-    expect(fs.readFileSync(path.join(dir, "CLAUDE.md"), "utf8")).toBe(
-      "v1 rules",
-    );
+    expect(read(dir, "AGENTS.md")).toBe("v1 rules");
+    expect(read(dir, "CLAUDE.md")).toBe("@AGENTS.md\n");
     expect(backups(dir)).toEqual([]);
   });
 

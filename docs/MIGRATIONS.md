@@ -14,9 +14,9 @@ pnpm docs:dev
 
 What the first `docs:dev` does depends on where the portal stands:
 
-- **No library access.** Nothing changes: the bundled skills and the v1 `CLAUDE.md` keep working, and `docs:dev` says nothing about skills.
-- **Access, and the bundled skills, commands and `CLAUDE.md` are exactly as the scaffold left them.** `docs:dev` replaces them with the library set and the library's portal `CLAUDE.md` on its own; review with `git status` and commit. From then on it brings library skills that fell behind forward on every start (`tf-skills update`, never `--force`) and only names the ones you edited.
-- **Access, but something was edited by hand** (a bundled skill, a command, `CLAUDE.md`), or an offer folder that carries hand-copied skills and its own long `CLAUDE.md`: `docs:dev` prints the one `install --force` command and touches nothing. Before running it, move anything project-specific from your `CLAUDE.md` into the `docs/README.md` contract; the library's `CLAUDE.md` is canonical and identical everywhere, and the `docs-workflow` skill sets the contract up with a few questions and offers a `migrate` operation for the content tree.
+- **No library access.** Nothing changes: the bundled skills and rules keep working, and `docs:dev` says nothing about skills.
+- **Access, and the bundled skills, commands, `AGENTS.md` and `CLAUDE.md` are exactly as the scaffold left them.** `docs:dev` replaces them with the library set and writes the library's portal rules into `AGENTS.md` on its own; review with `git status` and commit. From then on it brings library skills that fell behind forward on every start (`tf-skills update`, never `--force`) and only names the ones you edited.
+- **Access, but something was edited by hand** (a bundled skill, a command, `AGENTS.md`), or an offer folder that carries hand-copied skills and its own long `CLAUDE.md`: `docs:dev` prints the one `install --force` command and touches nothing. Before running it, move anything project-specific from your `AGENTS.md` into the `docs/README.md` contract; the library's rules file is canonical and identical everywhere, and the `docs-workflow` skill sets the contract up with a few questions and offers a `migrate` operation for the content tree.
 
 `TF_DOC_VAULT_SKILLS=off` turns the sync off for a run, for CI or a quick start.
 
