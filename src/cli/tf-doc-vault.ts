@@ -7,7 +7,7 @@
 
 import { spawnSync } from "node:child_process";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CLI_DIR = __dirname; // dist/cli
@@ -21,7 +21,6 @@ const COMMANDS: Record<string, string> = {
   "ensure-lf": "ensure-lf.js",
   fix: "fix.js",
   sync: "sync-template.js",
-  dev: "dev.js",
   "gen-diagrams": "generate-diagrams.cjs",
   "gen-wireframes": "generate-wireframes.cjs",
   "replace-wireframes": "replace-wireframes.cjs",
@@ -101,20 +100,30 @@ if (cmd === "setup") {
 if (cmd === "import-confluence") {
   process.exit(runCliScript("import-confluence.js", rest));
 }
-
-if (cmd === "pdf") {
-  let code = runScript("build-print-page.js");
-  if (code !== 0) process.exit(code);
-  code = runVitepressBuild();
-  if (code !== 0) process.exit(code);
-  code = runScript("export-pdf.js");
-  process.exit(code);
+// In-process, not spawned: pnpm forwards a SIGTERM to its own child only, so a
+// spawned dev.js (and the vitepress it starts) would outlive `pnpm docs:dev`.
+if (cmd === "dev") {
+  process.argv = [process.argv[0]!, path.join(SCRIPTS_DIR, "dev.js"), ...rest];
+  await import(pathToFileURL(path.join(SCRIPTS_DIR, "dev.js")).href);
+} else {
+  dispatch(cmd, rest);
 }
 
-const script = COMMANDS[cmd];
-if (!script) {
-  console.error(`Unknown command: ${cmd}`);
-  usage(1);
-}
+function dispatch(command: string, args: string[]): never {
+  if (command === "pdf") {
+    let code = runScript("build-print-page.js");
+    if (code !== 0) process.exit(code);
+    code = runVitepressBuild();
+    if (code !== 0) process.exit(code);
+    code = runScript("export-pdf.js");
+    process.exit(code);
+  }
 
-process.exit(runScript(script, rest));
+  const script = COMMANDS[command];
+  if (!script) {
+    console.error(`Unknown command: ${command}`);
+    usage(1);
+  }
+
+  process.exit(runScript(script, args));
+}

@@ -69,9 +69,10 @@ test("tf-doc-vault --help lists dev", ({ sandboxes }) => {
   expect(r.stdout).toMatch(/^ {2}dev {2,}/m);
 });
 
-// The skills step must never stand between a person and the dev server: with
-// no token it says nothing and hands over to vitepress.
-test("dev without a GitHub token is silent about skills and reaches vitepress", ({
+// With the sync switched off, nothing about skills is printed and control goes
+// straight to vitepress; --help makes vitepress exit instead of serving. (A
+// "no token" run cannot be simulated here: gh keeps tokens in the keyring.)
+test("dev with the skills sync off hands over to vitepress silently", ({
   sandboxes,
 }) => {
   const r = spawnSync(
@@ -80,23 +81,19 @@ test("dev without a GitHub token is silent about skills and reaches vitepress", 
       "exec",
       "tf-doc-vault",
       "dev",
-      "--root=/nonexistent",
+      "--root=docs",
       "--skills-bundle=docs",
+      "--help",
     ],
     {
       cwd: sandboxes.anaDir,
       encoding: "utf-8",
-      timeout: 30_000,
-      env: {
-        ...process.env,
-        GITHUB_TOKEN: "",
-        GH_TOKEN: "",
-        GH_CONFIG_DIR: "/nonexistent",
-        TF_DOC_VAULT_SKILLS: "",
-      },
+      timeout: 60_000,
+      env: { ...process.env, TF_DOC_VAULT_SKILLS: "off" },
     },
   );
   const out = `${r.stdout}${r.stderr}`;
+  expect(r.status, out).toBe(0);
   expect(out).not.toMatch(/skill/i);
-  expect(r.status !== 0 || /vitepress|localhost/i.test(out)).toBe(true);
+  expect(out).toMatch(/vitepress|usage/i);
 });

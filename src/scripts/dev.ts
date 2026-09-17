@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -223,8 +223,13 @@ try {
   // Skills are additive; the dev server starts regardless.
 }
 
-const vitepress = spawnSync("vitepress", ["dev", root, ...forwarded], {
+const vitepress = spawn("vitepress", ["dev", root, ...forwarded], {
   stdio: "inherit",
   shell: WIN,
 });
-process.exit(vitepress.status ?? 1);
+// A signal to this process must reach the server, or it outlives its terminal.
+for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) {
+  process.on(signal, () => vitepress.kill(signal));
+}
+vitepress.on("error", () => process.exit(1));
+vitepress.on("exit", (code, signal) => process.exit(code ?? (signal ? 1 : 0)));
