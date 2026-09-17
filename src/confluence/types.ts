@@ -5,13 +5,7 @@
  */
 
 export type AdfValue =
-  | AdfNode
-  | AdfValue[]
-  | string
-  | number
-  | boolean
-  | null
-  | undefined;
+  AdfNode | AdfValue[] | string | number | boolean | null | undefined;
 
 export interface AdfMark {
   type: string;

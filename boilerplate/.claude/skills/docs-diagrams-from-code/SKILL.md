@@ -1,6 +1,6 @@
 ---
 name: docs-diagrams-from-code
-description: "Generates diagrams (Mermaid primary, PlantUML fallback) for already-generated documentation pages. Attaches diagrams at the `<!-- diagram-anchor: <name> -->` markers placed by the technical and functional phases; it does NOT invent diagrams for pages without anchors. Covers the common diagram types (component, C4, domain-model class, ERD, sequence, use-case, state, flowchart / decision, BPMN where applicable). Runs AFTER textual content is confirmed stable. Uses code and existing docs as evidence sources, and performs a consistency check between each diagram and the host page text. Invoked by the docs-from-code orchestrator or by /docs-diagrams. DO NOT trigger for text generation, wireframes, sales, or pre-code design. Always inherits rules from CLAUDE.md."
+description: "Generates diagrams (Mermaid primary, PlantUML fallback) for already-generated documentation pages. Attaches diagrams at the `<!-- diagram-anchor: <name> -->` markers placed by the technical and functional phases; it does NOT invent diagrams for pages without anchors. Covers the common diagram types (component, C4, domain-model class, ERD, sequence, use-case, state, flowchart / decision, BPMN where applicable). Runs AFTER textual content is confirmed stable. Uses code and existing docs as evidence sources, and performs a consistency check between each diagram and the host page text. Invoked by the docs-from-code orchestrator or by /docs-diagrams. DO NOT trigger for text generation, wireframes, sales, or pre-code design. Always inherits rules from AGENTS.md."
 ---
 
 # docs-diagrams-from-code: Diagrams phase
@@ -200,11 +200,11 @@ side (diagram or text) is wrong.
   **NOT** invent new diagrams for pages without anchors. If a page
   should have a diagram but has no anchor, report it and let the user
   edit the host page first.
-- **Mermaid first, PlantUML fallback**: per §8 of CLAUDE.md.
+- **Mermaid first, PlantUML fallback**: per §8 of AGENTS.md.
 - **Caption + summary mandatory**: a diagram without caption and textual
   summary is incomplete.
-- **Evidence required**: per CLAUDE.md §1: no invented nodes or edges.
-- **Czech content for captions and summaries**: per §7 of CLAUDE.md.
+- **Evidence required**: per AGENTS.md §1: no invented nodes or edges.
+- **Czech content for captions and summaries**: per §7 of AGENTS.md.
   Diagram node labels follow the source; if the code calls it
   `UserService`, the class node is `UserService`, not `SlužbaUživatelů`.
 - **Syntactic validation required** before leaving Step 2.

@@ -6,4 +6,4 @@ output:
 commit-msg:
   jobs:
     - name: commitlint
-      run: pnpm exec commitlint --edit {1}
+      run: pnpm exec commitlint --edit "{1}"

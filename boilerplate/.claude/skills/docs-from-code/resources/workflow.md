@@ -12,7 +12,7 @@ self-check → Finish.
 
 ## Step 1: Preflight
 
-1. Read `CLAUDE.md` at project root.
+1. Read `AGENTS.md` at project root.
 2. Collect the five inputs (`source_path`, `version_folder`, `scope`,
    `source_version`, `screenshots`).
 3. Show the run context; wait for `y / edit / cancel`.

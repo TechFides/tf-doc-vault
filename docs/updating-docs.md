@@ -12,8 +12,22 @@ Update the `updated_at` field in the frontmatter to today's date:
 title: My page
 status: published
 updated_at: 2026-05-12
+order: 3
 ---
 ```
+
+## Sidebar and nav order
+
+The `order` field in frontmatter is the sort key for the sidebar, the top nav and the print page, within a folder:
+
+1. `index.md` is always first and does not compete for a position.
+2. Items with a valid `order` (an integer) come next, ascending.
+3. Everything else follows, alphabetically.
+4. A page's key is its own `order`; a subfolder's key comes from its `index.md`. Files and subfolders in the same folder share one number space, so a page and a subfolder there cannot both be `order: 2`.
+
+Two siblings with the same `order` fall back to `localeCompare(name, "cs")` between them, so the rendered order stays deterministic; `docs:validate` still reports the duplicate as an error.
+
+A missing or non-integer `order` does not break the sidebar, it just sorts to the alphabetical tail, but `docs:validate` reports it as an error. `order` is required on every page inside a version folder; a file sitting directly in `docs/` (including `docs/index.md`) and each version's own `index.md` are exempt, since neither is part of a sibling set that anything sorts.
 
 **Preview locally** while editing:
 

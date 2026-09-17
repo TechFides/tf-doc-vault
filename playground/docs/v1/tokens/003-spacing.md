@@ -2,6 +2,7 @@
 title: Spacing
 status: published
 updated_at: 2026-05-22
+order: 3
 ---
 
 Layout follows an **8-point grid**: paddings, gaps and margins are

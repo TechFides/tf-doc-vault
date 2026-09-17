@@ -2,6 +2,7 @@
 title: Task lists
 status: published
 updated_at: 2026-06-10
+order: 5
 ---
 
 GFM task lists rendered by the package's own markdown-it rule

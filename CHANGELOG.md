@@ -1,5 +1,74 @@
 # Changelog
 
+## v0.5.4
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.3...v0.5.4)
+
+### 🩹 Fixes
+
+- **frontmatter:** Read a quoted scalar as its value, not with the quotes ([f77d4e5](https://github.com/TechFides/tf-doc-vault/commit/f77d4e5))
+- **print:** Qualify heading ids with the page they came from ([2e39bfc](https://github.com/TechFides/tf-doc-vault/commit/2e39bfc))
+- **pdf:** Wait for Mermaid to render before printing ([62b0de2](https://github.com/TechFides/tf-doc-vault/commit/62b0de2))
+- **pdf:** Read Mermaid failure off its error graphic, qualify ids inside an attrs block ([a4b328f](https://github.com/TechFides/tf-doc-vault/commit/a4b328f))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+- Václav Mičulka ([@VaclavMiculka](https://github.com/VaclavMiculka))
+
+## v0.5.3
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.2...v0.5.3)
+
+### 🚀 Enhancements
+
+- **pdf:** Client-ready export with cover, contents page numbers and outline ([4105cd2](https://github.com/TechFides/tf-doc-vault/commit/4105cd2))
+
+### 🩹 Fixes
+
+- **setup:** Create a host package.json when the repo has none ([f583b86](https://github.com/TechFides/tf-doc-vault/commit/f583b86))
+- Store comment-audit state in the checkout git dir for worktrees ([795f2ce](https://github.com/TechFides/tf-doc-vault/commit/795f2ce))
+- Flush the hook message synchronously, align docs with the worktree fix ([9746067](https://github.com/TechFides/tf-doc-vault/commit/9746067))
+- **deps:** Keep playwright and @playwright/test on one version ([9abfe05](https://github.com/TechFides/tf-doc-vault/commit/9abfe05))
+- **pdf:** Make the print tokens, the cover and the base path actually apply ([19d973b](https://github.com/TechFides/tf-doc-vault/commit/19d973b))
+- **hooks:** Audit comments in every worktree the session dirtied, not just cwd ([95052f3](https://github.com/TechFides/tf-doc-vault/commit/95052f3))
+
+### 📖 Documentation
+
+- Add comment policy enforcement spec and plan ([080b92d](https://github.com/TechFides/tf-doc-vault/commit/080b92d))
+- Hold repo markdown to the comment tests, document the audit hook ([1a876dc](https://github.com/TechFides/tf-doc-vault/commit/1a876dc))
+- State file lives in the checkout git dir, align spec with the fix ([dd17916](https://github.com/TechFides/tf-doc-vault/commit/dd17916))
+- Format the enforcement spec and plan ([322e665](https://github.com/TechFides/tf-doc-vault/commit/322e665))
+
+### 🏡 Chore
+
+- Add comment-audit skill with the strict cleanup checklist ([e387f9d](https://github.com/TechFides/tf-doc-vault/commit/e387f9d))
+- Force a comment audit via Stop hook when files changed ([99dde2a](https://github.com/TechFides/tf-doc-vault/commit/99dde2a))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+- Václav Mičulka ([@VaclavMiculka](https://github.com/VaclavMiculka))
+
+## v0.5.2
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.1...v0.5.2)
+
+### 🚀 Enhancements
+
+- **sidebar:** Sort nav, sidebar and print page by frontmatter order ([80e20e1](https://github.com/TechFides/tf-doc-vault/commit/80e20e1))
+
+### 🩹 Fixes
+
+- **hooks:** Quote the commit-msg path so a repo path with spaces works ([b60dbe3](https://github.com/TechFides/tf-doc-vault/commit/b60dbe3))
+- **config:** Pre-bundle mermaid so its CommonJS deps reach the browser as ESM ([70c61c2](https://github.com/TechFides/tf-doc-vault/commit/70c61c2))
+- **print:** Resolve every internal link form into an in-document anchor ([744f9ee](https://github.com/TechFides/tf-doc-vault/commit/744f9ee))
+- **print:** Rewrite a link whose target is a bare ./ or ../ too ([2b13004](https://github.com/TechFides/tf-doc-vault/commit/2b13004))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.5.1
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.0...v0.5.1)

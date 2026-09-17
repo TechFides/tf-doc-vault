@@ -2,6 +2,7 @@
 title: Sidebar generator
 status: published
 updated_at: 2026-05-22
+order: 2
 ---
 
 `generateSidebar()` and `generateNav()` walk the `docs/<version>/`

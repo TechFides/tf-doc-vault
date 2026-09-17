@@ -2,6 +2,7 @@
 title: TO-BE tags
 status: published
 updated_at: 2026-08-13
+order: 8
 ---
 
 Tagging for planned, not-yet-deployed changes in a functional specification,

@@ -2,6 +2,7 @@
 title: <Czech title with numbering, e.g. 2.4.1 Komponentový diagram>
 status: draft
 updated_at: <YYYY-MM-DD>
+order: <N, unique among siblings>
 ---
 
 <!--
@@ -50,7 +51,7 @@ fallback, kdyby se diagram nevykreslil.>
 ## Příklad
 
 <Konkrétní příklad z kódu: snippet, request/response, config excerpt,
-nebo reálný scénář. VŽDY aspoň jeden. §7 CLAUDE.md.>
+nebo reálný scénář. VŽDY aspoň jeden. §7 AGENTS.md.>
 
 ```text
 <code excerpt>

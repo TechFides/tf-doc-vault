@@ -135,6 +135,6 @@ pole X, kód ho nezpracovává`.
   cross-checking the code.
 - **ALWAYS** prefer `path:line` over `path` for specific claims.
 - **ALWAYS** include at least one concrete example per non-trivial
-  concept, drawn from the code (§7 of `CLAUDE.md`).
+  concept, drawn from the code (§7 of `AGENTS.md`).
 - **ALWAYS** keep technical terms in their original language; only
   surrounding prose is Czech.

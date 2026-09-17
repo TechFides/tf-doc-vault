@@ -2,6 +2,7 @@
 title: StepCard
 status: published
 updated_at: 2026-08-13
+order: 20
 ---
 
 One numbered point of a method, standing on its own: a label, a claim, the checks that back

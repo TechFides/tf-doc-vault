@@ -2,6 +2,7 @@
 title: DocMeta
 status: published
 updated_at: 2026-05-22
+order: 1
 ---
 
 Status pill + "Updated" date that renders above every doc page

@@ -6,6 +6,7 @@ Two tiers. Add new tests in the tier whose boundary you crossed.
 
 Pure-logic tests for code that does not shell out, spawn processes, or build a site. Layout mirrors `src/`:
 
+- `tests/unit/shared/`: the primitives in `src/shared/` that the sidebar and the doc-tooling scripts both build on (frontmatter parsing, sibling ordering, text-file reading)
 - `tests/unit/sidebar/`: sidebar/nav generation against in-memory file trees
 - `tests/unit/scripts/`: doc-tooling helpers (`normalize-docs`, `validate-docs`) and the boilerplate-sync file resolution (`sync-template`)
 - `tests/unit/cli/`: CLI logic that needs neither a real repo nor a TTY. `utils.test.ts` covers the helpers in `src/cli/utils.ts` (arg parsing, `copyDir`, placeholder substitution); `scaffold.test.ts` covers template manifest parsing and validation, the copy plan and its rename and exclude rules; `setup.test.ts` covers the wizard, from flag and answer resolution through a fake prompt layer to the host `package.json` and `.gitignore` integration; `git-context.test.ts` covers detecting an ancestor git repo and parsing its `origin` remote (real `git init` in a temp dir, no network)
@@ -39,6 +40,8 @@ Run:
 - UI mode for debugging: `pnpm test:smoke --ui`
 
 Config: `playwright.config.ts`. Global setup is in `tests/smoke/global-setup.ts` (builds `dist/` and prepares fixtures).
+
+`@playwright/test` (devDependency) and `playwright` (runtime dependency, used by `export-pdf`) must resolve to the same version, because `@playwright/test@X` depends on `playwright@X` exactly. Both therefore carry a caret range, and `renovate.json` exempts `@playwright/test` from the exact pin devDependencies normally get. Pin it and the next lock refresh floats `playwright` ahead of it, pnpm keeps two Playwright copies and every spec fails to collect with "two different versions of @playwright/test".
 
 Every sandbox installs this package from the tarball `pnpm pack` produced, via `setup --source=file --file-path=<tgz>`. Never let a sandbox resolve `@techfides/tf-doc-vault` from npm: on a `chore(release)` commit the version in `package.json` is not published yet, so the install fails. pnpm resolves every spec already in a manifest before it applies an `add`, so swapping the dependency after scaffolding does not help; the wizard has to write the tarball path in the first place.
 
@@ -74,11 +77,12 @@ Good to know:
 
 ## When to add which
 
-- Touching `src/sidebar`, `src/scripts`, or pure helpers in `src/cli/`: **unit test** in the matching `tests/unit/<area>/` folder.
+- Touching `src/shared`, `src/sidebar`, `src/scripts`, or pure helpers in `src/cli/`: **unit test** in the matching `tests/unit/<area>/` folder. A change in `src/shared` reaches every consumer of the primitive, so cover it there as well as wherever the behaviour is visible.
 - Touching `src/cli/*` user-visible CLI behaviour, or anything that affects how a scaffolded site boots: **smoke test** in `tests/smoke/`.
 - Touching `src/confluence/**` or the Confluence importer: cover it with a `tests/unit/confluence/` spec and follow **Confluence importer verification** above.
 - Touching a boilerplate file with real logic (`middleware.ts`): **unit test** in `tests/unit/boilerplate/`, importing it directly.
 - Fixing a bug: add a regression test in the tier that would have caught it before fixing the code.
+- Adding or changing a text parser: read the file through `readText`, and add its fixtures to the LF/CRLF matrix that runs the read path with both line endings (`frontmatter.test.ts`: `EOLS` × `FIXTURES`, above the direct-parser block, which stays as it is). A leading BOM gets its own case there too. CI runs on `ubuntu-latest` only, so nothing else exercises those inputs.
 
 ## External dependencies
 

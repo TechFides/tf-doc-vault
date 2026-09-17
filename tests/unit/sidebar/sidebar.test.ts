@@ -221,3 +221,76 @@ describe("generateSidebar", () => {
     ]);
   });
 });
+
+describe("order", () => {
+  test("nav sections follow order from their index.md", () => {
+    write("v1/zeta/index.md", fm("Zeta", "order: 1"));
+    write("v1/alfa/index.md", fm("Alfa", "order: 2"));
+
+    expect(generateNav(docsRoot, "v1")).toEqual([
+      { text: "Zeta", link: "/v1/zeta/" },
+      { text: "Alfa", link: "/v1/alfa/" },
+    ]);
+  });
+
+  test("versions ignore order and stay alphabetical", () => {
+    write("v2/index.md", fm("V2", "order: 1"));
+    write("v1/index.md", fm("V1", "order: 2"));
+
+    expect(getVersions(docsRoot)).toEqual(["v1", "v2"]);
+  });
+
+  test("the version index stays first against a negative order", () => {
+    write("v1/index.md", fm("Přehled"));
+    write("v1/page.md", fm("Stránka", "order: -10"));
+
+    expect(generateSidebar(docsRoot, { unified: true })["/v1/"]).toEqual([
+      { text: "Přehled", link: "/v1/" },
+      { text: "Stránka", link: "/v1/page" },
+    ]);
+  });
+
+  test("pages and groups inside a section share one number space", () => {
+    write("v1/a/index.md", fm("A", "order: 1"));
+    write("v1/b/index.md", fm("B", "order: 2"));
+    write("v1/a/page.md", fm("Stránka", "order: 2"));
+    write("v1/a/skupina/index.md", fm("Skupina", "order: 1"));
+    write("v1/a/skupina/leaf.md", fm("List", "order: 1"));
+
+    expect(generateSidebar(docsRoot)["/v1/a/"]).toEqual([
+      {
+        text: "Skupina",
+        link: "/v1/a/skupina/",
+        collapsed: true,
+        items: [{ text: "List", link: "/v1/a/skupina/leaf" }],
+      },
+      { text: "Stránka", link: "/v1/a/page" },
+    ]);
+  });
+
+  test("items without order keep the alphabetical tail", () => {
+    write("v1/index.md", fm("Přehled"));
+    write("v1/beta.md", fm("Beta"));
+    write("v1/alfa.md", fm("Alfa"));
+    write("v1/zeta.md", fm("Zeta", "order: 1"));
+
+    expect(generateSidebar(docsRoot, { unified: true })["/v1/"]).toEqual([
+      { text: "Přehled", link: "/v1/" },
+      { text: "Zeta", link: "/v1/zeta" },
+      { text: "Alfa", link: "/v1/alfa" },
+      { text: "Beta", link: "/v1/beta" },
+    ]);
+  });
+
+  test("a tree without a single order renders as it did before", () => {
+    write("v1/index.md", fm("Přehled"));
+    write("v1/beta.md", fm("Beta"));
+    write("v1/alfa.md", fm("Alfa"));
+
+    expect(generateSidebar(docsRoot, { unified: true })["/v1/"]).toEqual([
+      { text: "Přehled", link: "/v1/" },
+      { text: "Alfa", link: "/v1/alfa" },
+      { text: "Beta", link: "/v1/beta" },
+    ]);
+  });
+});

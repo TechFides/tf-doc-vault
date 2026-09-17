@@ -2,6 +2,7 @@
 title: 🎯 Custom icon
 status: published
 updated_at: 2026-07-30
+order: 2
 ---
 
 This page's `title:` starts with an emoji, so no default marker is added: the

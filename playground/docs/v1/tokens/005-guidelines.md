@@ -2,6 +2,7 @@
 title: Guidelines
 status: published
 updated_at: 2026-06-11
+order: 5
 ---
 
 ## Page title

@@ -2,6 +2,7 @@
 title: Diagrams
 status: published
 updated_at: 2026-05-22
+order: 4
 ---
 
 Three different Mermaid diagram types, all picking up the brand

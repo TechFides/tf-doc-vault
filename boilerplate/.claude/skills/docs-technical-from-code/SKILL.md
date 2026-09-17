@@ -1,6 +1,6 @@
 ---
 name: docs-technical-from-code
-description: Generates technical documentation from an existing codebase, covering the full technical menu (tech stack, infrastructure, CI/CD, architecture, security, integrations, roles, jobs, testing, SLA, monitoring, scaling, feature toggles, caching, localization, disaster recovery, accessibility, audit, guides, and any project-specific technical concerns). Works file-by-file (text only, no diagrams and no wireframes), pausing after each generated page for user review. Invoked by the docs-from-code orchestrator or by /docs-technical. DO NOT trigger for functional docs, diagrams, wireframes, sales, or pre-code design. Always inherits rules from CLAUDE.md.
+description: Generates technical documentation from an existing codebase, covering the full technical menu (tech stack, infrastructure, CI/CD, architecture, security, integrations, roles, jobs, testing, SLA, monitoring, scaling, feature toggles, caching, localization, disaster recovery, accessibility, audit, guides, and any project-specific technical concerns). Works file-by-file (text only, no diagrams and no wireframes), pausing after each generated page for user review. Invoked by the docs-from-code orchestrator or by /docs-technical. DO NOT trigger for functional docs, diagrams, wireframes, sales, or pre-code design. Always inherits rules from AGENTS.md.
 ---
 
 # docs-technical-from-code: Technical documentation phase
@@ -88,11 +88,17 @@ For every planned file:
    dedicated template exists, fall back to
    `resources/templates/generic-page.md`.
 3. Produce the page following the template.
-4. For anything that cannot be derived from evidence, write
+4. Fill in `order` in the frontmatter: the page's position among its
+   siblings, from `resources/proposed-structure.md` where the page is
+   listed there, otherwise from the generation plan. `order` is a
+   required field checked by `docs:validate`, and files and subfolders
+   in the same folder share one number space, so the value must be
+   unique among them.
+5. For anything that cannot be derived from evidence, write
    `⚠️ TODO: [what is missing]`; **NEVER** invent.
-5. **ALWAYS include at least one example** per non-trivial concept (code
+6. **ALWAYS include at least one example** per non-trivial concept (code
    snippet, request/response, config excerpt, or concrete scenario).
-6. Save the file. Unless `auto_mode` is on, pause and ask:
+7. Save the file. Unless `auto_mode` is on, pause and ask:
    > "File `<path>` is written. Review and confirm to continue (y / edit /
    > stop)."
 
@@ -137,8 +143,8 @@ Return to the orchestrator:
 - **No diagrams in this phase**: if a diagram is expected later, insert
   only the anchor `<!-- diagram-anchor: <name> -->`; do not produce
   Mermaid / PlantUML here.
-- **Czech content, original technical terms**: per §7 of CLAUDE.md.
-- **Confluence marks required**: per §6 of CLAUDE.md.
+- **Czech content, original technical terms**: per §7 of AGENTS.md.
+- **Confluence marks required**: per §6 of AGENTS.md.
 
 Per-group nuances (what to emphasize for architecture vs. security vs.
 tests vs. guides, etc.) are captured inside the corresponding templates,

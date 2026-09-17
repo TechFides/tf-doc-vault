@@ -2,6 +2,7 @@
 title: 1.7 Seznam scénářů
 status: draft
 updated_at: <YYYY-MM-DD>
+order: <integer from proposed-structure.md, unique among siblings>
 ---
 
 <!--

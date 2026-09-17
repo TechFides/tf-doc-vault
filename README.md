@@ -52,17 +52,17 @@ call `makeConfig()` and `createTheme()`; the package owns the implementation, so
 
 ## What the package includes
 
-| Module                | Purpose                                                                                                                                            |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`config`**          | `makeConfig()`: complete VitePress config with locales, versioned nav, sidebar, i18n, Mermaid, optional analytics and edit links.                  |
-| **`theme`**           | `createTheme()`: the backdrop, DocMeta, footer, lightbox and table behaviour, plus BrandHero, FeatureCards, Spotlight and AuthorCard for Markdown. |
-| **`sidebar`**         | Auto-generates nav and sidebar from the `docs/<version>/<section>/<group>/` directory structure, with no manual config.                            |
-| **`scripts`**         | CLI commands: validate, normalize, build print page, export to PDF, fix line endings, sync boilerplate, dev (skills sync, then VitePress).         |
-| **`configs`**         | Shared `eslint.config.js`, `prettier.json`, `tsconfig.base.json` for consumer repos to extend.                                                     |
-| **`infra/terraform`** | Reusable GCP module: Cloud Run + Artifact Registry + IAM.                                                                                          |
-| **`docker`**          | Multi-stage Dockerfile with `nginx` / `nginx-auth` runtime variants.                                                                               |
-| **`boilerplate`**     | The VitePress project scaffold shared by every template: config, theme wiring, GitHub Actions CI, Vercel config, auth middleware.                  |
-| **`templates`**       | Markdown content sets (`ana-docs`, `tech-docs`, …), one folder per template, selected via `tf-doc-vault setup --template=<name>`.                  |
+| Module                | Purpose                                                                                                                                             |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`config`**          | `makeConfig()`: complete VitePress config with locales, versioned nav, sidebar, i18n, Mermaid, optional analytics and edit links.                   |
+| **`theme`**           | `createTheme()`: the backdrop, DocMeta, footer, lightbox and table behaviour, plus BrandHero, FeatureCards, Spotlight and AuthorCard for Markdown.  |
+| **`sidebar`**         | Auto-generates nav and sidebar from the `docs/<version>/<section>/<group>/` directory structure, with no manual config.                             |
+| **`scripts`**         | CLI commands: validate, normalize, build print page, export to PDF, fix line endings, sync boilerplate, dev (skills sync, then VitePress).          |
+| **`configs`**         | Shared `eslint.config.js`, `prettier.json`, `tsconfig.base.json` for consumer repos to extend.                                                      |
+| **`infra/terraform`** | Reusable GCP module: Cloud Run + Artifact Registry + IAM.                                                                                           |
+| **`docker`**          | Multi-stage Dockerfile with `nginx` / `nginx-auth` runtime variants.                                                                                |
+| **`boilerplate`**     | The VitePress project scaffold shared by every template: config, theme wiring, GitHub Actions CI, Vercel config, auth middleware, `.gitattributes`. |
+| **`templates`**       | Markdown content sets (`ana-docs`, `tech-docs`, …), one folder per template, selected via `tf-doc-vault setup --template=<name>`.                   |
 
 ## Quick start
 
@@ -132,6 +132,40 @@ export default createTheme({ widthToggle: true });
 > **Installing via a git URL?** Add `"pnpm": { "onlyBuiltDependencies": ["@techfides/tf-doc-vault"] }` to the consumer `package.json`, or pnpm 10 skips the `prepare` hook and `dist/` is never built. (The scaffolders already set this for you.)
 
 To rebrand (colors, logo, fonts, footer) for a non-TechFides project, see [BRANDING.md](./BRANDING.md).
+
+### PDF export
+
+`tf-doc-vault pdf` builds the site and renders `/print` into `artifacts/`. With no
+further setup it produces `docs-full.pdf`: every page in sidebar order, a contents
+list with page numbers, bookmarks that mirror the sidebar, and a running footer.
+
+A project that sends its PDF to a customer adds `tf-doc-vault.json` in its root
+to get a cover page and a letterhead:
+
+```json
+{
+  "pdf": {
+    "fileName": "TechFides-nabidka-acme.pdf",
+    "mark": "TechFides",
+    "footerLabel": "Nabídka pro Acme",
+    "cover": {
+      "eyebrow": "Návrh spolupráce pro Acme",
+      "title": "Název nabídky",
+      "subtitle": "Jedna věta o tom, co nabídka řeší.",
+      "vendor": "TechFides Solutions s.r.o.",
+      "website": "techfides.cz",
+      "recipient": "Acme",
+      "validUntil": "30. září 2026",
+      "contact": "Jméno · e-mail",
+      "confidentiality": "Důvěrné."
+    }
+  }
+}
+```
+
+Only `cover.title` is required; every other row is left off the imprint when it is
+not set. `fileName` is a name, not a path: the PDF always lands in `artifacts/`.
+Design notes and limits are in [specs/pdf-export.md](./specs/pdf-export.md).
 
 ---
 

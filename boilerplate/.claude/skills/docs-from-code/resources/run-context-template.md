@@ -49,4 +49,4 @@ anchors_report:
   but the screenshots question is still asked live, not read from a
   file.
 - `auto_mode` must match BOTH the command argument AND the opt-in rule
-  from §3 of `CLAUDE.md`.
+  from §3 of `AGENTS.md`.

@@ -1,6 +1,6 @@
 ---
 name: docs-learn-from-session
-description: Applies user feedback captured in `.claude/session-notes/*.md` to the documentation skill files themselves. Reads the notes produced by the session-notes collection step of `/docs-generate-from-code`, proposes a concrete edit per entry to the targeted `SKILL.md` or resource, waits for per-entry user approval, applies it, and marks the note processed. Trigger when the user asks to "apply session notes", "learn from session feedback", "process session notes", "update the docs skills from the last run", "improve the docs skills from session feedback", mentions `.claude/session-notes/` as the input, or asks to turn session notes into skill edits. DO NOT trigger for generating documentation pages, resolving in-content TODOs, editing `CLAUDE.md`, or editing files outside `.claude/skills/` and `.claude/commands/`. Always inherits rules from CLAUDE.md.
+description: Applies user feedback captured in `.claude/session-notes/*.md` to the documentation skill files themselves. Reads the notes produced by the session-notes collection step of `/docs-generate-from-code`, proposes a concrete edit per entry to the targeted `SKILL.md` or resource, waits for per-entry user approval, applies it, and marks the note processed. Trigger when the user asks to "apply session notes", "learn from session feedback", "process session notes", "update the docs skills from the last run", "improve the docs skills from session feedback", mentions `.claude/session-notes/` as the input, or asks to turn session notes into skill edits. DO NOT trigger for generating documentation pages, resolving in-content TODOs, editing `AGENTS.md`, or editing files outside `.claude/skills/` and `.claude/commands/`. Always inherits rules from AGENTS.md.
 ---
 
 # docs-learn-from-session: Feedback → skill updates
@@ -35,8 +35,8 @@ Do **NOT** use this skill for:
 - Resolving `⚠️ TODO` markers inside generated documentation; that is the
   orchestrator's TODO-resolution step.
 - Editing files outside `.claude/skills/` or `.claude/commands/` (per §11
-  of CLAUDE.md).
-- Editing `CLAUDE.md` itself; project-wide rules are the user's decision.
+  of AGENTS.md).
+- Editing `AGENTS.md` itself; project-wide rules are the user's decision.
 
 ## Inputs you must confirm before starting
 
@@ -50,10 +50,10 @@ Do **NOT** use this skill for:
    default: every `file:` referenced in the selected session notes that
    lives under `.claude/skills/` or `.claude/commands/`. Anything outside
    this prefix requires explicit user confirmation before any write
-   (§11 of CLAUDE.md).
+   (§11 of AGENTS.md).
 4. **`auto_mode`**: boolean. Default `false` (pause per entry for
    approval). Never auto-apply unless the user explicitly opts in for
-   this run (§3 of CLAUDE.md).
+   this run (§3 of AGENTS.md).
 
 **NEVER** start applying changes before the user confirms the input
 summary.
@@ -99,7 +99,7 @@ For every entry, in the order shown in the plan:
 4. Wait for the user's choice: `y / edit / skip / defer`.
    - `y` → apply the diff exactly as shown.
    - `edit` → user supplies replacement text; insert it verbatim (no
-     paraphrasing that changes meaning, per §1 of CLAUDE.md).
+     paraphrasing that changes meaning, per §1 of AGENTS.md).
    - `skip` → drop this entry; mark it `skipped` in the run report.
    - `defer` → leave the entry unprocessed; it remains in the session
      note for a later run.
@@ -143,7 +143,7 @@ separate, user-driven decision.
 - Run [`resources/review-checklist.md`](resources/review-checklist.md)
   over every touched file (skill files and session-notes files).
   Report the result as a compact table.
-- Skill self-check (§10 of CLAUDE.md): re-read this `SKILL.md` and
+- Skill self-check (§10 of AGENTS.md): re-read this `SKILL.md` and
   confirm every rule and step above was applied. Report any gap
   before finishing.
 
@@ -151,15 +151,15 @@ separate, user-driven decision.
 
 - **Evidence-first**: every change must cite the exact `excerpt` that
   justifies it. If the excerpt does not unambiguously specify the
-  change, ask the user; do **NOT** invent wording (§1 of CLAUDE.md).
+  change, ask the user; do **NOT** invent wording (§1 of AGENTS.md).
 - **Out-of-tree guard**: if an entry's `file` is not under
   `.claude/skills/` or `.claude/commands/`, pause and ask for explicit
-  permission before writing (§11 of CLAUDE.md).
+  permission before writing (§11 of AGENTS.md).
 - **No silent overwrite**: show the diff for every edit; require
-  per-entry approval unless `auto_mode` is on (§3 of CLAUDE.md).
+  per-entry approval unless `auto_mode` is on (§3 of AGENTS.md).
 - **Verbatim user edits**: when the user supplies replacement text via
   `edit`, insert it exactly. Do not rephrase.
-- **Do not edit `CLAUDE.md`**: if an entry implies a `CLAUDE.md` edit,
+- **Do not edit `AGENTS.md`**: if an entry implies a `AGENTS.md` edit,
   surface it in the finish report and defer; never apply
   automatically.
 - **Mark TODO for ambiguity**: if an entry targets a section that is
@@ -201,13 +201,13 @@ Report to the user:
 - the touched-file review table,
 - the skill self-check result,
 - the updated `status:` of every session-notes file processed,
-- any entry that was flagged as implying a `CLAUDE.md` change and
+- any entry that was flagged as implying a `AGENTS.md` change and
   deferred.
 
 ## Out of scope
 
 - Generating or editing documentation pages.
-- Editing `CLAUDE.md` (project-wide rules).
+- Editing `AGENTS.md` (project-wide rules).
 - Modifying files outside `.claude/skills/` or `.claude/commands/`
   without explicit user authorization.
 - Running `/docs-review` or any documentation-level review.

@@ -44,6 +44,7 @@ import {
   type WorkspaceSettings,
 } from "./scaffold.js";
 import { detectHostRepo } from "./git-context.js";
+import { readText, writeText } from "../shared/text-file.js";
 
 export class CancelledError extends Error {}
 
@@ -397,17 +398,26 @@ export function gitignoreEntries(docsPath: string): string[] {
   return [`${docsPath}/.vitepress/dist/`, `${docsPath}/.vitepress/cache/`];
 }
 
+/** The host repo may be non-Node (a .NET service, say) and own no package.json. */
+function ensureHostPackageJson(dir: string): void {
+  const pkgPath = path.join(dir, "package.json");
+  if (fs.existsSync(pkgPath)) return;
+  fs.writeFileSync(
+    pkgPath,
+    JSON.stringify({ private: true }, null, 2) + "\n",
+    "utf-8",
+  );
+  console.log("  package.json created (host repo had none)");
+}
+
 export function updatePackageJson(
   dir: string,
   docsPath: string,
   skillsBundle?: string,
 ): void {
   const pkgPath = path.join(dir, "package.json");
-  if (!fs.existsSync(pkgPath)) {
-    console.warn("  ⚠ package.json not found; scripts not added.");
-    return;
-  }
-  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as {
+  ensureHostPackageJson(dir);
+  const pkg = JSON.parse(readText(pkgPath)) as {
     scripts?: Record<string, string>;
   };
   const scripts = pkg.scripts ?? {};
@@ -425,7 +435,7 @@ export function updatePackageJson(
     return;
   }
   pkg.scripts = scripts;
-  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf-8");
+  writeText(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
   console.log(`  package.json updated (+${added} scripts)`);
 }
 
@@ -459,11 +469,8 @@ export function updateDevDependencies(
   peers: Record<string, string>,
 ): void {
   const pkgPath = path.join(dir, "package.json");
-  if (!fs.existsSync(pkgPath)) {
-    console.warn("  ⚠ package.json not found; dependencies not added.");
-    return;
-  }
-  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as HostPackageJson;
+  ensureHostPackageJson(dir);
+  const pkg = JSON.parse(readText(pkgPath)) as HostPackageJson;
   const missing = missingDependencies(peers, pkg);
   const added = Object.keys(missing).length;
   if (added === 0) {
@@ -477,7 +484,7 @@ export function updateDevDependencies(
       a.localeCompare(b),
     ),
   );
-  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf-8");
+  writeText(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
   console.log(`  package.json updated (+${added} devDependencies)`);
 }
 
@@ -649,10 +656,7 @@ export function updatePnpmWorkspace(
 ): void {
   const file = path.join(dir, WORKSPACE_FILE);
   const existed = fs.existsSync(file);
-  const merge = mergeWorkspaceSettings(
-    existed ? fs.readFileSync(file, "utf-8") : "",
-    settings,
-  );
+  const merge = mergeWorkspaceSettings(existed ? readText(file) : "", settings);
   if (merge.manual) {
     console.warn(
       `  ⚠ ${WORKSPACE_FILE} writes ${HOIST_KEY} or ${BUILDS_KEY} inline; merge this in by hand:\n` +
@@ -668,7 +672,7 @@ export function updatePnpmWorkspace(
     console.log(`  ${WORKSPACE_FILE}: pnpm settings already present; skipped.`);
     return;
   }
-  fs.writeFileSync(file, merge.content, "utf-8");
+  writeText(file, merge.content);
   console.log(
     `  ${WORKSPACE_FILE} ${existed ? "updated" : "created"} (+${merge.added.length} entries)`,
   );
@@ -676,19 +680,13 @@ export function updatePnpmWorkspace(
 
 export function updateGitignore(dir: string, docsPath: string): void {
   const gitignorePath = path.join(dir, ".gitignore");
-  const existing = fs.existsSync(gitignorePath)
-    ? fs.readFileSync(gitignorePath, "utf-8")
-    : "";
+  const existing = fs.existsSync(gitignorePath) ? readText(gitignorePath) : "";
   const missing = gitignoreEntries(docsPath).filter(
     (entry) => !existing.includes(entry),
   );
   if (missing.length === 0) return;
   const prefix = existing.length > 0 && !existing.endsWith("\n") ? "\n" : "";
-  fs.writeFileSync(
-    gitignorePath,
-    existing + prefix + missing.join("\n") + "\n",
-    "utf-8",
-  );
+  writeText(gitignorePath, existing + prefix + missing.join("\n") + "\n");
   console.log(`  .gitignore updated (+${missing.length} entries)`);
 }
 
@@ -813,7 +811,7 @@ const VERCEL_ANALYTICS_VERSION = "^2.0.1";
  */
 export function enableAnalytics(targetDir: string): void {
   const pkgPath = path.join(targetDir, "package.json");
-  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as {
+  const pkg = JSON.parse(readText(pkgPath)) as {
     dependencies?: Record<string, string>;
   };
   pkg.dependencies = Object.fromEntries(
@@ -822,10 +820,10 @@ export function enableAnalytics(targetDir: string): void {
       "@vercel/analytics": VERCEL_ANALYTICS_VERSION,
     }).sort(([a], [b]) => a.localeCompare(b)),
   );
-  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf-8");
+  writeText(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
 
   const themePath = path.join(targetDir, "docs/.vitepress/theme/index.ts");
-  const theme = fs.readFileSync(themePath, "utf-8");
+  const theme = readText(themePath);
   const injected = theme.replace(
     /\n(export default createTheme)/,
     '\nimport { inject } from "@vercel/analytics";\n' +
@@ -840,7 +838,7 @@ export function enableAnalytics(targetDir: string): void {
       `Could not wire up @vercel/analytics: "export default createTheme" not found in ${themePath}`,
     );
   }
-  fs.writeFileSync(themePath, injected, "utf-8");
+  writeText(themePath, injected);
   console.log("  @vercel/analytics enabled (dependency + theme wiring)");
 }
 

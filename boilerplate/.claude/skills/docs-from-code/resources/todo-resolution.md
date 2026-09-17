@@ -1,7 +1,7 @@
 # TODO resolution dialog
 
 The orchestrator runs this once, at the end of a run (§2 of
-`CLAUDE.md`). Phase skills only _emit_ TODOs; they never resolve them.
+`AGENTS.md`). Phase skills only _emit_ TODOs; they never resolve them.
 
 ## TODO kinds produced across phases
 

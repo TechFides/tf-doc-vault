@@ -21,6 +21,7 @@ import {
   fetchAttachments,
 } from "../confluence/client.js";
 import {
+  buildOrderMap,
   buildPathMap,
   flattenTree,
   rewriteConfluenceLinks,
@@ -32,6 +33,7 @@ import {
   type TreeNode,
   errorMessage,
 } from "../confluence/types.js";
+import { readText } from "../shared/text-file.js";
 
 interface WriteContext {
   site: string;
@@ -39,6 +41,7 @@ interface WriteContext {
   publicDir: string;
   pagePathMap: Map<string, string>;
   pageTitleMap: Map<string, string>;
+  pageOrderMap: Map<string, number>;
   docsRoot: string;
 }
 
@@ -70,7 +73,7 @@ function yamlString(value: string): string {
 
 function preservedStatus(filePath: string): string {
   if (!fs.existsSync(filePath)) return "review";
-  const match = fs.readFileSync(filePath, "utf-8").match(/^status:\s*(.+)$/m);
+  const match = readText(filePath).match(/^status:\s*(.+)$/m);
   return match?.[1]?.trim() === "published" ? "published" : "review";
 }
 
@@ -180,6 +183,8 @@ async function writePage(
     const displayTitle = node.emoji
       ? `${node.emoji} ${node.cleanTitle}`
       : node.cleanTitle;
+    const order = ctx.pageOrderMap.get(node.page.id);
+    const orderLine = order === undefined ? "" : `\norder: ${order}`;
 
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     fs.writeFileSync(
@@ -187,7 +192,7 @@ async function writePage(
       `---
 title: ${yamlString(displayTitle)}
 status: ${status}
-updated_at: ${updatedAt}
+updated_at: ${updatedAt}${orderLine}
 ---
 
 ${markdown}
@@ -374,6 +379,8 @@ logger.success(`Fetched ${pages.length} page${plural(pages.length)}`);
 const pagePathMap = new Map<string, string>();
 buildPathMap(tree, outputDir, true, pagePathMap);
 const pageTitleMap = new Map(pages.map((n) => [n.page.id, n.cleanTitle]));
+const pageOrderMap = new Map<string, number>();
+buildOrderMap(tree, pageOrderMap);
 fs.mkdirSync(outputDir, { recursive: true });
 fs.mkdirSync(publicDir, { recursive: true });
 
@@ -383,6 +390,7 @@ const ctx: WriteContext = {
   publicDir,
   pagePathMap,
   pageTitleMap,
+  pageOrderMap,
   docsRoot,
 };
 

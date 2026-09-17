@@ -2,7 +2,7 @@
 
 Used in two places by the orchestrator:
 
-- **Step 4**: small review (§10 of `CLAUDE.md`) over files touched in
+- **Step 4**: small review (§10 of `AGENTS.md`) over files touched in
   the run.
 - **Step 5**: the skill self-check.
 
@@ -12,7 +12,8 @@ A **comprehensive review** (`/docs-review`, planned) is out of scope.
 
 | Check          | Pass when                                                       |
 | -------------- | --------------------------------------------------------------- |
-| Frontmatter    | `title`, `status`, `updated_at` present; `order` on `index.md`  |
+| Frontmatter    | `title`, `status`, `updated_at`, `order` present on every page  |
+| Order          | `order` is an integer, unique among the folder's siblings       |
 | Confluence     | `<!-- confluence: … -->` block present on synced pages          |
 | Gen stamp      | `<!-- generated: … -->` on content pages (not `index.md`)       |
 | Markdown       | File parses as CommonMark (no unclosed fences, tables valid)    |

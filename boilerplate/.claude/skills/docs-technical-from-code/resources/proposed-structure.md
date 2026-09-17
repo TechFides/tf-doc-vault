@@ -168,9 +168,9 @@ content.
 
 ## Label, numbering, and order rules
 
-- Czech label with diacritics (§7 of `CLAUDE.md`).
+- Czech label with diacritics (§7 of `AGENTS.md`).
 - The `title` field in frontmatter includes the numbering prefix
-  exactly as shown in the tables above (§5 of `CLAUDE.md`).
+  exactly as shown in the tables above (§5 of `AGENTS.md`).
 - Number and Czech label are separated by a **single space**, with no
   hyphen (e.g. `2.4.1 Komponentový diagram`).
 - Section-level `index.md` carries **no** numeric prefix in its

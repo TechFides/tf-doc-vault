@@ -1,6 +1,6 @@
 ---
 name: docs-functional-from-code
-description: Generates functional documentation from an existing codebase AND from any already-generated technical documentation in the current version folder. Covers the full functional menu (overview, product structure, glossary, actors, personas, screens, scenarios list, business rules, notifications, reports, and scenario details with wireframe anchors). Code is the ultimate source of truth; the technical section, when available, is used as a faster, already-digested lookup for APIs, roles, components, data model, feature toggles, and metrics. Works file-by-file (text only, no diagrams and no wireframes), pausing after each generated page for user review. Invoked by the docs-from-code orchestrator or by /docs-functional. DO NOT trigger for technical docs, diagrams, wireframes, sales, or pre-code design. Always inherits rules from CLAUDE.md.
+description: Generates functional documentation from an existing codebase AND from any already-generated technical documentation in the current version folder. Covers the full functional menu (overview, product structure, glossary, actors, personas, screens, scenarios list, business rules, notifications, reports, and scenario details with wireframe anchors). Code is the ultimate source of truth; the technical section, when available, is used as a faster, already-digested lookup for APIs, roles, components, data model, feature toggles, and metrics. Works file-by-file (text only, no diagrams and no wireframes), pausing after each generated page for user review. Invoked by the docs-from-code orchestrator or by /docs-functional. DO NOT trigger for technical docs, diagrams, wireframes, sales, or pre-code design. Always inherits rules from AGENTS.md.
 ---
 
 # docs-functional-from-code: Functional documentation phase
@@ -134,12 +134,18 @@ For every file:
 2. Pick the template matching the target page (see Resources). Fall back
    to `resources/templates/generic-page.md`.
 3. Follow the template.
-4. Mark `⚠️ TODO: [what is missing]` for anything not derivable from
+4. Fill in `order` in the frontmatter: the page's position among its
+   siblings, from `resources/proposed-structure.md` where the page is
+   listed there, otherwise from the generation plan. `order` is a
+   required field checked by `docs:validate`, and files and subfolders
+   in the same folder share one number space, so the value must be
+   unique among them. Scenario pages are numbered within `scenarios/`.
+5. Mark `⚠️ TODO: [what is missing]` for anything not derivable from
    either source; **NEVER** invent behavior, fields, validations, or
    rules.
-5. **ALWAYS include at least one concrete example** per non-trivial
+6. **ALWAYS include at least one concrete example** per non-trivial
    concept (a real scenario, a real input payload, a real error case).
-6. For each scenario file: insert wireframe and diagram anchors at the
+7. For each scenario file: insert wireframe and diagram anchors at the
    right places; do not render the wireframe / diagram here:
 
    ```markdown
@@ -148,7 +154,7 @@ For every file:
    <!-- diagram-anchor: use-case-<group> -->
    ```
 
-7. Save the file. Unless `auto_mode` is on, pause and ask:
+8. Save the file. Unless `auto_mode` is on, pause and ask:
    > "File `<path>` is written. Review and confirm to continue (y / edit
    > / stop)."
 
@@ -217,8 +223,8 @@ Return to the orchestrator:
   wireframe anchor → main flow → I/O data table → triggers → business
   logic → feature toggle → metrics), and emit `⚠️ TODO` for any section
   without evidence.
-- **Czech content, original technical terms**: per §7 of CLAUDE.md.
-- **Confluence marks required**: per §6 of CLAUDE.md.
+- **Czech content, original technical terms**: per §7 of AGENTS.md.
+- **Confluence marks required**: per §6 of AGENTS.md.
 
 ## Resources
 

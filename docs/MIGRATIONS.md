@@ -107,3 +107,33 @@ the theme's. Rename yours rather than relying on that order.
 **Pattern classes ship for Markdown authors.** `patterns.css` adds classes a page can use without a component or an inline style (`tf-cards`, `tf-card`,
 `tf-stat`, `tf-tile`, `tf-chip`, `tf-step`, `tf-checks`, `tf-btn`, `tf-rows`, `tf-divider`, `tf-logos`), plus the `data-tf-edge` and `data-tf-reveal`
 attributes. All of it is additive and nothing existing changes.
+
+## Migration to 0.5.2
+
+Version 0.5.2 makes `order` in frontmatter the real sort key for the sidebar, the top nav and the print page, instead of a value only `title` extraction bothered to read. The field also becomes required, so the break lands on `docs:validate` rather than on the rendered site.
+
+**The sidebar and the nav render identically for a repo that has no `order` field anywhere**, because a folder with nothing ordered still falls back to today's alphabetical order. **The print page is the exception.** The same release fixes the print collector, which stopped two directory levels down and silently dropped anything below that, so `print.md` and the PDF built from it can gain pages that were missing before: this repo's own playground goes from 36 pages to 39. A nested group heading in the print page also changes, from the directory name to the group's title, and the table of contents becomes a nested list that mirrors the sidebar tree instead of a flat run of bold headings.
+
+**`docs:validate` starts failing until you normalize.** A missing `order`, a non-integer value, or two siblings claiming the same one are now lint errors, and a repo scaffolded before this change has no `order` field at all, so the first `docs:validate` after upgrading fails outright. Fix it in place, without touching what the site renders:
+
+```bash
+pnpm docs:normalize && pnpm docs:validate
+```
+
+`docs:normalize` fills in `order` for every page and folder that lacks it, walking each folder in its current alphabetical order so the assigned numbers preserve the position already on screen. It never overwrites a page that already carries a valid `order`.
+
+**A directory with no `index.md` is now a `docs:validate` error, even though the sidebar keeps rendering it fine as an unlinked group label.** There is nowhere for such a directory to carry its own `order`, so lint refuses to leave it in the alphabetical tail forever, and `docs:normalize` cannot fix it for you either: reaching a directory or a `.md` file it cannot write `order` into (no `index.md`, or a file with no frontmatter block at all) makes it stop numbering the rest of that folder's alphabetical tail, rather than number around the problem and shift that item in the render. So on a tree with either case, the upgrade recipe becomes a loop, not one shot: run `docs:normalize`, run `docs:validate`, fix whatever it reports (add the missing `index.md` with a `title` and `order`, or add the missing frontmatter block), and repeat both commands until `docs:validate` is clean.
+
+**Numeric filename prefixes keep working.** A page named `001-intro.md` still resolves fine: `order` in frontmatter wins over the filename, so the prefix becomes redundant rather than wrong. Dropping the prefixes is optional and manual; renaming the file changes its URL, so track down and fix every link to it yourself, internal or external. There is no tool for that part.
+
+## Migration to 0.5.4
+
+Version 0.5.4 fixes three defects in the print page and the PDF built from it. Nothing to run: the changes take effect on the next `docs:print` / `docs:pdf`.
+
+**Quoted frontmatter values stop rendering with their quotes.** The frontmatter reader treated a value as plain text, so a `title` that YAML requires to be quoted (one holding a colon, above all) reached the sidebar, the top nav and the print page as `"S1: cache a škálování"`. Those titles now render without the quotes, which means **the visible label of such a page changes** on the site as well as in the PDF. Single and double quoting are both understood, along with their escapes; a value that merely begins and ends with a quote (`"a" or "b"`) is left alone. `docs:validate` gets stricter in the same move: `status: "draft"` and `order: "3"` used to fail as an invalid status and a non-integer order, and now read as what they are.
+
+**Repeated heading ids no longer break the build.** A `{#id}` is unique per page, but the print page is one document assembled out of all of them, and VitePress aborts the whole build on the second copy of an id it sees. A site where two pages both carry `## Chybové stavy {#chybove-stavy}` could not produce a PDF at all. Heading ids in `print.md` are now qualified with the page slug (`{#v2-scenarios-sc-11-chybove-stavy}`), and same-page links move with them. Anchors are capped at the 127 bytes a PDF name token allows, falling back to a hashed page prefix when the readable form would overflow. **Only `print.md` is rewritten**, so the anchors on the site itself are untouched and links shared into a page keep working.
+
+**The PDF waits for Mermaid.** `export-pdf` printed as soon as the page reached `networkidle` with its fonts loaded, while Mermaid renders in the browser after that point and takes tens of seconds on a large site. Every diagram that had not finished was printed as Mermaid's "Syntax error in text" placeholder, on a 147-diagram site all of them. The exporter now waits for every diagram to carry an SVG and report no error, up to three minutes.
+
+**`export-pdf` can now exit 1.** If a diagram never renders, because its source genuinely does not parse, the export writes the PDF (look at it to find the diagram) and exits non-zero, which also stops the `pdf` chain before its second pass. Two Mermaid traps account for most of these: a `;` in sequence-diagram text is a statement separator, and a bare `{` in a flowchart node label opens a rhombus. Write `#59;` for a literal semicolon, and quote a label containing braces.

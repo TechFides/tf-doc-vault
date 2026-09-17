@@ -2,6 +2,7 @@
 title: Tables
 status: published
 updated_at: 2026-07-15
+order: 7
 ---
 
 Layout playground for data-heavy Markdown tables. Tables are plain

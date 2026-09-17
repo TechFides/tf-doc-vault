@@ -2,6 +2,7 @@
 title: An argument in sections
 status: published
 updated_at: 2026-08-13
+order: 4
 ---
 
 A page that makes a case, section by section: a claim as the heading, a sentence saying what it

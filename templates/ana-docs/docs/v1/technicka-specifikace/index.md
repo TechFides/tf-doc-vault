@@ -2,6 +2,7 @@
 title: Technická specifikace
 status: draft
 updated_at: 2026-04-27
+order: 3
 ---
 
 # Technická specifikace

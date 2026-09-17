@@ -74,7 +74,7 @@ the source (screenshot / scenario) explicitly calls for it.
 - Placeholders use the shape `<!-- param-name -->` inside attribute values
   or text nodes.
 - Numeric expressions like `<!-- y+34 -->` are evaluated at substitution
-  time and replaced with the computed integer (§9 CLAUDE.md).
+  time and replaced with the computed integer (§9 AGENTS.md).
 - **NEVER** leave a placeholder unsubstituted in the final SVG; the
   sanitizer treats any remaining `<!-- -->` token with `param` prefix as
   an error.

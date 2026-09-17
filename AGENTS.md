@@ -9,7 +9,7 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 
 ## Tech stack
 
-- Node >=24, pnpm 11.1.3 (pinned via `packageManager` in `package.json`)
+- Node >=24, pnpm 11.22.0 (pinned via `packageManager` in `package.json`)
 - TypeScript 6, strict + `noUncheckedIndexedAccess`, `module`/`moduleResolution` `NodeNext`, ESM only (`"type": "module"`)
 - `dist/` is emitted by `tsc`
 - VitePress 1.6 + Vue 3.5 (theme), Mermaid via `vitepress-plugin-mermaid`
@@ -35,6 +35,7 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 ## Repo map
 
 - `src/config/`: VitePress config factory (`makeConfig`)
+- `src/shared/`: frontmatter reader, sibling-ordering primitive and `text-file` (`readText` / `writeText`) shared by the sidebar generator, the print script and `docs:validate`
 - `src/sidebar/`: sidebar / nav generator (`generateNav`, `generateSidebar`, `getVersions`)
 - `src/theme/`: Vue theme: components, composables, styles
 - `src/scripts/`: docs tooling scripts (`validate-docs`, `normalize-docs`, `export-pdf`, …)
@@ -48,11 +49,19 @@ Internal TechFides docs platform: CLI (`tf-doc-vault`, with an interactive `setu
 - `tests/smoke/`: Playwright specs
 - `infra/terraform/`: published Terraform module
 - `docker/`: Dockerfile + nginx configs
-- `specs/`: internal implementation plans; excluded from the published package via `files` in `package.json`
+- `specs/`: internal implementation plans and design specs; every spec written before a change goes here, one Markdown file per topic. Excluded from the published package via `files` in `package.json`
 
 ## Conventions
 
 - Commit messages follow Conventional Commits. Enforced by Lefthook `commit-msg` → `commitlint` (`lefthook.yml`). `changelogen` derives the next version and `CHANGELOG.md` entries from these, so keep them well-formed.
+
+### Line endings
+
+Read text through `readText` from `src/shared/text-file.ts`, never `fs.readFileSync(f, "utf-8")`: `split("\n")` leaves a CR on every line and neither `.` nor `$` matches across it, so a CRLF checkout silently breaks any parser reading raw. It also strips a UTF-8 BOM, which a file written by Notepad or `>` in PowerShell carries and which keeps a `^---` frontmatter matcher from matching. Three files read raw on purpose and must stay that way: `ensure-lf` (through `readText` it would see LF and turn into a no-op that reports success), `replacePlaceholders` in `src/cli/utils.ts`, and `replace-wireframes.cjs`.
+
+Write a file this package does not own (a host `.gitignore`, `pnpm-workspace.yaml`, `package.json` or theme file) through `writeText`; anything the package generates itself is LF.
+
+`.gitattributes` is duplicated as `boilerplate/_gitattributes`. Change both.
 
 ### Comments
 
@@ -82,6 +91,10 @@ JSDoc stays on the published surface (`makeConfig` options, `createTheme`, the s
 
 - No em dash. Use a colon, parentheses, a semicolon, a comma, or two sentences. This holds for English and Czech, in code comments, CLI output, markdown and skill files. A hyphen in compounds and an en dash in numeric ranges are fine, as is a lone `—` used as an empty-value marker in a table cell.
 - Avoid the "not just X, but Y" construction, filler ("it is important to note"), marketing adjectives ("robust", "seamless", "comprehensive solution") and forced three-item lists.
+
+Markdown in this repo (docs/, specs/, the root files) is held to the same two
+tests as code comments: would a competent reader already know this, and does
+deleting it break anything? When in doubt, delete.
 
 ## Always: an implementation change updates the docs
 
@@ -121,9 +134,16 @@ See [`docs/TESTING.md`](docs/TESTING.md). In short: Vitest for pure logic in `sr
 ## Workflow for agents
 
 1. Smallest coherent diff that satisfies the goal, with no drive-by refactors or new tooling.
-2. Code + tests + docs change together when behaviour changes.
-3. Before opening / updating a PR run `pnpm lint && pnpm typecheck && pnpm test` and report results.
-4. If a check fails, fix the root cause; do not disable it or pass `--no-verify`.
-5. Never commit secrets. Publish auth is OIDC; there is no `NPM_TOKEN` in this repo.
-6. Do not bypass the `npm-publish` environment approval: releases require a named reviewer (see `CONTRIBUTING.md` → Releasing).
-7. In a fresh git worktree run `pnpm install` before the first commit. The hook lives in the shared `.git/hooks`, but without `node_modules` it cannot find lefthook, prints `Can't find lefthook in PATH` and lets the commit through unvalidated. Never work around that with `LEFTHOOK=0`; check a message with `npx commitlint --edit` if in doubt.
+2. A design or implementation plan agreed before coding is written to `specs/<topic>.md`, not to a scratch folder elsewhere.
+3. Code + tests + docs change together when behaviour changes.
+4. A Stop hook enforces a comment-and-prose audit (the `comment-audit` skill)
+   at the end of any turn that changed files, in any worktree of the repo this
+   session dirtied and not only the one it started in. A SessionStart hook
+   records what each worktree looked like at the start, so a worktree somebody
+   else left dirty does not nag you. Run the audit manually anytime; do not
+   disable either hook.
+5. Before opening / updating a PR run `pnpm lint && pnpm typecheck && pnpm test` and report results.
+6. If a check fails, fix the root cause; do not disable it or pass `--no-verify`.
+7. Never commit secrets. Publish auth is OIDC; there is no `NPM_TOKEN` in this repo.
+8. Do not bypass the `npm-publish` environment approval: releases require a named reviewer (see `CONTRIBUTING.md` → Releasing).
+9. In a fresh git worktree run `pnpm install` before the first commit. The hook lives in the shared `.git/hooks`, but without `node_modules` it cannot find lefthook, prints `Can't find lefthook in PATH` and lets the commit through unvalidated. Never work around that with `LEFTHOOK=0`; check a message with `npx commitlint --edit` if in doubt.

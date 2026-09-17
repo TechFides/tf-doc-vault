@@ -2,6 +2,7 @@
 title: Spotlight
 status: published
 updated_at: 2026-08-13
+order: 7
 ---
 
 A centred panel carrying one statement. With actions it sends the reader out of the document

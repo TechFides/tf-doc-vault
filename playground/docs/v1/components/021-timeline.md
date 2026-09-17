@@ -2,6 +2,7 @@
 title: Timeline
 status: published
 updated_at: 2026-08-13
+order: 22
 ---
 
 A dated sequence: how something got here, newest first. Two components, because each entry

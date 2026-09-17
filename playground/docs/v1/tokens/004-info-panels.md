@@ -2,6 +2,7 @@
 title: Info panels
 status: published
 updated_at: 2026-06-11
+order: 4
 ---
 
 VitePress supports 5 types of info panels (custom blocks). Syntax:

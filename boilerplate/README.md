@@ -76,5 +76,6 @@ Every `.md` must have frontmatter:
 title: Title
 status: published | draft | review | archived
 updated_at: 2026-04-27
+order: 1
 ---
 ```

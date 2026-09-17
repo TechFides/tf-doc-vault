@@ -2,6 +2,7 @@
 title: BrandHero
 status: published
 updated_at: 2026-07-29
+order: 6
 hero:
   title: BrandHero
   eyebrow: Component demo

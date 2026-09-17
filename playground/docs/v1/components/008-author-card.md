@@ -2,6 +2,7 @@
 title: AuthorCard
 status: published
 updated_at: 2026-08-13
+order: 9
 ---
 
 Who stands behind the document. A byline with evidence: the name and role carry the claim,

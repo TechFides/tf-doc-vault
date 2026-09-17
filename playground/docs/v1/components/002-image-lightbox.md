@@ -2,6 +2,7 @@
 title: ImageLightbox
 status: published
 updated_at: 2026-08-13
+order: 2
 ---
 
 Click any inline image or Mermaid diagram to open it full screen, then zoom into it. Mounted via

@@ -2,6 +2,7 @@
 title: Emoji
 status: published
 updated_at: 2026-07-30
+order: 8
 ---
 
 Emoji rendered inside `.vp-doc` prose, tables and headings. This page

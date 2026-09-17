@@ -2,6 +2,7 @@
 title: Exports
 status: published
 updated_at: 2026-08-13
+order: 19
 ---
 
 What `@techfides/tf-doc-vault/theme` hands you beyond the components. Two of these were

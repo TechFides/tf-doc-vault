@@ -62,7 +62,7 @@ Re-read this skill's `SKILL.md` and confirm:
   skipped with user confirmation).
 - Every bullet in `## Safety rules` was applied, in particular:
   out-of-tree guard, no silent overwrite, verbatim user edits, no
-  `CLAUDE.md` edits, ambiguity marked as TODO.
+  `AGENTS.md` edits, ambiguity marked as TODO.
 - Every resource listed in `## Resources` was loaded **only** when
   its trigger applied (progressive disclosure, not upfront).
 - The finish report contains every item listed under

@@ -2,6 +2,7 @@
 title: Colors
 status: published
 updated_at: 2026-05-22
+order: 1
 ---
 
 ## Brand palette
