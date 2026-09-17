@@ -65,9 +65,11 @@ Commands:
   ensure-lf           Normalize CRLF → LF
   fix                 Full polish pipeline (LF, normalize, format, lint, typecheck, validate)
                         --root=<dir>        docs root directory (default: docs)
-  sync                Diff infra/CI/config files against bundled template
-                        --apply             overwrite drifted files
-                        --files=a,b,c       restrict to a subset
+  sync                Diff infra/CI/config files and package.json docs:dev
+                      against the bundled template
+                        --apply                 overwrite drifted files
+                        --files=a,b,c           restrict to a subset (skips docs:dev)
+                        --skills-bundle=<name>  bundle the expected docs:dev carries
   dev                 Sync the documentation skills with the library (silent
                       without a GitHub token; off with TF_DOC_VAULT_SKILLS=off),
                       then run vitepress dev; other flags go to vitepress

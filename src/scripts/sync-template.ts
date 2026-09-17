@@ -12,6 +12,7 @@ import os from "node:os";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { boilerplateName } from "../cli/scaffold.js";
+import { devScript } from "../cli/setup.js";
 
 const PROJECT_ROOT = process.cwd();
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -39,13 +40,16 @@ export const TRACKED_FILES: string[] = [
 interface CliFlags {
   apply: boolean;
   files: string[] | null;
+  skillsBundle?: string;
 }
 
 function parseFlags(argv: string[]): CliFlags {
   const flags: CliFlags = { apply: false, files: null };
   for (const arg of argv) {
     if (arg === "--apply") flags.apply = true;
-    else if (arg.startsWith("--files=")) {
+    else if (arg.startsWith("--skills-bundle=")) {
+      flags.skillsBundle = arg.slice("--skills-bundle=".length);
+    } else if (arg.startsWith("--files=")) {
       flags.files = arg
         .slice("--files=".length)
         .split(",")
@@ -158,6 +162,43 @@ function inspect(rel: string, placeholders: Record<string, string>): Result {
   };
 }
 
+export interface DocsDevDrift {
+  actual: string | undefined;
+  expected: string;
+}
+
+/**
+ * `docs:dev` is the one script whose generated value changed shape (it used to
+ * call vitepress directly), so it is the one script `sync` compares. Every
+ * other `docs:*` script a scaffold ships is still what the generator writes.
+ */
+export function docsDevDrift(
+  pkg: { scripts?: Record<string, string> },
+  docsPath: string,
+  skillsBundle?: string,
+): DocsDevDrift | null {
+  const expected = devScript(docsPath, skillsBundle);
+  const actual = pkg.scripts?.["docs:dev"];
+  if (actual === expected) return null;
+  // Without --skills-bundle the caller cannot say which bundle the template
+  // installed, so any current form counts; only the legacy shape is drift.
+  if (
+    skillsBundle === undefined &&
+    actual?.startsWith(`${devScript(docsPath)} --skills-bundle=`)
+  ) {
+    return null;
+  }
+  return { actual, expected };
+}
+
+/** Rewrites `scripts["docs:dev"]` and nothing else; indentation follows the file. */
+export function applyDocsDev(text: string, expected: string): string {
+  const pkg = JSON.parse(text) as { scripts?: Record<string, string> };
+  pkg.scripts = { ...(pkg.scripts ?? {}), "docs:dev": expected };
+  const indent = /^(\s+)"/m.exec(text)?.[1] ?? "  ";
+  return JSON.stringify(pkg, null, indent) + (text.endsWith("\n") ? "\n" : "");
+}
+
 function applyResult(r: Result): void {
   if (r.expected === undefined) return;
   const consumerPath = path.join(PROJECT_ROOT, r.rel);
@@ -212,6 +253,29 @@ function main(): void {
     if (flags.apply) {
       applyResult(r);
       console.log(`     → overwritten from the boilerplate`);
+    }
+  }
+
+  // A restricted run (--files) is about those files only.
+  const pkgPath = path.join(PROJECT_ROOT, "package.json");
+  if (flags.files === null && fs.existsSync(pkgPath)) {
+    const pkgText = fs.readFileSync(pkgPath, "utf-8");
+    const pkg = readJSON(pkgPath) as {
+      scripts?: Record<string, string>;
+    } | null;
+    const drift = pkg ? docsDevDrift(pkg, "docs", flags.skillsBundle) : null;
+    if (!drift) {
+      console.log(`  ✓ package.json › docs:dev`);
+      okCount++;
+    } else {
+      drifted++;
+      console.log(`\n  ✗ drift    package.json › docs:dev`);
+      console.log(`     is      : ${drift.actual ?? "(missing)"}`);
+      console.log(`     expected: ${drift.expected}`);
+      if (flags.apply) {
+        fs.writeFileSync(pkgPath, applyDocsDev(pkgText, drift.expected));
+        console.log(`     → rewritten`);
+      }
     }
   }
 

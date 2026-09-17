@@ -164,6 +164,8 @@ User content (`docs/`, `package.json`, README, CLAUDE) is excluded from overwrit
 
 **See also:** [Editing &amp; publishing docs](./updating-docs.md) · [Import from Confluence](./confluence-import.md)
 
+`sync` also compares `package.json`'s `docs:dev` with what the current generator writes. Since `tf-doc-vault dev` exists, a scaffold's `docs:dev` should run it rather than `vitepress dev` directly, or the skills never get synced. Without `--skills-bundle` any current `tf-doc-vault dev` form passes and only the legacy `vitepress dev` shape is reported; pass `--skills-bundle=<name>` (the bundle the template installed: `docs` for `ana-docs` and `sales-docs`) to pin the exact value; `--apply` rewrites that one script and leaves the rest of `package.json` untouched. A run restricted with `--files` skips this check.
+
 ## Claude skills
 
 `setup` installs the TechFides documentation skills into `.claude/skills/`: the library's `docs` bundle, with the portal `CLAUDE.md` it ships placed at the project root and the bundled slash commands removed (the library set has none). It runs `npx @techfides/tf-skills-manager install --bundle docs`, which needs a GitHub token with read access to the skills library: `gh auth login`, or `GITHUB_TOKEN` / `GH_TOKEN` in the environment.
