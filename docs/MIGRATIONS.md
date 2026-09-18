@@ -2,6 +2,26 @@
 
 Breaking-change guides for major package versions. Each is self-contained; skip straight to the version you are upgrading past.
 
+## Upgrading a portal to the library skills
+
+Applies from the release that ships `tf-doc-vault dev` and the `sales-docs` template. Not a breaking change: a scaffolded portal keeps working untouched. This is the opt-in path to the documentation skills that `setup` now installs from the TechFides skills library (see [Claude skills](./ana-docs.md#claude-skills)).
+
+```bash
+pnpm up @techfides/tf-doc-vault@latest
+pnpm exec tf-doc-vault sync --files=package.json --skills-bundle=docs --apply   # docs:dev now runs tf-doc-vault dev
+pnpm docs:dev
+```
+
+`--files=package.json` limits `sync` to the `docs:dev` script; drop it to bring the rest of the boilerplate (CI workflow, lint configs) up to date in the same run, which a folder inside a monorepo usually does not want.
+
+What the first `docs:dev` does depends on where the portal stands:
+
+- **No library access.** Nothing changes: the bundled skills and rules keep working, and `docs:dev` says nothing about skills.
+- **Access, and the bundled skills, commands, `AGENTS.md` and `CLAUDE.md` are exactly as the scaffold left them.** `docs:dev` replaces them with the library set and writes the library's portal rules into `AGENTS.md` on its own; review with `git status` and commit. From then on it brings library skills that fell behind forward on every start (`tf-skills update`, never `--force`) and only names the ones you edited.
+- **Access, but something was edited by hand** (a bundled skill, a command, `AGENTS.md`), or an offer folder that carries hand-copied skills and its own long `CLAUDE.md`: `docs:dev` prints the one `install --force` command and touches nothing. Before running it, move anything project-specific from your `AGENTS.md` into the `docs/README.md` contract; the library's rules file is canonical and identical everywhere, and the `docs-workflow` skill sets the contract up with a few questions and offers a `migrate` operation for the content tree.
+
+`TF_DOC_VAULT_SKILLS=off` turns the sync off for a run, for CI or a quick start.
+
 ## Migration to 0.3
 
 Version 0.3.0 removes the Express/NestJS tech-docs mount and replaces `create-ana` and `init-tech-docs` with a single interactive `setup` wizard. This is a breaking change, but it is **not forced**: scaffolded repos pin an exact version, and a service repo that keeps its docs inside itself typically depends on `@techfides/tf-doc-vault` with a caret range, which under `0.x` semver rules does not include `0.3.0`. Nothing pulls an existing repo onto `0.3.0` automatically; `0.2.x` keeps working until someone raises the pinned version by hand. Plan and communicate the transition outside the package; the build only breaks once someone does that.

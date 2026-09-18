@@ -352,7 +352,11 @@ export function makeConfig(
         ]
       : [...navLinks];
 
-  const { vite: overrideVite, ...restOverride } = opts.override ?? {};
+  const {
+    vite: overrideVite,
+    srcExclude: overrideSrcExclude,
+    ...restOverride
+  } = opts.override ?? {};
 
   const baseConfig: UserConfig = {
     base,
@@ -408,6 +412,10 @@ export function makeConfig(
       ...overrideVite,
     },
     ignoreDeadLinks: [/^https?:\/\/localhost/],
+    /* `docs/README.md` is the documentation contract the library's v2 skills
+       keep (frontmatter `documentation: {…}`), not a page; without this
+       VitePress renders it as an unlinked /README.html. Root-level only. */
+    srcExclude: ["README.md", ...(overrideSrcExclude ?? [])],
     /* Mermaid colors come from CSS (`.mermaid` and `.dark .mermaid` in
        theme/styles/base.css) off the --brand-* tokens, so overriding a token
        recolors diagrams in both modes.

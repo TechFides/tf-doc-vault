@@ -1,0 +1,32 @@
+---
+title: __PROJECT__ (dokumentační portál)
+status: published
+updated_at: __DATE__
+aside: false
+hero:
+  title: __PROJECT__
+features:
+  - icon: business
+    title: Business specifikace
+    description: Proč to děláme, kdo to potřebuje, jaké procesy podporujeme.
+    link: /v1/byznys-specifikace/
+    linkText: Otevřít
+  - icon: functional
+    title: Funkční specifikace
+    description: Uživatelské role, scénáře, vstupy a výstupy.
+    link: /v1/funkcni-specifikace/
+    linkText: Otevřít
+  - icon: technical
+    title: Technická specifikace
+    description: Architektura, integrace, deployment.
+    link: /v1/technicka-specifikace/
+    linkText: Otevřít
+---
+
+<BrandHero>
+  <template #subtitle>
+    Byznys, funkční a technická specifikace projektu <strong>__PROJECT__</strong>.
+  </template>
+</BrandHero>
+
+<FeatureCards/>
