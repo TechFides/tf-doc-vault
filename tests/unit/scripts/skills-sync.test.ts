@@ -85,7 +85,9 @@ function makeDeps(
     hasToken: () => opts.token ?? true,
     tfSkillsJson: (sub) => {
       calls.json.push(sub);
-      return sub[0] === "check" ? (opts.check ?? null) : null;
+      if (sub[0] !== "check") return null;
+      // `check` doubles as the access probe, so it answers unless a test says otherwise.
+      return "check" in opts ? opts.check : { behind: 0, skills: {} };
     },
     update: (t) => {
       calls.update.push(t);
@@ -119,10 +121,19 @@ describe("syncSkills", () => {
     const { deps, calls } = makeDeps(fx);
     syncSkills("docs", deps);
     expect(calls.install).toEqual(["docs"]);
-    expect(calls.json).toEqual([]);
+    expect(calls.json).toEqual([["check"]]);
     const out = calls.log.join("");
     expect(out).toContain("Switching the bundled documentation skills");
     expect(out).toContain("skills and rules installed from the library");
+  });
+
+  test("a token that cannot read the library changes nothing and says nothing", () => {
+    const fx = fixture();
+    const { deps, calls } = makeDeps(fx, { check: null });
+    syncSkills("docs", deps);
+    expect(calls.json).toEqual([["check"]]);
+    expect(calls.install).toEqual([]);
+    expect(calls.log).toEqual([]);
   });
 
   test("an edited rules file keeps the bundled set and prints the command", () => {

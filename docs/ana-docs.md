@@ -172,7 +172,7 @@ Without a token, offline, after two minutes without an answer, or on any other f
 
 The swap is all or nothing: the bundled skills, commands and rules files are set aside first and come back as they were if anything fails. A run killed from outside can leave `.claude/.swap-backup-<pid>/` behind with those originals inside; the next install names it and refuses to run until you restore or delete it.
 
-`pnpm docs:dev` runs `tf-doc-vault dev`, which syncs those skills with the library before starting VitePress. Without a token it does nothing. With one it replaces a bundled set you never touched with the library set, brings library skills that fell behind forward (`tf-skills update`, never `--force`), and only prints the command for anything you edited by hand. `TF_DOC_VAULT_SKILLS=off` turns the sync off, for CI or a quick start; everything after `docs:dev` (`--port`, `--host`) goes to VitePress.
+`pnpm docs:dev` runs `tf-doc-vault dev`, which syncs those skills with the library before starting VitePress. Without a token it does nothing, and neither does it with a token that cannot read the library (it asks `tf-skills check` first, so someone outside TechFides with `gh` logged in sees no failed install). With access it replaces a bundled set you never touched with the library set, brings library skills that fell behind forward (`tf-skills update`, never `--force`), and only prints the command for anything you edited by hand. `TF_DOC_VAULT_SKILLS=off` turns the sync off, for CI or a quick start; everything after `docs:dev` (`--port`, `--host`) goes to VitePress.
 
 ## Sales offers (`sales-docs`)
 

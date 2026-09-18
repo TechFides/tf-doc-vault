@@ -14,7 +14,8 @@ import {
  * Keeps the documentation skills in step with the TechFides skills library.
  * Nothing here may stop the dev server from starting, and nothing a person
  * edited by hand is ever replaced:
- * - no GitHub token, or TF_DOC_VAULT_SKILLS=off: skip everything
+ * - no GitHub token, a token that cannot read the library, or
+ *   TF_DOC_VAULT_SKILLS=off: skip everything
  * - the bundled set, byte-identical to what this package ships: swap it for
  *   the library set; edited in any way: print the command, change nothing
  * - the library set: adopt (records a clone's files as managed), check, and
@@ -90,6 +91,10 @@ function switchFromFallback(
   deps: SyncDeps,
 ): void {
   const { projectDir, boilerplateDir, log } = deps;
+  // A token is not access: someone outside TechFides with `gh` logged in must
+  // not watch an install fail on every start. `check` reads the library and
+  // nothing else, so its failure is the cheapest "no access" there is.
+  if (deps.tfSkillsJson(["check"], target) === null) return;
   // Whatever rules files this package ships (AGENTS.md, the CLAUDE.md pointer)
   // must read exactly as scaffolded, project name aside.
   const rulesPristine = ["AGENTS.md", "CLAUDE.md"].every((name) => {
