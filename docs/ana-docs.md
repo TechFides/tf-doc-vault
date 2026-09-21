@@ -158,7 +158,7 @@ pnpm sync           # shows a unified diff of all drifted files
 pnpm sync:apply     # overwrites drifted files with the boilerplate (placeholders are rendered from the current repo)
 ```
 
-User content (`docs/`, README, `AGENTS.md`, `CLAUDE.md`) is excluded from overwriting. `package.json` is the host's too; the one thing `sync` reads in it is the `docs:dev` script, compared with what the current generator writes: a scaffold's `docs:dev` should run `tf-doc-vault dev` rather than `vitepress dev` directly, or the skills never get synced. Without `--skills-bundle` any current `tf-doc-vault dev` form passes and only the legacy shape is reported; pass `--skills-bundle=<name>` (the bundle the template installed: `docs` for `ana-docs` and `sales-docs`) to pin the bundle flag. Extra VitePress arguments the script carries (`--port`, `--host`) survive the rewrite, and `--apply` rewrites that one script and leaves the rest of `package.json` untouched. `--files=package.json` runs this check alone, so an upgrade can fix `docs:dev` without touching the other tracked files:
+User content (`docs/`, README, `AGENTS.md`, `CLAUDE.md`) is excluded from overwriting. `package.json` is the host's too; the one thing `sync` reads in it is the `docs:dev` script, compared with what the current generator writes: a scaffold's `docs:dev` should run `tf-doc-vault dev` rather than `vitepress dev` directly, or the skills never get synced. Without `--skills-bundle` any current `tf-doc-vault dev` form passes and only the legacy shape is reported; pass `--skills-bundle=<name>` (the bundle the template installed: `docs` for `ana-docs`) to pin the bundle flag. Extra VitePress arguments the script carries (`--port`, `--host`) survive the rewrite, and `--apply` rewrites that one script and leaves the rest of `package.json` untouched. `--files=package.json` runs this check alone, so an upgrade can fix `docs:dev` without touching the other tracked files:
 
 ```bash
 pnpm exec tf-doc-vault sync --files=package.json --skills-bundle=docs --apply
@@ -173,15 +173,6 @@ Without a token, offline, after two minutes without an answer, or on any other f
 The swap is all or nothing: the bundled skills, commands and rules files are set aside first and come back as they were if anything fails. A run killed from outside can leave `.claude/.swap-backup-<pid>/` behind with those originals inside; the next install names it and refuses to run until you restore or delete it.
 
 `pnpm docs:dev` runs `tf-doc-vault dev`, which syncs those skills with the library before starting VitePress. Without a token it does nothing, and neither does it with a token that cannot read the library (it asks `tf-skills check` first, so someone outside TechFides with `gh` logged in sees no failed install). With access it replaces a bundled set you never touched with the library set, brings library skills that fell behind forward (`tf-skills update`, never `--force`), and only prints the command for anything you edited by hand. `TF_DOC_VAULT_SKILLS=off` turns the sync off, for CI or a quick start; everything after `docs:dev` (`--port`, `--host`) goes to VitePress.
-
-## Sales offers (`sales-docs`)
-
-`--template=sales-docs` is `ana-docs` with the defaults a folder in the `tf-sales-private-offers` monorepo needs: `git` off (the folder sits inside a repository that already exists), section navigation off (offers navigate through the sidebar), and `--repo` pre-set to the monorepo. Everything above applies, skills included: the same `docs` bundle is installed, and "commercial offer" is chosen in the `docs/README.md` contract on first use, not by a different skill set.
-
-```bash
-cd tf-sales-private-offers
-pnpm dlx @techfides/tf-doc-vault@latest setup nabidka-acme --template=sales-docs
-```
 
 ---
 

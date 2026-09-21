@@ -4,7 +4,7 @@ Breaking-change guides for major package versions. Each is self-contained; skip 
 
 ## Upgrading a portal to the library skills
 
-Applies from the release that ships `tf-doc-vault dev` and the `sales-docs` template. Not a breaking change: a scaffolded portal keeps working untouched. This is the opt-in path to the documentation skills that `setup` now installs from the TechFides skills library (see [Claude skills](./ana-docs.md#claude-skills)).
+Applies from the release that ships `tf-doc-vault dev`. Not a breaking change: a scaffolded portal keeps working untouched. This is the opt-in path to the documentation skills that `setup` now installs from the TechFides skills library (see [Claude skills](./ana-docs.md#claude-skills)).
 
 ```bash
 pnpm up @techfides/tf-doc-vault@latest
