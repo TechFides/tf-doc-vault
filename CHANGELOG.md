@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.5.5
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.4...v0.5.5)
+
+### 🩹 Fixes
+
+- **tooling:** Read CRLF files the same as LF ([bcc7601](https://github.com/TechFides/tf-doc-vault/commit/bcc7601))
+- **tooling:** One LF invariant instead of per-parser CRLF handling ([16cd49d](https://github.com/TechFides/tf-doc-vault/commit/16cd49d))
+- **tooling:** Strip a BOM, keep the eol majority, rename to writeText ([8e61533](https://github.com/TechFides/tf-doc-vault/commit/8e61533))
+
+### 💅 Refactors
+
+- **boilerplate:** Rename CLAUDE.md to AGENTS.md, keep CLAUDE.md as a pointer ([6444f7c](https://github.com/TechFides/tf-doc-vault/commit/6444f7c))
+- **boilerplate:** Point skill and command references to AGENTS.md ([16df57d](https://github.com/TechFides/tf-doc-vault/commit/16df57d))
+
+### 📖 Documentation
+
+- **agents:** Forbid agent co-author and commit bodies ([1beeda3](https://github.com/TechFides/tf-doc-vault/commit/1beeda3))
+- **agents:** Forbid agent co-author and commit bodies" ([007b582](https://github.com/TechFides/tf-doc-vault/commit/007b582))
+
+### 🏡 Chore
+
+- **tooling:** Remove comments ([69c3862](https://github.com/TechFides/tf-doc-vault/commit/69c3862))
+
+### ❤️ Contributors
+
+- Jaroslav Hort ([@jaroslav-hort](https://github.com/jaroslav-hort))
+
 ## v0.5.4
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.3...v0.5.4)
