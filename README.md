@@ -57,7 +57,7 @@ call `makeConfig()` and `createTheme()`; the package owns the implementation, so
 | **`config`**          | `makeConfig()`: complete VitePress config with locales, versioned nav, sidebar, i18n, Mermaid, optional analytics and edit links.                   |
 | **`theme`**           | `createTheme()`: the backdrop, DocMeta, footer, lightbox and table behaviour, plus BrandHero, FeatureCards, Spotlight and AuthorCard for Markdown.  |
 | **`sidebar`**         | Auto-generates nav and sidebar from the `docs/<version>/<section>/<group>/` directory structure, with no manual config.                             |
-| **`scripts`**         | CLI commands: validate, normalize, build print page, export to PDF, fix line endings, sync boilerplate.                                             |
+| **`scripts`**         | CLI commands: validate, normalize, build print page, export to PDF, fix line endings, sync boilerplate, dev (skills sync, then VitePress).          |
 | **`configs`**         | Shared `eslint.config.js`, `prettier.json`, `tsconfig.base.json` for consumer repos to extend.                                                      |
 | **`infra/terraform`** | Reusable GCP module: Cloud Run + Artifact Registry + IAM.                                                                                           |
 | **`docker`**          | Multi-stage Dockerfile with `nginx` / `nginx-auth` runtime variants.                                                                                |
@@ -92,7 +92,7 @@ It asks which template to use, then prompts for the fields that template needs. 
 
 - **Migrating from Confluence?** → [Import from Confluence](./docs/confluence-import.md)
 
-Adding a template of your own means adding a folder under `templates/<name>/` with a `_template.md` manifest (target location, fields to prompt for, which boilerplate files to exclude): no code change, the wizard lists it automatically.
+Adding a template of your own means adding a folder under `templates/<name>/` with a `_template.md` manifest (target location, fields to prompt for, which boilerplate files to exclude, which skills bundle to install): no code change, the wizard lists it automatically.
 
 ## Configuration
 

@@ -19,6 +19,7 @@ git:
   init: true
 lockfile: true
 workspaceWarning: true
+skillsBundle: docs
 ---
 
 Business, functional and technical specification of a project, served as a

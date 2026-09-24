@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@11.27.0",
   "scripts": {
-    "docs:dev": "vitepress dev docs",
+    "docs:dev": "__DOCS_DEV__",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "docs:print": "tf-doc-vault print",
