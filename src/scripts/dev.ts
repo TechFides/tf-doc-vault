@@ -8,11 +8,7 @@ import {
 } from "../cli/install-skills.js";
 import { syncSkills } from "./skills-sync.js";
 
-/*
- * `tf-doc-vault dev`: sync the documentation skills with the library (see
- * skills-sync.ts), then start VitePress. Everything not addressed to this
- * script is VitePress's.
- */
+// Every argument this script does not consume goes to VitePress.
 
 const args = process.argv.slice(2);
 const take = (flag: string): string | undefined =>

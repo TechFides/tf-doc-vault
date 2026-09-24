@@ -11,15 +11,8 @@ import {
 } from "./skills-state.js";
 
 /*
- * Keeps the documentation skills in step with the TechFides skills library.
  * Nothing here may stop the dev server from starting, and nothing a person
- * edited by hand is ever replaced:
- * - no GitHub token, a token that cannot read the library, or
- *   TF_DOC_VAULT_SKILLS=off: skip everything
- * - the bundled set, byte-identical to what this package ships: swap it for
- *   the library set; edited in any way: print the command, change nothing
- * - the library set: adopt (records a clone's files as managed), check, and
- *   when behind `tf-skills update` without --force, which refuses edited skills
+ * edited by hand is ever replaced: edits get the command printed, never --force.
  */
 
 export interface SyncDeps {
@@ -95,8 +88,6 @@ function switchFromFallback(
   // not watch an install fail on every start. `check` reads the library and
   // nothing else, so its failure is the cheapest "no access" there is.
   if (deps.tfSkillsJson(["check"], target) === null) return;
-  // Whatever rules files this package ships (AGENTS.md, the CLAUDE.md pointer)
-  // must read exactly as scaffolded, project name aside.
   const rulesPristine = ["AGENTS.md", "CLAUDE.md"].every((name) => {
     const template = readText(path.join(boilerplateDir, name));
     if (template === null) return true;

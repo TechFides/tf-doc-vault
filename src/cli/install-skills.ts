@@ -7,7 +7,7 @@ export interface SkillsInstall {
   ok: boolean;
   /** The exact command a person can run by hand to get what `setup` could not. */
   command: string;
-  /** Whether the portal's rules file now carries the library's rules. */
+  /** Whether the portal's rules file carries the library's rules. */
   rules: "replaced" | "kept";
   reason?: string;
 }
@@ -70,9 +70,7 @@ export function skillsCommand(bundle: string, projectDir: string): string {
 const attempt = (step: () => void): void => {
   try {
     step();
-  } catch {
-    // best effort
-  }
+  } catch {}
 };
 
 function staleBackup(claude: string): string | undefined {
@@ -86,15 +84,11 @@ function staleBackup(claude: string): string | undefined {
 }
 
 /**
- * Backup → install into the real target → place the shipped rules → drop the
- * bundled commands; on any failure put everything back. Installing into the
- * final path (not a temp dir) keeps tf-skills' state.json keyed correctly,
- * and moving the bundled set aside first means no name collision and no
+ * Installs into the final path, not a temp dir: tf-skills keys its state.json
+ * by target. The bundled set is moved aside first, so no name collision and no
  * --force. The bundled commands go with the bundled skills: they load those
- * skills by name, and the library set has no slash commands.
- *
- * Never throws: whatever fails, the backup is restored step by step and the
- * result says `ok: false`.
+ * skills by name, and the library set has no slash commands. Never throws:
+ * whatever fails, the backup is restored step by step and `ok` is false.
  */
 export function installSkills(
   bundle: string,

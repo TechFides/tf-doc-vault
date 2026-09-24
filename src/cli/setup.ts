@@ -365,10 +365,6 @@ export function sourceWarnings(
 
 // ─── host repository integration ───
 
-/**
- * `tf-doc-vault dev` syncs the documentation skills with the library before
- * starting VitePress; without a bundle it only starts VitePress.
- */
 export function devScript(docsPath: string, skillsBundle?: string): string {
   return [
     "tf-doc-vault dev",

@@ -178,9 +178,8 @@ export interface DocsDevDrift {
 }
 
 /**
- * `docs:dev` is the one script whose generated value changed shape (it used to
- * call vitepress directly), so it is the one script `sync` compares. Every
- * other `docs:*` script a scaffold ships is still what the generator writes.
+ * Only `docs:dev` is compared: a portal whose script runs `vitepress dev`
+ * directly never syncs its skills. The other `docs:*` scripts have one shape.
  */
 export function docsDevDrift(
   pkg: { scripts?: Record<string, string> },

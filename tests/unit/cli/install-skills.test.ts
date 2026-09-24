@@ -8,7 +8,7 @@ import {
   type Runner,
 } from "../../../src/cli/install-skills.js";
 
-const V2 = "# Documentation portal rules — v2";
+const V2 = "# Documentation portal rules: v2";
 
 /** A scaffolded portal as the boilerplate leaves it: bundled skills, commands, AGENTS.md rules, CLAUDE.md pointer. */
 function project(opts: { pointerLayout?: boolean } = {}): string {
