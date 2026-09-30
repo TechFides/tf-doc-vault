@@ -46,7 +46,7 @@ variable "public" {
 }
 
 variable "iap_enabled" {
-  description = "If true, put Identity-Aware Proxy in front of the Cloud Run service. Requires public = false. Uses Google's managed OAuth client, so only accounts of the project's organization can sign in."
+  description = "If true, put Identity-Aware Proxy in front of the Cloud Run service. Requires public = false. Without iap_oauth_client_id it uses Google's managed OAuth client, which lets in only accounts of the project's organization."
   type        = bool
   default     = false
 }
@@ -55,4 +55,17 @@ variable "iap_members" {
   description = "IAM principals granted roles/iap.httpsResourceAccessor when iap_enabled is true, e.g. domain:example.com or user:a@example.com"
   type        = list(string)
   default     = []
+}
+
+variable "iap_oauth_client_id" {
+  description = "Custom OAuth client for IAP on this service, needed to let in accounts outside the project's organization. Null keeps Google's managed client."
+  type        = string
+  default     = null
+}
+
+variable "iap_oauth_client_secret" {
+  description = "Secret of iap_oauth_client_id. Ends up in the Terraform state."
+  type        = string
+  default     = null
+  sensitive   = true
 }

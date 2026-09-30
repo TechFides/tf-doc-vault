@@ -12,6 +12,9 @@ službou `docs`, aniž by změnil chování pro stávající konzumenty (výchoz
   `google_cloud_run_v2_service` existuje od 7.21.0. Je to breaking change i s vypnutým IAP.
 - Spravovaný OAuth klient Googlu: žádný `google_iap_brand` ani `google_iap_client`
   (API vypnuto v březnu 2026). Pustí jen účty z organizace projektu.
+- Účty mimo organizaci: vlastní OAuth client (External, založený ručně v konzoli) přes
+  `iap_oauth_client_id` a `iap_oauth_client_secret`. Nastavuje se na úrovni služby, ne projektu,
+  aby ostatní IAP zdroje v projektu zůstaly na spravovaném klientovi.
 - Servisní agent IAP zakládá ruční `gcloud beta services identity create`, protože
   `google_project_service_identity` je jen v google-beta.
 
@@ -21,6 +24,7 @@ službou `docs`, aniž by změnil chování pro stávající konzumenty (výchoz
 - `data.google_project.this`: číslo projektu pro adresu servisního agenta.
 - `google_cloud_run_v2_service_iam_member.iap_invoker`: `roles/run.invoker` pro agenta.
 - `google_iap_web_cloud_run_service_iam_member.iap_accessor`: jeden na člena.
+- `google_iap_settings.oauth`: vlastní OAuth client, jen když je `iap_oauth_client_id` nastavené.
 
 ## Ověření
 

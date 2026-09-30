@@ -153,3 +153,24 @@ resource "google_iap_web_cloud_run_service_iam_member" "iap_accessor" {
   role                   = "roles/iap.httpsResourceAccessor"
   member                 = each.key
 }
+
+# Scoped to this service: the same setting on projects/<n>/iap_web would switch every IAP resource in
+# the project to this client.
+resource "google_iap_settings" "oauth" {
+  count = var.iap_enabled && var.iap_oauth_client_id != null ? 1 : 0
+  name  = "projects/${data.google_project.this[0].number}/iap_web/cloud_run-${var.region}/services/${google_cloud_run_v2_service.docs.name}"
+
+  access_settings {
+    oauth_settings {
+      client_id     = var.iap_oauth_client_id
+      client_secret = var.iap_oauth_client_secret
+    }
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.iap_oauth_client_secret != null
+      error_message = "iap_oauth_client_id is set without iap_oauth_client_secret."
+    }
+  }
+}

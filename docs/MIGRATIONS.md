@@ -142,5 +142,6 @@ module "docs" {
 - `iap_members` are granted `roles/iap.httpsResourceAccessor`. An empty list lets nobody in.
 - The module enables `iap.googleapis.com` and grants `roles/run.invoker` to the IAP service agent, which is what stops the browser getting 403 after a successful sign-in.
 - The IAP service agent does not exist until it is created once per project: `gcloud beta services identity create --service=iap.googleapis.com --project=<project>`. Run it before or right after the first apply; `google_project_service_identity` is google-beta only, so the module cannot do it.
-- IAP uses Google's managed OAuth client. It lets in only accounts of the project's organization, so `iap_members` outside that organization cannot sign in.
+- IAP uses Google's managed OAuth client. It lets in only accounts of the project's organization, so `iap_members` outside that organization cannot sign in with it.
+- To let in accounts from outside the organization, create a custom OAuth client in the Google Cloud console (Google Auth Platform: branding with audience **External**, published to production, then a **Web application** client with the redirect URI `https://iap.googleapis.com/v1/oauth/clientIds/<CLIENT_ID>:handleRedirect`) and pass it as `iap_oauth_client_id` and `iap_oauth_client_secret`. The module sets it on this service only, so other IAP resources in the project keep the managed client. The secret is stored in the Terraform state.
 - Basic auth (`nginx-auth` image variant) and IAP are alternatives; with IAP on, use the plain `nginx` runtime.
