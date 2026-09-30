@@ -40,7 +40,19 @@ variable "max_instances" {
 }
 
 variable "public" {
-  description = "If true, allow allUsers to invoke the Cloud Run service. For private+basic-auth setups set to true and rely on htpasswd; for IAM-protected setups set to false."
+  description = "If true, allow allUsers to invoke the Cloud Run service. Set to true when the site is public or protected by basic auth (htpasswd); set to false for IAM-protected setups and whenever iap_enabled is true."
   type        = bool
   default     = true
+}
+
+variable "iap_enabled" {
+  description = "If true, put Identity-Aware Proxy in front of the Cloud Run service. Requires public = false. Uses Google's managed OAuth client, so only accounts of the project's organization can sign in."
+  type        = bool
+  default     = false
+}
+
+variable "iap_members" {
+  description = "IAM principals granted roles/iap.httpsResourceAccessor when iap_enabled is true, e.g. domain:example.com or user:a@example.com"
+  type        = list(string)
+  default     = []
 }
