@@ -968,7 +968,7 @@ describe("host repository integration", () => {
   // still gets consistent scripts and ignores.
   test("the docs scripts point at the scaffolded folder", () => {
     const scripts = docsScripts("sub/docs");
-    expect(scripts["docs:dev"]).toBe("vitepress dev sub/docs");
+    expect(scripts["docs:dev"]).toBe("tf-doc-vault dev --root=sub/docs");
     expect(scripts["docs:validate"]).toBe(
       "tf-doc-vault validate --root=sub/docs",
     );
@@ -997,7 +997,7 @@ describe("host repository integration", () => {
       fs.readFileSync(path.join(dir, "package.json"), "utf-8"),
     ) as { scripts: Record<string, string> };
     expect(pkg.scripts.build).toBe("tsc");
-    expect(pkg.scripts["docs:dev"]).toBe("vitepress dev sub/docs");
+    expect(pkg.scripts["docs:dev"]).toBe("tf-doc-vault dev --root=sub/docs");
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
@@ -1027,7 +1027,7 @@ describe("host repository integration", () => {
       fs.readFileSync(path.join(dir, "package.json"), "utf-8"),
     ) as { private?: boolean; scripts: Record<string, string> };
     expect(pkg.private).toBe(true);
-    expect(pkg.scripts["docs:dev"]).toBe("vitepress dev sub/docs");
+    expect(pkg.scripts["docs:dev"]).toBe("tf-doc-vault dev --root=sub/docs");
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
@@ -1753,5 +1753,66 @@ describe("enableAnalytics", () => {
     );
     expect(() => enableAnalytics(dir)).toThrow(SetupError);
     fs.rmSync(dir, { recursive: true, force: true });
+  });
+});
+
+describe("skills bundle wiring", () => {
+  test("docs:dev points at tf-doc-vault dev, carrying the bundle when the template has one", () => {
+    expect(docsScripts("docs", "docs")["docs:dev"]).toBe(
+      "tf-doc-vault dev --root=docs --skills-bundle=docs",
+    );
+    expect(docsScripts("docs")["docs:dev"]).toBe(
+      "tf-doc-vault dev --root=docs",
+    );
+  });
+
+  const RECOVERY =
+    "npx --yes @techfides/tf-skills-manager@latest install --bundle docs --target /tmp/probe/.claude/skills";
+  const ctx = {
+    manifest: manifest({ skillsBundle: "docs" }),
+    answers: { name: "probe" },
+    targetDir: "/tmp/probe",
+    cwd: "/tmp",
+    dependency: "^0.5.0",
+    gitInitialized: false,
+  };
+
+  test("--no-skills is a known flag", () => {
+    expect(unknownFlags({ "no-skills": true })).toEqual([]);
+  });
+
+  test("a failed skills install becomes the first next step, with the recovery command", () => {
+    const epilogue = nextSteps({
+      ...ctx,
+      skills: {
+        attempted: true,
+        ok: false,
+        command: RECOVERY,
+        rules: "kept",
+        reason: "no GitHub token",
+      },
+    });
+    expect(epilogue).toContain(RECOVERY);
+    expect(epilogue).toContain("gh auth login");
+    expect(epilogue.indexOf(RECOVERY)).toBeLessThan(
+      epilogue.indexOf("pnpm install"),
+    );
+  });
+
+  test("a kept CLAUDE.md after a successful install is called out", () => {
+    const epilogue = nextSteps({
+      ...ctx,
+      skills: {
+        attempted: true,
+        ok: true,
+        command: RECOVERY,
+        rules: "kept",
+      },
+    });
+    expect(epilogue).toContain("docs-base/references/CLAUDE.md");
+  });
+
+  test("no attempt, no skills text", () => {
+    expect(nextSteps(ctx)).not.toContain("tf-skills-manager");
   });
 });

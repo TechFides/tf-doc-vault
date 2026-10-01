@@ -14,6 +14,7 @@ import { fileURLToPath } from "node:url";
 import { boilerplateName } from "../cli/scaffold.js";
 import { isEntryModule } from "../cli/utils.js";
 import { readText, writeText } from "../shared/text-file.js";
+import { devScript } from "../cli/setup.js";
 
 const PROJECT_ROOT = process.cwd();
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -42,13 +43,16 @@ export const TRACKED_FILES: string[] = [
 interface CliFlags {
   apply: boolean;
   files: string[] | null;
+  skillsBundle?: string;
 }
 
 function parseFlags(argv: string[]): CliFlags {
   const flags: CliFlags = { apply: false, files: null };
   for (const arg of argv) {
     if (arg === "--apply") flags.apply = true;
-    else if (arg.startsWith("--files=")) {
+    else if (arg.startsWith("--skills-bundle=")) {
+      flags.skillsBundle = arg.slice("--skills-bundle=".length);
+    } else if (arg.startsWith("--files=")) {
       flags.files = arg
         .slice("--files=".length)
         .split(",")
@@ -168,6 +172,52 @@ function inspect(rel: string, placeholders: Record<string, string>): Result {
 
 // Only `.gitignore` is the host's; every other baseline is ours and goes out LF.
 const HOST_OWNED = new Set([".gitignore"]);
+export interface DocsDevDrift {
+  actual: string | undefined;
+  expected: string;
+}
+
+/**
+ * Only `docs:dev` is compared: a portal whose script runs `vitepress dev`
+ * directly never syncs its skills. The other `docs:*` scripts have one shape.
+ */
+export function docsDevDrift(
+  pkg: { scripts?: Record<string, string> },
+  docsPath: string,
+  skillsBundle?: string,
+): DocsDevDrift | null {
+  const actual = pkg.scripts?.["docs:dev"];
+  const base = devScript(docsPath);
+  if (
+    actual === undefined ||
+    (actual !== base && !actual.startsWith(`${base} `))
+  ) {
+    return { actual, expected: devScript(docsPath, skillsBundle) };
+  }
+  // A current script keeps whatever else it carries (--port, --host); only the
+  // bundle flag is pinned, and only when the caller names the bundle.
+  const extras = actual.slice(base.length).split(/\s+/).filter(Boolean);
+  const bundleFlag = extras.find((t) => t.startsWith("--skills-bundle="));
+  if (
+    skillsBundle === undefined ||
+    bundleFlag === `--skills-bundle=${skillsBundle}`
+  ) {
+    return null;
+  }
+  const rest = extras.filter((t) => !t.startsWith("--skills-bundle="));
+  return {
+    actual,
+    expected: [base, `--skills-bundle=${skillsBundle}`, ...rest].join(" "),
+  };
+}
+
+/** Rewrites `scripts["docs:dev"]` and nothing else; indentation follows the file. */
+export function applyDocsDev(text: string, expected: string): string {
+  const pkg = JSON.parse(text) as { scripts?: Record<string, string> };
+  pkg.scripts = { ...(pkg.scripts ?? {}), "docs:dev": expected };
+  const indent = /^(\s+)"/m.exec(text)?.[1] ?? "  ";
+  return JSON.stringify(pkg, null, indent) + (text.endsWith("\n") ? "\n" : "");
+}
 
 function applyResult(r: Result): void {
   if (r.expected === undefined) return;
@@ -180,7 +230,13 @@ function applyResult(r: Result): void {
 function main(): void {
   const flags = parseFlags(process.argv.slice(2));
   const placeholders = detectPlaceholders();
-  const tracked = flags.files ?? TRACKED_FILES;
+  // package.json is the host's and is never compared whole; naming it in
+  // --files asks for the docs:dev check alone.
+  const tracked = (flags.files ?? TRACKED_FILES).filter(
+    (rel) => rel !== "package.json",
+  );
+  const checkDocsDev =
+    flags.files === null || flags.files.includes("package.json");
 
   console.log(
     `Comparing ${tracked.length} file(s) against the @techfides/tf-doc-vault boilerplate.`,
@@ -224,6 +280,28 @@ function main(): void {
     if (flags.apply) {
       applyResult(r);
       console.log(`     → overwritten from the boilerplate`);
+    }
+  }
+
+  const pkgPath = path.join(PROJECT_ROOT, "package.json");
+  if (checkDocsDev && fs.existsSync(pkgPath)) {
+    const pkgText = readText(pkgPath);
+    const pkg = readJSON(pkgPath) as {
+      scripts?: Record<string, string>;
+    } | null;
+    const drift = pkg ? docsDevDrift(pkg, "docs", flags.skillsBundle) : null;
+    if (!drift) {
+      console.log(`  ✓ package.json › docs:dev`);
+      okCount++;
+    } else {
+      drifted++;
+      console.log(`\n  ✗ drift    package.json › docs:dev`);
+      console.log(`     is      : ${drift.actual ?? "(missing)"}`);
+      console.log(`     expected: ${drift.expected}`);
+      if (flags.apply) {
+        writeText(pkgPath, applyDocsDev(pkgText, drift.expected));
+        console.log(`     → rewritten`);
+      }
     }
   }
 

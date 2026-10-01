@@ -525,3 +525,25 @@ describe("applyCopyPlan", () => {
     fs.rmSync(cwd, { recursive: true, force: true });
   });
 });
+
+describe("skillsBundle manifest key", () => {
+  const withBundle = (value: string): string =>
+    MANIFEST.replace(
+      "lockfile: false",
+      `lockfile: false\nskillsBundle: ${value}`,
+    );
+
+  test("absent means undefined", () => {
+    expect(fixtureManifest().skillsBundle).toBeUndefined();
+  });
+
+  test("a lowercase bundle name parses", () => {
+    expect(fixtureManifest(withBundle("docs")).skillsBundle).toBe("docs");
+  });
+
+  test("a malformed name is rejected", () => {
+    expect(() => fixtureManifest(withBundle("Sales Bundle!"))).toThrow(
+      /"skillsBundle" must be a lowercase bundle name/,
+    );
+  });
+});

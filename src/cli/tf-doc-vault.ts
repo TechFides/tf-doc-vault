@@ -8,7 +8,7 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { readText } from "../shared/text-file.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -132,9 +132,16 @@ Commands:
   ensure-lf           Normalize CRLF → LF
   fix                 Full polish pipeline (LF, normalize, format, lint, typecheck, validate)
                         --root=<dir>        docs root directory (default: docs)
-  sync                Diff infra/CI/config files against bundled template
-                        --apply             overwrite drifted files
-                        --files=a,b,c       restrict to a subset
+  sync                Diff infra/CI/config files and package.json docs:dev
+                      against the bundled template
+                        --apply                 overwrite drifted files
+                        --files=a,b,c           restrict to a subset (skips docs:dev)
+                        --skills-bundle=<name>  bundle the expected docs:dev carries
+  dev                 Sync the documentation skills with the library (silent
+                      without a GitHub token; off with TF_DOC_VAULT_SKILLS=off),
+                      then run vitepress dev; other flags go to vitepress
+                        --root=<dir>            docs root directory (default: docs)
+                        --skills-bundle=<name>  bundle to sync against; omit to skip
   gen-diagrams        Generate analysis SVG diagrams to docs/public/images/diagrams/
   gen-wireframes      Generate wireframe SVGs to docs/public/images/wireframes/
   replace-wireframes  Replace ASCII wireframes in docs/v1/index.md with SVG image refs
@@ -161,15 +168,25 @@ if (cmd === "setup") {
 if (cmd === "import-confluence") {
   process.exit(runCliScript("import-confluence.js", rest));
 }
-
-if (cmd === "pdf") {
-  process.exit(runPdf());
+// In-process, not spawned: pnpm forwards a SIGTERM to its own child only, so a
+// spawned dev.js (and the vitepress it starts) would outlive `pnpm docs:dev`.
+if (cmd === "dev") {
+  process.argv = [process.argv[0]!, path.join(SCRIPTS_DIR, "dev.js"), ...rest];
+  await import(pathToFileURL(path.join(SCRIPTS_DIR, "dev.js")).href);
+} else {
+  dispatch(cmd, rest);
 }
 
-const script = COMMANDS[cmd];
-if (!script) {
-  console.error(`Unknown command: ${cmd}`);
-  usage(1);
-}
+function dispatch(command: string, args: string[]): never {
+  if (command === "pdf") {
+    process.exit(runPdf());
+  }
 
-process.exit(runScript(script, rest));
+  const script = COMMANDS[command];
+  if (!script) {
+    console.error(`Unknown command: ${command}`);
+    usage(1);
+  }
+
+  process.exit(runScript(script, args));
+}
