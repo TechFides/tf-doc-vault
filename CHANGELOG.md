@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.6.0
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.5...v0.6.0)
+
+### 🚀 Enhancements
+
+- **infra:** ⚠️  Optional IAP on the Cloud Run service ([8098240](https://github.com/TechFides/tf-doc-vault/commit/8098240))
+- **infra:** Optional custom OAuth client for IAP ([12ff262](https://github.com/TechFides/tf-doc-vault/commit/12ff262))
+
+#### ⚠️ Breaking Changes
+
+- **infra:** ⚠️  Optional IAP on the Cloud Run service ([8098240](https://github.com/TechFides/tf-doc-vault/commit/8098240))
+
+### ❤️ Contributors
+
+- Lukáš Brzobohatý ([@Brzda](https://github.com/Brzda))
+
 ## v0.5.5
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.4...v0.5.5)
