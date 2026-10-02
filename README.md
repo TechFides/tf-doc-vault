@@ -59,7 +59,7 @@ call `makeConfig()` and `createTheme()`; the package owns the implementation, so
 | **`sidebar`**         | Auto-generates nav and sidebar from the `docs/<version>/<section>/<group>/` directory structure, with no manual config.                             |
 | **`scripts`**         | CLI commands: validate, normalize, build print page, export to PDF, fix line endings, sync boilerplate.                                             |
 | **`configs`**         | Shared `eslint.config.js`, `prettier.json`, `tsconfig.base.json` for consumer repos to extend.                                                      |
-| **`infra/terraform`** | Reusable GCP module: Cloud Run + Artifact Registry + IAM.                                                                                           |
+| **`infra/terraform`** | Reusable GCP module: Cloud Run + Artifact Registry + IAM, optional IAP (`iap_enabled`).                                                             |
 | **`docker`**          | Multi-stage Dockerfile with `nginx` / `nginx-auth` runtime variants.                                                                                |
 | **`boilerplate`**     | The VitePress project scaffold shared by every template: config, theme wiring, GitHub Actions CI, Vercel config, auth middleware, `.gitattributes`. |
 | **`templates`**       | Markdown content sets (`ana-docs`, `tech-docs`, …), one folder per template, selected via `tf-doc-vault setup --template=<name>`.                   |
