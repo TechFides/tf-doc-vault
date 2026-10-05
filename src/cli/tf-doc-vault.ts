@@ -8,7 +8,7 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { readText } from "../shared/text-file.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -25,6 +25,7 @@ const COMMANDS: Record<string, string> = {
   "ensure-lf": "ensure-lf.js",
   fix: "fix.js",
   sync: "sync-template.js",
+  skills: "skills.js",
   "gen-diagrams": "generate-diagrams.cjs",
   "gen-wireframes": "generate-wireframes.cjs",
   "replace-wireframes": "replace-wireframes.cjs",
@@ -132,16 +133,14 @@ Commands:
   ensure-lf           Normalize CRLF → LF
   fix                 Full polish pipeline (LF, normalize, format, lint, typecheck, validate)
                         --root=<dir>        docs root directory (default: docs)
-  sync                Diff infra/CI/config files and package.json docs:dev
-                      against the bundled template
-                        --apply                 overwrite drifted files
-                        --files=a,b,c           restrict to a subset (skips docs:dev)
-                        --skills-bundle=<name>  bundle the expected docs:dev carries
-  dev                 Sync the documentation skills with the library (silent
-                      without a GitHub token; off with TF_DOC_VAULT_SKILLS=off),
-                      then run vitepress dev; other flags go to vitepress
-                        --root=<dir>            docs root directory (default: docs)
-                        --skills-bundle=<name>  bundle to sync against; omit to skip
+  sync                Diff infra/CI/config files against bundled template
+                        --apply             overwrite drifted files
+                        --files=a,b,c       restrict to a subset
+  skills              Documentation skills from the TechFides skills library (opt-in)
+                        install --bundle <name> [--force]   replace the bundled set
+                        update                              bring an installed library set
+                                                            forward; silent when there is
+                                                            nothing to do, so it suits a hook
   gen-diagrams        Generate analysis SVG diagrams to docs/public/images/diagrams/
   gen-wireframes      Generate wireframe SVGs to docs/public/images/wireframes/
   replace-wireframes  Replace ASCII wireframes in docs/v1/index.md with SVG image refs
@@ -168,14 +167,7 @@ if (cmd === "setup") {
 if (cmd === "import-confluence") {
   process.exit(runCliScript("import-confluence.js", rest));
 }
-// In-process, not spawned: pnpm forwards a SIGTERM to its own child only, so a
-// spawned dev.js (and the vitepress it starts) would outlive `pnpm docs:dev`.
-if (cmd === "dev") {
-  process.argv = [process.argv[0]!, path.join(SCRIPTS_DIR, "dev.js"), ...rest];
-  await import(pathToFileURL(path.join(SCRIPTS_DIR, "dev.js")).href);
-} else {
-  dispatch(cmd, rest);
-}
+dispatch(cmd, rest);
 
 function dispatch(command: string, args: string[]): never {
   if (command === "pdf") {

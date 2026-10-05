@@ -116,7 +116,7 @@ function checkSupplied(field: FieldSpec, value: Answer): Answer {
 }
 
 export function knownFlagKeys(): Set<string> {
-  const keys = new Set(["template", "help", "no-skills"]);
+  const keys = new Set(["template", "help", "skills"]);
   for (const field of FIELD_CATALOG) {
     if (!field.flag.startsWith("[")) keys.add(field.key);
     if (field.type === "confirm") keys.add(`no-${field.key}`);
@@ -315,9 +315,6 @@ export function resolvePlaceholders(
   return {
     ...placeholders,
     __DOCS_BASE__: manifest.base,
-    // The standalone boilerplate package.json carries docs:dev as a placeholder
-    // so it cannot drift from what `docsScripts` writes into a host package.json.
-    __DOCS_DEV__: devScript("docs", manifest.skillsBundle),
     __SECTION_NAV__: String(manifest.sectionNav),
     ...placeholderValues(manifest.fields, answers),
     ...extra,
@@ -365,20 +362,9 @@ export function sourceWarnings(
 
 // ─── host repository integration ───
 
-export function devScript(docsPath: string, skillsBundle?: string): string {
-  return [
-    "tf-doc-vault dev",
-    `--root=${docsPath}`,
-    ...(skillsBundle ? [`--skills-bundle=${skillsBundle}`] : []),
-  ].join(" ");
-}
-
-export function docsScripts(
-  docsPath: string,
-  skillsBundle?: string,
-): Record<string, string> {
+export function docsScripts(docsPath: string): Record<string, string> {
   return {
-    "docs:dev": devScript(docsPath, skillsBundle),
+    "docs:dev": `vitepress dev ${docsPath}`,
     "docs:build": `vitepress build ${docsPath}`,
     "docs:validate": `tf-doc-vault validate --root=${docsPath}`,
     "docs:normalize": `tf-doc-vault normalize --root=${docsPath}`,
@@ -406,11 +392,7 @@ function ensureHostPackageJson(dir: string): void {
   console.log("  package.json created (host repo had none)");
 }
 
-export function updatePackageJson(
-  dir: string,
-  docsPath: string,
-  skillsBundle?: string,
-): void {
+export function updatePackageJson(dir: string, docsPath: string): void {
   const pkgPath = path.join(dir, "package.json");
   ensureHostPackageJson(dir);
   const pkg = JSON.parse(readText(pkgPath)) as {
@@ -418,9 +400,7 @@ export function updatePackageJson(
   };
   const scripts = pkg.scripts ?? {};
   let added = 0;
-  for (const [key, value] of Object.entries(
-    docsScripts(docsPath, skillsBundle),
-  )) {
+  for (const [key, value] of Object.entries(docsScripts(docsPath))) {
     if (!(key in scripts)) {
       scripts[key] = value;
       added++;
@@ -911,8 +891,8 @@ function usage(exitCode = 0): never {
       ["--template=<name>", "Template to scaffold, from the list above"],
       ...rowsFor(options),
       [
-        "--no-skills",
-        "Skip installing the template's skills bundle through tf-skills",
+        "--skills",
+        "Install the template's skills bundle through tf-skills (needs a GitHub token with access to the skills library)",
       ],
       ["--help, -h", "Print this help and exit"],
     ]),
@@ -1022,6 +1002,11 @@ Commit it together with your other changes:
     blocks.push(`Publish the new repository:
   git remote add origin ${originUrl(ctx.answers.name)}
   git push -u origin main`);
+  }
+
+  if (!ctx.skills?.attempted && ctx.manifest.skillsBundle) {
+    blocks.push(`TechFides library skills (optional; needs a GitHub token with access to the skills library):
+  pnpm exec tf-doc-vault skills install --bundle ${ctx.manifest.skillsBundle}`);
   }
 
   return blocks.join("\n\n");
@@ -1188,7 +1173,12 @@ async function run(): Promise<void> {
     command: "",
     rules: "kept",
   };
-  if (manifest.skillsBundle && flags["no-skills"] !== true) {
+  if (flags.skills === true && !manifest.skillsBundle) {
+    process.stderr.write(
+      `⚠  --skills does not apply to the "${manifest.name}" template: it names no skills bundle; ignoring it.\n`,
+    );
+  }
+  if (flags.skills === true && manifest.skillsBundle) {
     console.log(
       `  installing skills bundle "${manifest.skillsBundle}" via tf-skills…`,
     );
@@ -1214,7 +1204,7 @@ async function run(): Promise<void> {
   );
   if (manifest.host.minimalPackageJson) writeMinimalPackageJson(targetDir);
   if (manifest.host.packageJsonScripts) {
-    updatePackageJson(cwd, docsPath, manifest.skillsBundle);
+    updatePackageJson(cwd, docsPath);
   }
   if (manifest.host.devDependencies) {
     updateDevDependencies(cwd, documentationDependencies(depFlags, cwd));

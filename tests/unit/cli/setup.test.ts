@@ -968,7 +968,7 @@ describe("host repository integration", () => {
   // still gets consistent scripts and ignores.
   test("the docs scripts point at the scaffolded folder", () => {
     const scripts = docsScripts("sub/docs");
-    expect(scripts["docs:dev"]).toBe("tf-doc-vault dev --root=sub/docs");
+    expect(scripts["docs:dev"]).toBe("vitepress dev sub/docs");
     expect(scripts["docs:validate"]).toBe(
       "tf-doc-vault validate --root=sub/docs",
     );
@@ -997,7 +997,7 @@ describe("host repository integration", () => {
       fs.readFileSync(path.join(dir, "package.json"), "utf-8"),
     ) as { scripts: Record<string, string> };
     expect(pkg.scripts.build).toBe("tsc");
-    expect(pkg.scripts["docs:dev"]).toBe("tf-doc-vault dev --root=sub/docs");
+    expect(pkg.scripts["docs:dev"]).toBe("vitepress dev sub/docs");
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
@@ -1027,7 +1027,7 @@ describe("host repository integration", () => {
       fs.readFileSync(path.join(dir, "package.json"), "utf-8"),
     ) as { private?: boolean; scripts: Record<string, string> };
     expect(pkg.private).toBe(true);
-    expect(pkg.scripts["docs:dev"]).toBe("tf-doc-vault dev --root=sub/docs");
+    expect(pkg.scripts["docs:dev"]).toBe("vitepress dev sub/docs");
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
@@ -1757,15 +1757,6 @@ describe("enableAnalytics", () => {
 });
 
 describe("skills bundle wiring", () => {
-  test("docs:dev points at tf-doc-vault dev, carrying the bundle when the template has one", () => {
-    expect(docsScripts("docs", "docs")["docs:dev"]).toBe(
-      "tf-doc-vault dev --root=docs --skills-bundle=docs",
-    );
-    expect(docsScripts("docs")["docs:dev"]).toBe(
-      "tf-doc-vault dev --root=docs",
-    );
-  });
-
   const RECOVERY =
     "npx --yes @techfides/tf-skills-manager@latest install --bundle docs --target /tmp/probe/.claude/skills";
   const ctx = {
@@ -1777,8 +1768,8 @@ describe("skills bundle wiring", () => {
     gitInitialized: false,
   };
 
-  test("--no-skills is a known flag", () => {
-    expect(unknownFlags({ "no-skills": true })).toEqual([]);
+  test("--skills is a known flag", () => {
+    expect(unknownFlags({ skills: true })).toEqual([]);
   });
 
   test("a failed skills install becomes the first next step, with the recovery command", () => {
@@ -1812,7 +1803,20 @@ describe("skills bundle wiring", () => {
     expect(epilogue).toContain("docs-base/references/CLAUDE.md");
   });
 
-  test("no attempt, no skills text", () => {
-    expect(nextSteps(ctx)).not.toContain("tf-skills-manager");
+  test("no attempt: the optional install command, nothing about tf-skills itself", () => {
+    const epilogue = nextSteps(ctx);
+    expect(epilogue).toContain(
+      "pnpm exec tf-doc-vault skills install --bundle docs",
+    );
+    expect(epilogue).not.toContain("tf-skills-manager");
+    expect(epilogue.indexOf("pnpm install")).toBeLessThan(
+      epilogue.indexOf("skills install"),
+    );
+  });
+
+  test("a template without a bundle gets no skills text at all", () => {
+    expect(nextSteps({ ...ctx, manifest: manifest({}) })).not.toMatch(
+      /skills install/,
+    );
   });
 });

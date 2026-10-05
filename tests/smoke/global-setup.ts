@@ -115,7 +115,6 @@ function scaffoldTechDocs(tgz: string): { host: string; dir: string } {
     [
       path.join(REPO_ROOT, "dist/cli/setup.js"),
       "--template=tech-docs",
-      "--no-skills",
       "--service-id=SMK",
       "--project=smoke",
       "--repo=test/test",
@@ -154,7 +153,6 @@ function scaffoldAna(tgz: string): string {
       path.join(REPO_ROOT, "dist/cli/setup.js"),
       "ana_test",
       "--template=ana-docs",
-      "--no-skills",
       "--source=file",
       `--file-path=${tgz}`, // the scaffold prepends `file:` itself
       "--no-git",
@@ -216,7 +214,6 @@ function scaffoldOffersMonorepo(tgz: string): {
       path.join(REPO_ROOT, "dist/cli/setup.js"),
       "offer_one",
       "--template=ana-docs",
-      "--no-skills",
       "--source=file",
       `--file-path=${tgz}`,
     ],
@@ -230,7 +227,6 @@ function scaffoldOffersMonorepo(tgz: string): {
       path.join(REPO_ROOT, "dist/cli/setup.js"),
       "offer_two",
       "--template=ana-docs",
-      "--no-skills",
       "--source=file",
       `--file-path=${tgz}`,
     ],

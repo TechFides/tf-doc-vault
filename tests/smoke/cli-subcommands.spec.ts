@@ -1,7 +1,6 @@
 import { test, expect } from "./fixtures";
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -61,53 +60,37 @@ test("setup without a TTY and without --template exits 1", ({ sandboxes }) => {
   expect(r.stderr).toContain("--template=<name>");
 });
 
-test("tf-doc-vault --help lists dev", ({ sandboxes }) => {
+test("tf-doc-vault --help lists skills", ({ sandboxes }) => {
   const r = spawnSync("pnpm", ["exec", "tf-doc-vault", "--help"], {
     cwd: sandboxes.anaDir,
     encoding: "utf-8",
   });
   expect(r.status, r.stderr).toBe(0);
-  expect(r.stdout).toMatch(/^ {2}dev {2,}/m);
+  expect(r.stdout).toMatch(/^ {2}skills {2,}/m);
 });
 
-// With the sync switched off nothing about skills is printed and control goes
-// straight to vitepress. A fake `vitepress` first on PATH keeps this hermetic:
-// the real one would serve until killed (a "no token" run cannot be simulated
-// either, gh keeps tokens in the keyring). The dispatcher is called directly
-// because `pnpm exec` would put the sandbox's real .bin ahead of the fake.
-test("dev with the skills sync off hands over to vitepress silently", ({
+// A fresh scaffold carries the bundled set, which `update` never touches, so
+// this stays off the network whatever token the machine has.
+test("skills update on a fresh scaffold prints nothing and exits 0", ({
   sandboxes,
 }) => {
-  const fakeBin = fs.mkdtempSync(path.join(os.tmpdir(), "fake-vitepress-"));
-  fs.writeFileSync(
-    path.join(fakeBin, "vitepress"),
-    '#!/bin/sh\necho "fake vitepress $*"\n',
-    { mode: 0o755 },
-  );
-  const r = spawnSync(
-    process.execPath,
-    [
-      path.join(REPO_ROOT, "dist/cli/tf-doc-vault.js"),
-      "dev",
-      "--root=docs",
-      "--skills-bundle=docs",
-      "--port",
-      "5199",
-    ],
-    {
-      cwd: sandboxes.anaDir,
-      encoding: "utf-8",
-      timeout: 60_000,
-      env: {
-        ...process.env,
-        PATH: `${fakeBin}${path.delimiter}${process.env.PATH ?? ""}`,
-        TF_DOC_VAULT_SKILLS: "off",
-      },
-    },
-  );
-  fs.rmSync(fakeBin, { recursive: true, force: true });
-  const out = `${r.stdout}${r.stderr}`;
-  expect(r.status, out).toBe(0);
-  expect(out).toContain("fake vitepress dev docs --port 5199");
-  expect(out).not.toMatch(/skill/i);
+  const r = spawnSync("pnpm", ["exec", "tf-doc-vault", "skills", "update"], {
+    cwd: sandboxes.anaDir,
+    encoding: "utf-8",
+    timeout: 60_000,
+  });
+  expect(r.status, r.stderr).toBe(0);
+  expect(`${r.stdout}${r.stderr}`.trim()).toBe("");
+});
+
+test("skills install without --bundle exits 1 and names the flag", ({
+  sandboxes,
+}) => {
+  const r = spawnSync("pnpm", ["exec", "tf-doc-vault", "skills", "install"], {
+    cwd: sandboxes.anaDir,
+    encoding: "utf-8",
+    timeout: 60_000,
+  });
+  expect(r.status).toBe(1);
+  expect(r.stderr).toContain("--bundle");
 });

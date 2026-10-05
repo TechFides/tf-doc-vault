@@ -4,23 +4,20 @@ Breaking-change guides for major package versions. Each is self-contained; skip 
 
 ## Upgrading a portal to the library skills
 
-Applies from the release that ships `tf-doc-vault dev`. Not a breaking change: a scaffolded portal keeps working untouched. This is the opt-in path to the documentation skills that `setup` now installs from the TechFides skills library (see [Claude skills](./ana-docs.md#claude-skills)).
+Applies from the release that ships `tf-doc-vault skills`. Not a breaking change, and nothing happens on its own: a scaffolded portal keeps working on its bundled skills untouched. This is the opt-in path to the documentation skills from the TechFides skills library (see [Claude skills](./ana-docs.md#claude-skills)); it needs a GitHub token with access to the library.
 
 ```bash
 pnpm up @techfides/tf-doc-vault@latest
-pnpm exec tf-doc-vault sync --files=package.json --skills-bundle=docs --apply   # docs:dev now runs tf-doc-vault dev
-pnpm docs:dev
+pnpm exec tf-doc-vault skills install --bundle docs
 ```
 
-`--files=package.json` limits `sync` to the `docs:dev` script; drop it to bring the rest of the boilerplate (CI workflow, lint configs) up to date in the same run, which a folder inside a monorepo usually does not want.
+What `install` does depends on where the portal stands:
 
-What the first `docs:dev` does depends on where the portal stands:
+- **The bundled skills, commands, `AGENTS.md` and `CLAUDE.md` are exactly as the scaffold left them.** They are replaced with the library set and the library's portal rules are written into `AGENTS.md`; review with `git status` and commit.
+- **Something was edited by hand** (a bundled skill, a command, `AGENTS.md`), or an offer folder that carries hand-copied skills and its own long `CLAUDE.md`: `install` refuses and asks for `--force`. Before passing it, move anything project-specific from your rules file into the `docs/README.md` contract; the library's rules file is canonical and identical everywhere, and the `docs-workflow` skill sets the contract up with a few questions and offers a `migrate` operation for the content tree. Git keeps the old files.
+- **The library set is already there** (a clone of a portal someone else switched): `install` says so and changes nothing. `pnpm exec tf-doc-vault skills update` is the command for that case, and the one to put into a hook so the skills follow the library from then on.
 
-- **No library access.** Nothing changes: the bundled skills and rules keep working, and `docs:dev` says nothing about skills.
-- **Access, and the bundled skills, commands, `AGENTS.md` and `CLAUDE.md` are exactly as the scaffold left them.** `docs:dev` replaces them with the library set and writes the library's portal rules into `AGENTS.md` on its own; review with `git status` and commit. From then on it brings library skills that fell behind forward on every start (`tf-skills update`, never `--force`) and only names the ones you edited.
-- **Access, but something was edited by hand** (a bundled skill, a command, `AGENTS.md`), or an offer folder that carries hand-copied skills and its own long `CLAUDE.md`: `docs:dev` prints the one `install --force` command and touches nothing. Before running it, move anything project-specific from your `AGENTS.md` into the `docs/README.md` contract; the library's rules file is canonical and identical everywhere, and the `docs-workflow` skill sets the contract up with a few questions and offers a `migrate` operation for the content tree.
-
-`TF_DOC_VAULT_SKILLS=off` turns the sync off for a run, for CI or a quick start.
+`pnpm sync` still reports drift in the boilerplate files (CI workflow, lint configs) separately; apply it in the same upgrade or not, as the folder prefers.
 
 ## Migration to 0.3
 

@@ -44,11 +44,3 @@ export function adviceFor(check: CheckSummary, target: string): string | null {
     : "";
   return `${check.behind} documentation skill(s) behind the library${force}: run ${CLI} update --target ${target}`;
 }
-
-export function switchAdvice(target: string, bundle: string): string {
-  return `You have access to the TechFides skills library. Switch with: ${CLI} install --bundle ${bundle} --target ${target} --force`;
-}
-
-export function unmanagedAdvice(target: string, bundle: string): string {
-  return `These documentation skills are not managed by tf-skills. To switch to the library set (replaces local edits): ${CLI} install --bundle ${bundle} --target ${target} --force`;
-}

@@ -6,26 +6,45 @@ import {
   classify,
   isPristine,
   matchesTemplate,
-  switchAdvice,
-  unmanagedAdvice,
 } from "./skills-state.js";
 
 /*
- * Nothing here may stop the dev server from starting, and nothing a person
- * edited by hand is ever replaced: edits get the command printed, never --force.
+ * Nothing a person edited by hand is replaced without --force, and `update`
+ * never touches the bundled set: switching to the library is `install`'s job.
  */
 
-export interface SyncDeps {
+export interface SkillsDeps {
   projectDir: string;
   boilerplateDir: string;
-  env: NodeJS.ProcessEnv;
   hasToken: () => boolean;
   /** `tf-skills <sub> --json --target <target>`, parsed; null on any failure. */
   tfSkillsJson: (sub: string[], target: string) => unknown;
   /** `tf-skills update --all --target <target>`; true on exit 0. */
   update: (target: string) => boolean;
   install: (bundle: string, projectDir: string) => SkillsInstall;
-  log: (message: string) => void;
+}
+
+export type UpdateOutcome =
+  | {
+      kind:
+        | "no-token"
+        | "bundled"
+        | "unreadable"
+        | "unmanaged"
+        | "current"
+        | "updated";
+    }
+  | { kind: "behind"; advice: string };
+
+export type InstallOutcome =
+  | { kind: "no-token" | "already-library" | "edited" }
+  | { kind: "failed"; reason: string; command: string }
+  | { kind: "installed"; rules: SkillsInstall["rules"] };
+
+export interface Rendered {
+  exit: number;
+  out?: string;
+  err?: string;
 }
 
 interface Check {
@@ -78,90 +97,150 @@ function readText(file: string): string | null {
   }
 }
 
-function switchFromFallback(
-  target: string,
-  bundle: string,
-  deps: SyncDeps,
-): void {
-  const { projectDir, boilerplateDir, log } = deps;
-  // A token is not access: someone outside TechFides with `gh` logged in must
-  // not watch an install fail on every start. `check` reads the library and
-  // nothing else, so its failure is the cheapest "no access" there is.
-  if (deps.tfSkillsJson(["check"], target) === null) return;
+const skillsDir = (root: string): string =>
+  path.join(root, ".claude", "skills");
+
+/** The bundled skills, commands and rules files exactly as scaffolded, project name aside. */
+function pristine(deps: SkillsDeps): boolean {
+  const { projectDir, boilerplateDir } = deps;
   const rulesPristine = ["AGENTS.md", "CLAUDE.md"].every((name) => {
     const template = readText(path.join(boilerplateDir, name));
     if (template === null) return true;
     const actual = readText(path.join(projectDir, name));
     return actual !== null && matchesTemplate(actual, template);
   });
-  const pristine =
+  return (
+    rulesPristine &&
     isPristine(
-      readTree(target),
-      readTree(path.join(boilerplateDir, ".claude", "skills")),
+      readTree(skillsDir(projectDir)),
+      readTree(skillsDir(boilerplateDir)),
     ) &&
     isPristine(
       readTree(path.join(projectDir, ".claude", "commands")),
       readTree(path.join(boilerplateDir, ".claude", "commands")),
-    ) &&
-    rulesPristine;
-  if (!pristine) {
-    log(`\n${switchAdvice(target, bundle)}\n`);
-    return;
-  }
-  log(
-    "\nSwitching the bundled documentation skills for the TechFides library set...",
-  );
-  const result = deps.install(bundle, projectDir);
-  if (!result.ok) {
-    log(
-      `Could not install (${result.reason ?? "unknown"}); bundled skills kept.\n${switchAdvice(target, bundle)}\n`,
-    );
-    return;
-  }
-  log(
-    result.rules === "replaced"
-      ? "Documentation skills and rules installed from the library: review with git status and commit.\n"
-      : "Documentation skills installed from the library (rules kept, the bundle ships none): review with git status and commit.\n",
+    )
   );
 }
 
-export function syncSkills(bundle: string | undefined, deps: SyncDeps): void {
-  if (!bundle || deps.env.TF_DOC_VAULT_SKILLS === "off" || !deps.hasToken()) {
-    return;
-  }
-  const target = path.resolve(deps.projectDir, ".claude", "skills");
+export function updateSkills(deps: SkillsDeps): UpdateOutcome {
+  if (!deps.hasToken()) return { kind: "no-token" };
+  const target = path.resolve(skillsDir(deps.projectDir));
   const installed = dirNames(target);
   if (
-    classify(
-      installed,
-      dirNames(path.join(deps.boilerplateDir, ".claude", "skills")),
-    ) === "fallback"
+    classify(installed, dirNames(skillsDir(deps.boilerplateDir))) === "fallback"
   ) {
-    switchFromFallback(target, bundle, deps);
-    return;
+    return { kind: "bundled" };
   }
   deps.tfSkillsJson(["adopt", "--all"], target);
   const check = deps.tfSkillsJson(["check"], target) as Check | null;
-  if (!check || typeof check.behind !== "number") return;
+  if (!check || typeof check.behind !== "number") return { kind: "unreadable" };
   const states = Object.values(check.skills ?? {}).map((s) => s.state);
   if (
     installed.length > 0 &&
     states.length > 0 &&
     states.every((s) => s === "unmanaged")
   ) {
-    deps.log(`\n${unmanagedAdvice(target, bundle)}\n`);
-    return;
+    return { kind: "unmanaged" };
   }
-  if (check.behind === 0) return;
-  if (deps.update(target)) {
-    deps.log(
-      "\nDocumentation skills updated from the library: review with git status and commit.\n",
-    );
-    return;
+  if (check.behind === 0) return { kind: "current" };
+  if (deps.update(target)) return { kind: "updated" };
+  return {
+    kind: "behind",
+    advice:
+      adviceFor(
+        { behind: check.behind, needForce: check.needForce === true },
+        target,
+      ) ?? "",
+  };
+}
+
+export function installFromLibrary(
+  bundle: string,
+  force: boolean,
+  deps: SkillsDeps,
+): InstallOutcome {
+  if (!deps.hasToken()) return { kind: "no-token" };
+  const installed = dirNames(skillsDir(deps.projectDir));
+  if (!force && installed.length > 0) {
+    if (
+      classify(installed, dirNames(skillsDir(deps.boilerplateDir))) ===
+      "library"
+    ) {
+      return { kind: "already-library" };
+    }
+    if (!pristine(deps)) return { kind: "edited" };
   }
-  const advice = adviceFor(
-    { behind: check.behind, needForce: check.needForce === true },
-    target,
-  );
-  if (advice) deps.log(`\n${advice}\n`);
+  const result = deps.install(bundle, deps.projectDir);
+  if (!result.ok) {
+    return {
+      kind: "failed",
+      reason: result.reason ?? "unknown",
+      command: result.command,
+    };
+  }
+  return { kind: "installed", rules: result.rules };
+}
+
+const INSTALL_HINT = "`tf-doc-vault skills install --bundle <name>`";
+
+/** Off a TTY (a hook) only a change or something to act on is worth a line. */
+export function renderUpdate(outcome: UpdateOutcome, tty: boolean): Rendered {
+  switch (outcome.kind) {
+    case "updated":
+      return {
+        exit: 0,
+        out: "Documentation skills updated from the library: review with git status and commit.",
+      };
+    case "behind":
+      return { exit: 0, out: outcome.advice };
+    default:
+      break;
+  }
+  if (!tty) return { exit: 0 };
+  const quiet: Record<
+    Exclude<UpdateOutcome["kind"], "updated" | "behind">,
+    string
+  > = {
+    "no-token":
+      "No GitHub token with access to the skills library (gh auth login, or GITHUB_TOKEN); nothing checked.",
+    bundled: `The bundled documentation skills are installed; ${INSTALL_HINT} switches to the library set.`,
+    unreadable:
+      "Could not read the skills library (tf-skills check failed); nothing changed.",
+    unmanaged: `These documentation skills are not managed by tf-skills; ${INSTALL_HINT} with --force replaces them with the library set.`,
+    current: "Documentation skills are current.",
+  };
+  return { exit: 0, out: quiet[outcome.kind] };
+}
+
+export function renderInstall(outcome: InstallOutcome): Rendered {
+  switch (outcome.kind) {
+    case "no-token":
+      return {
+        exit: 1,
+        err: "No GitHub token with access to the skills library: run gh auth login, or set GITHUB_TOKEN.",
+      };
+    case "already-library":
+      return {
+        exit: 0,
+        out: "The library skills are already installed; `tf-doc-vault skills update` brings them forward, --force reinstalls.",
+      };
+    case "edited":
+      return {
+        exit: 1,
+        err: "The bundled skills, commands or rules files were edited by hand; rerun with --force to replace them with the library set (git keeps the edits).",
+      };
+    case "failed":
+      return {
+        exit: 1,
+        err: `Could not install (${outcome.reason}); nothing changed. The command it ran: ${outcome.command}`,
+      };
+    case "installed":
+      return {
+        exit: 0,
+        out:
+          outcome.rules === "replaced"
+            ? "Documentation skills and rules installed from the library: review with git status and commit."
+            : "Documentation skills installed from the library (rules kept, the bundle ships none): review with git status and commit.",
+      };
+  }
 }
