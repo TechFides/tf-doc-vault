@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@11.28.0",
+  "packageManager": "pnpm@11.28.3",
   "scripts": {
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
@@ -28,9 +28,9 @@
     "@vercel/functions": "^3.7.7"
   },
   "devDependencies": {
-    "@types/node": "25.9.8",
-    "@typescript-eslint/eslint-plugin": "8.70.1",
-    "@typescript-eslint/parser": "8.70.1",
+    "@types/node": "25.9.9",
+    "@typescript-eslint/eslint-plugin": "8.71.0",
+    "@typescript-eslint/parser": "8.71.0",
     "eslint": "10.11.0",
     "eslint-config-prettier": "10.1.8",
     "mermaid": "11.17.2",
