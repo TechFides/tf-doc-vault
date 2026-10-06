@@ -2,6 +2,23 @@
 
 Breaking-change guides for major package versions. Each is self-contained; skip straight to the version you are upgrading past.
 
+## Upgrading a portal to the library skills
+
+Applies from the release that ships `tf-doc-vault skills`. Not a breaking change, and nothing happens on its own: a scaffolded portal keeps working on its bundled skills untouched. This is the opt-in path to the documentation skills from the TechFides skills library (see [Claude skills](./ana-docs.md#claude-skills)); it needs a GitHub token with access to the library.
+
+```bash
+pnpm up @techfides/tf-doc-vault@latest
+pnpm exec tf-doc-vault skills install --bundle docs
+```
+
+What `install` does depends on where the portal stands:
+
+- **The bundled skills, commands, `AGENTS.md` and `CLAUDE.md` are exactly as the scaffold left them.** They are replaced with the library set and the library's portal rules are written into `AGENTS.md`; review with `git status` and commit.
+- **Something was edited by hand** (a bundled skill, a command, `AGENTS.md`), or an offer folder that carries hand-copied skills and its own long `CLAUDE.md`: `install` refuses and asks for `--force`. Before passing it, move anything project-specific from your rules file into the `docs/README.md` contract; the library's rules file is canonical and identical everywhere, and the `docs-workflow` skill sets the contract up with a few questions and offers a `migrate` operation for the content tree. Git keeps the old files.
+- **The library set is already there** (a clone of a portal someone else switched): `install` says so and changes nothing. `pnpm exec tf-doc-vault skills update` is the command for that case, and the one to put into a hook so the skills follow the library from then on.
+
+`pnpm sync` still reports drift in the boilerplate files (CI workflow, lint configs) separately; apply it in the same upgrade or not, as the folder prefers.
+
 ## Migration to 0.3
 
 Version 0.3.0 removes the Express/NestJS tech-docs mount and replaces `create-ana` and `init-tech-docs` with a single interactive `setup` wizard. This is a breaking change, but it is **not forced**: scaffolded repos pin an exact version, and a service repo that keeps its docs inside itself typically depends on `@techfides/tf-doc-vault` with a caret range, which under `0.x` semver rules does not include `0.3.0`. Nothing pulls an existing repo onto `0.3.0` automatically; `0.2.x` keeps working until someone raises the pinned version by hand. Plan and communicate the transition outside the package; the build only breaks once someone does that.

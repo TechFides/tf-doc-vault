@@ -59,3 +59,38 @@ test("setup without a TTY and without --template exits 1", ({ sandboxes }) => {
   expect(r.status).toBe(1);
   expect(r.stderr).toContain("--template=<name>");
 });
+
+test("tf-doc-vault --help lists skills", ({ sandboxes }) => {
+  const r = spawnSync("pnpm", ["exec", "tf-doc-vault", "--help"], {
+    cwd: sandboxes.anaDir,
+    encoding: "utf-8",
+  });
+  expect(r.status, r.stderr).toBe(0);
+  expect(r.stdout).toMatch(/^ {2}skills {2,}/m);
+});
+
+// A fresh scaffold carries the bundled set, which `update` never touches, so
+// this stays off the network whatever token the machine has.
+test("skills update on a fresh scaffold prints nothing and exits 0", ({
+  sandboxes,
+}) => {
+  const r = spawnSync("pnpm", ["exec", "tf-doc-vault", "skills", "update"], {
+    cwd: sandboxes.anaDir,
+    encoding: "utf-8",
+    timeout: 60_000,
+  });
+  expect(r.status, r.stderr).toBe(0);
+  expect(`${r.stdout}${r.stderr}`.trim()).toBe("");
+});
+
+test("skills install without --bundle exits 1 and names the flag", ({
+  sandboxes,
+}) => {
+  const r = spawnSync("pnpm", ["exec", "tf-doc-vault", "skills", "install"], {
+    cwd: sandboxes.anaDir,
+    encoding: "utf-8",
+    timeout: 60_000,
+  });
+  expect(r.status).toBe(1);
+  expect(r.stderr).toContain("--bundle");
+});
