@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.27@sha256:bde3983e9c939224420ddaf6b784cc30e09b035a4dea01f581230c50809f372e
+# syntax=docker/dockerfile:1.27@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
 #
 # Multi-stage Dockerfile for TFSA analysis docs.
 #
@@ -15,7 +15,7 @@
 ARG SERVER_TYPE=nginx
 
 # ── Stage 1: build ────────────────────────────────────────────────────────────
-FROM node:24-slim@sha256:2fe369e969550cde8e867afc3fe370b260140cab4a23d467074295b42163d553 AS builder
+FROM node:24-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 AS builder
 
 WORKDIR /app
 
@@ -36,7 +36,7 @@ COPY tsconfig.json ./
 RUN pnpm run docs:print && pnpm run docs:build
 
 # ── Stage 2a: nginx (no auth) ─────────────────────────────────────────────────
-FROM node:24-slim@sha256:2fe369e969550cde8e867afc3fe370b260140cab4a23d467074295b42163d553 AS runner-nginx
+FROM node:24-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 AS runner-nginx
 
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends nginx \
@@ -50,7 +50,7 @@ EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
 
 # ── Stage 2b: nginx + Basic auth ──────────────────────────────────────────────
-FROM node:24-slim@sha256:2fe369e969550cde8e867afc3fe370b260140cab4a23d467074295b42163d553 AS runner-nginx-auth
+FROM node:24-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 AS runner-nginx-auth
 
 ARG BASIC_AUTH_USER
 ARG BASIC_AUTH_PASS

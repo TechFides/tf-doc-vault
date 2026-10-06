@@ -19,6 +19,16 @@ output "ci_service_account_key" {
   sensitive   = true
 }
 
+locals {
+  iap_instructions = var.iap_enabled ? join("\n", [
+    "",
+    "    5. IAP is on. Create the IAP service agent once per project; it does not",
+    "       exist until this runs, and the invoker grant for it is already applied:",
+    "       gcloud beta services identity create --service=iap.googleapis.com --project=${var.project_id}",
+    "",
+  ]) : ""
+}
+
 output "setup_instructions" {
   description = "Instructions for completing the CI/CD setup"
   value       = <<-EOT
@@ -38,5 +48,6 @@ output "setup_instructions" {
 
     4. Service URL:
        ${google_cloud_run_v2_service.docs.uri}
+    ${local.iap_instructions}
   EOT
 }

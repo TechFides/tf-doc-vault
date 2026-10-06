@@ -136,3 +136,29 @@ Version 0.5.4 fixes three defects in the print page and the PDF built from it. N
 **The PDF waits for Mermaid.** `export-pdf` printed as soon as the page reached `networkidle` with its fonts loaded, while Mermaid renders in the browser after that point and takes tens of seconds on a large site. Every diagram that had not finished was printed as Mermaid's "Syntax error in text" placeholder, on a 147-diagram site all of them. The exporter now waits for every diagram to carry an SVG and report no error, up to three minutes.
 
 **`export-pdf` can now exit 1.** If a diagram never renders, because its source genuinely does not parse, the export writes the PDF (look at it to find the diagram) and exits non-zero, which also stops the `pdf` chain before its second pass. Two Mermaid traps account for most of these: a `;` in sequence-diagram text is a statement separator, and a bare `{` in a flowchart node label opens a rhombus. Write `#59;` for a literal semicolon, and quote a label containing braces.
+
+## Migration to 0.6
+
+Version 0.6.0 adds an optional Identity-Aware Proxy (IAP) switch to the `infra/terraform` module and raises its Google provider constraint from `~> 6.0` to `>= 7.21, < 8.0`. Only consumers of that Terraform module are affected; the CLI and the scaffolds are unchanged.
+
+**The provider upgrade is forced, even with IAP off.** The `iap_enabled` argument on `google_cloud_run_v2_service` exists from google provider 7.21.0 and is absent in 7.20.0 and all of 6.x, and Terraform rejects an unknown argument whatever its value. Run `terraform init -upgrade` in the root configuration that calls the module, then read the plan before applying; a provider 6 to 7 jump can show unrelated diffs from other resources in the same root. If the root pins `hashicorp/google` itself, widen that constraint to allow 7.21 or newer.
+
+**Turning IAP on.** Set these on the module call:
+
+```hcl
+module "docs" {
+  source = "..."
+
+  public      = false
+  iap_enabled = true
+  iap_members = ["domain:example.com", "user:someone@example.com"]
+}
+```
+
+- `public` defaults to `true`, and IAP together with an `allUsers` invoker is rejected by a precondition on the service, so set `public = false` explicitly.
+- `iap_members` are granted `roles/iap.httpsResourceAccessor`. An empty list lets nobody in.
+- The module enables `iap.googleapis.com` and grants `roles/run.invoker` to the IAP service agent, which is what stops the browser getting 403 after a successful sign-in.
+- The IAP service agent does not exist until it is created once per project: `gcloud beta services identity create --service=iap.googleapis.com --project=<project>`. Run it before or right after the first apply; `google_project_service_identity` is google-beta only, so the module cannot do it.
+- IAP uses Google's managed OAuth client. It lets in only accounts of the project's organization, so `iap_members` outside that organization cannot sign in with it.
+- To let in accounts from outside the organization, create a custom OAuth client in the Google Cloud console (Google Auth Platform: branding with audience **External**, published to production, then a **Web application** client with the redirect URI `https://iap.googleapis.com/v1/oauth/clientIds/<CLIENT_ID>:handleRedirect`) and pass it as `iap_oauth_client_id` and `iap_oauth_client_secret`. The module sets it on this service only, so other IAP resources in the project keep the managed client. The secret is stored in the Terraform state.
+- Basic auth (`nginx-auth` image variant) and IAP are alternatives; with IAP on, use the plain `nginx` runtime.
