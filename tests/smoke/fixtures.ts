@@ -13,17 +13,6 @@ const SMOKE_ROOT = process.env.SMOKE_ROOT ?? path.join(os.tmpdir(), "tf-smoke");
  * order-dependent, which stays invisible until it fails on a machine that is slower at
  * releasing a socket.
  */
-/**
- * Console errors we do not control. VitePress' own VPNavBar derives its `home` and `top`
- * classes from the route and from window.scrollY, which the server cannot know, so the
- * element ships as `.VPNavBar` in the SSR HTML and hydrates into `.VPNavBar.home.top`.
- * Every built site logs it. Diffing the served HTML against the hydrated DOM shows that
- * class as the only divergence, on all three sites. Everything else stays fatal.
- */
-const UPSTREAM_CONSOLE_ERRORS = [
-  /^Hydration completed but contains mismatches\.$/,
-];
-
 export const PORTS = {
   anaDev: 5174,
   techDocsDev: 5175,
@@ -214,12 +203,9 @@ export const test = base.extend<Fixtures>({
           `${pageErrors.length} uncaught page error(s):\n  - ${pageErrors.join("\n  - ")}`,
         );
       }
-      const ourConsoleErrors = consoleErrors.filter(
-        (e) => !UPSTREAM_CONSOLE_ERRORS.some((re) => re.test(e.trim())),
-      );
-      if (ourConsoleErrors.length > 0) {
+      if (consoleErrors.length > 0) {
         failures.push(
-          `${ourConsoleErrors.length} console error(s):\n  - ${ourConsoleErrors.join("\n  - ")}`,
+          `${consoleErrors.length} console error(s):\n  - ${consoleErrors.join("\n  - ")}`,
         );
       }
       if (badResponses.length > 0) {
