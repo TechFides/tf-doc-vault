@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.6.1
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.6.0...v0.6.1)
+
+### 🚀 Enhancements
+
+- Support a docs tree without version folders ([90270be](https://github.com/TechFides/tf-doc-vault/commit/90270be))
+- Refine the unversioned layout after review ([b0c73a2](https://github.com/TechFides/tf-doc-vault/commit/b0c73a2))
+
+### 🩹 Fixes
+
+- **theme:** Give TableEnhancer a comment node so built pages hydrate ([4a5dd2a](https://github.com/TechFides/tf-doc-vault/commit/4a5dd2a))
+- **docker:** Copy tf-doc-vault.json into the build stage ([243a031](https://github.com/TechFides/tf-doc-vault/commit/243a031))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+
 ## v0.6.0
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.5.5...v0.6.0)
