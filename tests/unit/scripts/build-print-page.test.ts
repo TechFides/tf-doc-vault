@@ -513,3 +513,24 @@ describe("heading anchors", () => {
     );
   });
 });
+
+describe("build-print-page, unversioned layout", () => {
+  const rootFiles = {
+    "tf-doc-vault.json": JSON.stringify({ versioned: false }),
+  };
+
+  test("walks docs/ itself, opens on docs/index.md and skips its own output", () => {
+    const files = {
+      "index.md": page("Home", 1, "home body"),
+      "zeta/index.md": page("Zeta", 1, "zeta body"),
+      "alfa/index.md": page("Alfa", 2, "alfa body"),
+      "print.md": page("Stale", 1, "stale print body"),
+    };
+    const out = runPrint(files, { rootFiles });
+
+    expect(out).toContain("home body");
+    expect(out.indexOf("home body")).toBeLessThan(out.indexOf("zeta body"));
+    expect(out.indexOf("zeta body")).toBeLessThan(out.indexOf("alfa body"));
+    expect(out).not.toContain("stale print body");
+  });
+});

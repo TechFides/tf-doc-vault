@@ -11,12 +11,16 @@ import { parseFrontmatter, parseOrder } from "../shared/frontmatter.js";
 import { IGNORED_DIRS, isDocsDir, subDirEntries } from "../shared/ordering.js";
 import { allMdFiles } from "./docs-files.js";
 import { readText } from "../shared/text-file.js";
+import { isVersioned } from "../shared/project-config.js";
+import { configOrExit } from "./config-or-exit.js";
 
 const args = process.argv.slice(2);
 const rootArg = args.find((a) => a.startsWith("--root="))?.split("=")[1];
 const root = rootArg ?? "docs";
 const DOCS_ROOT = path.resolve(process.cwd(), root);
 const PUBLIC_ROOT = path.resolve(DOCS_ROOT, "public");
+/** Where the sorted tree starts: `docs/<version>/` (1) or `docs/` itself (0). */
+const TREE_DEPTH = configOrExit(() => isVersioned(DOCS_ROOT)) ? 1 : 0;
 const REQUIRED_FIELDS = ["title", "status", "updated_at"] as const;
 const VALID_STATUSES = new Set(["published", "draft", "review", "archived"]);
 
@@ -197,8 +201,8 @@ function isInIgnoredDir(file: string): boolean {
 /** Outside the sorted tree, so nothing to sort against. */
 function isOrderExempt(file: string): boolean {
   const depth = path.relative(DOCS_ROOT, file).split(path.sep).length;
-  if (depth <= 1) return true;
-  return path.basename(file) === "index.md" && depth === 2;
+  if (depth <= TREE_DEPTH) return true;
+  return path.basename(file) === "index.md" && depth === TREE_DEPTH + 1;
 }
 
 function checkOrder(files: string[]): Issue[] {
@@ -260,11 +264,10 @@ function checkSectionIndexes(): Issue[] {
   const walk = (dir: string, depth: number): void => {
     for (const entry of subDirEntries(dir)) {
       const sub = path.join(dir, entry.name);
-      // depth 0 holds the version directories, which `order` does not govern.
-      // A directory holding no pages has no position either, so an asset folder
-      // is not asked for an index.md.
+      // A directory holding no pages has no position, so an asset folder is not
+      // asked for an index.md.
       if (
-        depth > 0 &&
+        depth >= TREE_DEPTH &&
         !fs.existsSync(path.join(sub, "index.md")) &&
         holdsPages(sub)
       ) {

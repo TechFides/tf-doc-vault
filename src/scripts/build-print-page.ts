@@ -19,6 +19,8 @@ import {
 } from "../shared/ordering.js";
 import { LOGO_SHAPES, LOGO_VIEW_BOX } from "../theme/icons/logoSymbol.js";
 import { escapeHtml, readPdfBranding, type PdfCover } from "./pdf-branding.js";
+import { isVersioned } from "../shared/project-config.js";
+import { configOrExit } from "./config-or-exit.js";
 
 const DOCS_ROOT = path.resolve(process.cwd(), "docs");
 const OUTPUT = path.join(DOCS_ROOT, "print.md");
@@ -144,6 +146,7 @@ function walk(
 ): void {
   for (const entry of sortSiblings(dir, siblingEntries(dir))) {
     const full = path.join(dir, entry.name);
+    if (full === OUTPUT) continue;
     if (!entry.isDirectory()) {
       addPage(full, depth, pages, toc);
       continue;
@@ -158,8 +161,10 @@ function walk(
 function collectPages(): { pages: Page[]; toc: TocEntry[] } {
   const pages: Page[] = [];
   const toc: TocEntry[] = [];
-  for (const version of versionDirs(DOCS_ROOT)) {
-    const versionRoot = path.join(DOCS_ROOT, version);
+  const versionRoots = configOrExit(() => isVersioned(DOCS_ROOT))
+    ? versionDirs(DOCS_ROOT).map((version) => path.join(DOCS_ROOT, version))
+    : [DOCS_ROOT];
+  for (const versionRoot of versionRoots) {
     const versionIndex = path.join(versionRoot, "index.md");
     if (fs.existsSync(versionIndex)) addPage(versionIndex, 0, pages, toc);
     walk(versionRoot, 0, pages, toc);

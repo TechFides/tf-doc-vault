@@ -179,9 +179,18 @@ afterEach(() => {
  * Its own tree, not the shared `workdir`: normalize numbers a whole folder at
  * once, so what the tests above left there would shift the values asserted here.
  */
-function normalizeTree(tree: Record<string, string>): Record<string, string> {
+function normalizeTree(
+  tree: Record<string, string>,
+  projectConfig?: object,
+): Record<string, string> {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "normalize-order-"));
   isolated.push(dir);
+  if (projectConfig) {
+    fs.writeFileSync(
+      path.join(dir, "tf-doc-vault.json"),
+      JSON.stringify(projectConfig),
+    );
+  }
   for (const [rel, content] of Object.entries(tree)) {
     const full = path.join(dir, "docs", rel);
     fs.mkdirSync(path.dirname(full), { recursive: true });
@@ -320,5 +329,26 @@ describe("order backfill", () => {
     });
 
     expect(files["v1/alfa.md"]).toContain("order: 1\n# why this page is first");
+  });
+});
+
+describe("order backfill, unversioned layout", () => {
+  test("numbers the sections and pages of docs/ itself, never print.md", () => {
+    const files = normalizeTree(
+      {
+        "index.md": "---\ntitle: Home\n---\n\nbody\n",
+        "print.md": "---\ntitle: Print\n---\n\nbody\n",
+        "guide.md": "---\ntitle: Guide\n---\n\nbody\n",
+        "process/index.md": "---\ntitle: Proces\n---\n\nbody\n",
+        "process/review.md": "---\ntitle: Review\n---\n\nbody\n",
+      },
+      { versioned: false },
+    );
+
+    expect(files["guide.md"]).toContain("order: 1");
+    expect(files["process/index.md"]).toContain("order: 2");
+    expect(files["process/review.md"]).toContain("order: 1");
+    expect(files["index.md"]).not.toContain("order:");
+    expect(files["print.md"]).not.toContain("order:");
   });
 });

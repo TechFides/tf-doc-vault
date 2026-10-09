@@ -5,9 +5,8 @@
  * config, so this is the only channel between an offer's identity and its export.
  */
 
-import fs from "node:fs";
-import path from "node:path";
-import { readText } from "../shared/text-file.js";
+import { readProjectConfig } from "../shared/project-config.js";
+import { configOrExit } from "./config-or-exit.js";
 
 export interface PdfCover {
   /** Set above the title, in caps. */
@@ -35,8 +34,6 @@ export interface PdfBranding {
   cover?: PdfCover;
 }
 
-const CONFIG_FILE = "tf-doc-vault.json";
-
 export function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
@@ -44,20 +41,7 @@ export function escapeHtml(text: string): string {
     .replace(/>/g, "&gt;");
 }
 
-/**
- * A missing file is the documented way to opt out, so it yields defaults. A file
- * that exists but cannot be parsed is a typo in something the author meant to
- * apply, and fails loudly rather than silently dropping their cover page.
- */
 export function readPdfBranding(root: string = process.cwd()): PdfBranding {
-  const file = path.join(root, CONFIG_FILE);
-  if (!fs.existsSync(file)) return {};
-
-  try {
-    return (JSON.parse(readText(file)) as { pdf?: PdfBranding }).pdf ?? {};
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
-    console.error(`✗ ${CONFIG_FILE} could not be read: ${reason}`);
-    process.exit(1);
-  }
+  const pdf = configOrExit(() => readProjectConfig(root)["pdf"]);
+  return (pdf as PdfBranding | undefined) ?? {};
 }

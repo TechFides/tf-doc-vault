@@ -7,6 +7,7 @@ import { taskLists } from "./taskLists.js";
 import { tableWrapper } from "./tableWrapper.js";
 import { toBeTags, type ToBeTags } from "./toBeTags.js";
 import { generateNav, generateSidebar, getVersions } from "../sidebar/index.js";
+import { isVersioned } from "../shared/project-config.js";
 import { LOGO_SHAPES, LOGO_VIEW_BOX } from "../theme/icons/logoSymbol.js";
 import defaultStrings from "./strings.cs.json" with { type: "json" };
 
@@ -281,8 +282,9 @@ export function makeConfig(
 
   const configFile = findConfigFile(opts.configDir);
 
-  const versions = getVersions(docsRoot);
-  const defaultVersion = versions[0] ?? "v1";
+  const versioned = isVersioned(docsRoot);
+  const versions = versioned ? getVersions(docsRoot) : [];
+  const defaultVersion = versioned ? (versions[0] ?? "v1") : null;
   const strings: Strings = { ...defaultStrings, ...opts.strings };
 
   const head = buildHead(opts);
@@ -306,7 +308,7 @@ export function makeConfig(
   });
 
   const localeFor = (
-    v: string,
+    v: string | null,
   ): {
     label: string;
     lang: string;
@@ -317,13 +319,13 @@ export function makeConfig(
       opts.sectionNav === false ? [] : generateNav(docsRoot, v);
     const showSections = sectionNav.length > 1;
     return {
-      label: v,
+      label: v ?? strings.lang,
       lang: strings.lang,
-      link: `/${v}/`,
+      link: v === null ? "/" : `/${v}/`,
       themeConfig: {
         nav: [
           ...(showSections ? sectionNav : []),
-          ...(versions.length > 1 ? [versionDropdown(v)] : []),
+          ...(v !== null && versions.length > 1 ? [versionDropdown(v)] : []),
           ...navLinks,
         ],
       },
@@ -368,6 +370,7 @@ export function makeConfig(
       nav: topLevelNav,
       sidebar: generateSidebar(docsRoot, {
         unified: opts.sectionNav === false,
+        versioned,
       }),
       search: { provider: "local" },
       outline: {

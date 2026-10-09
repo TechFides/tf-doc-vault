@@ -125,6 +125,22 @@ export default createTheme({ widthToggle: true });
 
 To rebrand (colors, logo, fonts, footer) for a non-TechFides project, see [BRANDING.md](./BRANDING.md).
 
+### Layout without versions
+
+Every folder in `docs/` is a documentation version by default (`docs/v1/…`,
+served under `/v1/`). A repo whose `docs/` tree has to keep its paths, because
+other tools read it, turns that off in `tf-doc-vault.json` in the project root:
+
+```json
+{ "versioned": false }
+```
+
+`docs/` then plays the role of the version folder: its subfolders are the
+sections in the navbar, pages are served without a version segment
+(`/process/…`), and `docs/index.md` opens the sidebar and the PDF. The site
+config, `validate`, `normalize` and `print` all read the same setting, so the
+file is the only place to set it.
+
 ### PDF export
 
 `tf-doc-vault pdf` builds the site and renders `/print` into `artifacts/`. With no

@@ -294,3 +294,79 @@ describe("order", () => {
     ]);
   });
 });
+
+describe("unversioned layout", () => {
+  test("generateNav(null) links the sections of docs/ from /", () => {
+    write("process/index.md", fm("Proces"));
+    write("adr/index.md", fm("ADR"));
+
+    expect(generateNav(docsRoot, null)).toEqual([
+      { text: "ADR", link: "/adr/" },
+      { text: "Proces", link: "/process/" },
+    ]);
+  });
+
+  test("generateNav(null) without sections lists root pages, never print.md", () => {
+    write("index.md", fm("Home"));
+    write("intro.md", fm("Úvod"));
+    write("print.md", fm("Print"));
+
+    expect(generateNav(docsRoot, null)).toEqual([
+      { text: "Úvod", link: "/intro" },
+    ]);
+  });
+
+  test("per-section sidebars are keyed without a version segment", () => {
+    write("index.md", fm("Home"));
+    write("guide.md", fm("Guide"));
+    write("print.md", fm("Print"));
+    write("process/index.md", fm("Proces"));
+    write("process/review.md", fm("Review"));
+    write("adr/index.md", fm("ADR"));
+
+    const sidebar = generateSidebar(docsRoot, { versioned: false });
+    expect(Object.keys(sidebar).sort()).toEqual(["/", "/adr/", "/process/"]);
+    expect(sidebar["/"]).toEqual([
+      { text: "Home", link: "/" },
+      { text: "Guide", link: "/guide" },
+    ]);
+    expect(sidebar["/process/"]).toEqual([
+      { text: "Review", link: "/process/review" },
+    ]);
+  });
+
+  test("a unified sidebar holds the whole tree under /, without print.md", () => {
+    write("index.md", fm("Home"));
+    write("print.md", fm("Print"));
+    write("process/index.md", fm("Proces"));
+    write("process/review.md", fm("Review"));
+
+    const sidebar = generateSidebar(docsRoot, {
+      versioned: false,
+      unified: true,
+    });
+    expect(sidebar).toEqual({
+      "/": [
+        { text: "Home", link: "/" },
+        {
+          text: "Proces",
+          link: "/process/",
+          collapsed: true,
+          items: [{ text: "Review", link: "/process/review" }],
+        },
+      ],
+    });
+  });
+
+  test("print.md below a section stays a page", () => {
+    write("process/index.md", fm("Proces"));
+    write("process/print.md", fm("Tisk"));
+
+    const sidebar = generateSidebar(docsRoot, {
+      versioned: false,
+      unified: true,
+    });
+    const process = sidebar["/"]?.[0];
+    expect(process?.items).toEqual([{ text: "Tisk", link: "/process/print" }]);
+  });
+});

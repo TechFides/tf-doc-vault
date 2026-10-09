@@ -22,12 +22,21 @@ let workdirs: string[] = [];
  * tree at once, so each test builds its own temp `docs/` tree and runs the
  * script as a subprocess.
  */
-function runValidate(files: Record<string, string>): {
+function runValidate(
+  files: Record<string, string>,
+  projectConfig?: object,
+): {
   exitCode: number;
   stdout: string;
 } {
   const workdir = fs.mkdtempSync(path.join(os.tmpdir(), "validate-"));
   workdirs.push(workdir);
+  if (projectConfig) {
+    fs.writeFileSync(
+      path.join(workdir, "tf-doc-vault.json"),
+      JSON.stringify(projectConfig),
+    );
+  }
   for (const [rel, content] of Object.entries(files)) {
     const full = path.join(workdir, "docs", rel);
     fs.mkdirSync(path.dirname(full), { recursive: true });
@@ -266,5 +275,67 @@ describe("Order: directories without pages", () => {
     });
 
     expect(stdout).toContain("v1/sekce/sirotek: directory has no index.md");
+  });
+});
+
+describe("validate-docs, unversioned layout", () => {
+  const flat = { versioned: false };
+
+  function ordered(order: number, ...body: string[]): string {
+    return [
+      ...FRONTMATTER.slice(0, -1),
+      `order: ${order}`,
+      "---",
+      "",
+      ...body,
+      "",
+    ].join("\n");
+  }
+
+  test("a tree ordered below docs/ passes, docs/index.md is exempt", () => {
+    const r = runValidate(
+      {
+        "index.md": page("# Home"),
+        "guide.md": ordered(1, "# Guide"),
+        "process/index.md": ordered(2, "# Proces"),
+        "process/review.md": ordered(1, "# Review"),
+      },
+      flat,
+    );
+    expect(r.stdout).toContain("✓ Order");
+    expect(r.exitCode).toBe(0);
+  });
+
+  test("pages and sections directly in docs/ need an order", () => {
+    const r = runValidate(
+      {
+        "index.md": page("# Home"),
+        "guide.md": page("# Guide"),
+        "process/index.md": page("# Proces"),
+        "process/review.md": ordered(1, "# Review"),
+      },
+      flat,
+    );
+    expect(r.stdout).toContain("guide.md: missing required field: order");
+    expect(r.stdout).toContain(
+      "process/index.md: missing required field: order",
+    );
+    expect(r.exitCode).toBe(1);
+  });
+
+  test("a section of docs/ without index.md is reported", () => {
+    const r = runValidate(
+      { "index.md": page("# Home"), "process/review.md": ordered(1, "# R") },
+      flat,
+    );
+    expect(r.stdout).toContain(
+      "process: directory has no index.md, so it cannot carry order",
+    );
+  });
+
+  test("an invalid versioned value fails without a stack trace", () => {
+    const r = runValidate({ "index.md": page("# Home") }, { versioned: "no" });
+    expect(r.exitCode).toBe(1);
+    expect(r.stdout).not.toContain("Checking");
   });
 });

@@ -27,7 +27,7 @@ The `order` field in frontmatter is the sort key for the sidebar, the top nav an
 
 Two siblings with the same `order` fall back to `localeCompare(name, "cs")` between them, so the rendered order stays deterministic; `docs:validate` still reports the duplicate as an error.
 
-A missing or non-integer `order` does not break the sidebar, it just sorts to the alphabetical tail, but `docs:validate` reports it as an error. `order` is required on every page inside a version folder; a file sitting directly in `docs/` (including `docs/index.md`) and each version's own `index.md` are exempt, since neither is part of a sibling set that anything sorts.
+A missing or non-integer `order` does not break the sidebar, it just sorts to the alphabetical tail, but `docs:validate` reports it as an error. `order` is required on every page inside a version folder; a file sitting directly in `docs/` (including `docs/index.md`) and each version's own `index.md` are exempt, since neither is part of a sibling set that anything sorts. In a [layout without versions](../README.md#layout-without-versions) `docs/` is the version folder, so only `docs/index.md` is exempt.
 
 **Preview locally** while editing:
 

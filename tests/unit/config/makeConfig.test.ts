@@ -234,3 +234,61 @@ describe("makeConfig markdown options", () => {
     expect(typeof config.markdown?.config).toBe("function");
   });
 });
+
+describe("makeConfig with versioned: false", () => {
+  let projectRoot: string;
+  let flatConfigDir: string;
+
+  function writeFlat(rel: string, body: string): void {
+    const full = path.join(projectRoot, "docs", rel);
+    fs.mkdirSync(path.dirname(full), { recursive: true });
+    fs.writeFileSync(full, body);
+  }
+
+  beforeEach(() => {
+    projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), "makeconfig-flat-"));
+    flatConfigDir = path.join(projectRoot, "docs", ".vitepress");
+    fs.mkdirSync(flatConfigDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(projectRoot, "tf-doc-vault.json"),
+      JSON.stringify({ versioned: false }),
+    );
+    writeFlat("index.md", fm("Home"));
+    writeFlat("process/index.md", fm("Proces"));
+    writeFlat("specifications/index.md", fm("Specifikace"));
+  });
+
+  afterEach(() => {
+    fs.rmSync(projectRoot, { recursive: true, force: true });
+  });
+
+  test("serves the only locale from / with section links and no version menu", () => {
+    const config = makeConfig({
+      configDir: flatConfigDir,
+      mermaid: false,
+    }) as unknown as {
+      locales: Record<string, { link: string; themeConfig: { nav: unknown } }>;
+      themeConfig: { nav: unknown[]; sidebar: Record<string, unknown[]> };
+    };
+
+    expect(Object.keys(config.locales)).toEqual(["root"]);
+    expect(config.locales["root"]!.link).toBe("/");
+    expect(config.locales["root"]!.themeConfig.nav).toEqual([
+      { text: "Proces", link: "/process/" },
+      { text: "Specifikace", link: "/specifications/" },
+    ]);
+    expect(config.themeConfig.nav).toEqual([]);
+    expect(Object.keys(config.themeConfig.sidebar).sort()).toEqual([
+      "/",
+      "/process/",
+      "/specifications/",
+    ]);
+  });
+
+  test("a docs/ folder named like a version stays a section", () => {
+    writeFlat("v1/index.md", fm("Legacy"));
+    expect(
+      Object.keys(sidebarOf({ configDir: flatConfigDir, sectionNav: false })),
+    ).toEqual(["/"]);
+  });
+});
