@@ -21,6 +21,7 @@ export const PORTS = {
   playgroundWidthToggle: 5178,
   techDocsPreview: 4173,
   anaPreview: 4174,
+  unversionedPreview: 4175,
 } as const;
 
 interface Sandboxes {
@@ -30,6 +31,7 @@ interface Sandboxes {
   anaDir: string;
   offersRepoDir: string;
   secondOfferDir: string;
+  unversionedDir: string;
 }
 
 function loadSandboxes(): Sandboxes {

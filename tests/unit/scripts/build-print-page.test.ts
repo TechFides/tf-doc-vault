@@ -534,3 +534,77 @@ describe("build-print-page, unversioned layout", () => {
     expect(out).not.toContain("stale print body");
   });
 });
+
+describe("build-print-page with a bad tf-doc-vault.json", () => {
+  test("exits 1 with the config error on stderr", () => {
+    const workdir = fs.mkdtempSync(path.join(os.tmpdir(), "print-"));
+    workdirs.push(workdir);
+    fs.mkdirSync(path.join(workdir, "docs", "v1"), { recursive: true });
+    fs.writeFileSync(
+      path.join(workdir, "docs", "v1", "index.md"),
+      page("Verze", 1, "root"),
+    );
+    fs.writeFileSync(
+      path.join(workdir, "tf-doc-vault.json"),
+      JSON.stringify({ versioned: "false" }),
+    );
+
+    const r = spawnSync("node", [SCRIPT], { cwd: workdir, encoding: "utf-8" });
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain(
+      '✗ tf-doc-vault.json: "versioned" must be true or false, got "false"',
+    );
+  });
+});
+
+describe("build-print-page and the PDF branding file", () => {
+  function runRaw(config: string): ReturnType<typeof spawnSync> {
+    const workdir = fs.mkdtempSync(path.join(os.tmpdir(), "print-"));
+    workdirs.push(workdir);
+    fs.mkdirSync(path.join(workdir, "docs", "v1"), { recursive: true });
+    fs.writeFileSync(
+      path.join(workdir, "docs", "v1", "index.md"),
+      page("Verze", 1, "root"),
+    );
+    fs.writeFileSync(path.join(workdir, "tf-doc-vault.json"), config);
+    return spawnSync("node", [SCRIPT], { cwd: workdir, encoding: "utf-8" });
+  }
+
+  test("a file that does not parse exits 1 with the reason", () => {
+    const r = runRaw('{ "pdf": ');
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain("✗ tf-doc-vault.json could not be read:");
+  });
+
+  test("a misspelt pdf key warns and prints without a cover", () => {
+    const r = runRaw(JSON.stringify({ Pdf: { cover: { title: "X" } } }));
+    expect(r.status).toBe(0);
+    expect(r.stderr).toContain('⚠ tf-doc-vault.json: unknown key "Pdf"');
+  });
+});
+
+describe("build-print-page and folders without pages", () => {
+  test("an asset folder gets no row in the contents", () => {
+    const workdir = fs.mkdtempSync(path.join(os.tmpdir(), "print-"));
+    workdirs.push(workdir);
+    const files: Record<string, string> = {
+      "docs/index.md": page("Home", 1, "home body"),
+      "docs/guide.md": page("Guide", 1, "guide body"),
+      "docs/attachments/a.png": "png",
+      "tf-doc-vault.json": JSON.stringify({ versioned: false }),
+    };
+    for (const [rel, content] of Object.entries(files)) {
+      const full = path.join(workdir, rel);
+      fs.mkdirSync(path.dirname(full), { recursive: true });
+      fs.writeFileSync(full, content);
+    }
+    const r = spawnSync("node", [SCRIPT], { cwd: workdir, encoding: "utf-8" });
+    expect(r.status).toBe(0);
+    const out = fs.readFileSync(
+      path.join(workdir, "docs", "print.md"),
+      "utf-8",
+    );
+    expect(out).toContain("guide body");
+    expect(out).not.toContain("attachments");
+  });
+});

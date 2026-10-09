@@ -13,6 +13,7 @@ import path from "node:path";
 import { readFrontmatter } from "../shared/frontmatter.js";
 import { readText } from "../shared/text-file.js";
 import {
+  PRINT_PAGE,
   siblingEntries,
   sortSiblings,
   subDirEntries,
@@ -23,7 +24,7 @@ import { isVersioned } from "../shared/project-config.js";
 import { configOrExit } from "./config-or-exit.js";
 
 const DOCS_ROOT = path.resolve(process.cwd(), "docs");
-const OUTPUT = path.join(DOCS_ROOT, "print.md");
+const OUTPUT = path.join(DOCS_ROOT, PRINT_PAGE);
 
 const PRAGUE_DATE = new Intl.DateTimeFormat("cs-CZ", {
   timeZone: "Europe/Prague",

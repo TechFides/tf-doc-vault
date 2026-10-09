@@ -129,7 +129,8 @@ To rebrand (colors, logo, fonts, footer) for a non-TechFides project, see [BRAND
 
 Every folder in `docs/` is a documentation version by default (`docs/v1/…`,
 served under `/v1/`). A repo whose `docs/` tree has to keep its paths, because
-other tools read it, turns that off in `tf-doc-vault.json` in the project root:
+other tools read it, turns that off in `tf-doc-vault.json` next to the `docs/`
+folder:
 
 ```json
 { "versioned": false }
@@ -138,8 +139,9 @@ other tools read it, turns that off in `tf-doc-vault.json` in the project root:
 `docs/` then plays the role of the version folder: its subfolders are the
 sections in the navbar, pages are served without a version segment
 (`/process/…`), and `docs/index.md` opens the sidebar and the PDF. The site
-config, `validate`, `normalize` and `print` all read the same setting, so the
-file is the only place to set it.
+config, `validate`, `normalize` and `print` all read the setting from that file.
+Any key other than `pdf` and `versioned` prints a warning that names it, so a
+misspelt `Versioned` does not quietly keep the versioned layout.
 
 ### PDF export
 

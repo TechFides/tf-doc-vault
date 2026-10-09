@@ -352,3 +352,61 @@ describe("order backfill, unversioned layout", () => {
     expect(files["print.md"]).not.toContain("order:");
   });
 });
+
+describe("normalize-docs with a bad tf-doc-vault.json", () => {
+  test("exits 1 with the config error on stderr and writes nothing", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "normalize-config-"));
+    isolated.push(dir);
+    const page = path.join(dir, "docs", "guide.md");
+    fs.mkdirSync(path.dirname(page), { recursive: true });
+    fs.writeFileSync(page, "---\nstatus: draft\ntitle: Guide\n---\n\nbody\n");
+    fs.writeFileSync(
+      path.join(dir, "tf-doc-vault.json"),
+      JSON.stringify({ versioned: 0 }),
+    );
+
+    const r = spawnSync("node", [SCRIPT, "--root=docs"], {
+      cwd: dir,
+      encoding: "utf-8",
+    });
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain(
+      '✗ tf-doc-vault.json: "versioned" must be true or false, got 0',
+    );
+    expect(fs.readFileSync(page, "utf-8")).toBe(
+      "---\nstatus: draft\ntitle: Guide\n---\n\nbody\n",
+    );
+  });
+});
+
+describe("order backfill, unversioned layout with assets and a print page", () => {
+  test("a folder without pages does not stop the numbering", () => {
+    const files = normalizeTree(
+      {
+        "index.md": "---\ntitle: Home\n---\n\nbody\n",
+        "alpha.md": "---\ntitle: Alpha\n---\n\nbody\n",
+        "images/readme.txt": "not a page\n",
+        "process/index.md": "---\ntitle: Proces\n---\n\nbody\n",
+        "zeta.md": "---\ntitle: Zeta\n---\n\nbody\n",
+      },
+      { versioned: false },
+    );
+
+    expect(files["alpha.md"]).toContain("order: 1");
+    expect(files["process/index.md"]).toContain("order: 2");
+    expect(files["zeta.md"]).toContain("order: 3");
+  });
+
+  test("the generated docs/print.md is left exactly as print wrote it", () => {
+    const print = "---\nlayout: PrintLayout\ntitle: Print\n---\n\nbody\n";
+    const files = normalizeTree(
+      {
+        "index.md": "---\ntitle: Home\n---\n\nbody\n",
+        "print.md": print,
+      },
+      { versioned: false },
+    );
+
+    expect(files["print.md"]).toBe(print);
+  });
+});

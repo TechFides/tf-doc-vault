@@ -370,3 +370,52 @@ describe("unversioned layout", () => {
     expect(process?.items).toEqual([{ text: "Tisk", link: "/process/print" }]);
   });
 });
+
+describe("unversioned layout edges", () => {
+  test("an empty docs/ yields an empty nav and an empty / sidebar", () => {
+    expect(generateNav(docsRoot, null)).toEqual([]);
+    expect(generateSidebar(docsRoot, { versioned: false })).toEqual({
+      "/": [],
+    });
+  });
+
+  test("one section yields a single / sidebar without print.md", () => {
+    write("print.md", fm("Print"));
+    write("process/index.md", fm("Proces"));
+    write("process/review.md", fm("Review"));
+
+    const sidebar = generateSidebar(docsRoot, { versioned: false });
+    expect(Object.keys(sidebar)).toEqual(["/"]);
+    expect(JSON.stringify(sidebar)).not.toContain("/print");
+  });
+});
+
+describe("folders without pages", () => {
+  test("an asset folder in docs/ is neither a section nor a sidebar group", () => {
+    write("index.md", fm("Home"));
+    write("guide.md", fm("Guide"));
+    write("process/index.md", fm("Proces"));
+    write("process/step.md", fm("Step"));
+    fs.mkdirSync(path.join(docsRoot, "images"));
+    fs.writeFileSync(path.join(docsRoot, "images", "a.png"), "png");
+
+    expect(generateNav(docsRoot, null)).toEqual([
+      { text: "Proces", link: "/process/" },
+    ]);
+    const sidebar = generateSidebar(docsRoot, { versioned: false });
+    expect(Object.keys(sidebar)).toEqual(["/"]);
+    expect(JSON.stringify(sidebar)).not.toContain("images");
+  });
+
+  test("an asset folder inside a version is not a sidebar group", () => {
+    write("v1/index.md", fm("V1"));
+    write("v1/guide/index.md", fm("Guide"));
+    write("v1/guide/intro.md", fm("Intro"));
+    fs.mkdirSync(path.join(docsRoot, "v1", "guide", "img"), {
+      recursive: true,
+    });
+    fs.writeFileSync(path.join(docsRoot, "v1", "guide", "img", "a.png"), "png");
+
+    expect(JSON.stringify(generateSidebar(docsRoot))).not.toContain("img");
+  });
+});

@@ -8,7 +8,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { lint as markdownlint } from "markdownlint/sync";
 import { parseFrontmatter, parseOrder } from "../shared/frontmatter.js";
-import { IGNORED_DIRS, isDocsDir, subDirEntries } from "../shared/ordering.js";
+import {
+  IGNORED_DIRS,
+  PRINT_PAGE,
+  holdsPages,
+  subDirEntries,
+} from "../shared/ordering.js";
 import { allMdFiles } from "./docs-files.js";
 import { readText } from "../shared/text-file.js";
 import { isVersioned } from "../shared/project-config.js";
@@ -248,16 +253,6 @@ function checkOrder(files: string[]): Issue[] {
   return issues;
 }
 
-function holdsPages(dir: string): boolean {
-  return fs
-    .readdirSync(dir, { withFileTypes: true })
-    .some(
-      (e) =>
-        (e.isFile() && e.name.endsWith(".md")) ||
-        (isDocsDir(e) && holdsPages(path.join(dir, e.name))),
-    );
-}
-
 function checkSectionIndexes(): Issue[] {
   const issues: Issue[] = [];
 
@@ -284,7 +279,9 @@ function checkSectionIndexes(): Issue[] {
   return issues;
 }
 
-const files = allMdFiles(DOCS_ROOT, new Set(["print.md"]));
+const files = allMdFiles(DOCS_ROOT).filter(
+  (file) => file !== path.join(DOCS_ROOT, PRINT_PAGE),
+);
 console.log(`Checking ${files.length} file(s) in ${root}/\n`);
 
 const checks: { name: string; issues: Issue[] }[] = [

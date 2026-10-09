@@ -28,6 +28,7 @@ function runValidate(
 ): {
   exitCode: number;
   stdout: string;
+  stderr: string;
 } {
   const workdir = fs.mkdtempSync(path.join(os.tmpdir(), "validate-"));
   workdirs.push(workdir);
@@ -46,7 +47,11 @@ function runValidate(
     cwd: workdir,
     encoding: "utf-8",
   });
-  return { exitCode: r.status ?? -1, stdout: r.stdout ?? "" };
+  return {
+    exitCode: r.status ?? -1,
+    stdout: r.stdout ?? "",
+    stderr: r.stderr ?? "",
+  };
 }
 
 function page(...body: string[]): string {
@@ -337,5 +342,75 @@ describe("validate-docs, unversioned layout", () => {
     const r = runValidate({ "index.md": page("# Home") }, { versioned: "no" });
     expect(r.exitCode).toBe(1);
     expect(r.stdout).not.toContain("Checking");
+    expect(r.stderr).toContain(
+      '✗ tf-doc-vault.json: "versioned" must be true or false, got "no"',
+    );
+    expect(r.stderr).not.toMatch(/\n\s+at /);
+  });
+
+  test("the generated print.md, public/ and .vitepress/ need no order or index.md", () => {
+    const r = runValidate(
+      {
+        "index.md": page("# Home"),
+        "print.md": page("# Print"),
+        "guide.md": ordered(1, "# Guide"),
+        "public/readme.md": page("# Asset"),
+        ".vitepress/notes.md": page("# Notes"),
+      },
+      flat,
+    );
+    expect(r.stdout).toContain("✓ Order");
+    expect(r.exitCode).toBe(0);
+  });
+
+  test("tf-doc-vault.json is read next to a custom --root", () => {
+    const workdir = fs.mkdtempSync(path.join(os.tmpdir(), "validate-"));
+    workdirs.push(workdir);
+    fs.writeFileSync(
+      path.join(workdir, "tf-doc-vault.json"),
+      JSON.stringify(flat),
+    );
+    for (const [rel, content] of Object.entries({
+      "index.md": page("# Home"),
+      "guide.md": page("# Guide"),
+    })) {
+      const full = path.join(workdir, "site", rel);
+      fs.mkdirSync(path.dirname(full), { recursive: true });
+      fs.writeFileSync(full, content);
+    }
+    const r = spawnSync("node", [SCRIPT, "--root=site"], {
+      cwd: workdir,
+      encoding: "utf-8",
+    });
+    expect(r.stdout).toContain("guide.md: missing required field: order");
+    expect(r.status).toBe(1);
+  });
+});
+
+describe("validate-docs and print.md", () => {
+  test("a page named print.md inside a section is still validated", () => {
+    const r = runValidate({
+      "v1/index.md": page("# V1"),
+      "v1/guide/index.md": [
+        ...FRONTMATTER.slice(0, -1),
+        "order: 1",
+        "---",
+        "",
+        "# Guide",
+        "",
+      ].join("\n"),
+      "v1/guide/print.md": [
+        ...FRONTMATTER.slice(0, -1),
+        "order: 1",
+        "---",
+        "",
+        "# Print",
+        "",
+        "[x](./nope)",
+        "",
+      ].join("\n"),
+    });
+    expect(r.stdout).toContain("v1/guide/print.md: broken link → ./nope");
+    expect(r.exitCode).toBe(1);
   });
 });

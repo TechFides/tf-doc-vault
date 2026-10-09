@@ -9,7 +9,7 @@ import path from "node:path";
 import { allMdFiles } from "./docs-files.js";
 import { readFrontmatter, parseOrder } from "../shared/frontmatter.js";
 import { readText } from "../shared/text-file.js";
-import { pageEntries, subDirEntries } from "../shared/ordering.js";
+import { PRINT_PAGE, pageEntries, sectionEntries } from "../shared/ordering.js";
 import { isVersioned } from "../shared/project-config.js";
 import { configOrExit } from "./config-or-exit.js";
 
@@ -20,7 +20,7 @@ const DOCS_ROOT = path.resolve(process.cwd(), root);
 const FIELD_ORDER = ["title", "status", "updated_at", "order"];
 /** Where the sorted tree starts: `docs/<version>/` (1) or `docs/` itself (0). */
 const TREE_DEPTH = configOrExit(() => isVersioned(DOCS_ROOT)) ? 1 : 0;
-const PRINT_PAGE = path.join(DOCS_ROOT, "print.md");
+const PRINT_PATH = path.join(DOCS_ROOT, PRINT_PAGE);
 
 interface Block {
   key: string;
@@ -108,9 +108,9 @@ function planOrders(root: string): Map<string, number> {
   const assigned = new Map<string, number>();
 
   const walk = (dir: string, depth: number): void => {
-    const dirs = subDirEntries(dir);
+    const dirs = sectionEntries(dir);
     const files = pageEntries(dir).filter(
-      (e) => path.join(dir, e.name) !== PRINT_PAGE,
+      (e) => path.join(dir, e.name) !== PRINT_PATH,
     );
 
     if (depth >= TREE_DEPTH) {
@@ -159,7 +159,7 @@ function withOrder(blocks: Block[], value: number): Block[] {
   );
 }
 
-const files = allMdFiles(DOCS_ROOT);
+const files = allMdFiles(DOCS_ROOT).filter((file) => file !== PRINT_PATH);
 const orders = planOrders(DOCS_ROOT);
 console.log(`Normalizing ${files.length} file(s) in ${root}/\n`);
 

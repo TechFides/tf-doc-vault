@@ -18,6 +18,8 @@ the docs root):
 
 Missing file or missing key keeps today's versioned layout, so the change is
 opt-in and ships as a minor release. A value other than a boolean fails loudly.
+A key other than `pdf` or `versioned` prints a warning that names it: a misspelt
+`Versioned` is visible, while a file carrying `$schema` or a note keeps building.
 
 The file is the only place the setting lives. `validate`, `normalize` and
 `print` run as separate Node processes that never load the VitePress config, and
@@ -40,8 +42,15 @@ the PDF, `order` not checked on sections).
 | section without `index.md` | reported from `docs/<version>/<section>/` down            | reported from `docs/<section>/` down             |
 
 `print.md` is generated into `docs/` in both layouts. In the unversioned layout
-that is inside the walked tree, so the sidebar, `normalize` and `print` skip it
-by name, as `validate` already does.
+that is inside the walked tree, so the sidebar, `normalize`, `print` and
+`validate` skip `docs/print.md`. A page named `print.md` inside a section stays
+a page and is validated.
+
+A folder that holds no pages (`docs/images/`, `docs/attachments/`) is not a
+section: the nav, the sidebar, the PDF and `normalize` all skip it, as
+`validate` already did. Legacy trees keep such folders next to their pages, and
+counting one as a section would add a navbar link to a 404 and switch the
+sidebar to per-section mode.
 
 ## Out of scope
 

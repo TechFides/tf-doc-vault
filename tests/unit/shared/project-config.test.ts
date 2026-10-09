@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, afterEach } from "vitest";
+import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -63,5 +63,39 @@ describe("isVersioned", () => {
     expect(() => isVersioned(docsRoot)).toThrow(
       '"versioned" must be true or false, got "false"',
     );
+  });
+});
+
+describe("readProjectConfig keys", () => {
+  test("warns about an unknown top-level key, names it and keeps going", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    writeConfig(JSON.stringify({ $schema: "./s.json", Versioned: false }));
+    expect(readProjectConfig(projectRoot)).toEqual({
+      $schema: "./s.json",
+      Versioned: false,
+    });
+    expect(warn).toHaveBeenCalledWith(
+      '⚠ tf-doc-vault.json: unknown key "$schema" (expected one of: pdf, versioned)',
+    );
+    expect(warn).toHaveBeenCalledWith(
+      '⚠ tf-doc-vault.json: unknown key "Versioned" (expected one of: pdf, versioned)',
+    );
+    warn.mockRestore();
+  });
+
+  test("documented keys produce no warning", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    writeConfig(JSON.stringify({ pdf: {}, versioned: true }));
+    readProjectConfig(projectRoot);
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  test("accepts the documented keys", () => {
+    writeConfig(JSON.stringify({ pdf: { mark: "X" }, versioned: false }));
+    expect(readProjectConfig(projectRoot)).toEqual({
+      pdf: { mark: "X" },
+      versioned: false,
+    });
   });
 });

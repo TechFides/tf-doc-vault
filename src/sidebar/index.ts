@@ -3,9 +3,11 @@ import path from "node:path";
 import type { DefaultTheme } from "vitepress";
 import { readTitle } from "../shared/frontmatter.js";
 import {
+  PRINT_PAGE,
   pageEntries,
   siblingEntries,
   sortSiblings,
+  sectionEntries,
   subDirEntries,
 } from "../shared/ordering.js";
 
@@ -15,9 +17,6 @@ function mdFilesIn(dir: string): string[] {
 
 /** `null` is the unversioned layout: `docs/` takes the place of `docs/<version>/`. */
 type Version = string | null;
-
-/** Written into `docs/` by `tf-doc-vault print`, so only the unversioned layout meets it. */
-const PRINT_PAGE = "print.md";
 
 function versionDir(docsRoot: string, version: Version): string {
   return version === null ? docsRoot : path.join(docsRoot, version);
@@ -33,7 +32,7 @@ function rootPages(versionRoot: string, version: Version): string[] {
 }
 
 function subDirs(dir: string): string[] {
-  return sortSiblings(dir, subDirEntries(dir)).map((e) => e.name);
+  return sortSiblings(dir, sectionEntries(dir)).map((e) => e.name);
 }
 
 /** Each top-level directory in `docs/` is a documentation version. */
