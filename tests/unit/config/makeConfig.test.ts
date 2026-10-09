@@ -234,3 +234,150 @@ describe("makeConfig markdown options", () => {
     expect(typeof config.markdown?.config).toBe("function");
   });
 });
+
+describe("makeConfig with versioned: false", () => {
+  let projectRoot: string;
+  let flatConfigDir: string;
+
+  function writeFlat(rel: string, body: string): void {
+    const full = path.join(projectRoot, "docs", rel);
+    fs.mkdirSync(path.dirname(full), { recursive: true });
+    fs.writeFileSync(full, body);
+  }
+
+  beforeEach(() => {
+    projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), "makeconfig-flat-"));
+    flatConfigDir = path.join(projectRoot, "docs", ".vitepress");
+    fs.mkdirSync(flatConfigDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(projectRoot, "tf-doc-vault.json"),
+      JSON.stringify({ versioned: false }),
+    );
+    writeFlat("index.md", fm("Home"));
+    writeFlat("process/index.md", fm("Proces"));
+    writeFlat("specifications/index.md", fm("Specifikace"));
+  });
+
+  afterEach(() => {
+    fs.rmSync(projectRoot, { recursive: true, force: true });
+  });
+
+  test("serves the only locale from / with section links and no version menu", () => {
+    const config = makeConfig({
+      configDir: flatConfigDir,
+      mermaid: false,
+    }) as unknown as {
+      locales: Record<string, { link: string; themeConfig: { nav: unknown } }>;
+      themeConfig: { nav: unknown[]; sidebar: Record<string, unknown[]> };
+    };
+
+    expect(Object.keys(config.locales)).toEqual(["root"]);
+    expect(config.locales["root"]!.link).toBe("/");
+    expect(config.locales["root"]!.themeConfig.nav).toEqual([
+      { text: "Proces", link: "/process/" },
+      { text: "Specifikace", link: "/specifications/" },
+    ]);
+    expect(config.themeConfig.nav).toEqual([]);
+    expect(Object.keys(config.themeConfig.sidebar).sort()).toEqual([
+      "/",
+      "/process/",
+      "/specifications/",
+    ]);
+  });
+
+  test("docs:dev reloads the config when tf-doc-vault.json changes", () => {
+    const configFile = path.join(flatConfigDir, "config.ts");
+    fs.writeFileSync(configFile, "export default {};\n");
+    const past = new Date(2000, 0, 1);
+    fs.utimesSync(configFile, past, past);
+
+    const config = makeConfig({
+      configDir: flatConfigDir,
+      mermaid: false,
+    }) as unknown as {
+      vite: {
+        plugins: {
+          name: string;
+          configureServer?: (server: unknown) => void;
+        }[];
+      };
+    };
+    const plugin = config.vite.plugins.find(
+      (p) => p.name === "tf-doc-vault:dynamic-nav-reload",
+    );
+    const watched: string[] = [];
+    const handlers: Record<string, ((file: string) => void)[]> = {};
+    plugin?.configureServer?.({
+      watcher: {
+        add: (file: string) => watched.push(file),
+        on: (event: string, fn: (file: string) => void) =>
+          (handlers[event] ??= []).push(fn),
+      },
+    });
+
+    const projectConfig = path.join(projectRoot, "tf-doc-vault.json");
+    expect(watched).toContain(projectConfig);
+    for (const fn of handlers["change"] ?? []) fn(projectConfig);
+    expect(fs.statSync(configFile).mtimeMs).toBeGreaterThan(past.getTime());
+  });
+
+  test("an invalid versioned value stops the site config", () => {
+    fs.writeFileSync(
+      path.join(projectRoot, "tf-doc-vault.json"),
+      JSON.stringify({ versioned: "no" }),
+    );
+    expect(() =>
+      makeConfig({ configDir: flatConfigDir, mermaid: false }),
+    ).toThrow('"versioned" must be true or false, got "no"');
+  });
+
+  test("docs:dev reloads on add and unlink of tf-doc-vault.json and of pages only", () => {
+    const configFile = path.join(flatConfigDir, "config.ts");
+    fs.writeFileSync(configFile, "export default {};\n");
+    const config = makeConfig({
+      configDir: flatConfigDir,
+      mermaid: false,
+    }) as unknown as {
+      vite: {
+        plugins: {
+          name: string;
+          configureServer?: (server: unknown) => void;
+        }[];
+      };
+    };
+    const handlers: Record<string, ((file: string) => void)[]> = {};
+    config.vite.plugins
+      .find((p) => p.name === "tf-doc-vault:dynamic-nav-reload")
+      ?.configureServer?.({
+        watcher: {
+          add: () => undefined,
+          on: (event: string, fn: (file: string) => void) =>
+            (handlers[event] ??= []).push(fn),
+        },
+      });
+
+    const reloadsOn = (event: string, file: string): boolean => {
+      const past = new Date(2000, 0, 1);
+      fs.utimesSync(configFile, past, past);
+      for (const fn of handlers[event] ?? []) fn(file);
+      return fs.statSync(configFile).mtimeMs > past.getTime();
+    };
+    const projectConfig = path.join(projectRoot, "tf-doc-vault.json");
+    const page = path.join(projectRoot, "docs", "guide.md");
+
+    expect(reloadsOn("add", projectConfig)).toBe(true);
+    expect(reloadsOn("unlink", projectConfig)).toBe(true);
+    expect(reloadsOn("add", page)).toBe(true);
+    expect(reloadsOn("change", page)).toBe(false);
+    expect(reloadsOn("change", path.join(projectRoot, "other.json"))).toBe(
+      false,
+    );
+  });
+
+  test("a docs/ folder named like a version stays a section", () => {
+    writeFlat("v1/index.md", fm("Legacy"));
+    expect(
+      Object.keys(sidebarOf({ configDir: flatConfigDir, sectionNav: false })),
+    ).toEqual(["/"]);
+  });
+});

@@ -7,6 +7,7 @@ import { taskLists } from "./taskLists.js";
 import { tableWrapper } from "./tableWrapper.js";
 import { toBeTags, type ToBeTags } from "./toBeTags.js";
 import { generateNav, generateSidebar, getVersions } from "../sidebar/index.js";
+import { isVersioned, PROJECT_CONFIG_FILE } from "../shared/project-config.js";
 import { LOGO_SHAPES, LOGO_VIEW_BOX } from "../theme/icons/logoSymbol.js";
 import defaultStrings from "./strings.cs.json" with { type: "json" };
 
@@ -245,12 +246,16 @@ function findConfigFile(configDir: string): string | undefined {
 }
 
 interface DevServerLike {
-  watcher: { on: (event: string, listener: (file: string) => void) => unknown };
+  watcher: {
+    add: (file: string) => unknown;
+    on: (event: string, listener: (file: string) => void) => unknown;
+  };
 }
 
 /* Sidebar and nav are generated when the config is evaluated. On a .md add or
    delete VitePress refreshes its page list but does not re-run the user config,
-   so the sidebar goes stale. Touching the config file triggers VitePress' own
+   so the sidebar goes stale, and tf-doc-vault.json is read with fs, so VitePress
+   does not track it either. Touching the config file triggers VitePress' own
    config reload, which re-runs makeConfig. */
 function dynamicNavReload(
   docsRoot: string,
@@ -260,14 +265,26 @@ function dynamicNavReload(
     name: "tf-doc-vault:dynamic-nav-reload",
     configureServer(server: DevServerLike): void {
       if (!configFile) return;
-      const onChange = (file: string): void => {
-        if (file.endsWith(".md") && file.startsWith(docsRoot)) {
-          const now = new Date();
-          fs.utimesSync(configFile, now, now);
-        }
+      const projectConfig = path.join(
+        path.dirname(docsRoot),
+        PROJECT_CONFIG_FILE,
+      );
+      const reload = (): void => {
+        const now = new Date();
+        fs.utimesSync(configFile, now, now);
       };
-      server.watcher.on("add", onChange);
-      server.watcher.on("unlink", onChange);
+      const onPage = (file: string): void => {
+        if (file.endsWith(".md") && file.startsWith(docsRoot)) reload();
+      };
+      const onProjectConfig = (file: string): void => {
+        if (file === projectConfig) reload();
+      };
+      server.watcher.add(projectConfig);
+      server.watcher.on("add", onPage);
+      server.watcher.on("unlink", onPage);
+      for (const event of ["add", "change", "unlink"]) {
+        server.watcher.on(event, onProjectConfig);
+      }
     },
   };
 }
@@ -281,8 +298,9 @@ export function makeConfig(
 
   const configFile = findConfigFile(opts.configDir);
 
-  const versions = getVersions(docsRoot);
-  const defaultVersion = versions[0] ?? "v1";
+  const versioned = isVersioned(docsRoot);
+  const versions = versioned ? getVersions(docsRoot) : [];
+  const defaultVersion = versioned ? (versions[0] ?? "v1") : null;
   const strings: Strings = { ...defaultStrings, ...opts.strings };
 
   const head = buildHead(opts);
@@ -306,7 +324,7 @@ export function makeConfig(
   });
 
   const localeFor = (
-    v: string,
+    v: string | null,
   ): {
     label: string;
     lang: string;
@@ -317,13 +335,13 @@ export function makeConfig(
       opts.sectionNav === false ? [] : generateNav(docsRoot, v);
     const showSections = sectionNav.length > 1;
     return {
-      label: v,
+      label: v ?? strings.lang,
       lang: strings.lang,
-      link: `/${v}/`,
+      link: v === null ? "/" : `/${v}/`,
       themeConfig: {
         nav: [
           ...(showSections ? sectionNav : []),
-          ...(versions.length > 1 ? [versionDropdown(v)] : []),
+          ...(v !== null && versions.length > 1 ? [versionDropdown(v)] : []),
           ...navLinks,
         ],
       },
@@ -368,6 +386,7 @@ export function makeConfig(
       nav: topLevelNav,
       sidebar: generateSidebar(docsRoot, {
         unified: opts.sectionNav === false,
+        versioned,
       }),
       search: { provider: "local" },
       outline: {

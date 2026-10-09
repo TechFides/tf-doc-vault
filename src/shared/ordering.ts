@@ -9,6 +9,9 @@ export interface Sibling {
 
 export const IGNORED_DIRS = new Set([".vitepress", "node_modules", "public"]);
 
+/** Written into the docs root by `tf-doc-vault print`, so it is never a page of the tree. */
+export const PRINT_PAGE = "print.md";
+
 function entriesIn(dir: string): fs.Dirent[] {
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir, { withFileTypes: true });
@@ -28,8 +31,27 @@ function isPage(entry: fs.Dirent): boolean {
   );
 }
 
+export function holdsPages(dir: string): boolean {
+  return fs
+    .readdirSync(dir, { withFileTypes: true })
+    .some(
+      (e) =>
+        (e.isFile() && e.name.endsWith(".md")) ||
+        (isDocsDir(e) && holdsPages(path.join(dir, e.name))),
+    );
+}
+
 export function subDirEntries(dir: string): fs.Dirent[] {
   return entriesIn(dir).filter(isDocsDir);
+}
+
+/** An asset folder holds no pages, so the sidebar, nav, print and `order` all skip it. */
+function isSection(dir: string, entry: fs.Dirent): boolean {
+  return isDocsDir(entry) && holdsPages(path.join(dir, entry.name));
+}
+
+export function sectionEntries(dir: string): fs.Dirent[] {
+  return entriesIn(dir).filter((e) => isSection(dir, e));
 }
 
 /** Without `index.md`: it never competes for a position among its siblings. */
@@ -38,7 +60,7 @@ export function pageEntries(dir: string): fs.Dirent[] {
 }
 
 export function siblingEntries(dir: string): fs.Dirent[] {
-  return entriesIn(dir).filter((e) => isPage(e) || isDocsDir(e));
+  return entriesIn(dir).filter((e) => isPage(e) || isSection(dir, e));
 }
 
 function orderOf(dir: string, entry: Sibling): number | null {
