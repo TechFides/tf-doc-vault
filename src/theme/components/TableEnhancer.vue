@@ -319,5 +319,6 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- Behaviour only: the script enhances .vp-doc tables in place. -->
+  <!-- An empty template SSR-renders nothing while the client expects a comment node. -->
+  <span v-if="false"></span>
 </template>

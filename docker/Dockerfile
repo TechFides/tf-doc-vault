@@ -31,7 +31,7 @@ RUN pnpm install --frozen-lockfile
 
 COPY docs/ ./docs/
 COPY scripts/ ./scripts/
-COPY tsconfig.json ./
+COPY tsconfig.json tf-doc-vault.json* ./
 
 RUN pnpm run docs:print && pnpm run docs:build
 

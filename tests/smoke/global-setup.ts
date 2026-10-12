@@ -20,6 +20,8 @@ interface Sandboxes {
   offersRepoDir: string;
   /** A second offer scaffolded into the same repo, alongside the first. */
   secondOfferDir: string;
+  /** The ana scaffold moved out of docs/v1/ into docs/, with `versioned: false`. */
+  unversionedDir: string;
 }
 
 interface RunOptions {
@@ -53,7 +55,7 @@ function run(cmd: string, args: string[], cwd: string, opts: RunOptions): void {
 function killOrphanProbes(): void {
   // Kill anything left on the smoke ports from a previous run so tests don't
   // hit a stale server with stale handler state.
-  for (const port of [4173, 4174, 5174, 5175]) {
+  for (const port of [4173, 4174, 4175, 5174, 5175]) {
     spawnSync("sh", [
       "-c",
       `lsof -ti:${port} 2>/dev/null | xargs -r kill -9 2>/dev/null`,
@@ -180,6 +182,54 @@ function scaffoldAna(tgz: string): string {
 }
 
 /**
+ * Derived from the ana sandbox instead of scaffolded, so it needs no second
+ * install: node_modules is a symlink, and the binaries run from it directly
+ * because `pnpm run` would re-check the install and refuse the symlink.
+ */
+function buildUnversioned(anaDir: string): string {
+  logger.heading("Building unversioned sandbox");
+  const dir = path.join(SMOKE_ROOT, "unversioned");
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.cpSync(anaDir, dir, {
+    recursive: true,
+    filter: (src) => !/[\\/](node_modules|dist|cache)$/.test(src),
+  });
+  fs.symlinkSync(
+    path.join(anaDir, "node_modules"),
+    path.join(dir, "node_modules"),
+  );
+
+  const docs = path.join(dir, "docs");
+  const v1 = path.join(docs, "v1");
+  for (const entry of fs.readdirSync(v1)) {
+    if (entry === "index.md") continue;
+    fs.renameSync(path.join(v1, entry), path.join(docs, entry));
+  }
+  fs.rmSync(v1, { recursive: true });
+  const home = path.join(docs, "index.md");
+  fs.writeFileSync(
+    home,
+    fs.readFileSync(home, "utf-8").replaceAll("link: /v1/", "link: /"),
+  );
+  fs.writeFileSync(
+    path.join(dir, "tf-doc-vault.json"),
+    JSON.stringify({ versioned: false }) + "\n",
+  );
+
+  const bin = (name: string): string =>
+    path.join(dir, "node_modules", ".bin", name);
+  run(bin("tf-doc-vault"), ["validate"], dir, {
+    label: "tf-doc-vault validate (unversioned)",
+  });
+  run(bin("vitepress"), ["build", "docs"], dir, {
+    label: "vitepress build (unversioned)",
+  });
+
+  logger.success(`unversioned sandbox ready at ${dir}`);
+  return dir;
+}
+
+/**
  * The "offers monorepo" use case (github-vercel-migration §1.2): scaffolding
  * a second folder inside a repo that already exists must not nest a repo
  * inside it, must derive `repo`/`repo-subdir` from the existing origin, and
@@ -251,6 +301,7 @@ async function globalSetup(): Promise<void> {
   const techDocs = scaffoldTechDocs(tgz);
   const anaDir = scaffoldAna(tgz);
   const offersMonorepo = scaffoldOffersMonorepo(tgz);
+  const unversionedDir = buildUnversioned(anaDir);
 
   const sandboxes: Sandboxes = {
     tgz,
@@ -259,6 +310,7 @@ async function globalSetup(): Promise<void> {
     anaDir,
     offersRepoDir: offersMonorepo.repoDir,
     secondOfferDir: offersMonorepo.secondOfferDir,
+    unversionedDir,
   };
   fs.writeFileSync(
     path.join(SMOKE_ROOT, "sandboxes.json"),
