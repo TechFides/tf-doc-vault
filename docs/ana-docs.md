@@ -25,16 +25,17 @@ pnpm dlx @techfides/tf-doc-vault@latest setup my_analysis --template=ana-docs
 
 `tf-doc-vault setup <project-name> --template=ana-docs [options]`:
 
-Each of these except `--repo`, `--repo-subdir` and `--analytics` is also a prompt, with the listed default pre-filled:
+Each of these except `--repo`, `--repo-subdir`, `--analytics` and `--skills` is also a prompt, with the listed default pre-filled:
 
-| Option                               | Default                                                           | Description                                                                                                                     |
-| ------------------------------------ | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `--section-nav` / `--no-section-nav` | `--section-nav`                                                   | Whether the top bar gets a link per documentation section. Off means one flat sidebar.                                          |
-| `--base=<path>`                      | `/`                                                               | Base path baked into the VitePress build. Has to start and end with a slash.                                                    |
-| `--repo=<org/repo>`                  | `TechFides/<project>`, or the detected repo's own `origin` remote | Not prompted for. Pre-fills the path inside the commented-out edit-link block of `docs/.vitepress/config.ts`.                   |
-| `--repo-subdir=<path>`               | detected path from the repo root, empty for a standalone repo     | Not prompted for. Pre-fills the edit link's subfolder prefix when this folder lives inside a larger repo.                       |
-| `--no-git`                           | _(false)_                                                         | Skip `git init` + first commit. Automatic when the target already sits inside a git repo (see above); use this to force it too. |
-| `--analytics` / `--no-analytics`     | `--no-analytics`                                                  | Add `@vercel/analytics` and wire it into the VitePress theme. Off leaves no trace: no dependency, no wiring.                    |
+| Option                               | Default                                                           | Description                                                                                                                                                   |
+| ------------------------------------ | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--section-nav` / `--no-section-nav` | `--section-nav`                                                   | Whether the top bar gets a link per documentation section. Off means one flat sidebar.                                                                        |
+| `--base=<path>`                      | `/`                                                               | Base path baked into the VitePress build. Has to start and end with a slash.                                                                                  |
+| `--repo=<org/repo>`                  | `TechFides/<project>`, or the detected repo's own `origin` remote | Not prompted for. Pre-fills the path inside the commented-out edit-link block of `docs/.vitepress/config.ts`.                                                 |
+| `--repo-subdir=<path>`               | detected path from the repo root, empty for a standalone repo     | Not prompted for. Pre-fills the edit link's subfolder prefix when this folder lives inside a larger repo.                                                     |
+| `--no-git`                           | _(false)_                                                         | Skip `git init` + first commit. Automatic when the target already sits inside a git repo (see above); use this to force it too.                               |
+| `--analytics` / `--no-analytics`     | `--no-analytics`                                                  | Add `@vercel/analytics` and wire it into the VitePress theme. Off leaves no trace: no dependency, no wiring.                                                  |
+| `--skills`                           | _(false)_                                                         | Install the TechFides documentation skills through `tf-skills` instead of the bundled default skills. Needs a GitHub token with access to the skills library. |
 
 The flags below are for maintainers developing this package against a local checkout. The wizard never prompts for them, and a consumer wants the default (`npm`):
 
@@ -157,7 +158,44 @@ pnpm sync           # shows a unified diff of all drifted files
 pnpm sync:apply     # overwrites drifted files with the boilerplate (placeholders are rendered from the current repo)
 ```
 
-User content (`docs/`, `package.json`, README, CLAUDE) is excluded from overwriting.
+User content (`docs/`, `package.json`, README, `AGENTS.md`, `CLAUDE.md`) is excluded from overwriting.
+
+## Claude skills
+
+A scaffold ships six bundled documentation skills and slash commands in `.claude/`, with the portal rules in `AGENTS.md` (`CLAUDE.md` is the `@AGENTS.md` pointer). They work without any account and are the default.
+
+TechFides people can replace them with the library's `docs` bundle, which `docs-workflow` routes from plain-language requests (no slash commands) and which the library keeps current. It needs a GitHub token with read access to the skills library: `gh auth login`, or `GITHUB_TOKEN` / `GH_TOKEN` in the environment. Two ways in:
+
+- `setup --skills` installs the bundle while scaffolding. On any failure (no token, offline, two minutes without an answer) the scaffold keeps the bundled set, prints a warning with the exact command, and still succeeds.
+- `pnpm exec tf-doc-vault skills install --bundle docs` does the same in an existing portal. It refuses a bundled set that was edited by hand (skills, commands, `AGENTS.md` or `CLAUDE.md`) unless you pass `--force`, and says so when the library set is already installed.
+
+The swap is all or nothing: the bundled skills, commands and rules files are set aside first and come back as they were if anything fails. A run killed from outside can leave `.claude/.swap-backup-<pid>/` behind with those originals inside; the next install names it and refuses to run until you restore or delete it. The library's portal rules land in `AGENTS.md`.
+
+### Keeping the library skills current
+
+Nothing runs on its own. `pnpm exec tf-doc-vault skills update` brings an installed library set forward: it records files a clone brought along as managed (`tf-skills adopt`), checks, and updates what fell behind, never with `--force`; skills you edited by hand are only named. It prints nothing when there is nothing to do, exits 0 in every case, and never touches the bundled set, so it is safe to run from a hook. Without a token it does nothing.
+
+To run it at the start of every Claude Code session, add to the portal's `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm exec tf-doc-vault skills update"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+A git hook works the same way (`post-merge` or `post-checkout`, through lefthook or `.git/hooks`), so a pull that moved the skills is followed by an update.
 
 ---
 
