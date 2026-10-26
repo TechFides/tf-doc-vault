@@ -15,7 +15,7 @@
 ARG SERVER_TYPE=nginx
 
 # ── Stage 1: build ────────────────────────────────────────────────────────────
-FROM node:24-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5 AS builder
+FROM node:24-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205 AS builder
 
 WORKDIR /app
 
@@ -36,7 +36,7 @@ COPY tsconfig.json tf-doc-vault.json* ./
 RUN pnpm run docs:print && pnpm run docs:build
 
 # ── Stage 2a: nginx (no auth) ─────────────────────────────────────────────────
-FROM node:24-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5 AS runner-nginx
+FROM node:24-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205 AS runner-nginx
 
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends nginx \
@@ -50,7 +50,7 @@ EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
 
 # ── Stage 2b: nginx + Basic auth ──────────────────────────────────────────────
-FROM node:24-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5 AS runner-nginx-auth
+FROM node:24-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205 AS runner-nginx-auth
 
 ARG BASIC_AUTH_USER
 ARG BASIC_AUTH_PASS
