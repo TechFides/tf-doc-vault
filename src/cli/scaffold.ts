@@ -15,6 +15,7 @@ import {
   type ParsedArgs,
 } from "./utils.js";
 import { detectHostRepo } from "./git-context.js";
+import { BUNDLE_NAME_RE } from "./install-skills.js";
 import { readText } from "../shared/text-file.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -47,6 +48,11 @@ export interface TemplateManifest {
   git: { init: boolean };
   lockfile: boolean;
   workspaceWarning: boolean;
+  /**
+   * Skills bundle `setup` installs through tf-skills when the person has
+   * library access; the bundled `.claude/` stays as the fallback otherwise.
+   */
+  skillsBundle?: string;
   description: string;
   /** Absolute path of the template folder. */
   dir: string;
@@ -493,6 +499,7 @@ function parseYamlMap(
 const TARGET_MODES = ["new-folder", "subfolder"] as const;
 
 const KNOWN_KEYS = [
+  "skillsBundle",
   "name",
   "label",
   "target",
@@ -707,6 +714,21 @@ function checkBoilerplateEntries(
   }
 }
 
+function asSkillsBundle(
+  templateName: string,
+  value: YamlValue | undefined,
+): string | undefined {
+  if (value === undefined) return undefined;
+  const name = asString(templateName, "skillsBundle", value);
+  if (!BUNDLE_NAME_RE.test(name)) {
+    fail(
+      templateName,
+      `"skillsBundle" must be a lowercase bundle name, got "${name}"`,
+    );
+  }
+  return name;
+}
+
 export function parseTemplateManifest(
   source: string,
   templateName: string,
@@ -816,6 +838,7 @@ export function parseTemplateManifest(
       "workspaceWarning",
       raw.workspaceWarning,
     ),
+    skillsBundle: asSkillsBundle(templateName, raw.skillsBundle),
     description: (match[2] ?? "").trim(),
     dir,
   };

@@ -235,6 +235,28 @@ describe("makeConfig markdown options", () => {
   });
 });
 
+describe("makeConfig srcExclude", () => {
+  function srcExcludeOf(
+    opts: Parameters<typeof makeConfig>[0],
+  ): string[] | undefined {
+    return (
+      makeConfig({ ...opts, mermaid: false }) as unknown as {
+        srcExclude?: string[];
+      }
+    ).srcExclude;
+  }
+
+  test("ships no exclusion of its own: which files are not pages is the portal's call", () => {
+    expect(srcExcludeOf({ configDir })).toBeUndefined();
+  });
+
+  test("a consumer's override.srcExclude reaches VitePress as given", () => {
+    expect(
+      srcExcludeOf({ configDir, override: { srcExclude: ["README.md"] } }),
+    ).toEqual(["README.md"]);
+  });
+});
+
 describe("makeConfig with versioned: false", () => {
   let projectRoot: string;
   let flatConfigDir: string;

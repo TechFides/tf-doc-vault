@@ -173,8 +173,33 @@ function scaffoldAna(tgz: string): string {
 
   // Read-only verifications only. `pnpm fix` is left out because it triggers
   // the normalize bug that is tracked separately.
+  // The library's docs-workflow keeps the portal's documentation contract in
+  // docs/README.md; the scaffolded config has to keep it out of the pages.
+  // Removed again after the build: the unversioned sandbox copies docs/ and
+  // treats every root-level file there as a page.
+  const contract = path.join(dir, "docs", "README.md");
+  fs.writeFileSync(
+    contract,
+    [
+      "---",
+      "title: Documentation setup",
+      "status: published",
+      "updated_at: 2026-10-30",
+      "documentation:",
+      "  active_version: v1",
+      "  lifecycle_stage: discovery",
+      "  deliverable_type: documentation",
+      "  sections: [business]",
+      "  functional_views: [scenario]",
+      "---",
+      "",
+      "# Documentation setup",
+      "",
+    ].join("\n"),
+  );
   run("pnpm", ["docs:validate"], dir, { label: "pnpm docs:validate" });
   run("pnpm", ["docs:build"], dir, { label: "pnpm docs:build" });
+  fs.rmSync(contract);
   run("pnpm", ["sync"], dir, { label: "pnpm sync" });
 
   logger.success(`ana sandbox ready at ${dir}`);

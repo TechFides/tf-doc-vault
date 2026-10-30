@@ -25,6 +25,7 @@ const COMMANDS: Record<string, string> = {
   "ensure-lf": "ensure-lf.js",
   fix: "fix.js",
   sync: "sync-template.js",
+  skills: "skills.js",
   "gen-diagrams": "generate-diagrams.cjs",
   "gen-wireframes": "generate-wireframes.cjs",
   "replace-wireframes": "replace-wireframes.cjs",
@@ -135,6 +136,11 @@ Commands:
   sync                Diff infra/CI/config files against bundled template
                         --apply             overwrite drifted files
                         --files=a,b,c       restrict to a subset
+  skills              Documentation skills from the TechFides skills library (opt-in)
+                        install --bundle <name> [--force]   replace the bundled set
+                        update                              bring an installed library set
+                                                            forward; silent when there is
+                                                            nothing to do, so it suits a hook
   gen-diagrams        Generate analysis SVG diagrams to docs/public/images/diagrams/
   gen-wireframes      Generate wireframe SVGs to docs/public/images/wireframes/
   replace-wireframes  Replace ASCII wireframes in docs/v1/index.md with SVG image refs
@@ -161,15 +167,18 @@ if (cmd === "setup") {
 if (cmd === "import-confluence") {
   process.exit(runCliScript("import-confluence.js", rest));
 }
+dispatch(cmd, rest);
 
-if (cmd === "pdf") {
-  process.exit(runPdf());
+function dispatch(command: string, args: string[]): never {
+  if (command === "pdf") {
+    process.exit(runPdf());
+  }
+
+  const script = COMMANDS[command];
+  if (!script) {
+    console.error(`Unknown command: ${command}`);
+    usage(1);
+  }
+
+  process.exit(runScript(script, args));
 }
-
-const script = COMMANDS[cmd];
-if (!script) {
-  console.error(`Unknown command: ${cmd}`);
-  usage(1);
-}
-
-process.exit(runScript(script, rest));
