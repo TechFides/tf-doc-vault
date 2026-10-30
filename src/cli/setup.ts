@@ -947,11 +947,7 @@ export function nextSteps(ctx: {
     insideTarget ? entry : posix(path.join(relative, entry));
   const blocks: string[] = [];
 
-  if (ctx.skills?.attempted && !ctx.skills.ok) {
-    blocks.push(`Switch to the current TechFides documentation skills (needs a GitHub
-token with access to the skills library: \`gh auth login\` or GITHUB_TOKEN):
-  ${ctx.skills.command}`);
-  } else if (ctx.skills?.ok && ctx.skills.rules === "kept") {
+  if (ctx.skills?.ok && ctx.skills.rules === "kept") {
     blocks.push(`The installed skills bundle shipped no portal rules file. Once the library
 does, copy it over the bundled one:
   cp ${fromHere(".claude/skills/docs-base/references/CLAUDE.md")} ${fromHere(fs.existsSync(path.join(ctx.targetDir, "AGENTS.md")) ? "AGENTS.md" : "CLAUDE.md")}`);
@@ -1004,9 +1000,16 @@ Commit it together with your other changes:
   git push -u origin main`);
   }
 
-  if (!ctx.skills?.attempted && ctx.manifest.skillsBundle) {
-    blocks.push(`TechFides library skills (optional; needs a GitHub token with access to the skills library):
-  pnpm exec tf-doc-vault skills install --bundle ${ctx.manifest.skillsBundle}`);
+  // After a failed --skills the bundled set is back, so only the wrapper swaps it.
+  const bundle = ctx.manifest.skillsBundle;
+  if (bundle && !ctx.skills?.ok) {
+    const lead = ctx.skills?.attempted
+      ? `The skills bundle was not installed (${ctx.skills.reason ?? "unknown"}), the bundled
+skills are in place. Switch to the library set once the dependencies are installed
+(needs a GitHub token with access to the skills library: \`gh auth login\` or GITHUB_TOKEN):`
+      : "TechFides library skills (optional; needs a GitHub token with access to the skills library):";
+    blocks.push(`${lead}
+  pnpm exec tf-doc-vault skills install --bundle ${bundle}`);
   }
 
   return blocks.join("\n\n");

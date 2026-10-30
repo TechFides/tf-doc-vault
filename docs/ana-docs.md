@@ -166,7 +166,7 @@ A scaffold ships six bundled documentation skills and slash commands in `.claude
 
 TechFides people can replace them with the library's `docs` bundle, which `docs-workflow` routes from plain-language requests (no slash commands) and which the library keeps current. It needs a GitHub token with read access to the skills library: `gh auth login`, or `GITHUB_TOKEN` / `GH_TOKEN` in the environment. Two ways in:
 
-- `setup --skills` installs the bundle while scaffolding. On any failure (no token, offline, two minutes without an answer) the scaffold keeps the bundled set, prints a warning with the exact command, and still succeeds.
+- `setup --skills` installs the bundle while scaffolding. On any failure (no token, offline, two minutes without an answer) the scaffold keeps the bundled set, says why, lists the `skills install` command below among the next steps, and still succeeds.
 - `pnpm exec tf-doc-vault skills install --bundle docs` does the same in an existing portal. It refuses unless you pass `--force` when the skills, commands, `AGENTS.md` or `CLAUDE.md` are not as the scaffold left them, which covers a hand-edited set as well as a run in the wrong folder (a service repository's own rules file and commands would otherwise be replaced); a missing bundled set is fine, there is nothing to lose. It says so when the library set is already installed.
 
 The swap is all or nothing: the bundled skills, commands and rules files are set aside first and come back as they were if anything fails. A run killed from outside can leave `.claude/.swap-backup-<pid>/` behind with those originals inside; the next install names it and refuses to run until you restore or delete it. The library's portal rules land in `AGENTS.md`.

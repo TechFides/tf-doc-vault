@@ -5,7 +5,7 @@ import path from "node:path";
 export interface SkillsInstall {
   attempted: boolean;
   ok: boolean;
-  /** The exact command a person can run by hand to get what `setup` could not. */
+  /** The tf-skills command that ran, quoted in the failure message. */
   command: string;
   /** Whether the portal's rules file carries the library's rules. */
   rules: "replaced" | "kept";

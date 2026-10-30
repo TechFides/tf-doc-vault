@@ -1772,7 +1772,7 @@ describe("skills bundle wiring", () => {
     expect(unknownFlags({ skills: true })).toEqual([]);
   });
 
-  test("a failed skills install becomes the first next step, with the recovery command", () => {
+  test("a failed skills install points at the wrapper command, after pnpm install", () => {
     const epilogue = nextSteps({
       ...ctx,
       skills: {
@@ -1783,10 +1783,14 @@ describe("skills bundle wiring", () => {
         reason: "no GitHub token",
       },
     });
-    expect(epilogue).toContain(RECOVERY);
+    expect(epilogue).toContain(
+      "pnpm exec tf-doc-vault skills install --bundle docs",
+    );
+    expect(epilogue).toContain("no GitHub token");
     expect(epilogue).toContain("gh auth login");
-    expect(epilogue.indexOf(RECOVERY)).toBeLessThan(
-      epilogue.indexOf("pnpm install"),
+    expect(epilogue).not.toContain("tf-skills-manager");
+    expect(epilogue.indexOf("pnpm install")).toBeLessThan(
+      epilogue.indexOf("skills install"),
     );
   });
 
