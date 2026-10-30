@@ -209,4 +209,33 @@ describe("installSkills", () => {
     expect(read(dir, "AGENTS.md")).toBe("v1 rules");
     expect(backups(dir)).toEqual([]);
   });
+
+  // Root ignores file modes, so the locked directory would simply go away.
+  test.skipIf(process.platform === "win32" || process.getuid?.() === 0)(
+    "a restore that cannot finish keeps the backup and names it",
+    () => {
+      const dir = project();
+      let locked = "";
+      try {
+        const result = installSkills("docs", dir, (_cmd, args) => {
+          const target = args[args.indexOf("--target") + 1]!;
+          locked = path.join(target, "locked");
+          fs.mkdirSync(locked);
+          fs.writeFileSync(path.join(locked, "f"), "");
+          fs.chmodSync(locked, 0o555);
+          return { status: 1, stderr: "no GitHub token" };
+        });
+        expect(result.ok).toBe(false);
+        const [backup] = backups(dir);
+        expect(backup).toBeDefined();
+        expect(result.reason).toContain(backup);
+        expect(
+          read(dir, `.claude/${backup}/skills/docs-from-code/SKILL.md`),
+        ).toBe("old");
+        expect(read(dir, "AGENTS.md")).toBe("v1 rules");
+      } finally {
+        if (locked) fs.chmodSync(locked, 0o755);
+      }
+    },
+  );
 });

@@ -88,7 +88,8 @@ function staleBackup(claude: string): string | undefined {
  * by target. The bundled set is moved aside first, so no name collision and no
  * --force. The bundled commands go with the bundled skills: they load those
  * skills by name, and the library set has no slash commands. Never throws:
- * whatever fails, the backup is restored step by step and `ok` is false.
+ * whatever fails, the originals are put back and `ok` is false; a backup
+ * whose restore failed stays, named in `reason`.
  */
 export function installSkills(
   bundle: string,
@@ -121,28 +122,46 @@ export function installSkills(
   const rulesFiles = RULES_FILES.filter((name) =>
     fs.existsSync(path.join(projectDir, name)),
   );
-  // Only once the original set is in the backup may restore() clear the target.
+  // Only what reached the backup is restored from it.
+  const backedUp: string[] = [];
   let moved = false;
 
-  const restore = (): void => {
+  const restore = (): boolean => {
+    let whole = true;
+    const step = (fn: () => void): void => {
+      try {
+        fn();
+      } catch {
+        whole = false;
+      }
+    };
     if (moved) {
-      attempt(() => fs.rmSync(target, { recursive: true, force: true }));
+      step(() => fs.rmSync(target, { recursive: true, force: true }));
       if (hadSkills) {
-        attempt(() => fs.renameSync(path.join(backup, "skills"), target));
+        step(() => fs.renameSync(path.join(backup, "skills"), target));
       }
     }
-    for (const name of rulesFiles) {
-      attempt(() =>
+    for (const name of backedUp) {
+      step(() =>
         fs.copyFileSync(path.join(backup, name), path.join(projectDir, name)),
       );
     }
-    attempt(() => fs.rmSync(backup, { recursive: true, force: true }));
+    if (whole)
+      attempt(() => fs.rmSync(backup, { recursive: true, force: true }));
+    return whole;
   };
+  const undone = (reason: string): SkillsInstall =>
+    restore()
+      ? kept(reason)
+      : kept(
+          `${reason}; putting the original files back failed too, they are in .claude/${path.basename(backup)}`,
+        );
 
   try {
     fs.mkdirSync(backup, { recursive: true });
     for (const name of rulesFiles) {
       fs.copyFileSync(path.join(projectDir, name), path.join(backup, name));
+      backedUp.push(name);
     }
     if (hadSkills) fs.renameSync(target, path.join(backup, "skills"));
     moved = true;
@@ -150,15 +169,13 @@ export function installSkills(
 
     const result = run("npx", argv(bundle, target));
     if (result.status !== 0) {
-      restore();
-      return kept(
+      return undone(
         result.stderr.trim() ||
           `tf-skills exited with ${String(result.status)}`,
       );
     }
     if (fs.readdirSync(target).length === 0) {
-      restore();
-      return kept("tf-skills exited 0 but installed nothing");
+      return undone("tf-skills exited 0 but installed nothing");
     }
 
     const shipped = path.join(target, SHIPPED_RULES);
@@ -175,7 +192,6 @@ export function installSkills(
     attempt(() => fs.rmSync(backup, { recursive: true, force: true }));
     return { attempted: true, ok: true, command, rules };
   } catch (error) {
-    restore();
-    return kept(error instanceof Error ? error.message : String(error));
+    return undone(error instanceof Error ? error.message : String(error));
   }
 }
