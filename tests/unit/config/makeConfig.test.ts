@@ -246,17 +246,14 @@ describe("makeConfig srcExclude", () => {
     ).srcExclude;
   }
 
-  test("docs/README.md is never rendered as a page: it is the v2 documentation contract", () => {
-    expect(srcExcludeOf({ configDir })).toContain("README.md");
+  test("ships no exclusion of its own: which files are not pages is the portal's call", () => {
+    expect(srcExcludeOf({ configDir })).toBeUndefined();
   });
 
-  test("a consumer's override.srcExclude is merged, not replaced", () => {
-    const list = srcExcludeOf({
-      configDir,
-      override: { srcExclude: ["drafts/**"] },
-    });
-    expect(list).toContain("README.md");
-    expect(list).toContain("drafts/**");
+  test("a consumer's override.srcExclude reaches VitePress as given", () => {
+    expect(
+      srcExcludeOf({ configDir, override: { srcExclude: ["README.md"] } }),
+    ).toEqual(["README.md"]);
   });
 });
 

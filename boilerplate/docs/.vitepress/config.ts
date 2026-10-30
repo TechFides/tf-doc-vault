@@ -5,7 +5,9 @@ export default makeConfig({
   project: "__PROJECT__",
   // base has to match the path the site is served from; the folder-derived
   // default ("/docs/") would 404 every asset once deployed.
-  override: { base: "__DOCS_BASE__" },
+  // docs/README.md is the documentation contract the TechFides library skills
+  // keep in its frontmatter, not a page; srcExclude keeps it out of the build.
+  override: { base: "__DOCS_BASE__", srcExclude: ["README.md"] },
   sectionNav: __SECTION_NAV__,
   // Optional: branding overrides (siteTitle, logo, navbar links, footer)
   // branding: {

@@ -17,6 +17,12 @@ What `install` does depends on where the portal stands:
 - **Something was edited by hand** (a bundled skill, a command, `AGENTS.md`), or an offer folder that carries hand-copied skills and its own long `CLAUDE.md`: `install` refuses and asks for `--force`. The same refusal protects a run started in the wrong folder, say a service repository's root with its own `AGENTS.md` and `.claude/commands`. Before passing it, move anything project-specific from your rules file into the `docs/README.md` contract; the library's rules file is canonical and identical everywhere, and the `docs-workflow` skill sets the contract up with a few questions and offers a `migrate` operation for the content tree. Git keeps the old files.
 - **The library set is already there** (a clone of a portal someone else switched): `install` says so and changes nothing. `pnpm exec tf-doc-vault skills update` is the command for that case, and the one to put into a hook so the skills follow the library from then on.
 
+The library's `docs-workflow` keeps the portal's documentation contract in the frontmatter of `docs/README.md`. A fresh scaffold keeps that file out of the built pages through `override.srcExclude` in `docs/.vitepress/config.ts`; a portal scaffolded before this release adds it by hand, otherwise VitePress renders the contract as an unlinked `/README.html`:
+
+```ts
+override: { base: "/", srcExclude: ["README.md"] },
+```
+
 `pnpm sync` still reports drift in the boilerplate files (CI workflow, lint configs) separately; apply it in the same upgrade or not, as the folder prefers.
 
 ## Migration to 0.3

@@ -50,6 +50,14 @@ function serveDistAtRoot(distDir: string): Promise<http.Server> {
   );
 }
 
+test("docs/README.md is the documentation contract, not a page", ({
+  sandboxes,
+}) => {
+  const distDir = path.join(sandboxes.anaDir, "docs", ".vitepress", "dist");
+  expect(fs.existsSync(path.join(distDir, "index.html"))).toBe(true);
+  expect(fs.existsSync(path.join(distDir, "README.html"))).toBe(false);
+});
+
 test("built ana dist renders cleanly when served at the domain root", async ({
   page,
   sandboxes,

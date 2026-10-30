@@ -171,6 +171,8 @@ TechFides people can replace them with the library's `docs` bundle, which `docs-
 
 The swap is all or nothing: the bundled skills, commands and rules files are set aside first and come back as they were if anything fails. A run killed from outside, or a restore that could not finish (a locked file, say), leaves `.claude/.swap-backup-<pid>/` behind with those originals inside; the failure message names it, and the next install refuses to run until you restore or delete it. The library's portal rules land in `AGENTS.md`.
 
+The library's `docs-workflow` keeps the portal's documentation contract in the frontmatter of `docs/README.md`. The scaffolded `docs/.vitepress/config.ts` keeps that file out of the built pages (`override.srcExclude`); a portal scaffolded earlier adds the line by hand, see [Migrations](./MIGRATIONS.md#upgrading-a-portal-to-the-library-skills).
+
 ### Keeping the library skills current
 
 Nothing runs on its own. `pnpm exec tf-doc-vault skills update` brings an installed library set forward: it records files a clone brought along as managed (`tf-skills adopt`), checks, and updates what fell behind, never with `--force`; skills you edited by hand are only named. It prints nothing when there is nothing to do, exits 0 in every case, and never touches the bundled set, so it is safe to run from a hook. Without a token it does nothing.
