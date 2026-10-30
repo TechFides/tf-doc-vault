@@ -100,25 +100,29 @@ function readText(file: string): string | null {
 const skillsDir = (root: string): string =>
   path.join(root, ".claude", "skills");
 
-/** The bundled skills, commands and rules files exactly as scaffolded, project name aside. */
+/** The directory as scaffolded, or with nothing in it: nothing there to lose. */
+function pristineDir(deps: SkillsDeps, ...segments: string[]): boolean {
+  const onDisk = readTree(path.join(deps.projectDir, ...segments));
+  return (
+    onDisk.size === 0 ||
+    isPristine(onDisk, readTree(path.join(deps.boilerplateDir, ...segments)))
+  );
+}
+
+/** The rules files, bundled skills and commands as scaffolded (project name aside) or absent. */
 function pristine(deps: SkillsDeps): boolean {
   const { projectDir, boilerplateDir } = deps;
   const rulesPristine = ["AGENTS.md", "CLAUDE.md"].every((name) => {
     const template = readText(path.join(boilerplateDir, name));
-    if (template === null) return true;
     const actual = readText(path.join(projectDir, name));
-    return actual !== null && matchesTemplate(actual, template);
+    return (
+      template === null || actual === null || matchesTemplate(actual, template)
+    );
   });
   return (
     rulesPristine &&
-    isPristine(
-      readTree(skillsDir(projectDir)),
-      readTree(skillsDir(boilerplateDir)),
-    ) &&
-    isPristine(
-      readTree(path.join(projectDir, ".claude", "commands")),
-      readTree(path.join(boilerplateDir, ".claude", "commands")),
-    )
+    pristineDir(deps, ".claude", "skills") &&
+    pristineDir(deps, ".claude", "commands")
   );
 }
 
@@ -160,11 +164,13 @@ export function installFromLibrary(
   deps: SkillsDeps,
 ): InstallOutcome {
   if (!deps.hasToken()) return { kind: "no-token" };
-  const installed = dirNames(skillsDir(deps.projectDir));
-  if (!force && installed.length > 0) {
+  if (!force) {
+    // classify() calls an empty set "library", so it only sees a non-empty one.
+    const installed = dirNames(skillsDir(deps.projectDir));
     if (
+      installed.length > 0 &&
       classify(installed, dirNames(skillsDir(deps.boilerplateDir))) ===
-      "library"
+        "library"
     ) {
       return { kind: "already-library" };
     }
@@ -227,7 +233,7 @@ export function renderInstall(outcome: InstallOutcome): Rendered {
     case "edited":
       return {
         exit: 1,
-        err: "The bundled skills, commands or rules files were edited by hand; rerun with --force to replace them with the library set (git keeps the edits).",
+        err: "The rules files, skills or commands here are not as the scaffold left them (edited by hand, or this is not a portal directory); rerun with --force to replace them with the library set (git keeps the edits).",
       };
     case "failed":
       return {

@@ -261,6 +261,46 @@ describe("installFromLibrary", () => {
       command: "npx ...",
     });
   });
+
+  test("without a skills directory the rules file is still checked", () => {
+    const fx = fixture();
+    fs.rmSync(path.join(fx.project, ".claude", "skills"), { recursive: true });
+    fs.appendFileSync(path.join(fx.project, "AGENTS.md"), "my rule\n");
+    const { deps, calls } = makeDeps(fx);
+    expect(installFromLibrary("docs", false, deps)).toEqual({ kind: "edited" });
+    expect(calls.install).toEqual([]);
+  });
+
+  test("a repository's own commands are refused without --force", () => {
+    const fx = fixture();
+    fs.rmSync(path.join(fx.project, ".claude"), { recursive: true });
+    write(fx.project, { ".claude/commands/deploy.md": "theirs" });
+    const { deps, calls } = makeDeps(fx);
+    expect(installFromLibrary("docs", false, deps)).toEqual({ kind: "edited" });
+    expect(calls.install).toEqual([]);
+  });
+
+  test("a missing or empty skills directory is installable and never 'already the library'", () => {
+    const fx = fixture();
+    const skills = path.join(fx.project, ".claude", "skills");
+    fs.rmSync(skills, { recursive: true });
+    expect(installFromLibrary("docs", false, makeDeps(fx).deps).kind).toBe(
+      "installed",
+    );
+    fs.mkdirSync(skills);
+    expect(installFromLibrary("docs", false, makeDeps(fx).deps).kind).toBe(
+      "installed",
+    );
+  });
+
+  test("a missing rules file has nothing to lose", () => {
+    const fx = fixture();
+    fs.rmSync(path.join(fx.project, "AGENTS.md"));
+    fs.rmSync(path.join(fx.project, "CLAUDE.md"));
+    const { deps, calls } = makeDeps(fx);
+    expect(installFromLibrary("docs", false, deps).kind).toBe("installed");
+    expect(calls.install).toEqual(["docs"]);
+  });
 });
 
 describe("rendering", () => {
