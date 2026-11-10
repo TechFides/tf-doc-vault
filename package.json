@@ -27,7 +27,7 @@
   "engines": {
     "node": ">=24"
   },
-  "packageManager": "pnpm@11.28.9",
+  "packageManager": "pnpm@11.28.11",
   "private": false,
   "files": [
     "dist",
@@ -133,12 +133,12 @@
     "@types/node": "25.9.9",
     "@typescript-eslint/eslint-plugin": "8.72.1",
     "@typescript-eslint/parser": "8.72.1",
-    "@vercel/functions": "3.10.5",
+    "@vercel/functions": "3.11.0",
     "@vitest/coverage-v8": "4.1.12",
     "changelogen": "0.6.2",
-    "eslint": "10.13.0",
+    "eslint": "10.14.0",
     "eslint-config-prettier": "10.1.8",
-    "knip": "6.44.0",
+    "knip": "6.44.1",
     "lefthook": "2.2.2",
     "mermaid": "11.17.2",
     "prettier": "3.9.10",
@@ -148,6 +148,6 @@
     "vitepress": "1.6.4",
     "vitepress-plugin-mermaid": "2.0.17",
     "vitest": "4.1.12",
-    "vue": "3.5.44"
+    "vue": "3.5.45"
   }
 }
