@@ -143,6 +143,23 @@ config, `validate`, `normalize` and `print` all read the setting from that file.
 Any key other than `pdf` and `versioned` prints a warning that names it, so a
 misspelt `Versioned` does not quietly keep the versioned layout.
 
+### Markdown lint rules
+
+`validate` runs markdownlint with the package's defaults. A repo adjusts them, or
+adds its own rules, in a `.markdownlint-cli2.mjs` next to the `docs/` folder, the
+file the markdownlint editor extension reads as well:
+
+```js
+export default {
+  config: { MD012: false, "spec-word-budget": true },
+  customRules: ["./tools/markdownlint/spec-word-budget.mjs"],
+};
+```
+
+`config` is merged over the defaults; `customRules` takes rule objects or module
+paths relative to the file. Other markdownlint-cli2 keys are ignored, and every
+reported result fails `validate`, a rule configured as `"warning"` included.
+
 ### PDF export
 
 `tf-doc-vault pdf` builds the site and renders `/print` into `artifacts/`. With no
