@@ -414,3 +414,49 @@ describe("validate-docs and print.md", () => {
     expect(r.exitCode).toBe(1);
   });
 });
+
+describe("validate-docs, project markdownlint config", () => {
+  const noTodoRule = [
+    "export default {",
+    '  names: ["no-todo"],',
+    '  description: "No TODO",',
+    '  tags: ["test"],',
+    '  parser: "none",',
+    "  function: (params, onError) => {",
+    "    params.lines.forEach((line, i) => {",
+    '      if (line.includes("TODO")) onError({ lineNumber: i + 1, detail: \"found\" });',
+    "    });",
+    "  },",
+    "};",
+    "",
+  ].join("\n");
+
+  test("loads custom rules and overrides the default config", () => {
+    const r = runValidate({
+      "../.markdownlint-cli2.mjs": [
+        "export default {",
+        "  config: { MD012: false },",
+        '  customRules: ["./rules/no-todo.mjs"],',
+        "};",
+        "",
+      ].join("\n"),
+      "../rules/no-todo.mjs": noTodoRule,
+      "page.md": page("TODO", "", "", "", "text"),
+    });
+
+    expect(r.stdout).toContain("[no-todo] line 7: No TODO (found)");
+    expect(r.stdout).not.toContain("MD012");
+    expect(r.exitCode).toBe(1);
+  });
+
+  test("stops with the reason when the config cannot be loaded", () => {
+    const r = runValidate({
+      "../.markdownlint-cli2.mjs":
+        'export default { customRules: ["./missing.mjs"] };\n',
+      "page.md": page("text"),
+    });
+
+    expect(r.stderr).toContain(".markdownlint-cli2.mjs could not be loaded");
+    expect(r.exitCode).toBe(1);
+  });
+});

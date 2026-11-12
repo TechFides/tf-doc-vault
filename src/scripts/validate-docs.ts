@@ -5,7 +5,10 @@
  */
 
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
+import type { Configuration, Rule } from "markdownlint";
 import { lint as markdownlint } from "markdownlint/sync";
 import { parseFrontmatter, parseOrder } from "../shared/frontmatter.js";
 import {
@@ -26,6 +29,7 @@ const DOCS_ROOT = path.resolve(process.cwd(), root);
 const PUBLIC_ROOT = path.resolve(DOCS_ROOT, "public");
 /** Where the sorted tree starts: `docs/<version>/` (1) or `docs/` itself (0). */
 const TREE_DEPTH = configOrExit(() => isVersioned(DOCS_ROOT)) ? 1 : 0;
+const LINT_CONFIG_FILE = ".markdownlint-cli2.mjs";
 const REQUIRED_FIELDS = ["title", "status", "updated_at"] as const;
 const VALID_STATUSES = new Set(["published", "draft", "review", "archived"]);
 
@@ -161,27 +165,68 @@ function checkMissingImages(files: string[]): Issue[] {
   return issues;
 }
 
-function checkMarkdownLint(files: string[]): Issue[] {
-  const results = markdownlint({
-    files,
-    config: {
-      default: true,
-      MD013: false,
-      MD024: false,
-      MD025: false,
-      MD033: false,
-      MD036: false,
-      MD041: false,
-      MD060: false,
-    },
-  });
+const LINT_DEFAULTS: Configuration = {
+  default: true,
+  MD013: false,
+  MD024: false,
+  MD025: false,
+  MD033: false,
+  MD036: false,
+  MD041: false,
+  MD060: false,
+};
+
+interface LintOptions {
+  config: Configuration;
+  customRules: Rule[];
+}
+
+/**
+ * Reads `config` and `customRules` from the project's markdownlint-cli2 file,
+ * the same file the markdownlint editor extension reads; its other keys are ignored.
+ */
+async function readLintOptions(projectRoot: string): Promise<LintOptions> {
+  const file = path.join(projectRoot, LINT_CONFIG_FILE);
+  if (!fs.existsSync(file)) return { config: LINT_DEFAULTS, customRules: [] };
+
+  try {
+    const own = (
+      (await import(pathToFileURL(file).href)) as {
+        default?: { config?: Configuration; customRules?: (string | Rule)[] };
+      }
+    ).default;
+    const resolve = createRequire(file).resolve;
+    const customRules = await Promise.all(
+      (own?.customRules ?? []).map(async (rule) =>
+        typeof rule === "string"
+          ? (
+              (await import(pathToFileURL(resolve(rule)).href)) as {
+                default: Rule | Rule[];
+              }
+            ).default
+          : rule,
+      ),
+    );
+    return {
+      config: { ...LINT_DEFAULTS, ...own?.config },
+      customRules: customRules.flat(),
+    };
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    console.error(`✗ ${LINT_CONFIG_FILE} could not be loaded: ${reason}`);
+    process.exit(1);
+  }
+}
+
+function checkMarkdownLint(files: string[], options: LintOptions): Issue[] {
+  const results = markdownlint({ files, ...options });
 
   const issues: Issue[] = [];
   for (const [file, fileResults] of Object.entries(results)) {
     for (const result of fileResults) {
       issues.push({
         file: slugOf(file),
-        message: `[${result.ruleNames.join("/")}] line ${result.lineNumber}: ${result.ruleDescription}`,
+        message: `[${result.ruleNames.join("/")}] line ${result.lineNumber}: ${result.ruleDescription}${result.errorDetail ? ` (${result.errorDetail})` : ""}`,
       });
     }
   }
@@ -289,7 +334,13 @@ const checks: { name: string; issues: Issue[] }[] = [
   { name: "Duplicate slugs", issues: checkDuplicateSlugs(files) },
   { name: "Broken links", issues: checkBrokenLinks(files) },
   { name: "Missing images", issues: checkMissingImages(files) },
-  { name: "Markdown lint", issues: checkMarkdownLint(files) },
+  {
+    name: "Markdown lint",
+    issues: checkMarkdownLint(
+      files,
+      await readLintOptions(path.dirname(DOCS_ROOT)),
+    ),
+  },
   {
     name: "Order",
     issues: [...checkOrder(files), ...checkSectionIndexes()],
