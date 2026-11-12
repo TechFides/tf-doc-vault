@@ -1,5 +1,50 @@
 # Changelog
 
+## v0.6.2
+
+[compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.6.1...v0.6.2)
+
+### 🚀 Enhancements
+
+- **setup:** Install the skills bundle through tf-skills, keep the bundled set as fallback ([a18210f](https://github.com/TechFides/tf-doc-vault/commit/a18210f))
+- **cli:** Add dev, which syncs the skills with the library before vitepress ([cdd4454](https://github.com/TechFides/tf-doc-vault/commit/cdd4454))
+- **templates:** Add sales-docs ([08a3bd4](https://github.com/TechFides/tf-doc-vault/commit/08a3bd4))
+- **sync:** Report a stale docs:dev and rewrite it with --apply ([b341970](https://github.com/TechFides/tf-doc-vault/commit/b341970))
+- **skills:** Make the library skills opt-in, with setup --skills and a skills command ([dee87e8](https://github.com/TechFides/tf-doc-vault/commit/dee87e8))
+- Read markdownlint config and custom rules from the project ([265732c](https://github.com/TechFides/tf-doc-vault/commit/265732c))
+
+The library skills are opt-in and nothing changes on upgrade; to switch a portal over, follow [Upgrading a portal to the library skills](https://github.com/TechFides/tf-doc-vault/blob/master/docs/MIGRATIONS.md#upgrading-a-portal-to-the-library-skills). A repo can add its own markdownlint rules in `.markdownlint-cli2.mjs`, see [Markdown lint rules](https://github.com/TechFides/tf-doc-vault/blob/master/README.md#markdown-lint-rules).
+
+### 🩹 Fixes
+
+- **config:** Never render docs/README.md as a page ([75c355e](https://github.com/TechFides/tf-doc-vault/commit/75c355e))
+- **dev:** Run in-process and pass signals on to vitepress ([44dd483](https://github.com/TechFides/tf-doc-vault/commit/44dd483))
+- **setup:** Write the library rules where the boilerplate keeps them ([20c2137](https://github.com/TechFides/tf-doc-vault/commit/20c2137))
+- **skills:** Restore sales-docs ordering, harden the swap, scope sync to docs:dev ([9fa1555](https://github.com/TechFides/tf-doc-vault/commit/9fa1555))
+- **dev:** Probe library access before touching the bundled skills ([35b5e46](https://github.com/TechFides/tf-doc-vault/commit/35b5e46))
+- **skills:** Check the rules and commands before install even without a skills directory ([119f286](https://github.com/TechFides/tf-doc-vault/commit/119f286))
+- **setup:** Send a failed --skills to tf-doc-vault skills install ([8e2b4e3](https://github.com/TechFides/tf-doc-vault/commit/8e2b4e3))
+- **skills:** Keep the swap backup when restoring the originals fails ([76a439a](https://github.com/TechFides/tf-doc-vault/commit/76a439a))
+
+### 💅 Refactors
+
+- **templates:** Drop sales-docs, ana-docs already covers an offer folder ([240b781](https://github.com/TechFides/tf-doc-vault/commit/240b781))
+- Trim the skills comments to the AGENTS.md rules ([8b87685](https://github.com/TechFides/tf-doc-vault/commit/8b87685))
+- **config:** Exclude docs/README.md in the scaffolded config, not makeConfig ([b115b93](https://github.com/TechFides/tf-doc-vault/commit/b115b93))
+
+### 📖 Documentation
+
+- **migrations:** Upgrade recipe for the library skills ([60f3ffa](https://github.com/TechFides/tf-doc-vault/commit/60f3ffa))
+
+### ✅ Tests
+
+- **smoke:** Make the dev hand-over test hermetic ([f7ae215](https://github.com/TechFides/tf-doc-vault/commit/f7ae215))
+
+### ❤️ Contributors
+
+- Filip.koukal <filip.koukal@techfides.cz>
+- Tomáš Pokorný <tomas.pokorny@techfides.cz>
+
 ## v0.6.1
 
 [compare changes](https://github.com/TechFides/tf-doc-vault/compare/v0.6.0...v0.6.1)
